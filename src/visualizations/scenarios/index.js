@@ -1,0 +1,62 @@
+import * as arrays from './arrays.js';
+import * as linear from './linear.js';
+import * as trees from './trees.js';
+import * as graphs from './graphs.js';
+import * as dp from './dp.js';
+import * as xg from './extra-graphs.js';
+import * as xa from './extra-arrays.js';
+import * as xs from './extra-structures.js';
+
+export const SCENARIOS = {
+  'two-pointers-pair-sum': arrays.twoPointersPairSum,
+  'dutch-flag': arrays.dutchFlag,
+  'sliding-window-fixed': arrays.slidingWindowFixed,
+  'sliding-window-variable': arrays.slidingWindowVariable,
+  'prefix-sum': arrays.prefixSum,
+  kadane: arrays.kadane,
+  'binary-search': arrays.binarySearch,
+  'merge-sort': arrays.mergeSort,
+  'interval-merge': arrays.intervalMerge,
+  'stack-parentheses': linear.stackParentheses,
+  'monotonic-stack': linear.monotonicStack,
+  'monotonic-deque': linear.monotonicDeque,
+  'linked-list-reverse': linear.linkedListReverse,
+  'fast-slow-pointers': linear.fastSlowPointers,
+  'tree-traversal': trees.treeTraversal,
+  'heap-operations': trees.heapOperations,
+  'trie-insert': trees.trieInsert,
+  'backtracking-subsets': trees.backtrackingSubsets,
+  'graph-bfs': graphs.graphBfs,
+  'graph-dfs': graphs.graphDfs,
+  'grid-bfs': graphs.gridBfs,
+  'grid-dfs': graphs.gridDfs,
+  'topo-sort': graphs.topoSort,
+  'union-find': graphs.unionFind,
+  dijkstra: graphs.dijkstra,
+  'dp-coin-change': dp.dpCoinChange,
+  'dp-lcs': dp.dpLcs,
+  'dp-knapsack': dp.dpKnapsack,
+  'hash-map': xa.hashMap,
+  'frequency-map': xa.frequencyMap,
+  'recursion-tree': xa.recursionTree,
+  'quick-sort': xa.quickSort,
+  'counting-sort': xa.countingSort,
+  'cyclic-sort': xa.cyclicSort,
+  'sweep-line': xa.sweepLine,
+  'lis-patience': xa.lisPatience,
+  kmp: xs.kmp,
+  'rolling-hash': xs.rollingHash,
+  'bit-ops': xs.bitOps,
+  'xor-single-number': xs.xorSingle,
+  'segment-tree': xs.segmentTree,
+  'fenwick-tree': xs.fenwickTree,
+  'bst-operations': xs.bstOperations,
+  'backtracking-permutations': xs.backtrackingPermutations,
+  'n-queens': xs.nQueens,
+  kruskal: xg.kruskal,
+  prim: xg.prim,
+  'bellman-ford': xg.bellmanFord,
+  'zero-one-bfs': xg.zeroOneBfs,
+  'floyd-warshall': xg.floydWarshall,
+  'bipartite-check': xg.bipartite,
+};

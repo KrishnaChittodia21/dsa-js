@@ -1,0 +1,15 @@
+node_modules
+dist
+.DS_Store
+
+# Environment / local overrides
+.env
+.env.*
+*.local
+
+# Logs
+*.log
+
+# Editors
+.vscode/
+.idea/
