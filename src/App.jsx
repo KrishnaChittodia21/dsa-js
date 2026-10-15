@@ -22,6 +22,8 @@ const RevisionPage = lazy(() => import('./pages/RevisionPage.jsx'));
 const CheatSheetPage = lazy(() => import('./pages/CheatSheetPage.jsx'));
 const VisualizePage = lazy(() => import('./pages/VisualizePage.jsx'));
 const PatternFinderPage = lazy(() => import('./pages/PatternFinderPage.jsx'));
+const ContentsPage = lazy(() => import('./pages/ContentsPage.jsx'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage.jsx'));
 
 const Loading = () => <div className="page muted small">Loading…</div>;
 
@@ -36,6 +38,8 @@ export default function App() {
               <Suspense fallback={<Loading />}>
                 <Routes>
                   <Route index element={<Dashboard />} />
+                  <Route path="contents" element={<ContentsPage />} />
+                  <Route path="settings" element={<SettingsPage />} />
                   <Route path="path" element={<LearningPath />} />
                   <Route path="topic/:topicId" element={<TopicPage />} />
                   <Route path="topic/:topicId/q/:questionId" element={<QuestionPage />} />

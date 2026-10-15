@@ -6,10 +6,14 @@ import Markdown from '../components/ui/Markdown.jsx';
 import CodeBlock from '../components/ui/CodeBlock.jsx';
 import EvidenceBadge from '../components/EvidenceBadge.jsx';
 import { JsToolsTable } from '../components/lesson/Block.jsx';
-import { Callout, DifficultyBadge, EmptyState, ProgressBar, QuestionStatusIcon, StatusBadge, Tabs } from '../components/ui/primitives.jsx';
+import { Callout, DifficultyBadge, EmptyState, ProgressBar, QuestionStatusIcon, StatusBadge } from '../components/ui/primitives.jsx';
+import StudyPath from '../components/guide/StudyPath.jsx';
+import CoachTip from '../components/guide/CoachTip.jsx';
+import NextUp from '../components/guide/NextUp.jsx';
 import { useProgress } from '../state/ProgressContext.jsx';
 import { missedCheckpoints, mistakeQuestions, topicStats, topicStatus, prerequisitesMet } from '../state/selectors.js';
-import { topicById, companyQuestionsForTopic, companyById, EVIDENCE_LEVELS, patternById, getCheckpoints } from '../content/index.js';
+import { topicById, topics, companyQuestionsForTopic, companyById, EVIDENCE_LEVELS, patternById, getCheckpoints } from '../content/index.js';
+import { markTabVisited } from '../lib/uiPrefs.js';
 import NotFound from './NotFound.jsx';
 import { useTopicContent } from '../content/useContent.js';
 import PatternVisual, { hasVisual } from '../components/PatternVisual.jsx';
@@ -61,11 +65,11 @@ function VisualizeTab({ topic }) {
   );
 }
 
-function LearnTab({ topic, onFinish }) {
+function LearnTab({ topic, onFinish, initialSection, onSectionApplied }) {
   const { data, loading, error } = useTopicContent(topic.id);
-  if (loading) return <div className="card muted small">Loading lesson…</div>;
+  if (loading) return <div className="card muted small loading-shimmer">Loading lesson…</div>;
   if (error) return <div className="callout callout-danger small">Could not load this lesson: {String(error.message || error)}</div>;
-  return <LessonPlayer topic={{ ...topic, lesson: data?.lesson || topic.lesson }} onFinish={onFinish} />;
+  return <LessonPlayer topic={{ ...topic, lesson: data?.lesson || topic.lesson }} onFinish={onFinish} initialSection={initialSection} onSectionApplied={onSectionApplied} />;
 }
 
 const DIFFS = ['Easy', 'Medium', 'Hard'];
@@ -336,7 +340,8 @@ export function Cheatsheet({ topic }) {
   );
 }
 
-function ReviewTab({ topic: meta, progress }) {
+function ReviewTab({ topic: meta, progress, onRelearn }) {
+  const { dispatch } = useProgress();
   const { data, loading } = useTopicContent(meta.id);
   if (loading) return <div className="card muted small">Loading review…</div>;
   const topic = data ? { ...meta, lesson: data.lesson, patterns: data.patterns.map((p) => ({ ...p, topicId: meta.id })) } : meta;
@@ -411,6 +416,21 @@ function ReviewTab({ topic: meta, progress }) {
       <div className="grid-2">
         <div className="card">
           <h3>Checkpoints you missed</h3>
+          {missed.length > 0 && (
+            <div className="row-wrap" style={{ marginBottom: '0.6rem' }}>
+              <button
+                type="button"
+                className="btn btn-sm btn-primary"
+                onClick={() => {
+                  dispatch({ type: 'LESSON_RESET', topicId: meta.id, checkpointIds: missed.map((c) => c.id) });
+                  onRelearn?.();
+                }}
+              >
+                <Icon name="rotate" size={14} /> Re-answer these {missed.length} checkpoint{missed.length === 1 ? '' : 's'}
+              </button>
+              <span className="small muted">Clears just these answers; your new first try is what counts.</span>
+            </div>
+          )}
           {missed.length === 0 ? (
             <div className="small muted">{getCheckpoints(topic).some((c) => progress.checkpoints[c.id]) ? 'None — every checkpoint answered correctly on the first try.' : 'Answer the lesson checkpoints first.'}</div>
           ) : (
@@ -443,17 +463,26 @@ export default function TopicPage() {
   const { progress, dispatch } = useProgress();
   const topic = topicById[topicId];
   const tab = params.get('tab') || 'learn';
+  const sParam = params.get('s');
+  const initialSection = sParam !== null && /^\d+$/.test(sParam) ? Number(sParam) : undefined;
   const setTab = (t) => setParams(t === 'learn' ? {} : { tab: t }, { replace: true });
 
   useEffect(() => {
     document.querySelector('.main')?.scrollTo({ top: 0 });
   }, [topicId]);
+  useEffect(() => {
+    if (topicById[topicId]) markTabVisited(topicId, tab);
+  }, [topicId, tab]);
 
   if (!topic) return <NotFound />;
   const status = topicStatus(topic, progress);
   const s = topicStats(topic, progress);
-  const companyCount = companyQuestionsForTopic(topic.id).length;
   const tState = progress.topics[topic.id] || {};
+  const visualCount = topic.patterns.filter(hasVisual).length;
+  const nextTopic = topics[topic.index + 1];
+  const toNextTopic = nextTopic
+    ? { lead: status === 'completed' ? 'Topic complete.' : 'Ready to move on?', label: `Next topic: ${nextTopic.title}`, to: `/topic/${nextTopic.id}` }
+    : { lead: 'That was the last topic.', label: 'Revise what you learned', to: '/revision' };
 
   return (
     <div className="page page-wide">
@@ -499,28 +528,77 @@ export default function TopicPage() {
         </Callout>
       )}
 
-      <Tabs
-        label="Topic sections"
-        active={tab}
-        onChange={setTab}
-        tabs={[
-          { id: 'learn', label: 'Learn', icon: 'book' },
-          { id: 'visualize', label: 'Visualize', icon: 'play', count: topic.patterns.filter(hasVisual).length || undefined },
-          { id: 'practice', label: 'Practice', icon: 'code', count: topic.questions.length },
-          { id: 'company', label: 'Company Questions', icon: 'building', count: companyCount },
-          { id: 'cheatsheet', label: 'Cheatsheet', icon: 'file' },
-          { id: 'review', label: 'Review', icon: 'refresh' },
-        ]}
-      />
+      <StudyPath topic={topic} tab={tab} locked={status === 'locked' && !tState.unlockedManually} onSelect={setTab} />
 
-      {tab === 'learn' && (status !== 'locked' || tState.unlockedManually || prerequisitesMet(topic, progress)) && <LearnTab topic={topic} onFinish={() => setTab('practice')} />}
+      {tab === 'learn' && (
+        <CoachTip id="tab:learn" title="The lesson waits for you.">
+          Steps can end with a checkpoint question; the lesson continues once you answer, and a wrong answer explains the misconception. Your place is saved.
+        </CoachTip>
+      )}
+      {tab === 'visualize' && (
+        <CoachTip id="tab:visualize" title="Step through it.">
+          Focus an animation and use ← → to step; it pauses to ask what happens next. “Try your own input” tests edge cases.
+        </CoachTip>
+      )}
+      {tab === 'practice' && (
+        <CoachTip id="tab:practice" title="Name the pattern first.">
+          Each question asks which pattern fits before any hint. <kbd>Ctrl</kbd>/<kbd>⌘</kbd> <kbd>Enter</kbd> runs the visible tests; Submit also runs hidden ones.
+        </CoachTip>
+      )}
+      {tab === 'company' && (
+        <CoachTip id="tab:company" title="Every attribution has a source.">
+          Check the evidence level: verified, community-reported or commonly associated.
+        </CoachTip>
+      )}
+      {tab === 'cheatsheet' && (
+        <CoachTip id="tab:cheatsheet" title="One card per topic.">
+          Skim it before interviews; the global Cheat Sheet prints every topic on one page.
+        </CoachTip>
+      )}
+      {tab === 'review' && (
+        <CoachTip id="tab:review" title="Redo, don't re-read.">
+          Re-answer the checkpoints you missed and retry the listed questions without opening the solution; that is what lifts a weak area.
+        </CoachTip>
+      )}
+
+      {tab === 'learn' && (status !== 'locked' || tState.unlockedManually || prerequisitesMet(topic, progress)) && (
+        <>
+          <LearnTab
+            topic={topic}
+            onFinish={() => setTab(visualCount ? 'visualize' : 'practice')}
+            initialSection={initialSection}
+            onSectionApplied={() => setParams({}, { replace: true })}
+          />
+          {s.lessonCompleted && (
+            <NextUp
+              lead="Lesson complete."
+              label={visualCount ? `Next: watch ${visualCount} pattern${visualCount === 1 ? '' : 's'} animate` : `Next: practise ${topic.questions.length} questions`}
+              onClick={() => setTab(visualCount ? 'visualize' : 'practice')}
+            />
+          )}
+        </>
+      )}
       {tab === 'learn' && status === 'locked' && !tState.unlockedManually && (
         <EmptyState icon="lock" title="Unlock the topic to start the lesson">
           Finish {topic.prerequisites.filter((p) => !progress.topics[p]?.lessonCompleted).map((p) => topicById[p].title).join(', ')} first — or unlock it above.
         </EmptyState>
       )}
-      {tab === 'visualize' && <VisualizeTab topic={topic} />}
-      {tab === 'practice' && <PracticeTab topic={topic} progress={progress} />}
+      {tab === 'visualize' && (
+        <>
+          <VisualizeTab topic={topic} />
+          <NextUp lead="Seen how it moves?" label={topic.questions.length ? `Next: practise ${topic.questions.length} questions` : 'Next: the cheatsheet'} onClick={() => setTab(topic.questions.length ? 'practice' : 'cheatsheet')} />
+        </>
+      )}
+      {tab === 'practice' && (
+        <>
+          <PracticeTab topic={topic} progress={progress} />
+          {status === 'completed' ? (
+            <NextUp {...toNextTopic} />
+          ) : (
+            s.solved > 0 && <NextUp lead={`${s.solved}/${s.total} solved.`} label="Next: review what you missed" onClick={() => setTab('review')} />
+          )}
+        </>
+      )}
       {tab === 'company' && <CompanyTab topic={topic} />}
       {tab === 'cheatsheet' && (
         <>
@@ -528,7 +606,12 @@ export default function TopicPage() {
           <TopicTricks topicId={topic.id} />
         </>
       )}
-      {tab === 'review' && <ReviewTab topic={topic} progress={progress} />}
+      {tab === 'review' && (
+        <>
+          <ReviewTab topic={topic} progress={progress} onRelearn={() => setTab('learn')} />
+          <NextUp {...toNextTopic} />
+        </>
+      )}
 
       {tab !== 'learn' && s.lessonCompleted === false && tab === 'practice' && topic.questions.length > 0 && (
         <p className="small faint" style={{ marginTop: '1rem' }}>

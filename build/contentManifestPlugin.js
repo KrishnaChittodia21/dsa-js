@@ -84,8 +84,9 @@ export default function contentManifestPlugin() {
       if (id !== RESOLVED_ID) return null;
       const topicsDir = path.join(root, 'src/content/topics');
       const manifest = await buildManifest(topicsDir);
-      // Rebuild when content files change (dev) — register them as dependencies.
-      for (const t of fs.readdirSync(topicsDir)) this.addWatchFile(path.join(topicsDir, t));
+      // No addWatchFile here: Vite's dev server treats watch files of a virtual module as imports and fails to
+      // resolve the topic directories (500 on every page). Vite already watches src/, and handleHotUpdate below
+      // invalidates this module and reloads when a topic file changes.
       return `export default ${JSON.stringify(manifest)};`;
     },
     handleHotUpdate({ file, server }) {

@@ -1,6 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
+import { MotionConfig } from 'motion/react';
+// self-hosted variable fonts: Inter (body), Plus Jakarta Sans (headings), JetBrains Mono (code) — latin wght
+import './styles/fonts.css';
 import App from './App.jsx';
 import { ThemeProvider } from './state/ThemeContext.jsx';
 import { ProgressProvider } from './state/ProgressContext.jsx';
@@ -14,11 +17,14 @@ import './styles/pages.css';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
-      <ThemeProvider>
-        <ProgressProvider>
-          <App />
-        </ProgressProvider>
-      </ThemeProvider>
+      {/* OS "reduce motion" turns off transform/layout animations (opacity fades remain) */}
+      <MotionConfig reducedMotion="user">
+        <ThemeProvider>
+          <ProgressProvider>
+            <App />
+          </ProgressProvider>
+        </ThemeProvider>
+      </MotionConfig>
     </BrowserRouter>
   </React.StrictMode>,
 );

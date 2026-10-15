@@ -3,10 +3,35 @@ import { topics, allPatterns, allQuestions, companies, companyQuestions, toolkit
 
 const norm = (s) => String(s || '').toLowerCase();
 
+/** Every page of the app (also the palette's "Pages" group). `words` are extra search terms. */
+export const PAGES = [
+  { to: '/', title: 'Dashboard', sub: 'Next step, roadmap, metrics, weak areas', words: 'home metrics charts' },
+  { to: '/contents', title: 'Contents', sub: 'Everything in the course on one page', words: 'index toc all topics sections' },
+  { to: '/path', title: 'Learning Path', sub: 'Stages and topics with prerequisites', words: 'roadmap stages unlock' },
+  { to: '/patterns', title: 'Patterns', sub: 'Every pattern with clues and templates', words: 'algorithms templates' },
+  { to: '/finder', title: 'Pattern Finder', sub: 'Which pattern fits this problem?', words: 'recognise keywords clues' },
+  { to: '/visualize', title: 'Visualizer', sub: 'Step-through animations', words: 'animation visualisation' },
+  { to: '/questions', title: 'Questions', sub: 'All practice questions with filters', words: 'problems practice' },
+  { to: '/companies', title: 'Companies', sub: 'Sourced company questions', words: 'interview' },
+  { to: '/toolkit', title: 'JS DSA Toolkit', sub: 'Stack, Queue, Heap, Trie, Union-Find…', words: 'data structures classes' },
+  { to: '/js', title: 'JavaScript for DSA', sub: 'APIs, complexity table, gotchas', words: 'reference array map set' },
+  { to: '/playground', title: 'Playground', sub: 'Run JavaScript with the toolkit', words: 'console run code' },
+  { to: '/progress', title: 'Progress', sub: 'Stats, export / import, reset', words: 'backup export import' },
+  { to: '/revision', title: 'Revision', sub: 'Weak areas and questions to retry', words: 'review mistakes retry' },
+  { to: '/cheatsheet', title: 'Cheat Sheet', sub: 'Every topic on one printable page', words: 'summary print' },
+  { to: '/settings', title: 'Settings', sub: 'Theme, accent colour, guide and tips', words: 'dark mode accent colour tour coach' },
+];
+
 function build() {
   const items = [];
+  for (const p of PAGES) items.push({ group: 'Pages', title: p.title, sub: p.sub, to: p.to, primary: [p.title], secondary: [p.sub, p.words] });
   for (const t of topics) {
     items.push({ group: 'Topics', title: t.title, sub: t.category, to: `/topic/${t.id}`, primary: [t.title, t.id], secondary: [t.description, t.category, ...t.patterns.map((p) => p.name)] });
+  }
+  for (const t of topics) {
+    t.lesson.sections.forEach((sec, i) => {
+      items.push({ group: 'Lesson sections', title: `${t.title} › ${sec.title}`, sub: `Step ${i + 1} of ${t.lesson.sections.length}`, to: `/topic/${t.id}?s=${i}`, primary: [sec.title], secondary: [t.title] });
+    });
   }
   for (const p of allPatterns) {
     items.push({
@@ -71,6 +96,6 @@ export function search(query, limitPerGroup = 6) {
     const g = groups.get(it.group);
     if (g.length < limitPerGroup) g.push(it);
   }
-  const ORDER = ['Topics', 'Pattern clues', 'Patterns & algorithms', 'Data structures (JS Toolkit)', 'Questions', 'JavaScript APIs', 'Companies'];
+  const ORDER = ['Pages', 'Topics', 'Lesson sections', 'Pattern clues', 'Patterns & algorithms', 'Data structures (JS Toolkit)', 'Questions', 'JavaScript APIs', 'Companies'];
   return ORDER.filter((g) => groups.has(g)).map((g) => ({ group: g, items: groups.get(g) }));
 }

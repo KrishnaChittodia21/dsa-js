@@ -1,55 +1,65 @@
-/* Design tokens. Components must use these variables — never hardcoded colours. */
+/* =====================================================================
+   Design tokens (theme v3 — the same colour system as qa-learn and
+   system-design-learn). Components must use these variables — never
+   hardcoded colours. Every text/background pair is AA-checked by a node
+   contrast script (light + dark × 4 accents).
+   - canonical names: --bg --surface --surface-2 --border --text --text-2
+     --muted --accent --accent-soft --accent-text --good --warn --bad …
+   - the older dsa-js names (--bg-elev, --text-muted, --success, --easy …)
+     are kept as aliases further down, so every existing rule still works
+   - --brand-gradient is decorative (logo tile, featured borders, aurora);
+     --btn-gradient carries --accent-text (AA on every stop);
+     --text-gradient is for large gradient headings (AA on --bg and --surface)
+   - the theme is always stamped on <html> (data-theme, data-accent) by the
+     no-flash script in index.html, so no prefers-color-scheme copies needed
+   ===================================================================== */
 :root,
 :root[data-theme='light'] {
   color-scheme: light;
-  --bg: #f7f8fa;
-  --bg-elev: #ffffff;
-  --bg-subtle: #f1f3f7;
-  --bg-hover: #eceff5;
-  --border: #e2e5ec;
-  --border-strong: #cfd4de;
-  --text: #161a23;
-  --text-muted: #5b6475;
-  --text-faint: #8a93a5;
+  --bg: #f5f6fb;
+  --surface: #ffffff;
+  --surface-2: #eef1f8;
+  --surface-hover: #e9edf6;
+  --border: #e1e5f0;
+  --border-strong: #cdd3e3;
+  --text: #0f172a;
+  --text-2: #475569;
+  --muted: #5f6b80;
 
-  --accent: #4f46e5;
-  --accent-hover: #4338ca;
-  --accent-contrast: #ffffff;
-  --accent-soft: #eef0ff;
-  --accent-soft-text: #3730a3;
+  --accent: #5b4fe9;
+  --accent-2: #06b6d4;
+  --accent-soft: #eeedff;
+  --accent-text: #ffffff;
+  --brand-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 45%, #06b6d4 100%);
+  --btn-gradient: linear-gradient(135deg, #5b4fe9 0%, #7c3aed 100%);
+  --text-gradient: linear-gradient(100deg, #4f46e5 0%, #7c3aed 50%, #0e7490 100%);
 
-  --success: #15803d;
-  --success-soft: #e8f7ee;
-  --warning: #b45309;
-  --warning-soft: #fdf3e3;
-  --danger: #c2261d;
-  --danger-soft: #fdecea;
+  --good: #157a3a;
+  --good-soft: #e6f6ec;
+  --warn: #a84e08;
+  --warn-soft: #fdf3e2;
+  --bad: #b91c1c;
+  --bad-soft: #fdecec;
   --info: #0369a1;
   --info-soft: #e6f3fb;
+  --on-status: #ffffff;
 
-  --easy: #15803d;
-  --easy-soft: #e8f7ee;
-  --medium: #b45309;
-  --medium-soft: #fdf3e3;
-  --hard: #c2261d;
-  --hard-soft: #fdecea;
-
-  --code-bg: #f6f7fb;
-  --code-border: #e4e7ee;
-  --code-text: #24292f;
+  --code-bg: #f8f9fd;
+  --code-border: #e1e5f0;
+  --code-text: #1f2533;
   --code-keyword: #8b2fc9;
   --code-string: #0a7b45;
-  --code-number: #b35900;
-  --code-comment: #7c8596;
+  --code-number: #a85200;
+  --code-comment: #636d80;
   --code-function: #1d5fd1;
-  --code-punct: #57606a;
-  --code-variable: #24292f;
-  --code-selection: #dbe4ff;
-  --code-gutter: #9aa3b2;
-  --code-active-line: #eef1f8;
+  --code-punct: #4f5866;
+  --code-variable: #1f2533;
+  --code-selection: #dcdcff;
+  --code-gutter: #6b7488;
+  --code-active-line: #eef0fa;
 
   --viz-cell: #ffffff;
-  --viz-cell-border: #cfd4de;
+  --viz-cell-border: #cdd3e3;
   --viz-window: #dbe4ff;
   --viz-window-border: #4f46e5;
   --viz-active: #fde68a;
@@ -60,88 +70,199 @@
   --viz-ptr-a: #4f46e5;
   --viz-ptr-b: #db2777;
   --viz-ptr-c: #0891b2;
-  --viz-edge: #9aa3b2;
+  --viz-edge: #8a93a5;
 
-  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
-  --shadow-md: 0 4px 16px rgba(16, 24, 40, 0.08);
-  --shadow-lg: 0 12px 32px rgba(16, 24, 40, 0.14);
-  --focus-ring: 0 0 0 3px rgba(79, 70, 229, 0.35);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.07), 0 12px 28px -12px rgba(30, 27, 75, 0.12);
+  --shadow-lg: 0 2px 4px rgba(15, 23, 42, 0.04), 0 16px 36px -8px rgba(30, 27, 75, 0.18), 0 32px 64px -16px rgba(30, 27, 75, 0.2);
+  --mesh-a: 9%;
+  --mesh-b: 7%;
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #0d1017;
-  --bg-elev: #151923;
-  --bg-subtle: #1b202c;
-  --bg-hover: #222836;
-  --border: #272d3b;
-  --border-strong: #363e50;
-  --text: #e6e9f0;
-  --text-muted: #9aa3b5;
-  --text-faint: #6b7385;
+  --bg: #0a0c16;
+  --surface: #11142a;
+  --surface-2: #181c36;
+  --surface-hover: #1e2342;
+  --border: #262b4a;
+  --border-strong: #363c63;
+  --text: #e9ebf8;
+  --text-2: #b5bad8;
+  --muted: #8a90b4;
 
-  --accent: #818cf8;
-  --accent-hover: #a5b4fc;
-  --accent-contrast: #0d1017;
-  --accent-soft: #232752;
-  --accent-soft-text: #c7cdff;
+  --accent: #8f87ff;
+  --accent-2: #22d3ee;
+  --accent-soft: #221f4d;
+  --accent-text: #0a0c16;
+  --brand-gradient: linear-gradient(135deg, #818cf8 0%, #a78bfa 45%, #22d3ee 100%);
+  --btn-gradient: linear-gradient(135deg, #8f87ff 0%, #b197fc 100%);
+  --text-gradient: linear-gradient(100deg, #a5b4fc 0%, #c4b5fd 50%, #67e8f9 100%);
 
-  --success: #4ade80;
-  --success-soft: #11291b;
-  --warning: #fbbf24;
-  --warning-soft: #2d2410;
-  --danger: #f87171;
-  --danger-soft: #331618;
+  --good: #4ade80;
+  --good-soft: #10291f;
+  --warn: #fbbf24;
+  --warn-soft: #2b2312;
+  --bad: #f87171;
+  --bad-soft: #2f1520;
   --info: #38bdf8;
   --info-soft: #0f2533;
+  --on-status: #0a0c16;
 
-  --easy: #4ade80;
-  --easy-soft: #11291b;
-  --medium: #fbbf24;
-  --medium-soft: #2d2410;
-  --hard: #f87171;
-  --hard-soft: #331618;
-
-  --code-bg: #10141c;
-  --code-border: #252b38;
+  --code-bg: #0d1022;
+  --code-border: #262b4a;
   --code-text: #d8dde8;
   --code-keyword: #c792ea;
   --code-string: #a5e0a0;
   --code-number: #f5b97a;
-  --code-comment: #6f7a8f;
+  --code-comment: #8790a8;
   --code-function: #82aaff;
-  --code-punct: #9aa3b5;
+  --code-punct: #a3abc2;
   --code-variable: #d8dde8;
-  --code-selection: #2c3558;
-  --code-gutter: #4f586b;
-  --code-active-line: #161b26;
+  --code-selection: #2c3168;
+  --code-gutter: #7a80a6;
+  --code-active-line: #151a33;
 
-  --viz-cell: #1b202c;
-  --viz-cell-border: #363e50;
+  --viz-cell: #181c36;
+  --viz-cell-border: #363c63;
   --viz-window: #2a3170;
   --viz-window-border: #818cf8;
   --viz-active: #6b5315;
   --viz-done: #184d2c;
   --viz-visited: #262c52;
-  --viz-muted: #2a303d;
+  --viz-muted: #262b4a;
   --viz-bad: #5c2023;
   --viz-ptr-a: #818cf8;
   --viz-ptr-b: #f472b6;
   --viz-ptr-c: #22d3ee;
-  --viz-edge: #5b6477;
+  --viz-edge: #6b7299;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
-  --focus-ring: 0 0 0 3px rgba(129, 140, 248, 0.45);
+  --shadow-sm: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  --shadow-lg: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 0 1px rgba(143, 135, 255, 0.08), 0 24px 60px -16px rgba(0, 0, 0, 0.7);
+  --mesh-a: 14%;
+  --mesh-b: 10%;
 }
 
+/* ---------- accent themes (Settings → Accent colour; data-accent on <html>) ----------
+   Each overrides only the accent family. --ring and --glow derive from --accent. */
+:root[data-accent='teal'] {
+  --accent: #0f766e;
+  --accent-2: #6366f1;
+  --accent-soft: #e2f5f2;
+  --accent-text: #ffffff;
+  --brand-gradient: linear-gradient(135deg, #14b8a6 0%, #06b6d4 50%, #6366f1 100%);
+  --btn-gradient: linear-gradient(135deg, #0f766e 0%, #0e7490 100%);
+  --text-gradient: linear-gradient(100deg, #0f766e 0%, #0e7490 50%, #4f46e5 100%);
+}
+:root[data-accent='rose'] {
+  --accent: #be123c;
+  --accent-2: #a855f7;
+  --accent-soft: #ffeef2;
+  --accent-text: #ffffff;
+  --brand-gradient: linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #a855f7 100%);
+  --btn-gradient: linear-gradient(135deg, #be123c 0%, #a21caf 100%);
+  --text-gradient: linear-gradient(100deg, #be123c 0%, #a21caf 50%, #6d28d9 100%);
+}
+:root[data-accent='amber'] {
+  --accent: #a84e08;
+  --accent-2: #f43f5e;
+  --accent-soft: #fdf0db;
+  --accent-text: #ffffff;
+  --brand-gradient: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #f43f5e 100%);
+  --btn-gradient: linear-gradient(135deg, #a84e08 0%, #c2410c 100%);
+  --text-gradient: linear-gradient(100deg, #a84e08 0%, #c2410c 50%, #be123c 100%);
+}
+:root[data-accent='teal'][data-theme='dark'] {
+  --accent: #2dd4bf;
+  --accent-2: #818cf8;
+  --accent-soft: #0e2d2e;
+  --accent-text: #0a0c16;
+  --brand-gradient: linear-gradient(135deg, #2dd4bf 0%, #22d3ee 50%, #818cf8 100%);
+  --btn-gradient: linear-gradient(135deg, #2dd4bf 0%, #22d3ee 100%);
+  --text-gradient: linear-gradient(100deg, #5eead4 0%, #67e8f9 50%, #a5b4fc 100%);
+}
+:root[data-accent='rose'][data-theme='dark'] {
+  --accent: #fb7185;
+  --accent-2: #c084fc;
+  --accent-soft: #3a1526;
+  --accent-text: #0a0c16;
+  --brand-gradient: linear-gradient(135deg, #fb7185 0%, #f472b6 50%, #c084fc 100%);
+  --btn-gradient: linear-gradient(135deg, #fb7185 0%, #f472b6 100%);
+  --text-gradient: linear-gradient(100deg, #fda4af 0%, #f9a8d4 50%, #d8b4fe 100%);
+}
+:root[data-accent='amber'][data-theme='dark'] {
+  --accent: #fbbf24;
+  --accent-2: #fb7185;
+  --accent-soft: #33260c;
+  --accent-text: #0a0c16;
+  --brand-gradient: linear-gradient(135deg, #fbbf24 0%, #fb923c 50%, #f472b6 100%);
+  --btn-gradient: linear-gradient(135deg, #fbbf24 0%, #fb923c 100%);
+  --text-gradient: linear-gradient(100deg, #fcd34d 0%, #fdba74 50%, #f9a8d4 100%);
+}
+
+/* ---------- dashboard charts (src/components/charts) ----------
+   Mark colours follow the dataviz method and were run through validate_palette.js
+   against the card surface (#ffffff light, #11142a dark):
+   - --chart-series / --chart-weak: categorical slots 1–2 (blue, orange)
+   - --chart-ord-1..3: ordinal blue ramp (not started → in progress → completed; heatmap levels)
+   - --chart-empty: the receding "nothing" step (heatmap off-days, empty ring)
+   They are deliberately NOT tied to the accent theme, so charts stay comparable. */
+:root,
+:root[data-theme='light'] {
+  --chart-series: #2a78d6;
+  --chart-weak: #eb6834;
+  --chart-ord-1: #86b6ef;
+  --chart-ord-2: #2a78d6;
+  --chart-ord-3: #104281;
+  --chart-empty: #e4e8f1;
+}
+:root[data-theme='dark'] {
+  --chart-series: #3987e5;
+  --chart-weak: #d95926;
+  --chart-ord-1: #184f95;
+  --chart-ord-2: #3987e5;
+  --chart-ord-3: #9ec5f4;
+  --chart-empty: #232846;
+}
+
+/* ---------- derived tokens + aliases (resolve per theme/accent on <html>) ---------- */
 :root {
-  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-  --radius-sm: 6px;
-  --radius: 10px;
-  --radius-lg: 14px;
-  --sidebar-w: 240px;
-  --topbar-h: 56px;
+  --ring: var(--accent);
+  --glow: 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent), 0 10px 30px -10px color-mix(in srgb, var(--accent) 45%, transparent);
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--ring) 35%, transparent);
+
+  /* older dsa-js names → theme v3 tokens */
+  --bg-elev: var(--surface);
+  --bg-subtle: var(--surface-2);
+  --bg-hover: var(--surface-hover);
+  --text-muted: var(--text-2);
+  --text-faint: var(--muted);
+  --accent-hover: color-mix(in srgb, var(--accent) 86%, var(--text));
+  --accent-contrast: var(--accent-text);
+  --accent-soft-text: var(--accent);
+  --success: var(--good);
+  --success-soft: var(--good-soft);
+  --warning: var(--warn);
+  --warning-soft: var(--warn-soft);
+  --danger: var(--bad);
+  --danger-soft: var(--bad-soft);
+  --easy: var(--good);
+  --easy-soft: var(--good-soft);
+  --medium: var(--warn);
+  --medium-soft: var(--warn-soft);
+  --hard: var(--bad);
+  --hard-soft: var(--bad-soft);
+
+  --font-sans: 'Inter Variable', Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Plus Jakarta Sans Variable', var(--font-sans);
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-md: 14px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --sidebar-w: 256px;
+  --topbar-h: 60px;
 }

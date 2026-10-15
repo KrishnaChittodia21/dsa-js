@@ -5,6 +5,7 @@ import CodeWorkspace from '../components/question/CodeWorkspace.jsx';
 import QuizPanel from '../components/question/QuizPanel.jsx';
 import Icon from '../components/ui/Icon.jsx';
 import { QuestionStatusIcon } from '../components/ui/primitives.jsx';
+import CoachTip from '../components/guide/CoachTip.jsx';
 import { useProgress } from '../state/ProgressContext.jsx';
 import { formatDuration } from '../state/selectors.js';
 import { questionById, topicById } from '../content/index.js';
@@ -34,6 +35,13 @@ function useTimeTracking(qid, dispatch) {
     };
   }, [qid, dispatch]);
 }
+
+const QuestionTip = () => (
+  <CoachTip id="page:question" title="Work it like an interview.">
+    Read it, name the pattern, open hints only if stuck, then code, Run and Submit. Opening the solution before you solve it means the solve won&apos;t count as
+    clean in your weak-area score.
+  </CoachTip>
+);
 
 export default function QuestionPage() {
   const { topicId, questionId } = useParams();
@@ -84,12 +92,14 @@ export default function QuestionPage() {
       </div>
       {question.kind === 'quiz' ? (
         <div className="qpage-single">
+          <QuestionTip />
           <ProblemPanel question={question} topic={topic} />
           <QuizPanel question={question} />
         </div>
       ) : (
         <div className="qpage-split">
           <div className="qpage-left">
+            <QuestionTip />
             <ProblemPanel question={question} topic={topic} />
           </div>
           <div className="qpage-right">

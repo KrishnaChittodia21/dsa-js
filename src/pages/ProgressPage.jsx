@@ -6,25 +6,9 @@ import { useProgress } from '../state/ProgressContext.jsx';
 import { activityTotals, companyProgress, formatDuration, overallStats, streak, strongAreas, topicStats, topicStatus, weakAreas, pct } from '../state/selectors.js';
 import { topics } from '../content/index.js';
 import { todayKey } from '../state/progressReducer.js';
-
-function ActivityHeatmap({ activity }) {
-  const days = [];
-  const d = new Date();
-  d.setDate(d.getDate() - 7 * 17 + 1);
-  for (let i = 0; i < 7 * 17; i++) {
-    const k = todayKey(d);
-    days.push({ k, n: activity[k] || 0 });
-    d.setDate(d.getDate() + 1);
-  }
-  const level = (n) => (n === 0 ? 0 : n < 3 ? 1 : n < 8 ? 2 : n < 15 ? 3 : 4);
-  return (
-    <div className="heatmap" role="img" aria-label="Activity over the last 17 weeks">
-      {days.map((x) => (
-        <span key={x.k} className={`heat heat-${level(x.n)}`} title={`${x.k}: ${x.n} actions`} />
-      ))}
-    </div>
-  );
-}
+import Heatmap from '../components/charts/Heatmap.jsx';
+import { C } from '../components/charts/core.js';
+import { activityWeeks } from '../lib/dashMetrics.js';
 
 export default function ProgressPage() {
   const { progress, dispatch } = useProgress();
@@ -101,7 +85,7 @@ export default function ProgressPage() {
         </div>
         <div className="card">
           <h3>Activity</h3>
-          <ActivityHeatmap activity={progress.activity} />
+          <Heatmap weeks={activityWeeks(progress.activity, new Date(), 17)} colors={[C.ord1, C.ord2, C.ord3]} />
           <div className="small muted" style={{ marginTop: '0.5rem' }}>
             Streak {st.current} day(s) · longest {st.longest} · time practising {formatDuration(a.timeMs)}
           </div>

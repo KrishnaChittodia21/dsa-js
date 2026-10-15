@@ -13,6 +13,9 @@ export default defineConfig({
   worker: { format: 'es' },
   build: {
     chunkSizeWarningLimit: 1200,
+    // keep font subsets as separate files: browsers fetch only the unicode-range subsets a page uses,
+    // so inlining one into the CSS would make every visitor download it
+    assetsInlineLimit: (file) => (file.endsWith('.woff2') ? false : undefined),
     rollupOptions: {
       output: {
         manualChunks(id) {

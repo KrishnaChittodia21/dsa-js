@@ -57,32 +57,6 @@ export function ProgressBar({ value, max = 100, variant, size, label }) {
   );
 }
 
-export function Ring({ value, size = 96, stroke = 9, label }) {
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  const off = c - (Math.max(0, Math.min(100, value)) / 100) * c;
-  return (
-    <div className="ring" style={{ width: size, height: size }} role="img" aria-label={label || `${value}%`}>
-      <svg width={size} height={size}>
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="var(--bg-subtle)" strokeWidth={stroke} fill="none" />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          stroke="var(--accent)"
-          strokeWidth={stroke}
-          fill="none"
-          strokeDasharray={c}
-          strokeDashoffset={off}
-          strokeLinecap="round"
-          style={{ transition: 'stroke-dashoffset 0.5s ease' }}
-        />
-      </svg>
-      <span className="ring-label">{value}%</span>
-    </div>
-  );
-}
-
 export function Tabs({ tabs, active, onChange, label }) {
   return (
     <div className="tabs" role="tablist" aria-label={label}>

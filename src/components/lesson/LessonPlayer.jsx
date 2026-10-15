@@ -11,7 +11,7 @@ import { getCheckpoints } from '../../content/index.js';
  * Inside a section, content after an unanswered checkpoint stays hidden — the lesson
  * waits for the learner's answer before it continues explaining.
  */
-export default function LessonPlayer({ topic, onFinish }) {
+export default function LessonPlayer({ topic, onFinish, initialSection, onSectionApplied }) {
   const { progress, dispatch } = useProgress();
   const sections = topic.lesson.sections;
   const tState = progress.topics[topic.id] || {};
@@ -26,6 +26,16 @@ export default function LessonPlayer({ topic, onFinish }) {
   useEffect(() => {
     if (mode === 'guided') topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [index, mode]);
+
+  // deep link from Contents / search: ?s=<step>. Guided mode only jumps to steps already reached.
+  useEffect(() => {
+    if (initialSection === undefined || !sections.length) return;
+    const i = Math.min(initialSection, sections.length - 1);
+    if (mode === 'full') requestAnimationFrame(() => document.getElementById(`sec-${sections[i].id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    else if (tState.lessonCompleted || i <= (tState.maxSectionIndex || 0)) go(i);
+    onSectionApplied?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSection]);
 
   const sectionDone = (s) =>
     (s.blocks || []).every((b) => b.type !== 'checkpoint' || checkpointPassed(progress, b.id));

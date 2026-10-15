@@ -8,22 +8,38 @@ body,
 #root {
   height: 100%;
 }
+html { background: var(--bg); }
 body {
   margin: 0;
   font-family: var(--font-sans);
   font-size: 15px;
   line-height: 1.6;
   color: var(--text);
-  background: var(--bg);
+  /* transparent so the fixed mesh (body::before) shows; html paints --bg */
+  background: transparent;
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'cv11', 'ss01';
+}
+/* page backdrop: a faint mesh of the accent colours, fixed behind everything */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(55% 45% at 8% -5%, color-mix(in srgb, var(--accent) var(--mesh-a), transparent), transparent 70%),
+    radial-gradient(45% 40% at 100% 0%, color-mix(in srgb, var(--accent-2) var(--mesh-b), transparent), transparent 70%),
+    radial-gradient(50% 45% at 85% 105%, color-mix(in srgb, var(--accent) var(--mesh-b), transparent), transparent 70%);
 }
 h1, h2, h3, h4 {
+  font-family: var(--font-display);
   line-height: 1.25;
   margin: 0 0 0.5em;
-  font-weight: 650;
-  letter-spacing: -0.01em;
+  font-weight: 700;
+  letter-spacing: -0.015em;
 }
-h1 { font-size: 1.75rem; }
+h1 { font-size: 1.85rem; font-weight: 800; letter-spacing: -0.025em; }
 h2 { font-size: 1.35rem; }
 h3 { font-size: 1.1rem; }
 h4 { font-size: 1rem; }
@@ -33,7 +49,7 @@ a {
   text-decoration: none;
 }
 a:hover { text-decoration: underline; }
-code, pre, kbd { font-family: var(--font-mono); }
+code, pre, kbd, samp { font-family: var(--font-mono); }
 :not(pre) > code {
   font-size: 0.86em;
   background: var(--bg-subtle);
@@ -44,11 +60,17 @@ code, pre, kbd { font-family: var(--font-mono); }
 button { font: inherit; color: inherit; }
 input, select, textarea { font: inherit; color: inherit; }
 :focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
-::selection { background: var(--code-selection); }
+::selection { background: color-mix(in srgb, var(--accent) 26%, transparent); }
+mark {
+  background: color-mix(in srgb, var(--warn) 28%, transparent);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 1px;
+}
 hr {
   border: 0;
   border-top: 1px solid var(--border);
@@ -102,5 +124,47 @@ th {
   .grid-2, .grid-3, .grid-4 { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
-  * { animation: none !important; transition: none !important; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- code: show operators exactly as typed ----------
+   JetBrains Mono draws ===, !==, != , => and >= as joined ligatures by default, and code would otherwise
+   inherit the body font's stylistic sets (cv11, ss01). Learners must see the real characters, so both are
+   switched off everywhere code appears: inline code, blocks, the CodeMirror editor, consoles/test output,
+   kbd hints and the visualisations' SVG/mono text. */
+code,
+pre,
+kbd,
+samp,
+textarea,
+.mono,
+.kbd,
+.cm-editor,
+.cm-editor *,
+.cm-content,
+.cm-line,
+.code-block,
+.result-body,
+.case,
+.run-summary,
+.playground-out,
+.sheet-body,
+.viz,
+.viz *,
+svg text {
+  font-variant-ligatures: none;
+  font-feature-settings: normal;
+}
+/* the browser's default `code { font-family: monospace }` would drop the app's code font */
+code,
+pre,
+kbd,
+samp,
+.cm-editor .cm-scroller {
+  font-family: var(--font-mono);
 }
