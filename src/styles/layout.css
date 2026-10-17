@@ -71,6 +71,12 @@
   color: #fff;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 4px 12px -4px color-mix(in srgb, var(--accent) 60%, transparent);
 }
+/* the title gives way (ellipsis) instead of running under the controls on the right */
+.brand-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .brand-sub {
   font-family: var(--font-sans);
   color: var(--muted);
@@ -387,7 +393,9 @@
   .page { padding: 1.25rem 1rem 2rem; }
   .site-footer { padding: 20px 16px; }
 }
-@media (max-width: 420px) {
+/* below ~450px the streak pill and the title no longer fit side by side */
+@media (max-width: 460px) {
   .topbar { padding: 0 10px; gap: 6px; }
-  .topbar-streak { display: none; }
+  /* .topbar scope beats the later `.badge { display: inline-flex }` rule */
+  .topbar .topbar-streak { display: none; }
 }
