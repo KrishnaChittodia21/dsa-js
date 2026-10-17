@@ -24,6 +24,7 @@ const VisualizePage = lazy(() => import('./pages/VisualizePage.jsx'));
 const PatternFinderPage = lazy(() => import('./pages/PatternFinderPage.jsx'));
 const ContentsPage = lazy(() => import('./pages/ContentsPage.jsx'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage.jsx'));
+const AchievementsPage = lazy(() => import('./pages/AchievementsPage.jsx'));
 
 const Loading = () => <div className="page muted small">Loading…</div>;
 
@@ -54,6 +55,7 @@ export default function App() {
                   <Route path="js" element={<JsReferencePage />} />
                   <Route path="playground" element={<PlaygroundPage />} />
                   <Route path="progress" element={<ProgressPage />} />
+                  <Route path="achievements" element={<AchievementsPage />} />
                   <Route path="revision" element={<RevisionPage />} />
                   <Route path="cheatsheet" element={<CheatSheetPage />} />
                   <Route path="*" element={<NotFound />} />

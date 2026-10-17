@@ -266,3 +266,72 @@
   --sidebar-w: 256px;
   --topbar-h: 60px;
 }
+
+/* ---------- achievement badge tiers (src/components/achievements/Badge.jsx) ----------
+   Per tier: -hi / -lo = the metal rim gradient, -face = the medallion face, -ink = the glyph on
+   the face, -ribbon = the label ribbon (white --tier-ribbon-text on it is AA at small sizes).
+   'standard' (single-step badges) follows the accent theme; 'locked' is the greyed-out state. */
+:root,
+:root[data-theme='light'] {
+  --tier-bronze-hi: #eaa874;
+  --tier-bronze-lo: #9a5424;
+  --tier-bronze-face: #fbefe4;
+  --tier-bronze-ink: #8a4a1c;
+  --tier-bronze-ribbon: #8a4a1c;
+  --tier-silver-hi: #eef1f6;
+  --tier-silver-lo: #8a95a6;
+  --tier-silver-face: #f2f4f8;
+  --tier-silver-ink: #475569;
+  --tier-silver-ribbon: #556070;
+  --tier-gold-hi: #fde68a;
+  --tier-gold-lo: #c88a08;
+  --tier-gold-face: #fff8e2;
+  --tier-gold-ink: #8a5a00;
+  --tier-gold-ribbon: #8f5f00;
+  --tier-diamond-hi: #b8f1ff;
+  --tier-diamond-lo: #6d5cf0;
+  --tier-diamond-face: #eef4ff;
+  --tier-diamond-ink: #3b3fc4;
+  --tier-diamond-ribbon: #4338ca;
+  --tier-locked-hi: #dde1ea;
+  --tier-locked-lo: #a3aab8;
+  --tier-locked-face: #eef1f6;
+  --tier-locked-ink: #6b7488;
+  --tier-ribbon-text: #ffffff;
+  --tier-shine: rgba(255, 255, 255, 0.75);
+}
+:root[data-theme='dark'] {
+  --tier-bronze-hi: #f0b382;
+  --tier-bronze-lo: #9a5424;
+  --tier-bronze-face: #2a1d14;
+  --tier-bronze-ink: #f2ae78;
+  --tier-bronze-ribbon: #8a4a1c;
+  --tier-silver-hi: #f1f5f9;
+  --tier-silver-lo: #7c8798;
+  --tier-silver-face: #1d2335;
+  --tier-silver-ink: #d4dbe6;
+  --tier-silver-ribbon: #4f5a6b;
+  --tier-gold-hi: #fde68a;
+  --tier-gold-lo: #c88a08;
+  --tier-gold-face: #2a220d;
+  --tier-gold-ink: #fcd34d;
+  --tier-gold-ribbon: #855800;
+  --tier-diamond-hi: #a5f3fc;
+  --tier-diamond-lo: #7c6cf5;
+  --tier-diamond-face: #151a3d;
+  --tier-diamond-ink: #a5b4fc;
+  --tier-diamond-ribbon: #4338ca;
+  --tier-locked-hi: #3a4066;
+  --tier-locked-lo: #262b4a;
+  --tier-locked-face: #151933;
+  --tier-locked-ink: #8a90b4;
+  --tier-ribbon-text: #ffffff;
+  --tier-shine: rgba(255, 255, 255, 0.55);
+}
+:root {
+  --tier-standard-hi: color-mix(in srgb, var(--accent) 35%, #ffffff);
+  --tier-standard-lo: var(--accent);
+  --tier-standard-face: var(--accent-soft);
+  --tier-standard-ink: var(--accent);
+  --tier-standard-ribbon: var(--accent);
+}

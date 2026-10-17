@@ -1,4 +1,6 @@
 // Pure reducer for all learner progress. Persisted to localStorage by ProgressProvider.
+import { tierRank } from '../content/achievements.js';
+
 export const STORAGE_KEY = 'dsa-journey:progress:v1';
 
 export const initialProgress = () => ({
@@ -9,6 +11,8 @@ export const initialProgress = () => ({
   questions: {},
   activity: {},
   lastVisited: null,
+  // earned badges: { [id]: { tier, earnedAt, tiers: { [tier]: earnedAt } } } (see src/content/achievements.js)
+  achievements: {},
 });
 
 export const todayKey = (d = new Date()) => {
@@ -143,6 +147,19 @@ export function progressReducer(state, action) {
       const questions = { ...state.questions };
       delete questions[action.qid];
       return { ...state, questions };
+    }
+    case 'ACHIEVEMENTS_EARN': {
+      // action.earned: [{ id, tier, tiers: [newly reached tier names] }]; never downgrades a stored tier
+      const at = action.at || now();
+      const achievements = { ...(state.achievements || {}) };
+      for (const e of action.earned || []) {
+        const prev = achievements[e.id] || {};
+        if (prev.tier && tierRank(prev.tier) >= tierRank(e.tier)) continue;
+        const tiers = { ...(prev.tiers || {}) };
+        for (const t of e.tiers?.length ? e.tiers : [e.tier]) if (!tiers[t]) tiers[t] = at;
+        achievements[e.id] = { ...prev, tier: e.tier, earnedAt: at, tiers };
+      }
+      return { ...state, achievements };
     }
     case 'IMPORT':
       return { ...initialProgress(), ...action.state };

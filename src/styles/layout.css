@@ -224,11 +224,19 @@
   padding: 5px 10px 5px 14px;
 }
 .side-topic-title {
+  flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* per-topic mastery bar at the end of each sidebar topic row */
+.side-topic-bar {
+  flex: 0 0 40px;
+  display: flex;
+  align-items: center;
+}
+.side-topic-bar .progress { width: 100%; }
 /* status dots: shape and colour both encode the state (dashed / hollow / half / full) */
 .dot {
   width: 9px;
@@ -259,18 +267,13 @@
 .chev-icon.closed {
   transform: rotate(-90deg);
 }
-.nav-current {
-  margin: 1rem 0.35rem 0;
-  padding: 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
-  font-size: 0.85rem;
-}
 
 /* ---------- main column ---------- */
 .main {
   grid-area: main;
+  /* positioned so absolutely-positioned descendants (e.g. .sr-only labels) stay inside the scroll
+     container — otherwise they anchor to the page and stretch the document below the app */
+  position: relative;
   overflow-y: auto;
   min-width: 0;
   padding-top: var(--topbar-h);

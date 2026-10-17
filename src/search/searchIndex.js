@@ -17,6 +17,7 @@ export const PAGES = [
   { to: '/js', title: 'JavaScript for DSA', sub: 'APIs, complexity table, gotchas', words: 'reference array map set' },
   { to: '/playground', title: 'Playground', sub: 'Run JavaScript with the toolkit', words: 'console run code' },
   { to: '/progress', title: 'Progress', sub: 'Stats, export / import, reset', words: 'backup export import' },
+  { to: '/achievements', title: 'Achievements', sub: 'Badges you have earned and what unlocks next', words: 'badges milestones rewards trophies medals' },
   { to: '/revision', title: 'Revision', sub: 'Weak areas and questions to retry', words: 'review mistakes retry' },
   { to: '/cheatsheet', title: 'Cheat Sheet', sub: 'Every topic on one printable page', words: 'summary print' },
   { to: '/settings', title: 'Settings', sub: 'Theme, accent colour, guide and tips', words: 'dark mode accent colour tour coach' },

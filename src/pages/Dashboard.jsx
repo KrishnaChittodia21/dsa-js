@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, Building2, CheckCheck, FileText, ListChecks, PlayCircle, RotateCcw, Target, Terminal } from 'lucide-react';
 import ProgressRing from '../components/ui/ProgressRing.jsx';
@@ -50,6 +51,8 @@ function describeLocation(loc) {
 }
 
 const SCORE_ROWS = 10;
+// badge art + summary load as their own chunk (shared with the Achievements page)
+const AchievementsSummary = lazy(() => import('../components/achievements/AchievementsSummary.jsx'));
 
 export default function Dashboard() {
   const { progress } = useProgress();
@@ -143,6 +146,10 @@ export default function Dashboard() {
           />
         </ChartCard>
       </section>
+
+      <Suspense fallback={<div className="dash-section ach-summary-placeholder" aria-hidden="true" />}>
+        <AchievementsSummary progress={progress} />
+      </Suspense>
 
       {/* ---------- metrics ---------- */}
       <section className="dash-section" aria-labelledby="dash-metrics">

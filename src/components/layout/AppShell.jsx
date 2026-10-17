@@ -1,7 +1,8 @@
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
-import { Link, NavLink, Outlet, matchPath, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, matchPath, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import {
+  Award,
   BarChart3,
   BookOpen,
   Box,
@@ -29,9 +30,11 @@ import {
 import SiteFooter from './SiteFooter.jsx';
 import Toaster from './Toaster.jsx';
 import { useCelebrations } from './useCelebrations.js';
+import { useAchievementDetection } from '../../state/useAchievements.js';
+import { achievementById, TIER_LABEL } from '../../content/achievements.js';
 import { useTheme } from '../../state/ThemeContext.jsx';
 import { useProgress } from '../../state/ProgressContext.jsx';
-import { recommendations, streak, overallStats, topicStatus } from '../../state/selectors.js';
+import { streak, topicStats, topicStatus } from '../../state/selectors.js';
 import { stages } from '../../content/index.js';
 import { ProgressBar } from '../ui/primitives.jsx';
 import { on } from '../../lib/appEvents.js';
@@ -40,6 +43,7 @@ import { getUiPrefs, saveUiPrefs } from '../../lib/uiPrefs.js';
 // overlays are lazy so cmdk and the tour stay out of the main bundle until first use
 const CommandPalette = lazy(() => import('./CommandPalette.jsx'));
 const WelcomeTour = lazy(() => import('../guide/WelcomeTour.jsx'));
+const AchievementCelebration = lazy(() => import('../achievements/AchievementCelebration.jsx'));
 
 const NAV = [
   {
@@ -67,9 +71,9 @@ const NAV = [
     section: 'Review',
     links: [
       { to: '/progress', label: 'Progress', icon: BarChart3 },
+      { to: '/achievements', label: 'Achievements', icon: Award },
       { to: '/revision', label: 'Revision', icon: RefreshCw },
       { to: '/cheatsheet', label: 'Cheat Sheet', icon: FileText },
-      { to: '/settings', label: 'Settings', icon: Settings },
     ],
   },
 ];
@@ -102,17 +106,21 @@ function SideLink({ to, end, className = '', children }) {
 
 export default function AppShell() {
   const { theme, toggle } = useTheme();
-  const { progress } = useProgress();
+  const { progress, dispatch } = useProgress();
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => getUiPrefs().sidebarCollapsed);
   const [collapsedStages, setCollapsedStages] = useState(() => getUiPrefs().collapsedStages);
   const location = useLocation();
   const loc = location.pathname + location.search;
-  const rec = recommendations(progress);
   const st = streak(progress);
-  const overall = overallStats(progress).overall;
   const fill = !!matchPath('/topic/:topicId/q/:questionId', location.pathname);
   useCelebrations(progress);
+  const { queue: unlocked, dismiss: dismissUnlocked } = useAchievementDetection(progress, dispatch);
+  const viewAllAchievements = useCallback(() => {
+    dismissUnlocked();
+    navigate('/achievements');
+  }, [dismissUnlocked, navigate]);
 
   useEffect(() => setMenuOpen(false), [location.pathname]);
   useEffect(() => saveUiPrefs({ sidebarCollapsed }), [sidebarCollapsed]);
@@ -251,10 +259,14 @@ export default function AppShell() {
                     >
                       {stage.topics.map((t) => {
                         const s = topicStatus(t, progress);
+                        const mastery = topicStats(t, progress).mastery;
                         return (
                           <SideLink key={t.id} to={`/topic/${t.id}`} className="side-topic">
                             <span className={`dot dot-${s}`} aria-hidden="true" />
                             <span className="side-topic-title">{t.title}</span>
+                            <span className="side-topic-bar" title={`${mastery}% mastered`}>
+                              <ProgressBar value={mastery} size="sm" variant={s === 'completed' ? 'success' : ''} label={`${t.title}: ${mastery}% mastered`} />
+                            </span>
                             <span className="sr-only">, {STATUS_TEXT[s]}</span>
                           </SideLink>
                         );
@@ -267,19 +279,6 @@ export default function AppShell() {
           })}
         </div>
 
-        <div className="nav-current">
-          <div className="small muted">Overall progress</div>
-          <div className="row" style={{ margin: '0.25rem 0 0.5rem' }}>
-            <div style={{ flex: 1 }}>
-              <ProgressBar value={overall} label="Overall progress" />
-            </div>
-            <span className="small mono">{overall}%</span>
-          </div>
-          <div className="small muted">Current topic</div>
-          <Link to={`/topic/${rec.current.id}`} className="small" style={{ fontWeight: 600 }}>
-            {rec.current.title}
-          </Link>
-        </div>
       </motion.nav>
 
       <main className={`main ${fill ? 'main-fill' : ''}`} id="main">
@@ -301,7 +300,18 @@ export default function AppShell() {
       <Suspense fallback={null}>
         {paletteLoaded && <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} onOpenGuide={() => setTourOpen(true)} />}
         {tourOpen && <WelcomeTour onClose={closeTour} />}
+        {/* achievement unlocks wait until the guide is closed */}
+        {unlocked.length > 0 && !tourOpen && <AchievementCelebration items={unlocked} onClose={dismissUnlocked} onViewAll={viewAllAchievements} />}
       </Suspense>
+      <div className="sr-only" aria-live="assertive" aria-atomic="true">
+        {tourOpen
+          ? ''
+          : unlocked.length === 1
+          ? `Achievement unlocked: ${achievementById[unlocked[0].id]?.name}${TIER_LABEL[unlocked[0].tier] ? `, ${TIER_LABEL[unlocked[0].tier]} tier` : ''}`
+          : unlocked.length > 1
+            ? `You've earned ${unlocked.length} achievements`
+            : ''}
+      </div>
     </div>
   );
 }
