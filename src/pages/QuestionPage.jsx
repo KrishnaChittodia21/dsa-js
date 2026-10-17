@@ -3,8 +3,6 @@ import { Link, useParams } from 'react-router-dom';
 import ProblemPanel from '../components/question/ProblemPanel.jsx';
 import CodeWorkspace from '../components/question/CodeWorkspace.jsx';
 import QuizPanel from '../components/question/QuizPanel.jsx';
-import Icon from '../components/ui/Icon.jsx';
-import { QuestionStatusIcon } from '../components/ui/primitives.jsx';
 import CoachTip from '../components/guide/CoachTip.jsx';
 import { useProgress } from '../state/ProgressContext.jsx';
 import { formatDuration } from '../state/selectors.js';
@@ -56,53 +54,64 @@ export default function QuestionPage() {
   useTimeTracking(questionId, dispatch);
 
   if (!meta || !topic) return <NotFound />;
-  if (loading || !question) return <div className="page muted small">Loading question…</div>;
+  if (loading || !question)
+    return (
+      <div className="page qp-loading" aria-label="Loading the question">
+        <div className="skeleton">
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
+      </div>
+    );
   const list = topic.questions;
   const i = list.findIndex((q) => q.id === question.id);
   const prev = list[i - 1];
   const next = list[i + 1];
   const qs = progress.questions[question.id];
 
+  const mark = qs?.status === 'solved' ? ['✓', 'Solved'] : qs?.status === 'attempted' ? ['◐', 'Attempted'] : ['○', 'Not started'];
+
   return (
-    <div className="qpage">
-      <div className="qpage-bar">
-        <Link to={`/topic/${topic.id}?tab=practice`} className="btn btn-ghost btn-sm">
-          <Icon name="chevronLeft" size={15} /> {topic.title}
+    <div className="qp">
+      <nav className="qp-bar" aria-label="Question navigation">
+        <Link to={`/topic/${topic.id}?tab=practice`} className="qp-back">
+          <span aria-hidden="true">← </span>
+          {topic.title}
         </Link>
-        <span className="small muted">
-          Question {i + 1} of {list.length}
+        <span className="qp-folio folio">
+          Q {i + 1} <span className="qp-of">of {list.length}</span>
         </span>
-        <QuestionStatusIcon status={qs?.status} />
-        {qs?.timeSpentMs > 60000 && (
-          <span className="small faint">
-            <Icon name="clock" size={12} /> {formatDuration(qs.timeSpentMs)}
-          </span>
-        )}
-        <span className="spacer" />
+        <span className={`qp-status qp-status-${qs?.status || 'todo'}`}>
+          <span aria-hidden="true">{mark[0]}</span> {mark[1]}
+        </span>
+        {qs?.timeSpentMs > 60000 && <span className="qp-time folio">{formatDuration(qs.timeSpentMs)} on this one</span>}
+        <span className="qp-spacer" />
         {prev && (
-          <Link to={`/topic/${topic.id}/q/${prev.id}`} className="btn btn-ghost btn-sm" title={prev.title}>
-            <Icon name="chevronLeft" size={15} /> Prev
+          <Link to={`/topic/${topic.id}/q/${prev.id}`} className="qp-step" title={prev.title}>
+            <span aria-hidden="true">← </span>Previous
           </Link>
         )}
         {next && (
-          <Link to={`/topic/${topic.id}/q/${next.id}`} className="btn btn-sm" title={next.title}>
-            Next <Icon name="chevronRight" size={15} />
+          <Link to={`/topic/${topic.id}/q/${next.id}`} className="qp-step qp-step-next" title={next.title}>
+            Next<span aria-hidden="true"> →</span>
           </Link>
         )}
-      </div>
+      </nav>
       {question.kind === 'quiz' ? (
-        <div className="qpage-single">
+        <div className="qp-single">
           <QuestionTip />
           <ProblemPanel question={question} topic={topic} />
           <QuizPanel question={question} />
         </div>
       ) : (
-        <div className="qpage-split">
-          <div className="qpage-left">
+        <div className="qp-split">
+          <div className="qp-left">
             <QuestionTip />
             <ProblemPanel question={question} topic={topic} />
           </div>
-          <div className="qpage-right">
+          <div className="qp-right">
             <CodeWorkspace question={question} />
           </div>
         </div>

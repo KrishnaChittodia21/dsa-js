@@ -1,39 +1,43 @@
 import { useState } from 'react';
-import Icon from '../ui/Icon.jsx';
 
 // A collapsible learning stage that must be explicitly opened (hints, approach, solution).
-export default function Reveal({ title, icon = 'bulb', open, onOpen, locked, lockedText, confirmText, children, tone }) {
+// `icon` is kept for API compatibility; stages are marked typographically (○ closed · ● open).
+// eslint-disable-next-line no-unused-vars
+export default function Reveal({ title, icon, open, onOpen, locked, lockedText, confirmText, children, tone }) {
   const [confirming, setConfirming] = useState(false);
   if (open) {
     return (
-      <section className={`reveal reveal-open ${tone ? `reveal-${tone}` : ''}`}>
-        <div className="reveal-title">
-          <Icon name={icon} size={16} /> {title}
+      <section className={`unfold unfold-open ${tone ? `unfold-${tone}` : ''}`}>
+        <div className="unfold-title">
+          <span className="unfold-mark" aria-hidden="true">●</span> {title}
         </div>
-        <div className="reveal-body">{children}</div>
+        <div className="unfold-body">{children}</div>
       </section>
     );
   }
   return (
-    <section className="reveal">
-      <div className="reveal-title muted">
-        <Icon name={locked ? 'lock' : icon} size={16} /> {title}
+    <section className={`unfold ${locked ? 'unfold-locked' : ''}`}>
+      <div className="unfold-title">
+        <span className="unfold-mark" aria-hidden="true">○</span> {title}
+        {locked && <span className="unfold-lock">sealed</span>}
       </div>
       {locked ? (
-        <div className="small faint">{lockedText}</div>
+        <p className="unfold-note">{lockedText}</p>
       ) : confirming ? (
-        <div className="row-wrap">
-          <span className="small">{confirmText}</span>
-          <button type="button" className="btn btn-sm btn-primary" onClick={onOpen}>
-            Yes, show it
-          </button>
-          <button type="button" className="btn btn-sm btn-ghost" onClick={() => setConfirming(false)}>
-            I'll keep trying
-          </button>
+        <div className="unfold-confirm">
+          <p className="unfold-note">{confirmText}</p>
+          <div className="row-wrap">
+            <button type="button" className="btn btn-sm btn-primary" onClick={onOpen}>
+              Yes, show it
+            </button>
+            <button type="button" className="btn btn-sm btn-ghost" onClick={() => setConfirming(false)}>
+              I&apos;ll keep trying
+            </button>
+          </div>
         </div>
       ) : (
         <button type="button" className="btn btn-sm" onClick={() => (confirmText ? setConfirming(true) : onOpen())}>
-          Reveal {title.toLowerCase()}
+          Show me the {title.toLowerCase()}
         </button>
       )}
     </section>

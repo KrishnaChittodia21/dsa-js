@@ -16,7 +16,7 @@ export default function PatternVisual({ pattern, compact }) {
   return (
     <div className="stack-sm">
       {v.related && <div className="small muted">This animation shows a closely related mechanism — the core idea carries over to “{pattern.name}”.</div>}
-      <Suspense fallback={<div className="card muted small loading-shimmer">Loading animation…</div>}>
+      <Suspense fallback={<div className="card small loading-shimmer" aria-busy="true">Setting up the animation…</div>}>
         <Visualizer scenario={v.scenario} input={v.input} compact={compact} />
       </Suspense>
     </div>

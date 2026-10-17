@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { MotionConfig } from 'motion/react';
-// self-hosted variable fonts: Inter (body), Plus Jakarta Sans (headings), JetBrains Mono (code) — latin wght
+// self-hosted fonts: Fraunces (display), Atkinson Hyperlegible (text), IBM Plex Mono (code) — latin subset
 import './styles/fonts.css';
 import App from './App.jsx';
 import { ThemeProvider } from './state/ThemeContext.jsx';
@@ -13,6 +13,7 @@ import './styles/layout.css';
 import './styles/components.css';
 import './styles/lesson.css';
 import './styles/pages.css';
+import './styles/pages-ref.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

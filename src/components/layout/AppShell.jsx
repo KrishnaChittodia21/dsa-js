@@ -1,31 +1,6 @@
-import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, matchPath, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import {
-  BarChart3,
-  BookOpen,
-  Box,
-  Building2,
-  ChevronDown,
-  Code2,
-  Compass,
-  FileText,
-  Flame,
-  LayoutDashboard,
-  List,
-  ListTree,
-  Map as MapIcon,
-  Menu,
-  Moon,
-  Network,
-  PlayCircle,
-  Puzzle,
-  RefreshCw,
-  Settings,
-  Sun,
-  Target,
-  Terminal,
-} from 'lucide-react';
 import SiteFooter from './SiteFooter.jsx';
 import Toaster from './Toaster.jsx';
 import { useCelebrations } from './useCelebrations.js';
@@ -33,7 +8,6 @@ import { useTheme } from '../../state/ThemeContext.jsx';
 import { useProgress } from '../../state/ProgressContext.jsx';
 import { recommendations, streak, overallStats, topicStatus } from '../../state/selectors.js';
 import { stages } from '../../content/index.js';
-import { ProgressBar } from '../ui/primitives.jsx';
 import { on } from '../../lib/appEvents.js';
 import { getUiPrefs, saveUiPrefs } from '../../lib/uiPrefs.js';
 
@@ -41,39 +15,57 @@ import { getUiPrefs, saveUiPrefs } from '../../lib/uiPrefs.js';
 const CommandPalette = lazy(() => import('./CommandPalette.jsx'));
 const WelcomeTour = lazy(() => import('../guide/WelcomeTour.jsx'));
 
-const NAV = [
+/** The six places you go every day — shown in the masthead (desktop) and bottom bar (mobile). */
+const PRIMARY = [
+  { to: '/', label: 'Today', end: true },
+  { to: '/contents', label: 'Contents' },
+  { to: '/path', label: 'Path' },
+  { to: '/patterns', label: 'Patterns' },
+  { to: '/questions', label: 'Practice' },
+  { to: '/visualize', label: 'Visualizer' },
+];
+const MOBILE_BAR = [
+  { to: '/', label: 'Today', end: true },
+  { to: '/path', label: 'Path' },
+  { to: '/questions', label: 'Practice' },
+  { to: '/finder', label: 'Finder' },
+];
+
+/** Everything else lives in the Index drawer, grouped like a book's back matter. */
+const INDEX = [
   {
     section: 'Learn',
     links: [
-      { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
-      { to: '/contents', label: 'Contents', icon: ListTree },
-      { to: '/path', label: 'Learning Path', icon: MapIcon },
-      { to: '/patterns', label: 'Patterns', icon: Puzzle },
-      { to: '/finder', label: 'Pattern Finder', icon: Target },
-      { to: '/visualize', label: 'Visualizer', icon: PlayCircle },
-      { to: '/questions', label: 'Questions', icon: List },
-      { to: '/companies', label: 'Companies', icon: Building2 },
+      { to: '/', label: 'Today', end: true },
+      { to: '/contents', label: 'Contents' },
+      { to: '/path', label: 'Learning path' },
+      { to: '/patterns', label: 'Patterns' },
+      { to: '/finder', label: 'Pattern finder' },
+      { to: '/visualize', label: 'Visualizer' },
+      { to: '/questions', label: 'Practice questions' },
+      { to: '/companies', label: 'Company questions' },
     ],
   },
   {
     section: 'JavaScript',
     links: [
-      { to: '/toolkit', label: 'JS DSA Toolkit', icon: Box },
-      { to: '/js', label: 'JavaScript for DSA', icon: Code2 },
-      { to: '/playground', label: 'Playground', icon: Terminal },
+      { to: '/toolkit', label: 'DSA toolkit' },
+      { to: '/js', label: 'JavaScript for DSA' },
+      { to: '/playground', label: 'Playground' },
     ],
   },
   {
     section: 'Review',
     links: [
-      { to: '/progress', label: 'Progress', icon: BarChart3 },
-      { to: '/revision', label: 'Revision', icon: RefreshCw },
-      { to: '/cheatsheet', label: 'Cheat Sheet', icon: FileText },
-      { to: '/settings', label: 'Settings', icon: Settings },
+      { to: '/progress', label: 'Progress' },
+      { to: '/revision', label: 'Revision' },
+      { to: '/cheatsheet', label: 'Cheat sheet' },
+      { to: '/settings', label: 'Settings' },
     ],
   },
 ];
 
+const STATUS_MARK = { locked: '·', available: '○', 'in-progress': '◐', completed: '✓' };
 const STATUS_TEXT = { locked: 'locked', available: 'not started', 'in-progress': 'in progress', completed: 'completed' };
 /** pages worth offering under "Continue where you left off" */
 const STUDY_PAGE = /^\/(topic|visualize|playground|finder|patterns|toolkit|js)(\/|$)/;
@@ -84,16 +76,14 @@ function typingInField(e) {
   return !!t && (t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName) || !!t.closest?.('.cm-editor'));
 }
 
-const isMobile = () => window.matchMedia('(max-width: 960px)').matches;
-
-/** Sidebar link with the shared active pill that slides between items (motion layoutId). */
-function SideLink({ to, end, className = '', children }) {
+/** Masthead link: the active page gets an ink underline that slides between items. */
+function MastLink({ to, end, children, layoutId = 'mast-active' }) {
   return (
-    <NavLink to={to} end={end} className={({ isActive }) => `nav-link ${className} ${isActive ? 'active' : ''}`}>
+    <NavLink to={to} end={end} className={({ isActive }) => `mast-link ${isActive ? 'active' : ''}`}>
       {({ isActive }) => (
         <>
-          {isActive && <motion.span layoutId="side-active" className="side-active" aria-hidden="true" transition={{ type: 'spring', stiffness: 520, damping: 42 }} />}
           {children}
+          {isActive && <motion.span layoutId={layoutId} className="mast-underline" aria-hidden="true" transition={{ type: 'spring', stiffness: 520, damping: 42 }} />}
         </>
       )}
     </NavLink>
@@ -103,8 +93,7 @@ function SideLink({ to, end, className = '', children }) {
 export default function AppShell() {
   const { theme, toggle } = useTheme();
   const { progress } = useProgress();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => getUiPrefs().sidebarCollapsed);
+  const [indexOpen, setIndexOpen] = useState(false);
   const [collapsedStages, setCollapsedStages] = useState(() => getUiPrefs().collapsedStages);
   const location = useLocation();
   const loc = location.pathname + location.search;
@@ -112,10 +101,11 @@ export default function AppShell() {
   const st = streak(progress);
   const overall = overallStats(progress).overall;
   const fill = !!matchPath('/topic/:topicId/q/:questionId', location.pathname);
+  const indexBtn = useRef(null);
+  const drawerRef = useRef(null);
   useCelebrations(progress);
 
-  useEffect(() => setMenuOpen(false), [location.pathname]);
-  useEffect(() => saveUiPrefs({ sidebarCollapsed }), [sidebarCollapsed]);
+  useEffect(() => setIndexOpen(false), [location.pathname]);
   useEffect(() => saveUiPrefs({ collapsedStages }), [collapsedStages]);
   useEffect(() => {
     if (STUDY_PAGE.test(location.pathname)) saveUiPrefs({ lastStudyLocation: loc });
@@ -141,6 +131,9 @@ export default function AppShell() {
         e.preventDefault();
         if (paletteOpen) setPaletteOpen(false);
         else showPalette();
+      } else if (e.key === 'Escape' && indexOpen) {
+        setIndexOpen(false);
+        indexBtn.current?.focus();
       } else if (e.key === '/' && !e.metaKey && !e.ctrlKey && !e.altKey && !typingInField(e) && !paletteOpen && !tourOpen) {
         e.preventDefault();
         showPalette();
@@ -151,151 +144,177 @@ export default function AppShell() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [paletteOpen, tourOpen, showPalette]);
+  }, [paletteOpen, tourOpen, indexOpen, showPalette]);
 
-  const toggleNav = () => {
-    if (isMobile()) setMenuOpen((o) => !o);
-    else setSidebarCollapsed((c) => !c);
-  };
+  // move focus into the drawer when it opens
+  useEffect(() => {
+    if (indexOpen) drawerRef.current?.querySelector('a, button')?.focus();
+  }, [indexOpen]);
 
   return (
-    <div className={`app-shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+    <div className="app-shell">
       <a href="#main" className="skip-link">
         Skip to content
       </a>
-      <header className="topbar">
-        <button
-          type="button"
-          className="btn btn-ghost btn-icon menu-toggle"
-          onClick={toggleNav}
-          aria-label="Toggle navigation"
-          aria-expanded={isMobile() ? menuOpen : !sidebarCollapsed}
-          title={sidebarCollapsed ? 'Show the sidebar' : 'Hide the sidebar'}
-        >
-          <Menu size={20} aria-hidden="true" />
-        </button>
-        <Link to="/" className="brand">
-          <span className="brand-tile" aria-hidden="true">
-            <Network size={16} strokeWidth={2.4} />
-          </span>
-          <span className="brand-name">DSA Journey</span>
-          <span className="brand-sub">JavaScript · patterns · practice</span>
-        </Link>
-        <div className="topbar-right">
-          {st.current > 0 && (
-            <span className="badge badge-warning topbar-streak" title={`Longest streak: ${st.longest} days`}>
-              <Flame size={13} aria-hidden="true" /> {st.current} day{st.current > 1 ? 's' : ''}
-            </span>
-          )}
-          <button type="button" className="btn btn-ghost guide-btn" onClick={() => setTourOpen(true)} aria-label="Open the guide" title="Guide (press ?)">
-            <Compass size={18} aria-hidden="true" />
-            <span className="guide-btn-text">Guide</span>
-          </button>
-          <button type="button" className="btn btn-ghost btn-icon" onClick={toggle} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
-            {theme === 'dark' ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
-          </button>
-          <NavLink to="/settings" className="btn btn-ghost btn-icon" aria-label="Settings" title="Settings">
-            <Settings size={18} aria-hidden="true" />
-          </NavLink>
+      <header className="masthead">
+        <div className="mast-row">
+          <Link to="/" className="wordmark" aria-label="DSA Journey — today">
+            <span className="wordmark-dsa">dsa</span>
+            <span className="wordmark-journey">Journey</span>
+            <span className="wordmark-ed">in JavaScript</span>
+          </Link>
+
+          <nav className="mast-nav" aria-label="Main">
+            {PRIMARY.map((n) => (
+              <MastLink key={n.to} to={n.to} end={n.end}>
+                {n.label}
+              </MastLink>
+            ))}
+          </nav>
+
+          <div className="mast-tools">
+            <button type="button" className="mast-search" onClick={showPalette} aria-label="Search everything (Command K)">
+              <span>Search</span>
+              <kbd>⌘K</kbd>
+            </button>
+            {st.current > 0 && (
+              <span className="mast-streak" title={`Longest streak: ${st.longest} days`}>
+                day {st.current}
+              </span>
+            )}
+            <button type="button" className="mast-text-btn hide-sm" onClick={() => setTourOpen(true)} title="Guide (press ?)">
+              Guide
+            </button>
+            <button type="button" className="mast-text-btn" onClick={toggle} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+              {theme === 'dark' ? 'Day' : 'Night'}
+            </button>
+            <button
+              ref={indexBtn}
+              type="button"
+              className="mast-index-btn"
+              onClick={() => setIndexOpen(true)}
+              aria-haspopup="dialog"
+              aria-expanded={indexOpen}
+              aria-controls="index-drawer"
+            >
+              Index
+            </button>
+          </div>
+        </div>
+        <div className="mast-rule" role="progressbar" aria-label="Overall progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={overall} title={`Overall progress: ${overall}%`}>
+          <span style={{ width: `${overall}%` }} />
         </div>
       </header>
 
-      <div className={`sidebar-backdrop ${menuOpen ? 'open' : ''}`} onClick={() => setMenuOpen(false)} />
-      <motion.nav layoutScroll className={`sidebar ${menuOpen ? 'open' : ''}`} aria-label="Main navigation">
-        {NAV.map((g) => (
-          <div key={g.section} className="nav-group">
-            <div className="nav-section">{g.section}</div>
-            {g.links.map((n) => {
-              const Icon = n.icon;
-              return (
-                <SideLink key={n.to} to={n.to} end={n.end}>
-                  <Icon size={16} aria-hidden="true" className="side-icon" /> {n.label}
-                </SideLink>
-              );
-            })}
-          </div>
-        ))}
-
-        <div className="nav-group">
-          <div className="nav-section">
-            <BookOpen size={12} aria-hidden="true" /> Topics
-          </div>
-          {stages.map((stage, si) => {
-            const closed = !!collapsedStages[stage.id];
-            const done = stage.topics.filter((t) => topicStatus(t, progress) === 'completed').length;
-            return (
-              <div key={stage.id} className="side-stage">
-                <button
-                  type="button"
-                  className="side-stage-title"
-                  aria-expanded={!closed}
-                  onClick={() => setCollapsedStages((c) => ({ ...c, [stage.id]: !closed }))}
-                >
-                  <span className="side-stage-name">
-                    <span className="side-stage-num">{si + 1}</span>
-                    {stage.title}
-                  </span>
-                  <span className="side-stage-meta">
-                    {done}/{stage.topics.length}
-                    <ChevronDown size={14} aria-hidden="true" className={`chev-icon ${closed ? 'closed' : ''}`} />
-                  </span>
+      <AnimatePresence>
+        {indexOpen && (
+          <>
+            <motion.div className="index-backdrop" onClick={() => setIndexOpen(false)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
+            <motion.aside
+              id="index-drawer"
+              ref={drawerRef}
+              className="index-drawer"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Index — every page and topic"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'tween', duration: 0.26, ease: [0.3, 0.7, 0.1, 1] }}
+            >
+              <div className="index-head">
+                <span className="eyebrow">Index</span>
+                <button type="button" className="mast-text-btn" onClick={() => { setIndexOpen(false); indexBtn.current?.focus(); }}>
+                  Close <kbd>esc</kbd>
                 </button>
-                <AnimatePresence initial={false}>
-                  {!closed && (
-                    <motion.div
-                      className="side-stage-list"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2, ease: 'easeOut' }}
-                    >
-                      {stage.topics.map((t) => {
-                        const s = topicStatus(t, progress);
-                        return (
-                          <SideLink key={t.id} to={`/topic/${t.id}`} className="side-topic">
-                            <span className={`dot dot-${s}`} aria-hidden="true" />
-                            <span className="side-topic-title">{t.title}</span>
-                            <span className="sr-only">, {STATUS_TEXT[s]}</span>
-                          </SideLink>
-                        );
-                      })}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
-            );
-          })}
-        </div>
+              <div className="index-pages">
+                {INDEX.map((g) => (
+                  <div key={g.section} className="index-group">
+                    <div className="eyebrow">{g.section}</div>
+                    {g.links.map((n) => (
+                      <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => `index-link ${isActive ? 'active' : ''}`}>
+                        {n.label}
+                      </NavLink>
+                    ))}
+                  </div>
+                ))}
+              </div>
 
-        <div className="nav-current">
-          <div className="small muted">Overall progress</div>
-          <div className="row" style={{ margin: '0.25rem 0 0.5rem' }}>
-            <div style={{ flex: 1 }}>
-              <ProgressBar value={overall} label="Overall progress" />
-            </div>
-            <span className="small mono">{overall}%</span>
-          </div>
-          <div className="small muted">Current topic</div>
-          <Link to={`/topic/${rec.current.id}`} className="small" style={{ fontWeight: 600 }}>
-            {rec.current.title}
-          </Link>
-        </div>
-      </motion.nav>
+              <div className="index-topics">
+                <div className="eyebrow">Topics</div>
+                {stages.map((stage, si) => {
+                  const closed = !!collapsedStages[stage.id];
+                  const done = stage.topics.filter((t) => topicStatus(t, progress) === 'completed').length;
+                  return (
+                    <div key={stage.id} className="index-stage">
+                      <button type="button" className="index-stage-title" aria-expanded={!closed} onClick={() => setCollapsedStages((c) => ({ ...c, [stage.id]: !closed }))}>
+                        <span className="folio">{String(si + 1).padStart(2, '0')}</span>
+                        <span className="index-stage-name">{stage.title}</span>
+                        <span className="folio">
+                          {done}/{stage.topics.length} {closed ? '+' : '−'}
+                        </span>
+                      </button>
+                      {!closed && (
+                        <ol className="index-stage-list">
+                          {stage.topics.map((t) => {
+                            const s = topicStatus(t, progress);
+                            return (
+                              <li key={t.id}>
+                                <NavLink to={`/topic/${t.id}`} className={({ isActive }) => `index-topic status-${s} ${isActive ? 'active' : ''}`}>
+                                  <span className="index-mark" aria-hidden="true">
+                                    {STATUS_MARK[s]}
+                                  </span>
+                                  <span>{t.title}</span>
+                                  <span className="sr-only">, {STATUS_TEXT[s]}</span>
+                                </NavLink>
+                              </li>
+                            );
+                          })}
+                        </ol>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="index-foot">
+                <span className="folio">{overall}% of the book</span>
+                <span>
+                  Now reading <Link to={`/topic/${rec.current.id}`}>{rec.current.title}</Link>
+                </span>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
 
       <main className={`main ${fill ? 'main-fill' : ''}`} id="main">
-        <AnimatePresence initial={false}>
+        <AnimatePresence initial={false} mode="popLayout">
           <motion.div
             key={location.pathname}
             className="route"
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.3, 0.7, 0.1, 1] }}
           >
             <Outlet />
           </motion.div>
         </AnimatePresence>
         {!fill && <SiteFooter />}
       </main>
+
+      <nav className="bottom-bar" aria-label="Main (mobile)">
+        {MOBILE_BAR.map((n) => (
+          <MastLink key={n.to} to={n.to} end={n.end} layoutId="bottom-active">
+            {n.label}
+          </MastLink>
+        ))}
+        <button type="button" className="mast-link" onClick={() => setIndexOpen(true)} aria-haspopup="dialog">
+          Index
+        </button>
+      </nav>
 
       <Toaster />
       <Suspense fallback={null}>

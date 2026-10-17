@@ -1,6 +1,7 @@
 import { useRoving, useTooltip } from './core.js';
 import ChartTooltip from './ChartTooltip.jsx';
 import Legend from './Legend.jsx';
+import '../../styles/viz.css';
 
 const WEEKDAYS = ['Mon', '', 'Wed', '', 'Fri', '', ''];
 const fmt = (day) => new Date(`${day}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
@@ -20,15 +21,15 @@ export default function Heatmap({ weeks, colors }) {
   const roving = useRoving(todayIndex + 1, { step: 7, initial: todayIndex });
   const fill = (c) => (c.future ? 'transparent' : c.level ? colors[c.level - 1] : undefined);
   return (
-    <div className="heatmap-wrap" ref={tipRef}>
+    <div className="tally-heat-wrap" ref={tipRef}>
       <div
-        className="heatmap"
+        className="tally-heat"
         role="group"
         aria-label={`Study activity, last ${weeks.length} weeks. Use the arrow keys to move between days.`}
         style={{ gridTemplateColumns: `auto repeat(${weeks.length}, minmax(0, 1fr))` }}
       >
         {WEEKDAYS.map((d, row) => (
-          <div key={`l${row}`} className="heatmap-daylabel" style={{ gridColumn: 1, gridRow: row + 1 }} aria-hidden="true">
+          <div key={`l${row}`} className="tally-heat-daylabel" style={{ gridColumn: 1, gridRow: row + 1 }} aria-hidden="true">
             {d}
           </div>
         ))}
@@ -39,7 +40,7 @@ export default function Heatmap({ weeks, colors }) {
               key={c.day}
               role="img"
               aria-label={`${fmt(c.day)}${c.today ? ' (today)' : ''}: ${value}`}
-              className={`heatmap-cell ${c.today ? 'today' : ''} ${c.future ? 'future' : ''}`}
+              className={`tally-heat-cell ${c.today ? 'today' : ''} ${c.future ? 'future' : ''}`}
               style={{ gridColumn: Math.floor(i / 7) + 2, gridRow: (i % 7) + 1, background: fill(c) }}
               {...(c.future ? {} : roving.itemProps(i, i === roving.active))}
               {...bind({ value, label: `${fmt(c.day)}${c.today ? ' · today' : ''}`, color: c.level ? colors[c.level - 1] : undefined })}

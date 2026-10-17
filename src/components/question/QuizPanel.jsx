@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Markdown from '../ui/Markdown.jsx';
-import Icon from '../ui/Icon.jsx';
 import { useProgress } from '../../state/ProgressContext.jsx';
+import { Stamp } from '../lesson/Checkpoint.jsx';
 
 const LETTERS = 'ABCDEF';
 
@@ -19,14 +19,13 @@ export default function QuizPanel({ question }) {
   };
 
   return (
-    <div className="quiz">
+    <div className="exam-quiz">
       <div className={`checkpoint ${result ? (result.correct ? 'is-correct' : 'is-wrong') : ''}`}>
         <div className="checkpoint-head">
-          <span className="checkpoint-tag">
-            <Icon name="help" size={15} /> Your answer
-          </span>
+          <span className="checkpoint-folio">A</span>
+          <span className="checkpoint-tag">Your answer</span>
         </div>
-        <div className="options">
+        <div className="options" role="radiogroup">
           {quiz.options.map((opt, i) => {
             let state = '';
             if (result && i === quiz.answer && result.correct) state = 'correct';
@@ -37,47 +36,46 @@ export default function QuizPanel({ question }) {
                 <span className="option-text">
                   <Markdown>{opt}</Markdown>
                 </span>
+                {state === 'correct' && <span className="option-mark" aria-label="correct">✓</span>}
+                {state === 'wrong' && <span className="option-mark" aria-label="your answer, wrong">×</span>}
               </button>
             );
           })}
         </div>
         {!result && (
-          <div className="row" style={{ marginTop: '0.75rem' }}>
+          <div className="checkpoint-actions">
             <button type="button" className="btn btn-primary" disabled={selected === null} onClick={submit}>
-              Check answer
+              Check my answer
             </button>
           </div>
         )}
         {result && result.correct && (
           <div className="feedback feedback-correct">
-            <div className="feedback-title">
-              <Icon name="checkCircle" size={17} /> Correct!
-            </div>
+            <Stamp ok />
             <Markdown>{quiz.explanation}</Markdown>
           </div>
         )}
         {result && !result.correct && (
           <div className="feedback feedback-wrong">
-            <div className="feedback-title">
-              <Icon name="alert" size={17} /> Not quite — count the work again.
-            </div>
+            <Stamp ok={false} />
+            <p className="feedback-line">Count the work again, one loop at a time.</p>
             {quiz.misconceptions?.[result.choice] && <Markdown>{quiz.misconceptions[result.choice]}</Markdown>}
-            <div className="row" style={{ marginTop: '0.5rem' }}>
+            <div className="checkpoint-actions">
               <button type="button" className="btn btn-sm btn-primary" onClick={() => { setResult(null); setSelected(null); }}>
                 Try again
               </button>
               <button type="button" className="btn btn-sm btn-ghost" onClick={() => setResult({ choice: quiz.answer, correct: true })}>
-                Show explanation
+                Show me the answer
               </button>
             </div>
           </div>
         )}
       </div>
       {result?.correct && question.approach && (
-        <div className="card" style={{ marginTop: '1rem' }}>
-          <h4>How to analyse it</h4>
+        <section className="exam-section exam-analysis">
+          <h4 className="exam-label">How to analyse it</h4>
           <Markdown>{question.approach}</Markdown>
-        </div>
+        </section>
       )}
     </div>
   );

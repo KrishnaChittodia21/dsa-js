@@ -1,22 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Command } from 'cmdk';
-import {
-  BookOpen,
-  Box,
-  Building2,
-  Code2,
-  Compass,
-  CornerDownLeft,
-  FileText,
-  History,
-  KeyRound,
-  LayoutGrid,
-  ListChecks,
-  Moon,
-  Puzzle,
-  Sparkles,
-} from 'lucide-react';
 import { PAGES, search } from '../../search/searchIndex.js';
 import { topics } from '../../content/index.js';
 import { useProgress } from '../../state/ProgressContext.jsx';
@@ -25,18 +9,6 @@ import { nextStep } from '../../lib/nextStep.js';
 import { getUiPrefs, saveUiPrefs } from '../../lib/uiPrefs.js';
 
 const MAX_RECENT = 5;
-const GROUP_ICON = {
-  Pages: LayoutGrid,
-  Topics: BookOpen,
-  'Lesson sections': FileText,
-  'Pattern clues': KeyRound,
-  'Patterns & algorithms': Puzzle,
-  'Data structures (JS Toolkit)': Box,
-  Questions: ListChecks,
-  'JavaScript APIs': Code2,
-  Companies: Building2,
-};
-
 /**
  * ⌘K command palette (lazy-loaded on first open). Results come from the app's own search index
  * (src/search/searchIndex.js: pages, topics, lesson sections, patterns, clues, toolkit, questions,
@@ -68,9 +40,8 @@ export default function CommandPalette({ open, onOpenChange, onOpenGuide }) {
   };
   const recent = getUiPrefs().recentCommands;
 
-  const item = (it, key, Icon) => (
+  const item = (it, key) => (
     <Command.Item key={key} value={key} onSelect={() => go(it)}>
-      <Icon size={16} aria-hidden="true" className="cmd-icon" />
       <span className="cmd-label">{it.title}</span>
       {it.sub && <span className="cmd-hint">{it.sub}</span>}
     </Command.Item>
@@ -90,37 +61,35 @@ export default function CommandPalette({ open, onOpenChange, onOpenGuide }) {
       loop
       shouldFilter={false}
     >
-      <Command.Input value={query} onValueChange={setQuery} placeholder="Search topics, lessons, patterns, questions, JS APIs…" className="cmd-input" />
+      <Command.Input value={query} onValueChange={setQuery} placeholder="Look something up — a topic, pattern, question…" className="cmd-input" />
       <Command.List className="cmd-list">
-        <Command.Empty className="cmd-empty">No results for “{query}”. Try fewer or shorter words.</Command.Empty>
+        <Command.Empty className="cmd-empty">Nothing matches “{query}”. Try a shorter word, or just the pattern’s name.</Command.Empty>
         {!typing && (
           <>
             {recent.length > 0 && (
               <Command.Group heading="Recent">
-                {recent.map((r) => item({ ...r, sub: r.group }, `recent:${r.id}`, History))}
+                {recent.map((r) => item({ ...r, sub: r.group }, `recent:${r.id}`))}
               </Command.Group>
             )}
             <Command.Group heading="Actions">
               <Command.Item value="action:next" onSelect={run(() => nav(step.href))}>
-                <Sparkles size={16} aria-hidden="true" className="cmd-icon" />
-                <span className="cmd-label">Go to my next step</span>
+                <span className="cmd-label">Next on the desk</span>
                 <span className="cmd-hint">{step.title}</span>
               </Command.Item>
               <Command.Item value="action:guide" onSelect={run(onOpenGuide)}>
-                <Compass size={16} aria-hidden="true" className="cmd-icon" />
-                <span className="cmd-label">Open the guide (welcome tour)</span>
+                <span className="cmd-label">Open the guide</span>
+                <span className="cmd-hint">a five-page tour</span>
               </Command.Item>
               <Command.Item value="action:theme" onSelect={run(toggle)}>
-                <Moon size={16} aria-hidden="true" className="cmd-icon" />
-                <span className="cmd-label">Switch to {theme === 'dark' ? 'light' : 'dark'} mode</span>
+                <span className="cmd-label">Switch to {theme === 'dark' ? 'day' : 'night'} paper</span>
               </Command.Item>
             </Command.Group>
-            <Command.Group heading="Pages">{PAGES.map((p) => item({ ...p, group: 'Pages' }, `page:${p.to}`, LayoutGrid))}</Command.Group>
+            <Command.Group heading="Pages">{PAGES.map((p) => item({ ...p, group: 'Pages' }, `page:${p.to}`))}</Command.Group>
           </>
         )}
         {groups.map((g) => (
           <Command.Group key={g.group} heading={g.group}>
-            {g.items.map((it) => item(it, `${g.group}:${it.to}:${it.title}`, GROUP_ICON[g.group] || FileText))}
+            {g.items.map((it) => item(it, `${g.group}:${it.to}:${it.title}`))}
           </Command.Group>
         ))}
       </Command.List>
@@ -129,14 +98,14 @@ export default function CommandPalette({ open, onOpenChange, onOpenGuide }) {
           <kbd>↑</kbd> <kbd>↓</kbd> move
         </span>
         <span>
-          <CornerDownLeft size={12} /> open
+          <kbd>↵</kbd> open
         </span>
         <span>
           <kbd>esc</kbd> close
         </span>
         <span className="cmd-foot-tip">
           <kbd>⌘</kbd>
-          <kbd>K</kbd> or <kbd>/</kbd> opens this anywhere
+          <kbd>K</kbd> or <kbd>/</kbd> from any page
         </span>
       </div>
     </Command.Dialog>

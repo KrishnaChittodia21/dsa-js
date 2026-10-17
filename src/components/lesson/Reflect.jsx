@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import Markdown from '../ui/Markdown.jsx';
-import Icon from '../ui/Icon.jsx';
 import { useProgress } from '../../state/ProgressContext.jsx';
 
 // "Do you understand why…?" — honest self-check that reveals a deeper explanation on demand.
@@ -14,21 +13,21 @@ export default function Reflect({ block, reflectKey }) {
   };
   return (
     <div className="reflect">
-      <div className="reflect-head">
-        <Icon name="brain" size={17} />
+      <div className="reflect-label">Ask yourself</div>
+      <div className="reflect-prompt">
         <Markdown>{block.prompt}</Markdown>
       </div>
       {!open && (
         <div className="row-wrap">
-          <button type="button" className={`btn btn-sm ${saved === 'yes' ? 'btn-success' : ''}`} onClick={() => answer('yes')}>
-            <Icon name="check" size={14} /> Yes, I can explain it
+          <button type="button" className={`btn btn-sm ${saved === 'yes' ? 'is-on' : ''}`} aria-pressed={saved === 'yes'} onClick={() => answer('yes')}>
+            {saved === 'yes' ? '✓ ' : ''}Yes, I could explain it
           </button>
           <button type="button" className="btn btn-sm" onClick={() => answer('no')}>
-            Not quite — explain it differently
+            Not yet — explain it another way
           </button>
           {saved === 'yes' && (
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOpen(true)}>
-              Show explanation anyway
+              Read the explanation anyway
             </button>
           )}
         </div>
@@ -37,7 +36,7 @@ export default function Reflect({ block, reflectKey }) {
         <div className="reflect-deeper">
           <Markdown>{block.deeper}</Markdown>
           <button type="button" className="btn btn-sm btn-primary" onClick={() => answer('yes')}>
-            Got it now
+            That makes sense now
           </button>
         </div>
       )}

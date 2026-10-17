@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import Icon from '../components/ui/Icon.jsx';
 import { stages } from '../content/index.js';
 import { visualForPattern } from '../visualizations/patternVisuals.js';
 import { SCENARIO_TITLES } from '../visualizations/scenarioTitles.js';
@@ -45,60 +44,76 @@ export default function VisualizePage() {
 
   const total = byStage.reduce((n, s) => n + s.topics.reduce((m, t) => m + t.items.length, 0), 0);
 
+  let fig = 0;
+
   return (
-    <div className="page page-wide">
-      <div className="page-header">
+    <div className="page page-wide vz ink-in">
+      <header className="page-header vz-head">
         <div>
-          <h1>Visualizer</h1>
-          <p>{total} step-through animations along the learning path. Each pauses at key moments to ask what happens next — turn off “Predict mode” to just watch.</p>
+          <span className="eyebrow">List of figures · {total} plates</span>
+          <h1>
+            Watch it <em>move</em>
+          </h1>
+          <p>Every step-through animation in the course, in the order you'll meet them. Each one stops at the interesting moments and asks what happens next — switch off “Predict mode” if you'd rather just watch.</p>
         </div>
-      </div>
+      </header>
 
       {current && (
-        <section id="viz-player" className="card" style={{ marginBottom: '1.5rem', scrollMarginTop: '1rem' }}>
-          <div className="row" style={{ marginBottom: '0.75rem' }}>
-            <div style={{ flex: 1 }}>
-              {current.topic && (
-                <Link to={`/topic/${current.topic.id}?tab=visualize`} className="small muted">
-                  {current.topic.title}
-                </Link>
-              )}
-              {current.patterns.length > 0 && <div className="small">Pattern: {current.patterns.join(' · ')}</div>}
+        <section id="viz-player" className="vz-player" aria-label="Animation player">
+          <header className="vz-player-head">
+            <div>
+              <span className="eyebrow">Now showing</span>
+              <h2>{SCENARIO_TITLES[current.scenario]}</h2>
+              <p className="vz-player-meta">
+                {current.topic && <Link to={`/topic/${current.topic.id}?tab=visualize`}>{current.topic.title}</Link>}
+                {current.topic && current.patterns.length > 0 && ' · '}
+                {current.patterns.length > 0 && <span>{current.patterns.join(' · ')}</span>}
+              </p>
             </div>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setParams({})}>
-              <Icon name="x" size={14} /> Close
+            <button type="button" className="rf-textbtn" onClick={() => setParams({})}>
+              Close <span aria-hidden="true">×</span>
             </button>
-          </div>
-          <Suspense fallback={<div className="muted small">Loading animation…</div>}>
+          </header>
+          <Suspense
+            fallback={
+              <div className="skeleton" aria-label="Loading the animation">
+                <span />
+                <span />
+                <span />
+              </div>
+            }
+          >
             <Visualizer key={current.scenario + (current.topic?.id || '')} scenario={current.scenario} input={current.input} />
           </Suspense>
         </section>
       )}
 
-      {byStage.map(({ stage, topics }) =>
+      {byStage.map(({ stage, topics }, si) =>
         topics.length ? (
-          <section key={stage.id} style={{ marginBottom: '1.75rem' }}>
-            <div className="divider-label">{stage.title}</div>
-            <div className="viz-gallery">
+          <section key={stage.id} className="vz-stage" aria-labelledby={`vz-${stage.id}`}>
+            <h2 id={`vz-${stage.id}`} className="vz-stage-h">
+              <span className="folio">Part {si + 1}</span> {stage.title}
+            </h2>
+            <ol className="vz-figs">
               {topics.flatMap(({ topic, items }) =>
-                items.map((it) => (
-                  <button
-                    key={`${topic.id}-${it.scenario}`}
-                    type="button"
-                    className={`card card-link viz-tile ${selected === it.scenario && topicFor === topic.id ? 'active' : ''}`}
-                    onClick={() => setParams({ s: it.scenario, t: topic.id })}
-                  >
-                    <span className="viz-tile-icon">
-                      <Icon name="play" size={16} />
-                    </span>
-                    <span style={{ minWidth: 0 }}>
-                      <span className="viz-tile-title">{SCENARIO_TITLES[it.scenario]}</span>
-                      <span className="small muted viz-tile-sub">{topic.title}</span>
-                    </span>
-                  </button>
-                )),
+                items.map((it) => {
+                  fig += 1;
+                  const active = selected === it.scenario && topicFor === topic.id;
+                  return (
+                    <li key={`${topic.id}-${it.scenario}`}>
+                      <button type="button" className={`vz-fig ${active ? 'is-active' : ''}`} aria-current={active ? 'true' : undefined} onClick={() => setParams({ s: it.scenario, t: topic.id })}>
+                        <span className="vz-fig-no folio">Fig. {fig}</span>
+                        <span className="vz-fig-title">{SCENARIO_TITLES[it.scenario]}</span>
+                        <span className="vz-fig-topic">{topic.title}</span>
+                        <span className="vz-fig-go" aria-hidden="true">
+                          {active ? 'showing' : 'play →'}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                }),
               )}
-            </div>
+            </ol>
           </section>
         ) : null,
       )}

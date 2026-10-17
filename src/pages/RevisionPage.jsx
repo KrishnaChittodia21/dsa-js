@@ -1,6 +1,4 @@
 import { Link } from 'react-router-dom';
-import Icon from '../components/ui/Icon.jsx';
-import { EmptyState, StatusBadge } from '../components/ui/primitives.jsx';
 import { QuestionList } from './TopicPage.jsx';
 import { useProgress } from '../state/ProgressContext.jsx';
 import { mistakeQuestions, missedCheckpoints, topicStatus, weakAreas, topicStats } from '../state/selectors.js';
@@ -12,79 +10,114 @@ export default function RevisionPage() {
   const mistakes = mistakeQuestions(progress);
   const studied = topics.filter((t) => ['completed', 'in-progress'].includes(topicStatus(t, progress)) && topicStats(t, progress).lessonCompleted);
   return (
-    <div className="page">
-      <div className="page-header">
+    <div className="page rv ink-in">
+      <header className="page-header rv-head">
         <div>
-          <h1>Revision</h1>
-          <p>Spaced review beats re-reading. Revisit weak areas, redo questions you struggled with, and skim the cheatsheets of finished topics.</p>
+          <span className="eyebrow">Revision</span>
+          <h1>
+            Go back over it, <em>on purpose</em>
+          </h1>
+          <p>Coming back to something a few days later beats reading it twice. Start with the weak spots, redo what tripped you, then skim the sheets of what you've finished.</p>
         </div>
-        <span className="spacer" />
         <Link to="/cheatsheet" className="btn">
-          <Icon name="file" size={15} /> Global cheat sheet
+          Open the one-page cheat sheet
         </Link>
-      </div>
+      </header>
 
-      <h2>Weak areas</h2>
-      {weak.length === 0 ? (
-        <p className="muted small">No weak areas detected yet. They are computed from first-try checkpoint accuracy, pattern-recognition accuracy, and whether you solved questions without viewing the solution.</p>
-      ) : (
-        <div className="grid-2">
-          {weak.map((w) => (
-            <div key={w.topic.id} className="card">
-              <div className="row">
-                <h3 style={{ margin: 0, flex: 1 }}>{w.topic.title}</h3>
-                <span className="badge badge-danger">score {Math.round(w.score * 100)}%</span>
-              </div>
-              <ul className="small" style={{ margin: '0.5rem 0' }}>
-                {w.signals.map((s) => (
-                  <li key={s}>{s}</li>
-                ))}
-              </ul>
-              <div className="row">
-                <Link to={`/topic/${w.topic.id}?tab=review`} className="btn btn-sm btn-primary">
-                  Review topic
-                </Link>
-                <Link to={`/topic/${w.topic.id}`} className="btn btn-sm btn-ghost">
-                  Redo lesson
-                </Link>
-              </div>
+      <section className="rv-sec" aria-labelledby="rv-weak">
+        <div className="rv-margin" aria-hidden="true">
+          <span className="rv-num">1</span>
+        </div>
+        <div className="rv-content">
+          <h2 id="rv-weak">Weak spots</h2>
+          {weak.length === 0 ? (
+            <p className="rv-empty">Nothing weak yet. This list is worked out from first-try checkpoint answers, pattern guesses, and whether you solved a question without opening its solution.</p>
+          ) : (
+            <ol className="rv-weak">
+              {weak.map((w) => (
+                <li key={w.topic.id}>
+                  <div className="rv-weak-score">
+                    <span className="rv-weak-big">{Math.round(w.score * 100)}</span>
+                    <span className="eyebrow">score</span>
+                  </div>
+                  <div>
+                    <h3>{w.topic.title}</h3>
+                    <ul className="rv-signals">
+                      {w.signals.map((s) => (
+                        <li key={s}>{s}</li>
+                      ))}
+                    </ul>
+                    <div className="rv-actions">
+                      <Link to={`/topic/${w.topic.id}?tab=review`} className="btn btn-sm btn-primary">
+                        Review the topic
+                      </Link>
+                      <Link to={`/topic/${w.topic.id}`} className="rf-textbtn">
+                        Redo the lesson
+                      </Link>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+        </div>
+      </section>
+
+      <section className="rv-sec" aria-labelledby="rv-retry">
+        <div className="rv-margin" aria-hidden="true">
+          <span className="rv-num">2</span>
+        </div>
+        <div className="rv-content">
+          <h2 id="rv-retry">Questions to try again</h2>
+          {mistakes.length === 0 ? (
+            <p className="rv-empty">Nothing to retry. Questions you fail, mis-name or peek at the answer for will be waiting here.</p>
+          ) : (
+            <div className="rv-qlist">
+              <QuestionList questions={mistakes} progress={progress} showTopic />
             </div>
-          ))}
+          )}
         </div>
-      )}
+      </section>
 
-      <h2 style={{ marginTop: '2rem' }}>Questions to retry</h2>
-      {mistakes.length === 0 ? <p className="muted small">Questions you failed, mis-identified, or peeked at will appear here.</p> : <div className="card"><QuestionList questions={mistakes} progress={progress} showTopic /></div>}
-
-      <h2 style={{ marginTop: '2rem' }}>Completed lessons</h2>
-      {studied.length === 0 ? (
-        <EmptyState icon="book" title="Nothing to review yet">
-          Complete a lesson and its Review tab will appear here.
-        </EmptyState>
-      ) : (
-        <div className="grid-auto">
-          {studied.map((t) => {
-            const missed = missedCheckpoints(progress, t).length;
-            return (
-              <div key={t.id} className="card">
-                <div className="row-wrap" style={{ marginBottom: '0.35rem' }}>
-                  <StatusBadge status={topicStatus(t, progress)} />
-                  {missed > 0 && <span className="badge badge-warning">{missed} missed checkpoints</span>}
-                </div>
-                <h3>{t.title}</h3>
-                <div className="row">
-                  <Link to={`/topic/${t.id}?tab=review`} className="btn btn-sm">
-                    Review
-                  </Link>
-                  <Link to={`/topic/${t.id}?tab=cheatsheet`} className="btn btn-sm btn-ghost">
-                    Cheatsheet
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
+      <section className="rv-sec" aria-labelledby="rv-done">
+        <div className="rv-margin" aria-hidden="true">
+          <span className="rv-num">3</span>
         </div>
-      )}
+        <div className="rv-content">
+          <h2 id="rv-done">Finished lessons</h2>
+          {studied.length === 0 ? (
+            <div className="rf-empty">
+              <p>No finished lessons yet. Complete one and its review sheet will be filed here.</p>
+              <Link to="/path" className="btn btn-sm">
+                Pick a lesson
+              </Link>
+            </div>
+          ) : (
+            <ul className="rv-done">
+              {studied.map((t) => {
+                const missed = missedCheckpoints(progress, t).length;
+                const done = topicStatus(t, progress) === 'completed';
+                return (
+                  <li key={t.id}>
+                    <span className={`rv-done-mark ${done ? 'is-done' : ''}`} aria-hidden="true">
+                      {done ? '●' : '◐'}
+                    </span>
+                    <span className="rv-done-title">
+                      {t.title}
+                      <span className="sr-only">{done ? ' (completed)' : ' (in progress)'}</span>
+                    </span>
+                    {missed > 0 && <span className="rv-missed">{missed} missed checkpoints</span>}
+                    <span className="rv-done-links">
+                      <Link to={`/topic/${t.id}?tab=review`}>Review</Link>
+                      <Link to={`/topic/${t.id}?tab=cheatsheet`}>Cheat sheet</Link>
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

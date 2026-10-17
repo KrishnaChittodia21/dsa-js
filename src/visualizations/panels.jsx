@@ -172,7 +172,7 @@ export function NodesPanel({ panel }) {
           const long = n.label.length > 3;
           return (
             <g key={n.id} className={`viz-node ${n.state ? `viz-node-${n.state}` : ''}`}>
-              {long ? <rect x={p.x - Math.max(r, n.label.length * 4.2)} y={p.y - 14} width={Math.max(2 * r, n.label.length * 8.4)} height={28} rx={8} /> : <circle cx={p.x} cy={p.y} r={r} />}
+              {long ? <rect x={p.x - Math.max(r, n.label.length * 4.2)} y={p.y - 14} width={Math.max(2 * r, n.label.length * 8.4)} height={28} rx={3} /> : <circle cx={p.x} cy={p.y} r={r} />}
               <text x={p.x} y={p.y + 4.5} textAnchor="middle">
                 {n.label}
               </text>

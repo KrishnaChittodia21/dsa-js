@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import CodeEditor from '../components/editor/CodeEditor.jsx';
-import Icon from '../components/ui/Icon.jsx';
 import { runInWorker } from '../runner/runInWorker.js';
 
 const KEY = 'dsa-journey:playground';
@@ -46,37 +45,65 @@ export default function PlaygroundPage() {
     setRunning(false);
   };
   const r = out?.results?.[0];
+  const failed = out?.compileError || r?.error;
   return (
-    <div className="page page-wide">
-      <div className="page-header">
+    <div className="page page-wide pg ink-in">
+      <header className="pg-head">
         <div>
+          <span className="eyebrow">Scratch paper</span>
           <h1>Playground</h1>
-          <p>Experiment with JavaScript and the DSA toolkit. Ctrl/⌘ + Enter runs.</p>
+          <p>Try an idea before it becomes an answer. Every toolkit class is already loaded; whatever <code>main()</code> returns is printed below the console lines.</p>
         </div>
-        <span className="spacer" />
-        <button type="button" className="btn btn-ghost" onClick={() => save(DEFAULT)}>
-          <Icon name="rotate" size={15} /> Reset
-        </button>
-        <button type="button" className="btn btn-primary" onClick={run} disabled={running}>
-          <Icon name="play" size={15} /> Run
-        </button>
-      </div>
-      <div className="playground">
-        <div className="playground-editor">
+        <div className="pg-actions">
+          <button type="button" className="rf-textbtn" onClick={() => save(DEFAULT)}>
+            Reset to the example
+          </button>
+          <button type="button" className="btn btn-primary" onClick={run} disabled={running} aria-keyshortcuts="Control+Enter Meta+Enter">
+            {running ? 'Running…' : 'Run the code'}
+            <kbd className="pg-kbd" aria-hidden="true">
+              Ctrl/⌘ ↵
+            </kbd>
+          </button>
+        </div>
+      </header>
+      <div className="pg-bench">
+        <div className="pg-editor">
+          <span className="pg-label eyebrow" aria-hidden="true">
+            main.js
+          </span>
           <CodeEditor value={code} onChange={save} onRun={run} label="Playground editor" />
         </div>
-        <div className="card playground-out">
-          <div className="card-title">Output</div>
-          {!out && <div className="small muted">Run the code to see output.</div>}
-          {out?.compileError && <pre className="result-error mono small">{out.compileError}</pre>}
-          {r && (
+        <section className={`pg-out ${failed ? 'is-error' : ''}`} aria-labelledby="pg-out-h" aria-live="polite">
+          <header className="pg-out-head">
+            <h2 id="pg-out-h" className="eyebrow">
+              Console
+            </h2>
+            {r?.ms != null && <span className="folio">{r.ms.toFixed(2)} ms</span>}
+          </header>
+          {!out && <p className="pg-empty">Nothing printed yet. Press Run — or Ctrl/⌘ + Enter in the editor — and the output lands here.</p>}
+          {out?.compileError && (
             <>
-              {r.logs?.length > 0 && <pre className="mono small">{r.logs.join('\n')}</pre>}
-              {r.error ? <pre className="result-error mono small">{r.error}</pre> : <pre className="mono small">→ {r.output}</pre>}
-              <div className="small faint">{r.ms?.toFixed(2)} ms</div>
+              <p className="pg-err-note">That didn't run. The first line of the error usually tells you why.</p>
+              <pre className="pg-err">{out.compileError}</pre>
             </>
           )}
-        </div>
+          {r && (
+            <>
+              {r.logs?.length > 0 && <pre className="pg-logs">{r.logs.join('\n')}</pre>}
+              {r.error ? (
+                <>
+                  <p className="pg-err-note">That didn't run. The first line of the error usually tells you why.</p>
+                  <pre className="pg-err">{r.error}</pre>
+                </>
+              ) : (
+                <pre className="pg-return">
+                  <span className="pg-return-k">main() returned</span>
+                  {'\n'}→ {r.output}
+                </pre>
+              )}
+            </>
+          )}
+        </section>
       </div>
     </div>
   );

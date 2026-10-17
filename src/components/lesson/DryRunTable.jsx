@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import Markdown from '../ui/Markdown.jsx';
-import Icon from '../ui/Icon.jsx';
 
 // Iteration table revealed one row at a time so the learner predicts the next state.
 export default function DryRunTable({ title, columns, rows, note, stepwise = true }) {
@@ -10,17 +9,15 @@ export default function DryRunTable({ title, columns, rows, note, stepwise = tru
     <div className="dryrun">
       {title && (
         <div className="dryrun-title">
-          <Icon name="play" size={14} /> Dry run: <span className="mono">{title}</span>
+          <span className="eyebrow">Dry run</span> <span className="dryrun-code">{title}</span>
         </div>
       )}
-      <div className="table-wrap">
-        <table>
+      <div className="ruled-wrap">
+        <table className="dryrun-table">
           <thead>
             <tr>
               {columns.map((c) => (
-                <th key={c} className="mono">
-                  {c}
-                </th>
+                <th key={c}>{c}</th>
               ))}
             </tr>
           </thead>
@@ -28,9 +25,7 @@ export default function DryRunTable({ title, columns, rows, note, stepwise = tru
             {rows.slice(0, shown).map((r, i) => (
               <tr key={i} className={i === shown - 1 && !done ? 'dryrun-latest' : ''}>
                 {r.map((cell, j) => (
-                  <td key={j} className="mono small">
-                    {String(cell)}
-                  </td>
+                  <td key={j}>{String(cell)}</td>
                 ))}
               </tr>
             ))}
@@ -38,25 +33,27 @@ export default function DryRunTable({ title, columns, rows, note, stepwise = tru
         </table>
       </div>
       {stepwise && (
-        <div className="row" style={{ marginTop: '0.5rem' }}>
+        <div className="dryrun-actions">
           {!done ? (
             <>
               <button type="button" className="btn btn-sm" onClick={() => setShown((s) => s + 1)}>
-                Next step <Icon name="chevronRight" size={14} />
+                Next row →
               </button>
               <button type="button" className="btn btn-ghost btn-sm" onClick={() => setShown(rows.length)}>
-                Show all
+                Show every row
               </button>
-              <span className="small faint">Predict the next row before revealing it.</span>
+              <span className="dryrun-hint">
+                Row {shown} of {rows.length}. Predict the next one before you reveal it.
+              </span>
             </>
           ) : (
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => setShown(1)}>
-              <Icon name="rotate" size={14} /> Restart
+              ↺ Start the dry run again
             </button>
           )}
         </div>
       )}
-      {note && done && <Markdown className="small muted dryrun-note">{note}</Markdown>}
+      {note && done && <Markdown className="dryrun-note">{note}</Markdown>}
     </div>
   );
 }

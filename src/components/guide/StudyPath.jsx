@@ -1,11 +1,10 @@
-import { motion } from 'motion/react';
-import { Check, ChevronRight, Lock } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
 import { useProgress } from '../../state/ProgressContext.jsx';
 import { useUiPrefs } from '../../lib/uiPrefs.js';
 import { LOOP, TAB_META, stepProgress } from './studyLoop.js';
 
 /**
- * Sticky "Study path" stepper: the topic's tabs shown as the study loop
+ * Sticky "Study path": the topic's tabs as a numbered syllabus line
  * (Learn → Visualize → Practice → Review, plus Company Qs and Cheatsheet on the side), each with its own
  * mini progress. It IS the tab bar (same `?tab=` ids), so it keeps tablist semantics and arrow keys.
  */
@@ -14,6 +13,7 @@ export default function StudyPath({ topic, tab, locked, onSelect, extras = ['com
   const visited = useUiPrefs().visitedTabs[topic.id] || [];
   const currentIdx = LOOP.findIndex((id) => !stepProgress(progress, topic, id, visited).complete);
   const all = [...LOOP, ...extras];
+  const reduce = useReducedMotion();
 
   const onKeyDown = (e) => {
     const i = all.indexOf(tab);
@@ -27,7 +27,6 @@ export default function StudyPath({ topic, tab, locked, onSelect, extras = ['com
 
   const renderStep = (id, n) => {
     const meta = TAB_META[id];
-    const Icon = meta.icon;
     const prog = stepProgress(progress, topic, id, visited);
     const isLocked = id === 'learn' && locked;
     const idx = LOOP.indexOf(id);
@@ -46,9 +45,15 @@ export default function StudyPath({ topic, tab, locked, onSelect, extras = ['com
         onClick={() => onSelect(id)}
         title={`${meta.why}${isLocked ? ' (unlock the topic first)' : ''}`}
       >
-        {active && <motion.span layoutId={`path-indicator-${topic.id}`} className="path-indicator" transition={{ type: 'spring', stiffness: 500, damping: 40 }} />}
+        {active && (
+          <motion.span
+            layoutId={reduce ? undefined : `path-indicator-${topic.id}`}
+            className="path-indicator"
+            transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+          />
+        )}
         <span className="path-icon" aria-hidden="true">
-          {isLocked ? <Lock size={15} /> : state === 'done' ? <Check size={15} strokeWidth={3} /> : <Icon size={15} />}
+          {isLocked ? '×' : state === 'done' ? '✓' : n !== undefined ? String(n).padStart(2, '0') : '§'}
         </span>
         <span className="path-text">
           <span className="path-label">
@@ -75,7 +80,11 @@ export default function StudyPath({ topic, tab, locked, onSelect, extras = ['com
     <div className="study-path" role="tablist" aria-label="Study path" onKeyDown={onKeyDown}>
       {LOOP.map((id, i) => (
         <span key={id} className="path-item">
-          {i > 0 && <ChevronRight size={14} className="path-sep" aria-hidden="true" />}
+          {i > 0 && (
+            <span className="path-sep" aria-hidden="true">
+              →
+            </span>
+          )}
           {renderStep(id, i + 1)}
         </span>
       ))}

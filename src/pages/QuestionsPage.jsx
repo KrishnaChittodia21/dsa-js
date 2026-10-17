@@ -1,9 +1,13 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DifficultyBadge, QuestionStatusIcon } from '../components/ui/primitives.jsx';
-import Icon from '../components/ui/Icon.jsx';
 import { useProgress } from '../state/ProgressContext.jsx';
 import { allQuestions, topics, topicById, patternById, companies, companyQuestions } from '../content/index.js';
+
+const DIFF_MARK = { Easy: 'E', Medium: 'M', Hard: 'H' };
+const STATUS_MARK = {
+  solved: ['✓', 'Solved'],
+  attempted: ['◐', 'Attempted'],
+};
 
 export default function QuestionsPage() {
   const { progress } = useProgress();
@@ -29,19 +33,42 @@ export default function QuestionsPage() {
     if (q && !`${x.title} ${(x.tags || []).join(' ')} ${patternById[x.pattern]?.name || ''}`.toLowerCase().includes(q.toLowerCase())) return false;
     return true;
   });
+  const solvedCount = allQuestions.filter((x) => progress.questions[x.id]?.status === 'solved').length;
+  const filtered = q || topic !== 'all' || diff !== 'all' || status !== 'all' || company !== 'all';
+  const clear = () => {
+    setQ('');
+    setTopic('all');
+    setDiff('all');
+    setStatus('all');
+    setCompany('all');
+  };
 
   return (
-    <div className="page page-wide">
-      <div className="page-header">
+    <div className="page page-wide lg ink-in">
+      <header className="lg-head">
         <div>
+          <span className="eyebrow">The problem ledger</span>
           <h1>Questions</h1>
-          <p>
-            {allQuestions.length} questions across {topics.length} topics. Solve them from their topic for the best progression.
-          </p>
         </div>
-      </div>
-      <div className="filter-bar">
-        <input className="input" placeholder="Search title, tag or pattern" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search questions" />
+        <dl className="lg-tally">
+          <div>
+            <dt className="eyebrow">Entries</dt>
+            <dd>{allQuestions.length}</dd>
+          </div>
+          <div>
+            <dt className="eyebrow">Topics</dt>
+            <dd>{topics.length}</dd>
+          </div>
+          <div>
+            <dt className="eyebrow">Solved</dt>
+            <dd>{solvedCount}</dd>
+          </div>
+        </dl>
+        <p className="lg-lede">Every question in the course, in one book. They make most sense solved from inside their topic, in order — use this page to find one again.</p>
+      </header>
+
+      <div className="lg-toolbar" role="search" aria-label="Filter questions">
+        <input className="input lg-search" type="search" placeholder="Search a title, tag or pattern" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search questions" />
         <select className="select" value={topic} onChange={(e) => setTopic(e.target.value)} aria-label="Topic">
           <option value="all">All topics</option>
           {topics.map((t) => (
@@ -51,7 +78,7 @@ export default function QuestionsPage() {
           ))}
         </select>
         <select className="select" value={diff} onChange={(e) => setDiff(e.target.value)} aria-label="Difficulty">
-          <option value="all">All difficulties</option>
+          <option value="all">Any difficulty</option>
           <option>Easy</option>
           <option>Medium</option>
           <option>Hard</option>
@@ -70,50 +97,74 @@ export default function QuestionsPage() {
             </option>
           ))}
         </select>
-        <span className="small muted">{rows.length} shown</span>
+        <span className="lg-shown folio" aria-live="polite">
+          {rows.length} shown
+        </span>
+        {filtered && (
+          <button type="button" className="rf-textbtn" onClick={clear}>
+            Clear filters
+          </button>
+        )}
       </div>
-      <div className="table-wrap">
-        <table>
+
+      <div className="lg-table-wrap">
+        <table className="lg-table">
           <thead>
             <tr>
-              <th style={{ width: 36 }} />
-              <th>Question</th>
-              <th>Topic</th>
-              <th>Pattern</th>
-              <th>Difficulty</th>
-              <th>Attempts</th>
+              <th scope="col" className="lg-c-num">
+                №
+              </th>
+              <th scope="col" className="lg-c-mark">
+                <span className="sr-only">Status</span>
+              </th>
+              <th scope="col">Question</th>
+              <th scope="col">Topic</th>
+              <th scope="col">Pattern</th>
+              <th scope="col" className="lg-c-diff">
+                Diff.
+              </th>
+              <th scope="col" className="lg-c-att">
+                Tries
+              </th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((x) => {
+            {rows.map((x, i) => {
               const st = progress.questions[x.id];
+              const [mark, markLabel] = STATUS_MARK[st?.status] || ['○', 'Not started'];
               return (
-                <tr key={x.id}>
-                  <td>
-                    <QuestionStatusIcon status={st?.status} />
+                <tr key={x.id} className={st?.status === 'solved' ? 'is-solved' : undefined}>
+                  <td className="lg-c-num folio">{String(i + 1).padStart(3, '0')}</td>
+                  <td className={`lg-c-mark lg-mark-${st?.status || 'todo'}`}>
+                    <span aria-hidden="true">{mark}</span>
+                    <span className="sr-only">{markLabel}</span>
                   </td>
-                  <td>
+                  <td className="lg-c-title">
                     <Link to={`/topic/${x.topicId}/q/${x.id}`}>{x.title}</Link>
-                    {x.source?.premium && <span className="badge" style={{ marginLeft: 6 }}>premium</span>}
+                    {x.source?.premium && <span className="lg-premium">premium</span>}
                   </td>
-                  <td className="small">
-                    <Link to={`/topic/${x.topicId}`} className="muted">
-                      {topicById[x.topicId]?.title}
-                    </Link>
+                  <td className="lg-c-topic">
+                    <Link to={`/topic/${x.topicId}`}>{topicById[x.topicId]?.title}</Link>
                   </td>
-                  <td className="small muted">{patternById[x.pattern]?.name}</td>
-                  <td>
-                    <DifficultyBadge difficulty={x.difficulty} />
+                  <td className="lg-c-pattern">{patternById[x.pattern]?.name}</td>
+                  <td className="lg-c-diff">
+                    <span className={`rf-dm rf-dm-${x.difficulty.toLowerCase()}`} title={x.difficulty}>
+                      <span aria-hidden="true">{DIFF_MARK[x.difficulty]}</span>
+                      <span className="sr-only">{x.difficulty}</span>
+                    </span>
                   </td>
-                  <td className="small mono muted">{st?.submissions || st?.attempts || 0}</td>
+                  <td className="lg-c-att folio">{st?.submissions || st?.attempts || 0}</td>
                 </tr>
               );
             })}
           </tbody>
         </table>
         {rows.length === 0 && (
-          <div className="empty">
-            <Icon name="search" /> No questions match these filters.
+          <div className="rf-empty">
+            <p>No question fits all of those filters at once. Loosen one and the ledger fills back in.</p>
+            <button type="button" className="btn btn-sm" onClick={clear}>
+              Clear filters
+            </button>
           </div>
         )}
       </div>

@@ -6,19 +6,26 @@ import { tags as t } from '@lezer/highlight';
 import { useMemo, useRef } from 'react';
 
 // Theme built entirely from CSS variables → follows light/dark mode without re-creating the editor.
+// Ledger look: code-paper ground, pencil-grey gutter behind a hairline rule, red-pen caret,
+// highlighter selection, and a faint ruled band on the active line.
 const varTheme = EditorView.theme({
-  '&': { color: 'var(--code-text)', backgroundColor: 'var(--code-bg)', height: '100%', fontSize: '13.5px' },
-  '.cm-scroller': { fontFamily: 'var(--font-mono)', lineHeight: '1.6' },
-  '.cm-content': { caretColor: 'var(--accent)', padding: '10px 0' },
+  '&': { color: 'var(--code-text)', backgroundColor: 'var(--code-bg)', height: '100%', fontSize: '14px' },
+  '.cm-scroller': { fontFamily: 'var(--font-mono)', lineHeight: '1.65' },
+  '.cm-content': { caretColor: 'var(--accent)', padding: '12px 0' },
+  '.cm-line': { padding: '0 12px 0 10px' },
   '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--accent)', borderLeftWidth: '2px' },
+  '&.cm-focused': { outline: 'none' },
   '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': { backgroundColor: 'var(--code-selection) !important' },
-  '.cm-gutters': { backgroundColor: 'var(--code-bg)', color: 'var(--code-gutter)', border: 'none', borderRight: '1px solid var(--code-border)' },
+  '.cm-gutters': { backgroundColor: 'var(--code-bg)', color: 'var(--code-gutter)', border: 'none', borderRight: '1px solid var(--code-border)', fontVariantNumeric: 'tabular-nums' },
+  '.cm-lineNumbers .cm-gutterElement': { padding: '0 10px 0 14px', fontSize: '12px' },
   '.cm-activeLine': { backgroundColor: 'var(--code-active-line)' },
-  '.cm-activeLineGutter': { backgroundColor: 'var(--code-active-line)', color: 'var(--text-muted)' },
-  '.cm-matchingBracket': { backgroundColor: 'var(--accent-soft)', outline: '1px solid var(--accent)' },
-  '.cm-tooltip': { backgroundColor: 'var(--bg-elev)', border: '1px solid var(--border)', color: 'var(--text)' },
-  '.cm-tooltip-autocomplete > ul > li[aria-selected]': { backgroundColor: 'var(--accent-soft)', color: 'var(--text)' },
-  '.cm-foldPlaceholder': { backgroundColor: 'var(--bg-subtle)', border: '1px solid var(--border)', color: 'var(--text-muted)' },
+  '.cm-activeLineGutter': { backgroundColor: 'var(--code-active-line)', color: 'var(--accent)' },
+  '.cm-matchingBracket, &.cm-focused .cm-matchingBracket': { backgroundColor: 'transparent', outline: '1px solid var(--accent)', borderRadius: '1px' },
+  '.cm-tooltip': { backgroundColor: 'var(--surface)', border: '1px solid var(--border-strong)', color: 'var(--text)', borderRadius: 'var(--radius-sm)', boxShadow: 'var(--shadow-md)' },
+  '.cm-tooltip-autocomplete > ul': { fontFamily: 'var(--font-mono)' },
+  '.cm-tooltip-autocomplete > ul > li[aria-selected]': { backgroundColor: 'var(--highlight)', color: 'var(--on-highlight)' },
+  '.cm-foldPlaceholder': { backgroundColor: 'var(--surface-2)', border: '1px dashed var(--border-strong)', color: 'var(--muted)' },
+  '.cm-foldGutter .cm-gutterElement': { color: 'var(--muted)' },
 });
 
 const highlight = HighlightStyle.define([

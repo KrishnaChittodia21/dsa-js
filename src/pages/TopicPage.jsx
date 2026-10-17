@@ -1,17 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import LessonPlayer from '../components/lesson/LessonPlayer.jsx';
-import Icon from '../components/ui/Icon.jsx';
 import Markdown from '../components/ui/Markdown.jsx';
 import CodeBlock from '../components/ui/CodeBlock.jsx';
 import EvidenceBadge from '../components/EvidenceBadge.jsx';
 import { JsToolsTable } from '../components/lesson/Block.jsx';
-import { Callout, DifficultyBadge, EmptyState, ProgressBar, QuestionStatusIcon, StatusBadge } from '../components/ui/primitives.jsx';
+import { Callout, DifficultyBadge, QuestionStatusIcon } from '../components/ui/primitives.jsx';
 import StudyPath from '../components/guide/StudyPath.jsx';
 import CoachTip from '../components/guide/CoachTip.jsx';
 import NextUp from '../components/guide/NextUp.jsx';
 import { useProgress } from '../state/ProgressContext.jsx';
-import { missedCheckpoints, mistakeQuestions, topicStats, topicStatus, prerequisitesMet } from '../state/selectors.js';
+import { missedCheckpoints, mistakeQuestions, topicStats, topicStatus, prerequisitesMet, STATUS_LABEL } from '../state/selectors.js';
 import { topicById, topics, companyQuestionsForTopic, companyById, EVIDENCE_LEVELS, patternById, getCheckpoints } from '../content/index.js';
 import { markTabVisited } from '../lib/uiPrefs.js';
 import NotFound from './NotFound.jsx';
@@ -19,6 +18,18 @@ import { useTopicContent } from '../content/useContent.js';
 import PatternVisual, { hasVisual } from '../components/PatternVisual.jsx';
 import TopicTricks from '../components/TopicTricks.jsx';
 import { visualForPattern } from '../visualizations/patternVisuals.js';
+
+const MARK = { locked: '·', available: '○', 'in-progress': '◐', completed: '✓' };
+
+/** An empty state in the notebook voice: one specific sentence, and an optional action. */
+function Blank({ title, children }) {
+  return (
+    <div className="blank">
+      <p className="blank-title">{title}</p>
+      {children && <p>{children}</p>}
+    </div>
+  );
+}
 
 function VisualizeTab({ topic }) {
   const withVisual = topic.patterns.filter(hasVisual);
@@ -32,34 +43,40 @@ function VisualizeTab({ topic }) {
     else groups.push({ key, patterns: [p] });
   }
   const [open, setOpen] = useState(() => new Set(groups.length ? [groups[0].key] : []));
-  if (!groups.length) return <EmptyState icon="play" title="No animations for this topic">Its ideas are rules and analysis rather than step-by-step processes — the lesson covers them with worked examples.</EmptyState>;
+  if (!groups.length) return <Blank title="Nothing to animate here.">This topic is rules and analysis rather than step-by-step processes, so the lesson covers it with worked examples instead.</Blank>;
   const toggle = (k) => setOpen((o) => { const n = new Set(o); n.has(k) ? n.delete(k) : n.add(k); return n; });
   return (
     <div className="stack">
       <Callout variant="tip" title="Predict, then watch">
-        <span className="small">Animations pause at key steps and ask what happens next. Answer before revealing — it's the fastest way to check you really understand the pattern. Use “Try your own input” to test edge cases.</span>
+        <span className="small">Each animation stops at the key moments and asks what happens next. Answer before you reveal it; that is the quickest way to find out whether the pattern has really landed. “Try your own input” is there for edge cases.</span>
       </Callout>
-      {groups.map((g) => {
-        const primary = g.patterns.find((p) => !visualForPattern(p).related) || g.patterns[0];
-        return (
-          <div key={g.key} className="card">
-            <button type="button" className="pattern-head" style={{ padding: 0 }} onClick={() => toggle(g.key)} aria-expanded={open.has(g.key)}>
-              <div style={{ flex: 1, textAlign: 'left' }}>
-                <div style={{ fontWeight: 650 }}>{g.patterns.map((p) => p.name).join(' · ')}</div>
-                <div className="small muted">{primary.summary}</div>
-              </div>
-              <Icon name="chevronDown" size={16} />
-            </button>
-            {open.has(g.key) && (
-              <div style={{ marginTop: '0.75rem' }}>
-                <PatternVisual pattern={primary} />
-              </div>
-            )}
-          </div>
-        );
-      })}
+      <ol className="anim-list">
+        {groups.map((g, i) => {
+          const primary = g.patterns.find((p) => !visualForPattern(p).related) || g.patterns[0];
+          const isOpen = open.has(g.key);
+          return (
+            <li key={g.key} className={`viz-entry ${isOpen ? 'open' : ''}`}>
+              <button type="button" className="viz-entry-head" onClick={() => toggle(g.key)} aria-expanded={isOpen}>
+                <span className="folio">{String(i + 1).padStart(2, '0')}</span>
+                <span className="viz-entry-text">
+                  <span className="viz-entry-title">{g.patterns.map((p) => p.name).join(' · ')}</span>
+                  <span className="viz-entry-sum">{primary.summary}</span>
+                </span>
+                <span className="viz-entry-sign" aria-hidden="true">
+                  {isOpen ? '−' : '+'}
+                </span>
+              </button>
+              {isOpen && (
+                <div className="viz-entry-body">
+                  <PatternVisual pattern={primary} />
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ol>
       {topic.patterns.length > withVisual.length && (
-        <p className="small faint">Not animated: {topic.patterns.filter((p) => !hasVisual(p)).map((p) => p.name).join(', ')} — these are covered with examples in the lesson.</p>
+        <p className="margin-text">Not animated: {topic.patterns.filter((p) => !hasVisual(p)).map((p) => p.name).join(', ')}. The lesson covers these with worked examples.</p>
       )}
     </div>
   );
@@ -67,8 +84,17 @@ function VisualizeTab({ topic }) {
 
 function LearnTab({ topic, onFinish, initialSection, onSectionApplied }) {
   const { data, loading, error } = useTopicContent(topic.id);
-  if (loading) return <div className="card muted small loading-shimmer">Loading lesson…</div>;
-  if (error) return <div className="callout callout-danger small">Could not load this lesson: {String(error.message || error)}</div>;
+  if (loading)
+    return (
+      <div className="skeleton" role="status" aria-label="Loading the lesson">
+        <span />
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
+    );
+  if (error) return <div className="callout callout-danger small">The lesson didn&apos;t load. {String(error.message || error)}</div>;
   return <LessonPlayer topic={{ ...topic, lesson: data?.lesson || topic.lesson }} onFinish={onFinish} initialSection={initialSection} onSectionApplied={onSectionApplied} />;
 }
 
@@ -77,24 +103,27 @@ const DIFFS = ['Easy', 'Medium', 'Hard'];
 export function MasteryBox({ topic, progress }) {
   const s = topicStats(topic, progress);
   return (
-    <div className="mastery-box mono small">
+    <dl className="mastery-box">
       <div>
-        <span>Learning</span>
-        <span>{s.lessonCompleted ? '✓' : `${s.checkpointsPassed}/${s.checkpointsTotal} checkpoints`}</span>
+        <dt>Lesson</dt>
+        <span className="leader" aria-hidden="true" />
+        <dd>{s.lessonCompleted ? '✓ done' : `${s.checkpointsPassed}/${s.checkpointsTotal} checkpoints`}</dd>
       </div>
       {DIFFS.map((d) => (
         <div key={d}>
-          <span style={{ color: `var(--${d.toLowerCase()})` }}>{d}</span>
-          <span>
+          <dt className={`diff-${d.toLowerCase()}`}>{d}</dt>
+          <span className="leader" aria-hidden="true" />
+          <dd>
             {s.byDiff[d].solved}/{s.byDiff[d].total}
-          </span>
+          </dd>
         </div>
       ))}
       <div className="mastery-total">
-        <span>Pattern mastery</span>
-        <span>{s.mastery}%</span>
+        <dt>Mastery</dt>
+        <span className="leader" aria-hidden="true" />
+        <dd>{s.mastery}%</dd>
       </div>
-    </div>
+    </dl>
   );
 }
 
@@ -114,8 +143,10 @@ export function QuestionList({ questions, progress, topicId, showTopic = false }
             <span className="qlist-pattern small muted">{patternById[q.pattern]?.name?.replace(/^.*?—\s*/, '')}</span>
             {showTopic && <span className="small muted">{topicById[q.topicId]?.title}</span>}
             {companies.size > 0 && (
-              <span className="badge" title={[...companies].map((c) => companyById[c]?.name).join(', ')}>
-                <Icon name="building" size={11} /> {companies.size}
+              <span className="qlist-co folio" title={[...companies].map((c) => companyById[c]?.name).join(', ')}>
+                {companies.size}
+                <span aria-hidden="true"> co.</span>
+                <span className="sr-only"> {companies.size === 1 ? 'company' : 'companies'}</span>
               </span>
             )}
             {q.kind === 'design' && <span className="badge badge-outline">design</span>}
@@ -131,7 +162,7 @@ export function QuestionList({ questions, progress, topicId, showTopic = false }
 function PracticeTab({ topic, progress }) {
   const [pattern, setPattern] = useState('all');
   const qs = pattern === 'all' ? topic.questions : topic.questions.filter((q) => q.pattern === pattern);
-  if (!topic.questions.length) return <EmptyState icon="list" title="Questions are on their way">This topic's practice set is still being written.</EmptyState>;
+  if (!topic.questions.length) return <Blank title="No questions here yet.">This topic&apos;s practice set is still being written; the lesson and cheatsheet are ready.</Blank>;
   return (
     <div className="topic-practice">
       <div>
@@ -152,36 +183,42 @@ function PracticeTab({ topic, progress }) {
           if (!list.length) return null;
           const solved = list.filter((q) => progress.questions[q.id]?.status === 'solved').length;
           return (
-            <div key={d} className="card" style={{ marginBottom: '1rem' }}>
-              <div className="card-header">
-                <DifficultyBadge difficulty={d} />
-                <span className="small muted mono">
-                  {solved}/{list.length}
+            <section key={d} className="practice-set" aria-label={`${d} questions`}>
+              <div className="practice-set-head">
+                <h3 className={`diff-${d.toLowerCase()}`}>{d}</h3>
+                <span className="folio">
+                  {solved}/{list.length} solved
                 </span>
-                <span className="spacer" />
-                <div style={{ width: 140 }}>
-                  <ProgressBar value={solved} max={list.length} variant={d.toLowerCase()} size="sm" label={`${d} progress`} />
-                </div>
+                <span
+                  className="thin-rule"
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={list.length}
+                  aria-valuenow={solved}
+                  aria-label={`${d} progress`}
+                >
+                  <span style={{ width: `${(solved / list.length) * 100}%` }} />
+                </span>
               </div>
               <QuestionList questions={list} progress={progress} topicId={topic.id} />
-            </div>
+            </section>
           );
         })}
       </div>
-      <aside className="stack">
-        <div className="card">
-          <h3>Progress</h3>
+      <aside className="practice-margin">
+        <div className="note">
+          <p className="eyebrow">Your ledger</p>
           <MasteryBox topic={topic} progress={progress} />
         </div>
-        <div className="card">
-          <h3>How to practise</h3>
+        <div className="note">
+          <p className="eyebrow">How to practise</p>
           <ol className="small thought-list">
-            <li>Read the problem and constraints.</li>
+            <li>Read the problem and its constraints.</li>
             <li>Name the pattern before any hint.</li>
-            <li>Write the brute force in words.</li>
-            <li>Optimise, then code it.</li>
-            <li>Run, then submit against hidden tests.</li>
-            <li>Only then read the solution & alternatives.</li>
+            <li>Say the brute force in words.</li>
+            <li>Make it faster, then code it.</li>
+            <li>Run it, then submit against the hidden tests.</li>
+            <li>Only then read the solution and the alternatives.</li>
           </ol>
         </div>
       </aside>
@@ -206,17 +243,17 @@ export function CompanyTab({ topic }) {
           Attributions come only from linked sources. <strong>{EVIDENCE_LEVELS.verified.label}</strong>: {EVIDENCE_LEVELS.verified.description} <strong>{EVIDENCE_LEVELS.community.label}</strong>: {EVIDENCE_LEVELS.community.description} <strong>{EVIDENCE_LEVELS.associated.label}</strong>: {EVIDENCE_LEVELS.associated.description}
         </div>
       </Callout>
-      {byCompany.length === 0 && <EmptyState icon="building" title="No sourced company questions for this topic yet">We only list company questions with a verifiable source.</EmptyState>}
+      {byCompany.length === 0 && <Blank title="No sourced company questions for this topic yet.">A question only appears here once it has a source we can link to.</Blank>}
       {byCompany.map(([cid, list]) => (
-        <div key={cid} className="card">
-          <div className="card-header">
+        <section key={cid} className="ruled-sec">
+          <div className="ruled-sec-head">
             <h3>
               <Link to={`/companies/${cid}`}>{companyById[cid]?.name || cid}</Link>
             </h3>
-            <span className="badge">{list.length}</span>
+            <span className="folio">{list.length}</span>
           </div>
           <CompanyEntryTable entries={list} />
-        </div>
+        </section>
       ))}
     </div>
   );
@@ -250,7 +287,7 @@ export function CompanyEntryTable({ entries, showCompany = false }) {
                   <Link to={`/topic/${e.question.topicId}/q/${e.question.id}`}>{e.title}</Link>
                 ) : e.url ? (
                   <a href={e.url} target="_blank" rel="noreferrer">
-                    {e.title} <Icon name="external" size={11} />
+                    {e.title} <span aria-hidden="true">↗</span>
                   </a>
                 ) : (
                   e.title
@@ -268,7 +305,7 @@ export function CompanyEntryTable({ entries, showCompany = false }) {
                 {e.sourceList.map((s) =>
                   s.url ? (
                     <a key={s.key} href={s.url} target="_blank" rel="noreferrer" title={s.description} style={{ display: 'block' }}>
-                      {s.label} <Icon name="external" size={10} />
+                      {s.label} <span aria-hidden="true">↗</span>
                     </a>
                   ) : (
                     <span key={s.key}>{s.label}</span>
@@ -285,7 +322,7 @@ export function CompanyEntryTable({ entries, showCompany = false }) {
 
 export function Cheatsheet({ topic }) {
   const c = topic.cheatsheet;
-  if (!c) return <EmptyState icon="file" title="Cheatsheet coming soon" />;
+  if (!c) return <Blank title="This cheatsheet hasn't been written yet." />;
   return (
     <div className="cheatsheet">
       <div className="cheat-flow">
@@ -343,14 +380,21 @@ export function Cheatsheet({ topic }) {
 function ReviewTab({ topic: meta, progress, onRelearn }) {
   const { dispatch } = useProgress();
   const { data, loading } = useTopicContent(meta.id);
-  if (loading) return <div className="card muted small">Loading review…</div>;
+  if (loading)
+    return (
+      <div className="skeleton" role="status" aria-label="Loading the review">
+        <span />
+        <span />
+        <span />
+      </div>
+    );
   const topic = data ? { ...meta, lesson: data.lesson, patterns: data.patterns.map((p) => ({ ...p, topicId: meta.id })) } : meta;
   const mistakes = mistakeQuestions(progress, topic.id);
   const missed = missedCheckpoints(progress, topic);
   return (
-    <div className="stack">
-      <div className="grid-2">
-        <div className="card">
+    <div className="review">
+      <div className="review-pair">
+        <section className="ruled-sec">
           <h3>Key concepts</h3>
           <ul className="md">
             {topic.keyConcepts.map((k) => (
@@ -359,13 +403,13 @@ function ReviewTab({ topic: meta, progress, onRelearn }) {
               </li>
             ))}
           </ul>
-        </div>
-        <div className="card">
+        </section>
+        <section className="ruled-sec">
           <h3>Pattern recognition clues</h3>
           {topic.patterns.map((p) => (
-            <div key={p.id} style={{ marginBottom: '0.75rem' }}>
-              <div style={{ fontWeight: 600 }}>{p.name}</div>
-              <div className="row-wrap" style={{ marginTop: '0.25rem' }}>
+            <div key={p.id} className="clue-group">
+              <div className="clue-name">{p.name}</div>
+              <div className="row-wrap">
                 {(p.clues || []).map((c) => (
                   <span key={c} className="badge badge-outline mono">
                     {c}
@@ -374,10 +418,10 @@ function ReviewTab({ topic: meta, progress, onRelearn }) {
               </div>
             </div>
           ))}
-        </div>
+        </section>
       </div>
 
-      <div className="card">
+      <section className="ruled-sec">
         <h3>Templates</h3>
         {topic.patterns.map((p) => (
           <details key={p.id} className="details">
@@ -387,9 +431,7 @@ function ReviewTab({ topic: meta, progress, onRelearn }) {
             {p.template && <CodeBlock code={p.template} />}
             {p.mistakes?.length > 0 && (
               <>
-                <div className="small" style={{ fontWeight: 600 }}>
-                  Common mistakes
-                </div>
+                <p className="eyebrow">Common mistakes</p>
                 <ul className="small">
                   {p.mistakes.map((m) => (
                     <li key={m}>{m}</li>
@@ -400,24 +442,24 @@ function ReviewTab({ topic: meta, progress, onRelearn }) {
           </details>
         ))}
         {topic.cheatsheet?.complexity && (
-          <p className="small" style={{ marginTop: '0.75rem' }}>
-            <strong>Complexity:</strong> <span className="mono">{topic.cheatsheet.complexity}</span>
+          <p className="small review-complexity">
+            <span className="eyebrow">Complexity</span> <span className="mono">{topic.cheatsheet.complexity}</span>
           </p>
         )}
-      </div>
+      </section>
 
       {topic.jsTools.length > 0 && (
-        <div className="card">
+        <section className="ruled-sec">
           <h3>JavaScript APIs used</h3>
           <JsToolsTable items={topic.jsTools} />
-        </div>
+        </section>
       )}
 
-      <div className="grid-2">
-        <div className="card">
+      <div className="review-pair">
+        <section className="ruled-sec">
           <h3>Checkpoints you missed</h3>
           {missed.length > 0 && (
-            <div className="row-wrap" style={{ marginBottom: '0.6rem' }}>
+            <div className="row-wrap review-redo">
               <button
                 type="button"
                 className="btn btn-sm btn-primary"
@@ -426,13 +468,13 @@ function ReviewTab({ topic: meta, progress, onRelearn }) {
                   onRelearn?.();
                 }}
               >
-                <Icon name="rotate" size={14} /> Re-answer these {missed.length} checkpoint{missed.length === 1 ? '' : 's'}
+                Re-answer these {missed.length} checkpoint{missed.length === 1 ? '' : 's'}
               </button>
-              <span className="small muted">Clears just these answers; your new first try is what counts.</span>
+              <span className="small muted">Only these answers are cleared, and your new first try is the one that counts.</span>
             </div>
           )}
           {missed.length === 0 ? (
-            <div className="small muted">{getCheckpoints(topic).some((c) => progress.checkpoints[c.id]) ? 'None — every checkpoint answered correctly on the first try.' : 'Answer the lesson checkpoints first.'}</div>
+            <p className="small muted">{getCheckpoints(topic).some((c) => progress.checkpoints[c.id]) ? 'None. Every checkpoint so far was right on the first try.' : 'Nothing yet. The lesson checkpoints show up here once you answer them.'}</p>
           ) : (
             missed.map((c) => (
               <details key={c.id} className="details">
@@ -447,11 +489,15 @@ function ReviewTab({ topic: meta, progress, onRelearn }) {
               </details>
             ))
           )}
-        </div>
-        <div className="card">
+        </section>
+        <section className="ruled-sec">
           <h3>Questions to retry</h3>
-          {mistakes.length === 0 ? <div className="small muted">Questions with failed submissions, wrong pattern guesses, or where you viewed the solution first will be listed here.</div> : <QuestionList questions={mistakes} progress={progress} topicId={topic.id} />}
-        </div>
+          {mistakes.length === 0 ? (
+            <p className="small muted">Clean so far. A question lands here after a failed submission, a wrong pattern guess, or a look at the solution before solving it.</p>
+          ) : (
+            <QuestionList questions={mistakes} progress={progress} topicId={topic.id} />
+          )}
+        </section>
       </div>
     </div>
   );
@@ -485,27 +531,23 @@ export default function TopicPage() {
     : { lead: 'That was the last topic.', label: 'Revise what you learned', to: '/revision' };
 
   return (
-    <div className="page page-wide">
-      <div className="topic-header">
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="row-wrap small" style={{ marginBottom: '0.4rem' }}>
-            <Link to="/path" className="muted">
-              {topic.stageTitle}
-            </Link>
-            <Icon name="chevronRight" size={12} />
-            <StatusBadge status={status} />
-            <DifficultyBadge difficulty={topic.difficulty} />
-            <span className="muted">
-              <Icon name="clock" size={12} /> ~{topic.estMinutes} min
+    <div className="page page-wide chapter ink-in">
+      <header className="chapter-head">
+        <div className="chapter-opener">
+          <p className="chapter-folio">
+            <span className="chapter-num">Chapter {String(topic.index + 1).padStart(2, '0')}</span>
+            <Link to="/path">{topic.stageTitle}</Link>
+            <span className={`chapter-status st-${status}`}>
+              <span aria-hidden="true">{MARK[status]}</span> {STATUS_LABEL[status]}
             </span>
-          </div>
-          <h1 style={{ margin: 0 }}>{topic.title}</h1>
-          <p className="muted" style={{ margin: '0.35rem 0 0', maxWidth: 780 }}>
-            {topic.summary}
+            <span className={`diff-${topic.difficulty.toLowerCase()}`}>{topic.difficulty}</span>
+            <span>~{topic.estMinutes} min</span>
           </p>
+          <h1 className="chapter-title">{topic.title}</h1>
+          <p className="standfirst">{topic.summary}</p>
           {topic.prerequisites.length > 0 && (
-            <div className="small" style={{ marginTop: '0.5rem' }}>
-              <span className="muted">Builds on: </span>
+            <p className="chapter-prereq">
+              <span className="eyebrow">Builds on</span>{' '}
               {topic.prerequisites.map((p, i) => (
                 <span key={p}>
                   {i > 0 && ' · '}
@@ -513,15 +555,18 @@ export default function TopicPage() {
                   {progress.topics[p]?.lessonCompleted ? ' ✓' : ''}
                 </span>
               ))}
-            </div>
+            </p>
           )}
         </div>
-        <MasteryBox topic={topic} progress={progress} />
-      </div>
+        <aside className="chapter-margin" aria-label="Mastery">
+          <p className="eyebrow">Mastery ledger</p>
+          <MasteryBox topic={topic} progress={progress} />
+        </aside>
+      </header>
 
       {status === 'locked' && (
-        <Callout variant="warning" title="This topic is locked">
-          <p className="small">Its prerequisites aren't complete yet. You can still explore it — the lesson assumes you know the prerequisites.</p>
+        <Callout variant="warning" title="This topic is still locked">
+          <p className="small">Its prerequisites aren&apos;t finished yet. You can open it anyway; the lesson just assumes you know what comes before.</p>
           <button type="button" className="btn btn-sm" onClick={() => dispatch({ type: 'TOPIC_UNLOCK', topicId: topic.id })}>
             Unlock anyway
           </button>
@@ -542,7 +587,7 @@ export default function TopicPage() {
       )}
       {tab === 'practice' && (
         <CoachTip id="tab:practice" title="Name the pattern first.">
-          Each question asks which pattern fits before any hint. <kbd>Ctrl</kbd>/<kbd>⌘</kbd> <kbd>Enter</kbd> runs the visible tests; Submit also runs hidden ones.
+          Each question asks which pattern fits before you get a hint. <kbd>Ctrl</kbd>/<kbd>⌘</kbd> <kbd>Enter</kbd> runs the visible tests; Submit also runs hidden ones.
         </CoachTip>
       )}
       {tab === 'company' && (
@@ -579,9 +624,9 @@ export default function TopicPage() {
         </>
       )}
       {tab === 'learn' && status === 'locked' && !tState.unlockedManually && (
-        <EmptyState icon="lock" title="Unlock the topic to start the lesson">
-          Finish {topic.prerequisites.filter((p) => !progress.topics[p]?.lessonCompleted).map((p) => topicById[p].title).join(', ')} first — or unlock it above.
-        </EmptyState>
+        <Blank title="Unlock the topic to start the lesson.">
+          Finish {topic.prerequisites.filter((p) => !progress.topics[p]?.lessonCompleted).map((p) => topicById[p].title).join(', ')} first, or unlock it above.
+        </Blank>
       )}
       {tab === 'visualize' && (
         <>
@@ -614,9 +659,7 @@ export default function TopicPage() {
       )}
 
       {tab !== 'learn' && s.lessonCompleted === false && tab === 'practice' && topic.questions.length > 0 && (
-        <p className="small faint" style={{ marginTop: '1rem' }}>
-          Tip: finish the lesson first — questions build on its patterns.
-        </p>
+        <p className="margin-text chapter-tip">Finish the lesson first if you can; the questions lean on its patterns.</p>
       )}
     </div>
   );

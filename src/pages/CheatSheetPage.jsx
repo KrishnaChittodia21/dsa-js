@@ -2,67 +2,70 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import CodeBlock from '../components/ui/CodeBlock.jsx';
 import { stages } from '../content/index.js';
-import { Callout } from '../components/ui/primitives.jsx';
 import SheetSection from '../components/SheetSection.jsx';
 import { sectionByNum } from '../content/guides/index.js';
 
 export default function CheatSheetPage() {
   const [showTemplates, setShowTemplates] = useState(true);
   return (
-    <div className="page page-wide">
-      <div className="page-header">
-        <div>
-          <h1>DSA Cheat Sheet</h1>
-          <p>Every pattern on one page: when to use it, the clues that give it away, its template and complexity.</p>
+    <div className="page page-wide cs ink-in">
+      <header className="cs-head">
+        <div className="cs-title">
+          <span className="eyebrow">One sheet · every pattern</span>
+          <h1>The cheat sheet</h1>
         </div>
-        <span className="spacer" />
-        <label className="row small">
-          <input type="checkbox" checked={showTemplates} onChange={(e) => setShowTemplates(e.target.checked)} /> Show templates
-        </label>
-        <button type="button" className="btn btn-sm" onClick={() => window.print()}>
-          Print
-        </button>
-      </div>
-      <Callout variant="tip" title="Recognising the pattern is half the problem">
-        <span className="small">
-          Use the <Link to="/finder">Pattern Finder</Link> — an interactive decision tree, keyword → pattern lookup, common confusions and constraint → complexity guide built from your cheat sheet. Each topic's Cheatsheet tab also has its recognition tree plus tricks & tips.
-        </span>
-      </Callout>
-      <div className="sheet-grid" style={{ margin: '1rem 0 2rem' }}>
+        <p className="cs-lede">When to use each pattern, the words that give it away, its template and its cost — small enough to print and pin above the desk.</p>
+        <div className="cs-tools">
+          <label className="cs-check">
+            <input type="checkbox" checked={showTemplates} onChange={(e) => setShowTemplates(e.target.checked)} /> Include templates
+          </label>
+          <button type="button" className="btn btn-sm" onClick={() => window.print()}>
+            Print the sheet
+          </button>
+        </div>
+      </header>
+
+      <aside className="rf-note cs-note">
+        <span className="eyebrow">Spotting the pattern is half the problem</span>
+        <p>
+          The <Link to="/finder">pattern finder</Link> walks you there with a few questions, a keyword lookup, common mix-ups and a constraints → complexity guide. Each topic's Cheat sheet tab adds its own recognition tree and tricks.
+        </p>
+      </aside>
+
+      <div className="cs-rules">
         <SheetSection section={sectionByNum(58)} collapsible defaultOpen={false} />
         <SheetSection section={sectionByNum(59)} collapsible defaultOpen={false} />
       </div>
-      {stages.map((s) => (
-        <section key={s.id} style={{ marginBottom: '2rem' }}>
-          <div className="divider-label">{s.title}</div>
-          <div className="cheat-grid">
+
+      {stages.map((s, si) => (
+        <section key={s.id} className="cs-stage" aria-labelledby={`cs-${s.id}`}>
+          <h2 id={`cs-${s.id}`} className="cs-stage-h">
+            <span className="folio">Part {si + 1}</span> {s.title}
+          </h2>
+          <div className="cs-cols">
             {s.topics
               .filter((t) => t.cheatsheet)
               .map((t) => (
-                <article key={t.id} className="card cheat-card">
+                <article key={t.id} className="cs-entry">
                   <h3>
                     <Link to={`/topic/${t.id}?tab=cheatsheet`}>{t.title}</Link>
+                    <span className="cs-cx mono">{t.cheatsheet.complexity}</span>
                   </h3>
-                  <div className="small">
-                    <strong>Use when:</strong> {t.cheatsheet.whenToUse?.join('; ')}
-                  </div>
-                  <div className="row-wrap" style={{ margin: '0.5rem 0' }}>
-                    {t.cheatsheet.clues?.map((c) => (
-                      <span key={c} className="badge badge-accent mono">
-                        {c}
-                      </span>
-                    ))}
-                  </div>
+                  <p>
+                    <span className="cs-k">Use when</span> {t.cheatsheet.whenToUse?.join('; ')}
+                  </p>
+                  {t.cheatsheet.clues?.length > 0 && (
+                    <p className="cs-clues">
+                      <span className="cs-k">Clues</span> {t.cheatsheet.clues.map((c) => `“${c}”`).join('  ')}
+                    </p>
+                  )}
                   {showTemplates && t.cheatsheet.template && <CodeBlock code={t.cheatsheet.template} copy={false} />}
-                  <div className="small mono" style={{ color: 'var(--accent)' }}>
-                    {t.cheatsheet.complexity}
-                  </div>
-                  <div className="small muted" style={{ marginTop: '0.35rem' }}>
-                    <strong>Avoid:</strong> {t.cheatsheet.mistakes?.join('; ')}
-                  </div>
-                  <div className="small" style={{ marginTop: '0.35rem' }}>
-                    <strong>JS:</strong> {t.cheatsheet.jsTools?.join(', ')}
-                  </div>
+                  <p className="cs-avoid">
+                    <span className="cs-k">Avoid</span> {t.cheatsheet.mistakes?.join('; ')}
+                  </p>
+                  <p>
+                    <span className="cs-k">JS</span> <span className="mono">{t.cheatsheet.jsTools?.join(', ')}</span>
+                  </p>
                 </article>
               ))}
           </div>

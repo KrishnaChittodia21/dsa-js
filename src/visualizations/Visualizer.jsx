@@ -29,7 +29,8 @@ function PredictCard({ predict, answer, onChoose, onReveal }) {
   return (
     <div className={`viz-predict ${answeredNow ? (correct ? 'is-correct' : 'is-wrong') : ''}`} role="group" aria-label="Predict the next step">
       <div className="viz-predict-q">
-        <Icon name="help" size={15} /> <strong>Predict:</strong> {predict.question}
+        <span className="viz-predict-tag">Predict</span>
+        <span>{predict.question}</span>
       </div>
       <div className="viz-predict-options">
         {predict.options.map((o, i) => {
@@ -37,22 +38,22 @@ function PredictCard({ predict, answer, onChoose, onReveal }) {
           if (answeredNow && i === predict.answer) state = 'correct';
           else if (answeredNow && i === answer) state = 'wrong';
           return (
-            <button key={i} type="button" className={`option option-compact ${state}`} disabled={answeredNow} onClick={() => onChoose(i)}>
+            <button key={i} type="button" className={`option ${state}`} disabled={answeredNow} onClick={() => onChoose(i)}>
               <span className="option-letter">{LETTERS[i]}</span>
               <span className="option-text">{o}</span>
+              {state === 'correct' && <span className="option-mark" aria-label="correct">✓</span>}
+              {state === 'wrong' && <span className="option-mark" aria-label="your answer, wrong">×</span>}
             </button>
           );
         })}
       </div>
       {answeredNow && (
-        <div className="row-wrap" style={{ marginTop: '0.5rem' }}>
-          <span className="small" style={{ color: correct ? 'var(--success)' : 'var(--danger)', fontWeight: 600 }}>
-            {correct ? 'Correct!' : `Not quite — it's ${LETTERS[predict.answer]}.`}
-          </span>
-          {predict.explain && <span className="small">{predict.explain}</span>}
+        <div className="viz-predict-result">
+          <span className={`stamp ${correct ? 'stamp-good' : 'stamp-bad'}`}>{correct ? 'Correct' : `Not quite — ${LETTERS[predict.answer]}`}</span>
+          {predict.explain && <span className="viz-predict-explain">{predict.explain}</span>}
           <span className="spacer" />
           <button type="button" className="btn btn-primary btn-sm" onClick={onReveal} autoFocus>
-            Show the step <Icon name="chevronRight" size={14} />
+            Show the step →
           </button>
         </div>
       )}
@@ -160,7 +161,7 @@ export default function Visualizer({ scenario, input, caption, compact = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing, step, speed]);
 
-  if (!def) return <div className="card muted small">Unknown visualization “{scenario}”.</div>;
+  if (!def) return <p className="viz-missing">There is no animation called “{scenario}” yet.</p>;
   const frame = frames[Math.min(step, frames.length - 1)] || { note: '', panels: [] };
   const last = frames.length - 1;
 
@@ -195,14 +196,13 @@ export default function Visualizer({ scenario, input, caption, compact = false }
     <figure className={`viz ${compact ? 'viz-compact' : ''}`} tabIndex={0} onKeyDown={onKey} aria-label={`Visualization: ${def.title}`}>
       <div className="viz-head">
         <div>
-          <div className="viz-title">
-            <Icon name="play" size={14} /> {def.title}
-          </div>
-          <div className="small muted">{caption || def.description}</div>
+          <div className="viz-eyebrow">Lab bench</div>
+          <div className="viz-title">{def.title}</div>
+          <div className="viz-caption">{caption || def.description}</div>
         </div>
         <span className="spacer" />
         {totalPredicts > 0 && (
-          <label className="viz-predict-toggle small" title="Pause at key steps and ask what happens next">
+          <label className="viz-predict-toggle" title="Pause at key steps and ask what happens next">
             <input
               type="checkbox"
               checked={predictMode}
@@ -212,17 +212,18 @@ export default function Visualizer({ scenario, input, caption, compact = false }
                 setPending(null);
               }}
             />
-            Predict mode
-            {score.total > 0 && <span className="badge badge-accent mono">{score.correct}/{score.total}</span>}
+            Ask me to predict
+            {score.total > 0 && <span className="viz-score">{score.correct}/{score.total}</span>}
           </label>
         )}
         {def.fields?.length > 0 && (
           <button
             type="button"
             className="btn btn-ghost btn-sm"
+            aria-expanded={!!draft}
             onClick={() => setDraft(draft ? null : Object.fromEntries(def.fields.map((f) => [f.key, toText(f, data[f.key])])))}
           >
-            <Icon name="code" size={14} /> {draft ? 'Cancel' : 'Try your own input'}
+            {draft ? 'Cancel' : 'Use your own input'}
           </button>
         )}
       </div>
@@ -231,7 +232,7 @@ export default function Visualizer({ scenario, input, caption, compact = false }
         <div className="viz-input">
           {def.fields.map((f) => (
             <label key={f.key} className="viz-field">
-              <span className="small muted">{f.label}</span>
+              <span className="eyebrow">{f.label}</span>
               {f.type === 'select' ? (
                 <select className="select" value={draft[f.key]} onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })}>
                   {f.options.map((o) => (
@@ -243,14 +244,18 @@ export default function Visualizer({ scenario, input, caption, compact = false }
               )}
             </label>
           ))}
-          <div className="row">
+          <div className="row-wrap">
             <button type="button" className="btn btn-primary btn-sm" onClick={applyDraft}>
-              Visualize
+              Run it
             </button>
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setData(initial); setDraft(null); setError(null); }}>
-              Reset to example
+              Back to the example
             </button>
-            {error && <span className="small" style={{ color: 'var(--danger)' }}>{error}</span>}
+            {error && (
+              <span className="viz-error" role="alert">
+                {error}
+              </span>
+            )}
           </div>
         </div>
       )}
@@ -264,22 +269,23 @@ export default function Visualizer({ scenario, input, caption, compact = false }
         <PredictCard predict={frames[pending].predict} answer={answer} onChoose={choose} onReveal={reveal} />
       ) : (
         <div className="viz-note" aria-live="polite">
-          <span className="badge badge-accent mono">
-            {step + 1}/{frames.length}
+          <span className="viz-step folio">
+            {String(step + 1).padStart(2, '0')}
+            <span className="viz-step-of">/{String(frames.length).padStart(2, '0')}</span>
           </span>
-          <span>{frame.note}</span>
+          <span className="viz-note-text">{frame.note}</span>
         </div>
       )}
       <div className="viz-controls">
-        <button type="button" className="btn btn-icon btn-sm" onClick={restart} disabled={step === 0 && pending === null} aria-label="First step">
+        <button type="button" className="viz-btn" onClick={restart} disabled={step === 0 && pending === null} aria-label="First step">
           <Icon name="skipBack" size={15} />
         </button>
-        <button type="button" className="btn btn-icon btn-sm" onClick={() => { setPending(null); setStep((s) => Math.max(0, s - 1)); }} disabled={step === 0} aria-label="Previous step">
+        <button type="button" className="viz-btn" onClick={() => { setPending(null); setStep((s) => Math.max(0, s - 1)); }} disabled={step === 0} aria-label="Previous step">
           <Icon name="chevronLeft" size={15} />
         </button>
         <button
           type="button"
-          className="btn btn-primary btn-sm"
+          className="viz-btn viz-play"
           disabled={pending !== null}
           onClick={() => {
             if (step >= last) restart();
@@ -289,14 +295,14 @@ export default function Visualizer({ scenario, input, caption, compact = false }
         >
           <Icon name={playing ? 'pause' : 'play'} size={14} /> {playing ? 'Pause' : step >= last ? 'Replay' : 'Play'}
         </button>
-        <button type="button" className="btn btn-icon btn-sm" onClick={next} disabled={step >= last || pending !== null} aria-label="Next step">
+        <button type="button" className="viz-btn" onClick={next} disabled={step >= last || pending !== null} aria-label="Next step">
           <Icon name="chevronRight" size={15} />
         </button>
-        <button type="button" className="btn btn-icon btn-sm" onClick={() => { setPending(null); setStep(last); }} disabled={step >= last} aria-label="Last step">
+        <button type="button" className="viz-btn" onClick={() => { setPending(null); setStep(last); }} disabled={step >= last} aria-label="Last step">
           <Icon name="skipForward" size={15} />
         </button>
         <input type="range" min={0} max={last} value={step} onChange={(e) => { setPending(null); setStep(Number(e.target.value)); }} className="viz-scrub" aria-label="Step" />
-        <select className="select btn-sm" value={speed} onChange={(e) => setSpeed(Number(e.target.value))} aria-label="Speed">
+        <select className="viz-speed" value={speed} onChange={(e) => setSpeed(Number(e.target.value))} aria-label="Speed">
           <option value={1800}>0.5×</option>
           <option value={1100}>1×</option>
           <option value={600}>2×</option>

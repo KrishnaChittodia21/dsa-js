@@ -1,138 +1,157 @@
+import { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import Icon from '../components/ui/Icon.jsx';
-import { DifficultyBadge, ProgressBar, StatusBadge } from '../components/ui/primitives.jsx';
 import { useProgress } from '../state/ProgressContext.jsx';
-import { topicStats, topicStatus, recommendations } from '../state/selectors.js';
+import { topicStats, topicStatus, recommendations, STATUS_LABEL } from '../state/selectors.js';
 import { stages, topicById, companyQuestionsForTopic } from '../content/index.js';
+import useReveal from '../lib/useReveal.js';
 
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+const MARK = { locked: '·', available: '○', 'in-progress': '◐', completed: '✓' };
+const DIFF = { Easy: 'easy', Medium: 'medium', Hard: 'hard' };
+
+/** One topic as a numbered syllabus row: description, prerequisites, time, mastery rule and actions. */
 export function TopicCard({ topic, progress, dispatch, highlight }) {
   const status = topicStatus(topic, progress);
   const s = topicStats(topic, progress);
   const companyCount = companyQuestionsForTopic(topic.id).length;
   const locked = status === 'locked';
+  const patterns = topic.patterns.map((p) => p.name.replace(/^.*?—\s*/, ''));
   return (
-    <div className={`card topic-card topic-${status} ${highlight ? 'topic-highlight' : ''}`}>
-      <div className="row" style={{ alignItems: 'flex-start' }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="row-wrap" style={{ marginBottom: '0.35rem' }}>
-            <StatusBadge status={status} />
-            <DifficultyBadge difficulty={topic.difficulty} />
-            {highlight && <span className="badge badge-accent">Recommended</span>}
-          </div>
-          <h3 style={{ margin: 0 }}>{locked ? topic.title : <Link to={`/topic/${topic.id}`}>{topic.title}</Link>}</h3>
-        </div>
-        <span className="topic-index mono">{String(topic.index + 1).padStart(2, '0')}</span>
-      </div>
-      <p className="small muted" style={{ margin: '0.5rem 0' }}>
-        {topic.description}
-      </p>
-      <div className="topic-meta small">
-        <span>
-          <Icon name="clock" size={13} /> ~{Math.round(topic.estMinutes / 10) * 10} min lesson
-        </span>
-        <span>
-          <Icon name="list" size={13} /> {s.total} questions
-        </span>
-        {companyCount > 0 && (
-          <span>
-            <Icon name="building" size={13} /> {companyCount} company refs
+    <li className={`syl-topic st-${status} ${highlight ? 'is-next' : ''}`}>
+      <span className="syl-num" aria-hidden="true">
+        {String(topic.index + 1).padStart(2, '0')}
+      </span>
+      <div className="syl-body">
+        <div className="syl-titleline">
+          <h3>
+            <span className="sr-only">Topic {topic.index + 1}: </span>
+            {locked ? topic.title : <Link to={`/topic/${topic.id}`}>{topic.title}</Link>}
+          </h3>
+          {highlight && <span className="syl-next">Next up</span>}
+          <span className={`syl-status st-${status}`}>
+            <span aria-hidden="true">{MARK[status]}</span> {STATUS_LABEL[status]}
           </span>
-        )}
-      </div>
-      {topic.patterns.length > 0 && (
-        <div className="row-wrap" style={{ margin: '0.5rem 0' }}>
-          {topic.patterns.slice(0, 5).map((p) => (
-            <span key={p.id} className="badge badge-outline">
-              {p.name.replace(/^.*?—\s*/, '')}
-            </span>
-          ))}
-          {topic.patterns.length > 5 && <span className="small faint">+{topic.patterns.length - 5}</span>}
         </div>
-      )}
-      <div className="small muted" style={{ marginBottom: '0.35rem' }}>
-        {topic.prerequisites.length ? (
-          <>
-            Prerequisites:{' '}
-            {topic.prerequisites.map((p, i) => (
-              <span key={p}>
-                {i > 0 && ', '}
-                <Link to={`/topic/${p}`}>{topicById[p].title}</Link>
-                {progress.topics[p]?.lessonCompleted ? ' ✓' : ''}
-              </span>
-            ))}
-          </>
-        ) : (
-          'No prerequisites'
+        <p className="syl-desc">{topic.description}</p>
+        <p className="syl-meta">
+          <span>~{Math.round(topic.estMinutes / 10) * 10} min lesson</span>
+          <span className={`syl-diff diff-${DIFF[topic.difficulty] || ''}`}>{topic.difficulty}</span>
+          <span>{s.total} questions</span>
+          {companyCount > 0 && <span>{companyCount} company references</span>}
+        </p>
+        {patterns.length > 0 && (
+          <p className="syl-patterns">
+            <span className="eyebrow">Patterns</span> {patterns.slice(0, 5).join(' · ')}
+            {patterns.length > 5 && <span className="folio"> +{patterns.length - 5} more</span>}
+          </p>
         )}
-      </div>
-      <div className="row">
-        <div style={{ flex: 1 }}>
-          <ProgressBar value={s.mastery} variant={status === 'completed' ? 'success' : ''} size="sm" label={`${topic.title} mastery`} />
+        <p className="syl-prereq">
+          {topic.prerequisites.length ? (
+            <>
+              <span className="eyebrow">Builds on</span>{' '}
+              {topic.prerequisites.map((p, i) => (
+                <span key={p}>
+                  {i > 0 && ', '}
+                  <Link to={`/topic/${p}`}>{topicById[p].title}</Link>
+                  {progress.topics[p]?.lessonCompleted ? <span className="syl-tick"> ✓</span> : ''}
+                </span>
+              ))}
+            </>
+          ) : (
+            <span className="syl-free">No prerequisites; start here whenever you like.</span>
+          )}
+        </p>
+        <div className="syl-mastery">
+          <span
+            className={`thin-rule ${status === 'completed' ? 'good' : ''}`}
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={s.mastery}
+            aria-label={`${topic.title} mastery`}
+          >
+            <span style={{ width: `${s.mastery}%` }} />
+          </span>
+          <span className="folio">{s.mastery}% mastery</span>
         </div>
-        <span className="small mono muted">{s.mastery}%</span>
-      </div>
-      <div className="row" style={{ marginTop: '0.75rem' }}>
-        {locked ? (
-          <>
-            <button type="button" className="btn btn-sm" onClick={() => dispatch({ type: 'TOPIC_UNLOCK', topicId: topic.id })}>
-              <Icon name="lock" size={13} /> Unlock anyway
-            </button>
-            <span className="small faint">Complete prerequisites first for the best experience.</span>
-          </>
-        ) : (
-          <>
-            <Link to={`/topic/${topic.id}`} className={`btn btn-sm ${status === 'available' || status === 'in-progress' ? 'btn-primary' : ''}`}>
-              {status === 'completed' ? 'Revisit' : status === 'in-progress' ? 'Continue' : 'Start'}
-            </Link>
-            <Link to={`/topic/${topic.id}?tab=visualize`} className="btn btn-sm btn-ghost" title="Step-through animations for this topic">
-              <Icon name="play" size={13} /> Visualize
-            </Link>
-            {s.lessonCompleted && (
-              <Link to={`/topic/${topic.id}?tab=practice`} className="btn btn-sm btn-ghost">
-                Practice
+        <div className="syl-actions">
+          {locked ? (
+            <>
+              <button type="button" className="btn btn-sm" onClick={() => dispatch({ type: 'TOPIC_UNLOCK', topicId: topic.id })}>
+                Unlock anyway
+              </button>
+              <span className="syl-hint">It reads best after its prerequisites, but nothing stops you.</span>
+            </>
+          ) : (
+            <>
+              <Link to={`/topic/${topic.id}`} className={`btn btn-sm ${status === 'available' || status === 'in-progress' ? 'btn-primary' : ''}`}>
+                {status === 'completed' ? 'Revisit' : status === 'in-progress' ? 'Continue' : 'Start the lesson'}
               </Link>
-            )}
-            {status === 'completed' && (
-              <Link to={`/topic/${topic.id}?tab=review`} className="btn btn-sm btn-ghost">
-                Review
+              <Link to={`/topic/${topic.id}?tab=visualize`} className="syl-link" title="Step-through animations for this topic">
+                Watch it animate
               </Link>
-            )}
-          </>
-        )}
+              {s.lessonCompleted && (
+                <Link to={`/topic/${topic.id}?tab=practice`} className="syl-link">
+                  Practise
+                </Link>
+              )}
+              {status === 'completed' && (
+                <Link to={`/topic/${topic.id}?tab=review`} className="syl-link">
+                  Review
+                </Link>
+              )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </li>
   );
 }
 
 export default function LearningPath() {
   const { progress, dispatch } = useProgress();
   const rec = recommendations(progress);
+  const ref = useRef(null);
+  useReveal(ref);
   return (
-    <div className="page">
-      <div className="page-header">
+    <div ref={ref} className="page syllabus ink-in">
+      <header className="page-header syl-header">
         <div>
-          <h1>Learning Path</h1>
-          <p>Topics unlock when their prerequisites' lessons are complete. A topic is completed when you finish its lesson and solve at least half its questions.</p>
+          <p className="eyebrow">Syllabus</p>
+          <h1>The learning path</h1>
+          <p>
+            Topics open once the lessons they build on are finished. A topic counts as complete when its lesson is done and at least half its questions are
+            solved.
+          </p>
         </div>
-      </div>
-      <div className="path">
-        {stages.map((stage, si) => (
-          <section key={stage.id} className="path-stage">
-            <div className="path-stage-head">
-              <span className="path-stage-num">{si + 1}</span>
-              <div>
-                <h2 style={{ margin: 0 }}>{stage.title}</h2>
-                <div className="small muted">{stage.description}</div>
-              </div>
+      </header>
+      {stages.map((stage, si) => {
+        const done = stage.topics.filter((t) => topicStatus(t, progress) === 'completed').length;
+        const minutes = stage.topics.reduce((a, t) => a + t.estMinutes, 0);
+        return (
+          <section key={stage.id} className="syl-part" aria-labelledby={`part-${stage.id}`} data-reveal={si > 0 ? '' : undefined}>
+            <div className="syl-part-head">
+              <p className="syl-part-num">Part {ROMAN[si]}</p>
+              <h2 id={`part-${stage.id}`}>{stage.title}</h2>
+              <p className="syl-part-desc">{stage.description}</p>
+              <p className="folio">
+                {done}/{stage.topics.length} complete · about {minutes >= 90 ? `${Math.round(minutes / 60)} hours` : `${minutes} minutes`} of lessons
+              </p>
             </div>
-            <div className="grid-auto path-topics">
+            <ol className="syl-topics">
               {stage.topics.map((t) => (
-                <TopicCard key={t.id} topic={t} progress={progress} dispatch={dispatch} highlight={t.id === rec.nextTopic?.id || (t.id === rec.current.id && topicStatus(t, progress) !== 'completed')} />
+                <TopicCard
+                  key={t.id}
+                  topic={t}
+                  progress={progress}
+                  dispatch={dispatch}
+                  highlight={t.id === rec.nextTopic?.id || (t.id === rec.current.id && topicStatus(t, progress) !== 'completed')}
+                />
               ))}
-            </div>
+            </ol>
           </section>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }

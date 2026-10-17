@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Icon from '../components/ui/Icon.jsx';
-import { DiffProgress, ProgressBar, StatCard, StatusBadge } from '../components/ui/primitives.jsx';
+import { DiffProgress, ProgressBar } from '../components/ui/primitives.jsx';
 import { useProgress } from '../state/ProgressContext.jsx';
 import { activityTotals, companyProgress, formatDuration, overallStats, streak, strongAreas, topicStats, topicStatus, weakAreas, pct } from '../state/selectors.js';
 import { topics } from '../content/index.js';
@@ -9,6 +8,13 @@ import { todayKey } from '../state/progressReducer.js';
 import Heatmap from '../components/charts/Heatmap.jsx';
 import { C } from '../components/charts/core.js';
 import { activityWeeks } from '../lib/dashMetrics.js';
+
+const STATUS_TEXT = {
+  completed: ['●', 'Completed'],
+  'in-progress': ['◐', 'In progress'],
+  available: ['○', 'Open'],
+  locked: ['–', 'Locked'],
+};
 
 export default function ProgressPage() {
   const { progress, dispatch } = useProgress();
@@ -37,142 +43,224 @@ export default function ProgressPage() {
       const data = JSON.parse(await file.text());
       if (!data || typeof data !== 'object' || !data.questions) throw new Error('Not a DSA Journey progress file');
       dispatch({ type: 'IMPORT', state: data });
-      setMsg('Progress imported.');
+      setMsg('Backup imported — your marks are restored.');
     } catch (err) {
-      setMsg(`Import failed: ${err.message}`);
+      setMsg(`That file didn't import: ${err.message}`);
     }
     e.target.value = '';
   };
 
   return (
-    <div className="page page-wide">
-      <div className="page-header">
+    <div className="page page-wide rc ink-in">
+      <header className="page-header rc-head">
         <div>
-          <h1>Progress</h1>
-          <p>Everything is stored locally in your browser. Export a backup to move it between devices.</p>
+          <span className="eyebrow">Report card · {todayKey()}</span>
+          <h1>
+            How it's <em>going</em>
+          </h1>
+          <p>Kept in this browser only. Export a copy to carry it to another device, or to keep a backup before you reset.</p>
         </div>
-        <span className="spacer" />
-        <button type="button" className="btn btn-sm" onClick={exportData}>
-          <Icon name="download" size={14} /> Export
-        </button>
-        <button type="button" className="btn btn-sm" onClick={() => fileRef.current?.click()}>
-          <Icon name="upload" size={14} /> Import
-        </button>
-        <input ref={fileRef} type="file" accept="application/json" hidden onChange={importData} />
-        <button
-          type="button"
-          className="btn btn-sm btn-ghost"
-          onClick={() => {
-            if (window.confirm('Delete ALL progress? This cannot be undone (export a backup first).')) dispatch({ type: 'RESET_ALL' });
-          }}
-        >
-          Reset
-        </button>
-      </div>
-      {msg && <div className="small" style={{ marginBottom: '1rem' }}>{msg}</div>}
+      </header>
 
-      <div className="grid-4">
-        <StatCard icon="target" label="Overall mastery" value={`${o.overall}%`} sub={`${o.topicsCompleted}/${o.topicsTotal} topics completed`} />
-        <StatCard icon="check" label="Solved" value={`${o.solved}/${o.total}`} sub={`${a.submissions} submissions · ${a.failedSubmissions} failed`} />
-        <StatCard icon="help" label="Checkpoints" value={`${pct(a.checkpointsFirstTry, a.checkpointsAnswered)}%`} sub={`${a.checkpointsFirstTry}/${a.checkpointsAnswered} correct on first try`} />
-        <StatCard icon="puzzle" label="Pattern recognition" value={`${pct(a.patternCorrect, a.patternGuesses)}%`} sub={`${a.patternCorrect}/${a.patternGuesses} identified correctly`} />
-      </div>
+      <dl className="rc-marks">
+        <div>
+          <dt className="eyebrow">Overall mastery</dt>
+          <dd className="rc-big">
+            {o.overall}
+            <span className="rc-unit">%</span>
+          </dd>
+          <dd className="rc-sub">
+            {o.topicsCompleted} of {o.topicsTotal} topics finished
+          </dd>
+        </div>
+        <div>
+          <dt className="eyebrow">Solved</dt>
+          <dd className="rc-big">
+            {o.solved}
+            <span className="rc-unit">/{o.total}</span>
+          </dd>
+          <dd className="rc-sub">
+            {a.submissions} submissions · {a.failedSubmissions} failed
+          </dd>
+        </div>
+        <div>
+          <dt className="eyebrow">Checkpoints, first try</dt>
+          <dd className="rc-big">
+            {pct(a.checkpointsFirstTry, a.checkpointsAnswered)}
+            <span className="rc-unit">%</span>
+          </dd>
+          <dd className="rc-sub">
+            {a.checkpointsFirstTry} of {a.checkpointsAnswered} right first time
+          </dd>
+        </div>
+        <div>
+          <dt className="eyebrow">Pattern spotting</dt>
+          <dd className="rc-big">
+            {pct(a.patternCorrect, a.patternGuesses)}
+            <span className="rc-unit">%</span>
+          </dd>
+          <dd className="rc-sub">
+            {a.patternCorrect} of {a.patternGuesses} named correctly
+          </dd>
+        </div>
+      </dl>
 
-      <div className="grid-3" style={{ marginTop: '1rem' }}>
-        <div className="card">
-          <h3>Difficulty</h3>
+      <div className="rc-row">
+        <section className="rc-panel" aria-labelledby="rc-diff">
+          <h2 id="rc-diff" className="rc-panel-h">
+            By difficulty
+          </h2>
           <DiffProgress byDiff={o.byDiff} />
-        </div>
-        <div className="card">
-          <h3>Activity</h3>
+        </section>
+        <section className="rc-panel" aria-labelledby="rc-act">
+          <h2 id="rc-act" className="rc-panel-h">
+            Attendance
+          </h2>
           <Heatmap weeks={activityWeeks(progress.activity, new Date(), 17)} colors={[C.ord1, C.ord2, C.ord3]} />
-          <div className="small muted" style={{ marginTop: '0.5rem' }}>
-            Streak {st.current} day(s) · longest {st.longest} · time practising {formatDuration(a.timeMs)}
-          </div>
-        </div>
-        <div className="card">
-          <h3>Strong & weak</h3>
-          <div className="small" style={{ fontWeight: 600, color: 'var(--success)' }}>
-            Strong
-          </div>
-          <div className="row-wrap" style={{ margin: '0.25rem 0 0.75rem' }}>
-            {strong.length ? strong.map((s) => <Link key={s.topic.id} to={`/topic/${s.topic.id}`} className="badge badge-success">{s.topic.title}</Link>) : <span className="small faint">Not enough data yet</span>}
-          </div>
-          <div className="small" style={{ fontWeight: 600, color: 'var(--danger)' }}>
-            Needs work
-          </div>
-          <div className="row-wrap" style={{ marginTop: '0.25rem' }}>
-            {weak.length ? weak.map((s) => <Link key={s.topic.id} to={`/topic/${s.topic.id}?tab=review`} className="badge badge-danger">{s.topic.title}</Link>) : <span className="small faint">Nothing flagged</span>}
-          </div>
-        </div>
+          <p className="rc-note">
+            {st.current}-day streak · longest {st.longest} · {formatDuration(a.timeMs)} at the desk
+          </p>
+        </section>
+        <section className="rc-panel rc-remarks" aria-labelledby="rc-rem">
+          <h2 id="rc-rem" className="rc-panel-h">
+            Teacher's remarks
+          </h2>
+          <h3 className="eyebrow rc-good">Strong</h3>
+          {strong.length ? (
+            <ul>
+              {strong.map((s) => (
+                <li key={s.topic.id}>
+                  <Link to={`/topic/${s.topic.id}`}>{s.topic.title}</Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="rc-note">Too early to say — a few more checkpoints and this fills in.</p>
+          )}
+          <h3 className="eyebrow rc-bad">Worth another look</h3>
+          {weak.length ? (
+            <ul>
+              {weak.map((s) => (
+                <li key={s.topic.id}>
+                  <Link to={`/topic/${s.topic.id}?tab=review`}>{s.topic.title}</Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="rc-note">Nothing flagged. Keep going.</p>
+          )}
+        </section>
       </div>
 
-      <h2 style={{ marginTop: '2rem' }}>By topic</h2>
-      <div className="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Topic</th>
-              <th>Status</th>
-              <th>Learning</th>
-              <th>Easy</th>
-              <th>Medium</th>
-              <th>Hard</th>
-              <th>Checkpoints (1st try)</th>
-              <th style={{ width: 160 }}>Mastery</th>
-            </tr>
-          </thead>
-          <tbody>
-            {topics.map((t) => {
-              const s = topicStats(t, progress);
-              return (
-                <tr key={t.id}>
-                  <td>
-                    <Link to={`/topic/${t.id}`}>{t.title}</Link>
-                  </td>
-                  <td>
-                    <StatusBadge status={topicStatus(t, progress)} />
-                  </td>
-                  <td className="small">{s.lessonCompleted ? '✓' : `${s.checkpointsPassed}/${s.checkpointsTotal}`}</td>
-                  {['Easy', 'Medium', 'Hard'].map((d) => (
-                    <td key={d} className="mono small">
-                      {s.byDiff[d].solved}/{s.byDiff[d].total}
+      <section className="rc-sec" aria-labelledby="rc-topics">
+        <h2 id="rc-topics" className="rc-sec-h">
+          Marks by topic
+        </h2>
+        <div className="rc-table-wrap">
+          <table className="rc-table">
+            <thead>
+              <tr>
+                <th scope="col">Topic</th>
+                <th scope="col">Status</th>
+                <th scope="col">Lesson</th>
+                <th scope="col" className="rc-num">
+                  E
+                </th>
+                <th scope="col" className="rc-num">
+                  M
+                </th>
+                <th scope="col" className="rc-num">
+                  H
+                </th>
+                <th scope="col" className="rc-num">
+                  1st try
+                </th>
+                <th scope="col" className="rc-mastery-h">
+                  Mastery
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {topics.map((t) => {
+                const s = topicStats(t, progress);
+                const status = topicStatus(t, progress);
+                const [mark, label] = STATUS_TEXT[status] || STATUS_TEXT.available;
+                return (
+                  <tr key={t.id}>
+                    <th scope="row">
+                      <Link to={`/topic/${t.id}`}>{t.title}</Link>
+                    </th>
+                    <td className={`rc-status rc-status-${status}`}>
+                      <span aria-hidden="true">{mark}</span> {label}
                     </td>
-                  ))}
-                  <td className="mono small">{s.checkpointsAnswered ? `${s.checkpointFirstTry}/${s.checkpointsAnswered}` : '—'}</td>
-                  <td>
-                    <div className="row">
-                      <div style={{ flex: 1 }}>
-                        <ProgressBar value={s.mastery} size="sm" label={`${t.title} mastery`} />
-                      </div>
-                      <span className="mono small">{s.mastery}%</span>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                    <td className="mono">{s.lessonCompleted ? '✓' : `${s.checkpointsPassed}/${s.checkpointsTotal}`}</td>
+                    {['Easy', 'Medium', 'Hard'].map((d) => (
+                      <td key={d} className="mono rc-num">
+                        {s.byDiff[d].solved}/{s.byDiff[d].total}
+                      </td>
+                    ))}
+                    <td className="mono rc-num">{s.checkpointsAnswered ? `${s.checkpointFirstTry}/${s.checkpointsAnswered}` : '—'}</td>
+                    <td className="rc-mastery">
+                      <ProgressBar value={s.mastery} size="sm" label={`${t.title} mastery`} />
+                      <span className="mono">{s.mastery}%</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       {comp.length > 0 && (
-        <>
-          <h2 style={{ marginTop: '2rem' }}>By company</h2>
-          <div className="grid-4">
+        <section className="rc-sec" aria-labelledby="rc-comp">
+          <h2 id="rc-comp" className="rc-sec-h">
+            By company
+          </h2>
+          <ul className="rc-companies">
             {comp.map((c) => (
-              <Link key={c.company.id} to={`/companies/${c.company.id}`} className="card card-tight card-link">
-                <div className="row small" style={{ justifyContent: 'space-between' }}>
-                  <strong>{c.company.name}</strong>
-                  <span className="mono muted">
+              <li key={c.company.id}>
+                <Link to={`/companies/${c.company.id}`}>
+                  <span>{c.company.name}</span>
+                  <span className="rc-dots" aria-hidden="true" />
+                  <span className="folio">
                     {c.solved}/{c.total}
                   </span>
-                </div>
-                <ProgressBar value={c.solved} max={c.total || 1} size="sm" label={`${c.company.name}`} />
-              </Link>
+                </Link>
+              </li>
             ))}
-          </div>
-        </>
+          </ul>
+        </section>
       )}
+
+      <section className="rc-records" aria-labelledby="rc-rec">
+        <h2 id="rc-rec" className="eyebrow">
+          Record keeping
+        </h2>
+        <div className="rc-records-actions">
+          <button type="button" className="btn btn-sm" onClick={exportData}>
+            Export a backup
+          </button>
+          <button type="button" className="btn btn-sm" onClick={() => fileRef.current?.click()}>
+            Import a backup
+          </button>
+          <input ref={fileRef} type="file" accept="application/json" hidden onChange={importData} />
+          <button
+            type="button"
+            className="rf-textbtn rf-textbtn-danger"
+            onClick={() => {
+              if (window.confirm('Erase all progress? This cannot be undone — export a backup first.')) dispatch({ type: 'RESET_ALL' });
+            }}
+          >
+            Erase all progress
+          </button>
+        </div>
+        {msg && (
+          <p className="rc-msg" role="status">
+            {msg}
+          </p>
+        )}
+      </section>
     </div>
   );
 }

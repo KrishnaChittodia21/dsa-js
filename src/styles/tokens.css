@@ -1,244 +1,202 @@
 /* =====================================================================
-   Design tokens (theme v3 — the same colour system as qa-learn and
-   system-design-learn). Components must use these variables — never
-   hardcoded colours. Every text/background pair is AA-checked by a node
-   contrast script (light + dark × 4 accents).
+   Design tokens — "The Study Ledger" (warm paper & ink).
+   One committed accent (red-pen vermilion), a highlighter for marking,
+   near-square corners, hairline rules and offset "printed" shadows.
+   Components must use these variables — never hardcoded colours.
    - canonical names: --bg --surface --surface-2 --border --text --text-2
      --muted --accent --accent-soft --accent-text --good --warn --bad …
-   - the older dsa-js names (--bg-elev, --text-muted, --success, --easy …)
-     are kept as aliases further down, so every existing rule still works
-   - --brand-gradient is decorative (logo tile, featured borders, aurora);
-     --btn-gradient carries --accent-text (AA on every stop);
-     --text-gradient is for large gradient headings (AA on --bg and --surface)
-   - the theme is always stamped on <html> (data-theme, data-accent) by the
-     no-flash script in index.html, so no prefers-color-scheme copies needed
+   - older names (--bg-elev, --text-muted, --success, --easy …) are aliases below
+   - gradient tokens are kept for compatibility but resolve to flat ink
+     (gradients are not part of this design language)
+   - every text/background pair is checked for WCAG AA by scripts/check-contrast.mjs
    ===================================================================== */
 :root,
 :root[data-theme='light'] {
   color-scheme: light;
-  --bg: #f5f6fb;
-  --surface: #ffffff;
-  --surface-2: #eef1f8;
-  --surface-hover: #e9edf6;
-  --border: #e1e5f0;
-  --border-strong: #cdd3e3;
-  --text: #0f172a;
-  --text-2: #475569;
-  --muted: #5f6b80;
+  --bg: #f3eee3;            /* paper */
+  --surface: #fbf8f1;       /* sheet */
+  --surface-2: #efe8da;     /* tinted sheet */
+  --surface-hover: #e9e1d0;
+  --border: #ddd3c0;        /* rule line */
+  --border-strong: #b3a68d;
+  --text: #1c1a16;          /* ink */
+  --text-2: #4a443a;
+  --muted: #645c4e;         /* pencil */
 
-  --accent: #5b4fe9;
-  --accent-2: #06b6d4;
-  --accent-soft: #eeedff;
-  --accent-text: #ffffff;
-  --brand-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 45%, #06b6d4 100%);
-  --btn-gradient: linear-gradient(135deg, #5b4fe9 0%, #7c3aed 100%);
-  --text-gradient: linear-gradient(100deg, #4f46e5 0%, #7c3aed 50%, #0e7490 100%);
+  --accent: #b3361d;        /* red pen */
+  --accent-2: #1f5f5b;      /* sea ink (secondary marks only) */
+  --accent-soft: #f6e3da;
+  --accent-text: #fff8f0;
+  --highlight: #f3d35b;     /* highlighter — marking & selection only */
+  --highlight-soft: #faedb4;
+  --on-highlight: #1c1a16;   /* text on the highlighter is always dark ink */
+  --ink-shadow: #1c1a16;
 
-  --good: #157a3a;
-  --good-soft: #e6f6ec;
-  --warn: #a84e08;
-  --warn-soft: #fdf3e2;
-  --bad: #b91c1c;
-  --bad-soft: #fdecec;
-  --info: #0369a1;
-  --info-soft: #e6f3fb;
-  --on-status: #ffffff;
+  --brand-gradient: linear-gradient(var(--accent), var(--accent));
+  --btn-gradient: linear-gradient(var(--accent), var(--accent));
+  --text-gradient: linear-gradient(var(--text), var(--text));
 
-  --code-bg: #f8f9fd;
-  --code-border: #e1e5f0;
-  --code-text: #1f2533;
-  --code-keyword: #8b2fc9;
-  --code-string: #0a7b45;
-  --code-number: #a85200;
-  --code-comment: #636d80;
-  --code-function: #1d5fd1;
-  --code-punct: #4f5866;
-  --code-variable: #1f2533;
-  --code-selection: #dcdcff;
-  --code-gutter: #6b7488;
-  --code-active-line: #eef0fa;
+  --good: #2f6b3a;
+  --good-soft: #e1ecd8;
+  --warn: #85560a;
+  --warn-soft: #f5e7c4;
+  --bad: #a3261a;
+  --bad-soft: #f6ded6;
+  --info: #1f5a78;
+  --info-soft: #dce9ee;
+  --on-status: #fff8f0;
 
-  --viz-cell: #ffffff;
-  --viz-cell-border: #cdd3e3;
-  --viz-window: #dbe4ff;
-  --viz-window-border: #4f46e5;
-  --viz-active: #fde68a;
-  --viz-done: #bbf7d0;
-  --viz-visited: #e0e7ff;
-  --viz-muted: #e5e7eb;
-  --viz-bad: #fecaca;
-  --viz-ptr-a: #4f46e5;
-  --viz-ptr-b: #db2777;
-  --viz-ptr-c: #0891b2;
-  --viz-edge: #8a93a5;
+  --code-bg: #f6f1e5;
+  --code-border: #ddd3c0;
+  --code-text: #1c1a16;
+  --code-keyword: #8e2c48;
+  --code-string: #2f6b3a;
+  --code-number: #85560a;
+  --code-comment: #6f6656;
+  --code-function: #1f4e79;
+  --code-punct: #4a443a;
+  --code-variable: #1c1a16;
+  --code-selection: #f8e6a2;
+  --code-gutter: #7d7462;
+  --code-active-line: #efe7d6;
 
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.07), 0 12px 28px -12px rgba(30, 27, 75, 0.12);
-  --shadow-lg: 0 2px 4px rgba(15, 23, 42, 0.04), 0 16px 36px -8px rgba(30, 27, 75, 0.18), 0 32px 64px -16px rgba(30, 27, 75, 0.2);
-  --mesh-a: 9%;
-  --mesh-b: 7%;
+  --viz-cell: #fbf8f1;
+  --viz-cell-border: #b3a68d;
+  --viz-window: #f8e6a2;
+  --viz-window-border: #b3361d;
+  --viz-active: #f3d35b;
+  --viz-done: #cfe2c3;
+  --viz-visited: #e6dcc8;
+  --viz-muted: #e3dccd;
+  --viz-bad: #f1c4b8;
+  --viz-ptr-a: #b3361d;
+  --viz-ptr-b: #1f4e79;
+  --viz-ptr-c: #2f6b3a;
+  --viz-edge: #8a806d;
+
+  /* hairlines + printed shadows (no blur — ink offset like a letterpress card) */
+  --shadow-sm: 0 1px 0 rgba(28, 26, 22, 0.06);
+  --shadow-md: 2px 2px 0 rgba(28, 26, 22, 0.12);
+  --shadow-lg: 6px 6px 0 rgba(28, 26, 22, 0.88);
+  --shadow-print: 3px 3px 0 var(--ink-shadow);
+  --grain-opacity: 0.35;
+  --dot-color: rgba(28, 26, 22, 0.07);
+  --mesh-a: 0%;
+  --mesh-b: 0%;
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #0a0c16;
-  --surface: #11142a;
-  --surface-2: #181c36;
-  --surface-hover: #1e2342;
-  --border: #262b4a;
-  --border-strong: #363c63;
-  --text: #e9ebf8;
-  --text-2: #b5bad8;
-  --muted: #8a90b4;
+  --bg: #15130f;            /* desk at night */
+  --surface: #1e1b16;
+  --surface-2: #26221b;
+  --surface-hover: #2e2921;
+  --border: #3a342a;
+  --border-strong: #5f5646;
+  --text: #eee7d7;          /* chalk */
+  --text-2: #cbc2ae;
+  --muted: #a39881;
 
-  --accent: #8f87ff;
-  --accent-2: #22d3ee;
-  --accent-soft: #221f4d;
-  --accent-text: #0a0c16;
-  --brand-gradient: linear-gradient(135deg, #818cf8 0%, #a78bfa 45%, #22d3ee 100%);
-  --btn-gradient: linear-gradient(135deg, #8f87ff 0%, #b197fc 100%);
-  --text-gradient: linear-gradient(100deg, #a5b4fc 0%, #c4b5fd 50%, #67e8f9 100%);
+  --accent: #f0714f;
+  --accent-2: #6fbcb2;
+  --accent-soft: #3b2119;
+  --accent-text: #15130f;
+  --highlight: #e8c547;
+  --highlight-soft: #3d331a;
+  --on-highlight: #1c1a16;
+  --ink-shadow: #000000;
 
-  --good: #4ade80;
-  --good-soft: #10291f;
-  --warn: #fbbf24;
-  --warn-soft: #2b2312;
-  --bad: #f87171;
-  --bad-soft: #2f1520;
-  --info: #38bdf8;
-  --info-soft: #0f2533;
-  --on-status: #0a0c16;
+  --good: #8fca9b;
+  --good-soft: #1d2a1e;
+  --warn: #e2b04e;
+  --warn-soft: #2f2613;
+  --bad: #f2917c;
+  --bad-soft: #351c16;
+  --info: #84bcd8;
+  --info-soft: #172631;
+  --on-status: #15130f;
 
-  --code-bg: #0d1022;
-  --code-border: #262b4a;
-  --code-text: #d8dde8;
-  --code-keyword: #c792ea;
-  --code-string: #a5e0a0;
-  --code-number: #f5b97a;
-  --code-comment: #8790a8;
-  --code-function: #82aaff;
-  --code-punct: #a3abc2;
-  --code-variable: #d8dde8;
-  --code-selection: #2c3168;
-  --code-gutter: #7a80a6;
-  --code-active-line: #151a33;
+  --code-bg: #1a1813;
+  --code-border: #3a342a;
+  --code-text: #e6dfcf;
+  --code-keyword: #e48aa3;
+  --code-string: #9fcf9a;
+  --code-number: #e8bd6c;
+  --code-comment: #988e78;
+  --code-function: #8fb8e0;
+  --code-punct: #b9b09c;
+  --code-variable: #e6dfcf;
+  --code-selection: #4a3f1f;
+  --code-gutter: #887f6c;
+  --code-active-line: #221f19;
 
-  --viz-cell: #181c36;
-  --viz-cell-border: #363c63;
-  --viz-window: #2a3170;
-  --viz-window-border: #818cf8;
-  --viz-active: #6b5315;
-  --viz-done: #184d2c;
-  --viz-visited: #262c52;
-  --viz-muted: #262b4a;
-  --viz-bad: #5c2023;
-  --viz-ptr-a: #818cf8;
-  --viz-ptr-b: #f472b6;
-  --viz-ptr-c: #22d3ee;
-  --viz-edge: #6b7299;
+  --viz-cell: #1e1b16;
+  --viz-cell-border: #5f5646;
+  --viz-window: #3d331a;
+  --viz-window-border: #f0714f;
+  --viz-active: #6b5617;
+  --viz-done: #24402a;
+  --viz-visited: #2e2921;
+  --viz-muted: #2a261f;
+  --viz-bad: #4f241b;
+  --viz-ptr-a: #f0714f;
+  --viz-ptr-b: #8fb8e0;
+  --viz-ptr-c: #8fca9b;
+  --viz-edge: #7d745f;
 
-  --shadow-sm: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
-  --shadow-lg: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 0 1px rgba(143, 135, 255, 0.08), 0 24px 60px -16px rgba(0, 0, 0, 0.7);
-  --mesh-a: 14%;
-  --mesh-b: 10%;
+  --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.35);
+  --shadow-md: 2px 2px 0 rgba(0, 0, 0, 0.45);
+  --shadow-lg: 6px 6px 0 rgba(0, 0, 0, 0.75);
+  --grain-opacity: 0.5;
+  --dot-color: rgba(238, 231, 215, 0.045);
 }
 
-/* ---------- accent themes (Settings → Accent colour; data-accent on <html>) ----------
-   Each overrides only the accent family. --ring and --glow derive from --accent. */
-:root[data-accent='teal'] {
-  --accent: #0f766e;
-  --accent-2: #6366f1;
-  --accent-soft: #e2f5f2;
-  --accent-text: #ffffff;
-  --brand-gradient: linear-gradient(135deg, #14b8a6 0%, #06b6d4 50%, #6366f1 100%);
-  --btn-gradient: linear-gradient(135deg, #0f766e 0%, #0e7490 100%);
-  --text-gradient: linear-gradient(100deg, #0f766e 0%, #0e7490 50%, #4f46e5 100%);
-}
-:root[data-accent='rose'] {
-  --accent: #be123c;
-  --accent-2: #a855f7;
-  --accent-soft: #ffeef2;
-  --accent-text: #ffffff;
-  --brand-gradient: linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #a855f7 100%);
-  --btn-gradient: linear-gradient(135deg, #be123c 0%, #a21caf 100%);
-  --text-gradient: linear-gradient(100deg, #be123c 0%, #a21caf 50%, #6d28d9 100%);
-}
-:root[data-accent='amber'] {
-  --accent: #a84e08;
-  --accent-2: #f43f5e;
-  --accent-soft: #fdf0db;
-  --accent-text: #ffffff;
-  --brand-gradient: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #f43f5e 100%);
-  --btn-gradient: linear-gradient(135deg, #a84e08 0%, #c2410c 100%);
-  --text-gradient: linear-gradient(100deg, #a84e08 0%, #c2410c 50%, #be123c 100%);
-}
-:root[data-accent='teal'][data-theme='dark'] {
-  --accent: #2dd4bf;
-  --accent-2: #818cf8;
-  --accent-soft: #0e2d2e;
-  --accent-text: #0a0c16;
-  --brand-gradient: linear-gradient(135deg, #2dd4bf 0%, #22d3ee 50%, #818cf8 100%);
-  --btn-gradient: linear-gradient(135deg, #2dd4bf 0%, #22d3ee 100%);
-  --text-gradient: linear-gradient(100deg, #5eead4 0%, #67e8f9 50%, #a5b4fc 100%);
-}
-:root[data-accent='rose'][data-theme='dark'] {
-  --accent: #fb7185;
-  --accent-2: #c084fc;
-  --accent-soft: #3a1526;
-  --accent-text: #0a0c16;
-  --brand-gradient: linear-gradient(135deg, #fb7185 0%, #f472b6 50%, #c084fc 100%);
-  --btn-gradient: linear-gradient(135deg, #fb7185 0%, #f472b6 100%);
-  --text-gradient: linear-gradient(100deg, #fda4af 0%, #f9a8d4 50%, #d8b4fe 100%);
-}
-:root[data-accent='amber'][data-theme='dark'] {
-  --accent: #fbbf24;
-  --accent-2: #fb7185;
-  --accent-soft: #33260c;
-  --accent-text: #0a0c16;
-  --brand-gradient: linear-gradient(135deg, #fbbf24 0%, #fb923c 50%, #f472b6 100%);
-  --btn-gradient: linear-gradient(135deg, #fbbf24 0%, #fb923c 100%);
-  --text-gradient: linear-gradient(100deg, #fcd34d 0%, #fdba74 50%, #f9a8d4 100%);
-}
+/* ---------- accent inks (Settings → Accent colour; data-accent on <html>) ----------
+   Same keys as before so saved preferences keep working. Each is a pen colour. */
+:root[data-accent='teal'] { --accent: #1f5f5b; --accent-2: #b3361d; --accent-soft: #dcebe7; --accent-text: #fbf8f1; }
+:root[data-accent='rose'] { --accent: #8e2c48; --accent-2: #1f5f5b; --accent-soft: #f2dde3; --accent-text: #fbf8f1; }
+:root[data-accent='amber'] { --accent: #85560a; --accent-2: #1f5f5b; --accent-soft: #f5e7c4; --accent-text: #fbf8f1; }
+:root[data-accent='teal'][data-theme='dark'] { --accent: #6fc2b8; --accent-2: #f0714f; --accent-soft: #15302d; --accent-text: #15130f; }
+:root[data-accent='rose'][data-theme='dark'] { --accent: #e88aa4; --accent-2: #6fbcb2; --accent-soft: #3a1c26; --accent-text: #15130f; }
+:root[data-accent='amber'][data-theme='dark'] { --accent: #e2b04e; --accent-2: #6fbcb2; --accent-soft: #2f2613; --accent-text: #15130f; }
 
-/* ---------- dashboard charts (src/components/charts) ----------
-   Mark colours follow the dataviz method and were run through validate_palette.js
-   against the card surface (#ffffff light, #11142a dark):
-   - --chart-series / --chart-weak: categorical slots 1–2 (blue, orange)
-   - --chart-ord-1..3: ordinal blue ramp (not started → in progress → completed; heatmap levels)
-   - --chart-empty: the receding "nothing" step (heatmap off-days, empty ring)
-   They are deliberately NOT tied to the accent theme, so charts stay comparable. */
+/* ---------- pen swatches (Settings shows every accent ink side by side) ---------- */
+:root,
+:root[data-theme='light'] { --pen-red: #b3361d; --pen-sea: #1f5f5b; --pen-oxblood: #8e2c48; --pen-ochre: #85560a; }
+:root[data-theme='dark'] { --pen-red: #f0714f; --pen-sea: #6fc2b8; --pen-oxblood: #e88aa4; --pen-ochre: #e2b04e; }
+
+/* ---------- charts (src/components/charts) — not tied to the accent, so charts stay comparable ----------
+   series = ink blue, weak = red pen, ordinal ramp = sepia (not started → in progress → completed). */
 :root,
 :root[data-theme='light'] {
-  --chart-series: #2a78d6;
-  --chart-weak: #eb6834;
-  --chart-ord-1: #86b6ef;
-  --chart-ord-2: #2a78d6;
-  --chart-ord-3: #104281;
-  --chart-empty: #e4e8f1;
+  --chart-series: #1f4e79;
+  --chart-weak: #b3361d;
+  --chart-ord-1: #dccaa2;
+  --chart-ord-2: #a98439;
+  --chart-ord-3: #5f4519;
+  --chart-empty: #e6decd;
 }
 :root[data-theme='dark'] {
-  --chart-series: #3987e5;
-  --chart-weak: #d95926;
-  --chart-ord-1: #184f95;
-  --chart-ord-2: #3987e5;
-  --chart-ord-3: #9ec5f4;
-  --chart-empty: #232846;
+  --chart-series: #8fb8e0;
+  --chart-weak: #f0714f;
+  --chart-ord-1: #4a3d24;
+  --chart-ord-2: #a98439;
+  --chart-ord-3: #e6c88a;
+  --chart-empty: #2e2921;
 }
 
-/* ---------- derived tokens + aliases (resolve per theme/accent on <html>) ---------- */
+/* ---------- derived tokens + aliases ---------- */
 :root {
   --ring: var(--accent);
-  --glow: 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent), 0 10px 30px -10px color-mix(in srgb, var(--accent) 45%, transparent);
-  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--ring) 35%, transparent);
+  --glow: none;
+  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--ring);
 
-  /* older dsa-js names → theme v3 tokens */
   --bg-elev: var(--surface);
   --bg-subtle: var(--surface-2);
   --bg-hover: var(--surface-hover);
   --text-muted: var(--text-2);
   --text-faint: var(--muted);
-  --accent-hover: color-mix(in srgb, var(--accent) 86%, var(--text));
+  --accent-hover: color-mix(in srgb, var(--accent) 84%, var(--text));
   --accent-contrast: var(--accent-text);
   --accent-soft-text: var(--accent);
   --success: var(--good);
@@ -254,15 +212,37 @@
   --hard: var(--bad);
   --hard-soft: var(--bad-soft);
 
-  --font-sans: 'Inter Variable', Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Plus Jakarta Sans Variable', var(--font-sans);
-  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-md: 14px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+  /* type */
+  --font-sans: 'Atkinson Hyperlegible', 'Atkinson Fallback', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', 'Fraunces Fallback', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --fs-xs: 0.8125rem;   /* 13 */
+  --fs-sm: 0.9375rem;   /* 15 */
+  --fs-md: 1.0625rem;   /* 17 — body */
+  --fs-lg: 1.3125rem;   /* 21 */
+  --fs-xl: 1.6875rem;   /* 27 */
+  --fs-2xl: 2.125rem;   /* 34 */
+  --fs-3xl: 3rem;       /* 48 */
+  --fs-4xl: 4rem;       /* 64 */
+  --measure: 68ch;
+
+  /* space (4px grid) */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 72px;
+
+  /* shape — paper corners are nearly square */
+  --radius-sm: 2px;
+  --radius: 3px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+
+  /* motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --sidebar-w: 256px;
-  --topbar-h: 60px;
+  --ease-ink: cubic-bezier(0.3, 0.7, 0.1, 1);
+  --dur-fast: 120ms;
+  --dur: 220ms;
+
+  --sidebar-w: 0px;
+  --topbar-h: 64px;
+  --bottombar-h: 64px;
 }

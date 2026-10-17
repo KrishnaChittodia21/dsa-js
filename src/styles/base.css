@@ -8,74 +8,90 @@ body,
 #root {
   height: 100%;
 }
-html { background: var(--bg); }
+html {
+  background: var(--bg);
+  scrollbar-color: var(--border-strong) transparent;
+  scrollbar-width: thin;
+}
 body {
   margin: 0;
   font-family: var(--font-sans);
-  font-size: 15px;
+  font-size: var(--fs-md);
   line-height: 1.6;
   color: var(--text);
-  /* transparent so the fixed mesh (body::before) shows; html paints --bg */
-  background: transparent;
+  background: transparent; /* html paints --bg; body::before adds the paper texture */
   -webkit-font-smoothing: antialiased;
-  font-feature-settings: 'cv11', 'ss01';
+  text-rendering: optimizeLegibility;
+  font-synthesis: none;
 }
-/* page backdrop: a faint mesh of the accent colours, fixed behind everything */
+/* Paper: a faint dot grid (graph-paper feel) plus SVG grain, fixed behind everything. */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background:
-    radial-gradient(55% 45% at 8% -5%, color-mix(in srgb, var(--accent) var(--mesh-a), transparent), transparent 70%),
-    radial-gradient(45% 40% at 100% 0%, color-mix(in srgb, var(--accent-2) var(--mesh-b), transparent), transparent 70%),
-    radial-gradient(50% 45% at 85% 105%, color-mix(in srgb, var(--accent) var(--mesh-b), transparent), transparent 70%);
+  background-image:
+    radial-gradient(var(--dot-color) 1px, transparent 1.2px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.1 0 0 0 0 0.08 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 24px 24px, 180px 180px;
+  opacity: 1;
 }
 h1, h2, h3, h4 {
   font-family: var(--font-display);
-  line-height: 1.25;
-  margin: 0 0 0.5em;
-  font-weight: 700;
-  letter-spacing: -0.015em;
+  line-height: 1.12;
+  margin: 0 0 0.45em;
+  font-weight: 560;
+  letter-spacing: -0.02em;
+  font-optical-sizing: auto;
+  text-wrap: balance;
 }
-h1 { font-size: 1.85rem; font-weight: 800; letter-spacing: -0.025em; }
-h2 { font-size: 1.35rem; }
-h3 { font-size: 1.1rem; }
-h4 { font-size: 1rem; }
-p { margin: 0 0 0.85em; }
+h1 { font-size: clamp(2.1rem, 1.4rem + 2.6vw, var(--fs-3xl)); font-weight: 500; letter-spacing: -0.035em; }
+h2 { font-size: var(--fs-xl); }
+h3 { font-size: var(--fs-lg); font-weight: 600; letter-spacing: -0.01em; }
+h4 { font-size: var(--fs-md); font-weight: 650; letter-spacing: 0; }
+h1 em, h2 em, h3 em { font-style: italic; font-weight: 400; color: var(--accent); }
+p { margin: 0 0 0.85em; text-wrap: pretty; }
 a {
   color: var(--accent);
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  transition: text-decoration-color var(--dur-fast);
 }
-a:hover { text-decoration: underline; }
+a:hover { text-decoration-color: currentColor; }
 code, pre, kbd, samp { font-family: var(--font-mono); }
 :not(pre) > code {
   font-size: 0.86em;
-  background: var(--bg-subtle);
-  border: 1px solid var(--border);
-  padding: 0.08em 0.35em;
-  border-radius: 5px;
-}
-button { font: inherit; color: inherit; }
-input, select, textarea { font: inherit; color: inherit; }
-:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-strong);
+  padding: 0.05em 0.3em;
   border-radius: var(--radius-sm);
 }
-::selection { background: color-mix(in srgb, var(--accent) 26%, transparent); }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+input, select, textarea { font: inherit; color: inherit; }
+/* Focus: a dashed red-pen outline — visible on every surface, never a blurry glow. */
+:focus-visible {
+  outline: 2px dashed var(--ring);
+  outline-offset: 3px;
+}
+::selection { background: var(--highlight); color: var(--on-highlight); }
 mark {
-  background: color-mix(in srgb, var(--warn) 28%, transparent);
+  background: linear-gradient(transparent 38%, var(--highlight) 38%, var(--highlight) 88%, transparent 88%);
   color: inherit;
-  border-radius: 3px;
-  padding: 0 1px;
+  padding: 0 2px;
 }
 hr {
   border: 0;
-  border-top: 1px solid var(--border);
-  margin: 1.5rem 0;
+  border-top: 1px solid var(--border-strong);
+  margin: 1.75rem 0;
 }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border: 3px solid var(--bg); border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 table { border-collapse: collapse; width: 100%; }
 th, td {
   text-align: left;
@@ -84,11 +100,13 @@ th, td {
   vertical-align: top;
 }
 th {
-  font-weight: 600;
-  color: var(--text-muted);
-  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--muted);
+  font-size: var(--fs-xs);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--text);
 }
 .sr-only {
   position: absolute;
@@ -104,7 +122,7 @@ th {
 .muted { color: var(--text-muted); }
 .faint { color: var(--text-faint); }
 .mono { font-family: var(--font-mono); }
-.small { font-size: 0.85rem; }
+.small { font-size: var(--fs-sm); }
 .nowrap { white-space: nowrap; }
 .row { display: flex; align-items: center; gap: 0.5rem; }
 .row-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
@@ -133,8 +151,7 @@ th {
 }
 
 /* ---------- code: show operators exactly as typed ----------
-   JetBrains Mono draws ===, !==, != , => and >= as joined ligatures by default, and code would otherwise
-   inherit the body font's stylistic sets (cv11, ss01). Learners must see the real characters, so both are
+   Learners must see the real characters (===, !==, =>), so ligatures and stylistic sets are
    switched off everywhere code appears: inline code, blocks, the CodeMirror editor, consoles/test output,
    kbd hints and the visualisations' SVG/mono text. */
 code,
@@ -149,9 +166,6 @@ textarea,
 .cm-content,
 .cm-line,
 .code-block,
-.result-body,
-.case,
-.run-summary,
 .playground-out,
 .sheet-body,
 .viz,
@@ -168,3 +182,52 @@ samp,
 .cm-editor .cm-scroller {
   font-family: var(--font-mono);
 }
+
+/* ---------- motion: "ink-in" page-load stagger (respecting reduced motion via the rule above) ----------
+   Put .ink-in on a container; its direct children fade/lift in 40ms apart (first 12 children). */
+@keyframes ink-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.ink-in > * { animation: ink-in 420ms var(--ease-ink) both; }
+.ink-in > *:nth-child(2) { animation-delay: 40ms; }
+.ink-in > *:nth-child(3) { animation-delay: 80ms; }
+.ink-in > *:nth-child(4) { animation-delay: 120ms; }
+.ink-in > *:nth-child(5) { animation-delay: 160ms; }
+.ink-in > *:nth-child(6) { animation-delay: 200ms; }
+.ink-in > *:nth-child(7) { animation-delay: 240ms; }
+.ink-in > *:nth-child(8) { animation-delay: 280ms; }
+.ink-in > *:nth-child(n + 9) { animation-delay: 320ms; }
+/* scroll reveal: elements with [data-reveal] start hidden and get [data-revealed] from useReveal() */
+[data-reveal] { opacity: 0; transform: translateY(10px); transition: opacity 500ms var(--ease-ink), transform 500ms var(--ease-ink); }
+[data-reveal][data-revealed] { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; }
+}
+/* skeleton loader: ruled lines that shimmer like ink drying */
+.skeleton {
+  display: grid;
+  gap: 10px;
+}
+.skeleton > span {
+  height: 12px;
+  background: linear-gradient(90deg, var(--surface-2) 0%, var(--surface-hover) 50%, var(--surface-2) 100%);
+  background-size: 200% 100%;
+  animation: skeleton 1.4s linear infinite;
+}
+.skeleton > span:nth-child(3n) { width: 70%; }
+.skeleton > span:nth-child(3n + 2) { width: 92%; }
+@keyframes skeleton { to { background-position: -200% 0; } }
+
+/* typographic helpers used across the redesign */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+.folio { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--muted); }
+.display { font-family: var(--font-display); font-optical-sizing: auto; }
+.rule-double { border: 0; border-top: 3px double var(--text); margin: var(--s-5) 0; }

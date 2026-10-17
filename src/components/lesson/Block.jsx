@@ -1,25 +1,25 @@
 import { lazy, Suspense } from 'react';
 import Markdown from '../ui/Markdown.jsx';
 import CodeBlock from '../ui/CodeBlock.jsx';
-import Icon from '../ui/Icon.jsx';
-import { Callout } from '../ui/primitives.jsx';
 import Checkpoint from './Checkpoint.jsx';
 import Reflect from './Reflect.jsx';
 import DryRunTable from './DryRunTable.jsx';
 
 const Visualizer = lazy(() => import('../../visualizations/Visualizer.jsx'));
 
-const CALLOUT_TITLES = { analogy: 'Analogy', tip: 'Tip', warning: 'Watch out', insight: 'Insight', definition: 'Definition' };
+const CALLOUT_TITLES = { analogy: 'Think of it like this', tip: 'Tip', warning: 'Watch out', insight: 'Why it works', definition: 'Definition', danger: 'Careful' };
 
-export default function Block({ block, topicId, blockKey }) {
+export default function Block({ block, topicId, blockKey, number }) {
   switch (block.type) {
     case 'text':
       return <Markdown>{block.md}</Markdown>;
     case 'callout':
+      // a margin note: coloured left rule + small label, written in the teacher's hand
       return (
-        <Callout variant={block.variant} title={block.title || CALLOUT_TITLES[block.variant]}>
+        <div className={`mnote mnote-${block.variant || 'insight'}`} role="note">
+          <div className="mnote-label">{block.title || CALLOUT_TITLES[block.variant] || 'Note'}</div>
           <Markdown>{block.md}</Markdown>
-        </Callout>
+        </div>
       );
     case 'code':
       return <CodeBlock code={block.code} title={block.title} caption={block.caption} language={block.language || 'javascript'} />;
@@ -29,7 +29,10 @@ export default function Block({ block, topicId, blockKey }) {
           {[block.left, block.right].map((side, i) => (
             <div key={i} className={`compare-side ${i === 0 ? 'compare-before' : 'compare-after'}`}>
               <div className="compare-title">
-                <Icon name={i === 0 ? 'x' : 'check'} size={15} /> {side.title}
+                <span className="compare-mark" aria-hidden="true">
+                  {i === 0 ? '×' : '✓'}
+                </span>
+                {side.title}
               </div>
               {side.md && <Markdown>{side.md}</Markdown>}
               {side.code && <CodeBlock code={side.code} copy={false} />}
@@ -51,36 +54,35 @@ export default function Block({ block, topicId, blockKey }) {
         </div>
       );
     case 'checkpoint':
-      return <Checkpoint block={block} topicId={topicId} />;
+      return <Checkpoint block={block} topicId={topicId} number={number} />;
     case 'reflect':
       return <Reflect block={block} reflectKey={blockKey} />;
     case 'recognition':
       return (
         <div className="recognition">
-          <div className="recognition-title">
-            <Icon name="target" size={16} /> How to recognize it in an interview
-          </div>
+          <div className="recognition-title">Spotting it in an interview</div>
           <div className="recognition-body">
-            <div>
-              <div className="small muted" style={{ marginBottom: '0.35rem' }}>
-                Look for:
-              </div>
+            <div className="recognition-look">
+              <div className="recognition-k">Look for</div>
               <ul className="recognition-clues">
                 {block.clues.map((c) => (
                   <li key={c}>{c}</li>
                 ))}
               </ul>
             </div>
-            <div className="recognition-arrow">
-              <Icon name="arrowRight" size={22} />
+            <div className="recognition-arrow" aria-hidden="true">
+              →
             </div>
-            <div className="recognition-conclusion">{block.conclusion}</div>
+            <div className="recognition-think">
+              <div className="recognition-k">Think</div>
+              <div className="recognition-conclusion">{String(block.conclusion).replace(/^think\s+/i, '')}</div>
+            </div>
           </div>
         </div>
       );
     case 'visual':
       return (
-        <Suspense fallback={<div className="card muted small">Loading visualization…</div>}>
+        <Suspense fallback={<div className="viz-loading skeleton" aria-label="Setting up the animation"><span /><span /><span /></div>}>
           <Visualizer scenario={block.scenario} input={block.input} caption={block.caption} />
         </Suspense>
       );
@@ -89,16 +91,16 @@ export default function Block({ block, topicId, blockKey }) {
     case 'complexity':
       return (
         <div className="complexity-card">
-          <div className="complexity-pills">
+          <dl className="complexity-pills">
             <div>
-              <div className="small muted">Time</div>
-              <div className="complexity-value">{block.time}</div>
+              <dt className="eyebrow">Time</dt>
+              <dd className="complexity-value">{block.time}</dd>
             </div>
             <div>
-              <div className="small muted">Space</div>
-              <div className="complexity-value">{block.space}</div>
+              <dt className="eyebrow">Space</dt>
+              <dd className="complexity-value">{block.space}</dd>
             </div>
-          </div>
+          </dl>
           {block.md && <Markdown>{block.md}</Markdown>}
         </div>
       );
@@ -111,8 +113,8 @@ export default function Block({ block, topicId, blockKey }) {
 
 export function JsToolsTable({ items }) {
   return (
-    <div className="table-wrap">
-      <table>
+    <div className="ruled-wrap">
+      <table className="jstools">
         <thead>
           <tr>
             <th>JavaScript</th>
@@ -123,13 +125,13 @@ export function JsToolsTable({ items }) {
         <tbody>
           {items.map((it) => (
             <tr key={it.api}>
-              <td className="mono small nowrap">
+              <td className="nowrap">
                 <code>{it.api}</code>
               </td>
               <td className="small">
                 <Markdown>{it.use}</Markdown>
               </td>
-              <td className="small muted mono">{it.complexity || '—'}</td>
+              <td className="folio">{it.complexity || '—'}</td>
             </tr>
           ))}
         </tbody>

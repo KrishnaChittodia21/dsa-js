@@ -2,159 +2,201 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Markdown from '../components/ui/Markdown.jsx';
 import CodeBlock from '../components/ui/CodeBlock.jsx';
-import Icon from '../components/ui/Icon.jsx';
-import { ProgressBar } from '../components/ui/primitives.jsx';
 import { useProgress } from '../state/ProgressContext.jsx';
 import { patternStats } from '../state/selectors.js';
 import { topics } from '../content/index.js';
 import { useTopicContent } from '../content/useContent.js';
 import PatternVisual, { hasVisual } from '../components/PatternVisual.jsx';
 
+const DIFF_MARK = { Easy: 'E', Medium: 'M', Hard: 'H' };
+const slug = (s) => `cat-${s.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+
 function PatternDetails({ summary, progress }) {
   const { data, loading } = useTopicContent(summary.topicId);
-  if (loading) return <div className="pattern-body small muted">Loading…</div>;
+  if (loading)
+    return (
+      <div className="pi-body skeleton" aria-label="Loading the entry">
+        <span />
+        <span />
+        <span />
+      </div>
+    );
   const full = data?.patterns?.find((p) => p.id === summary.id);
   return <PatternBody pattern={{ ...summary, ...full }} stats={patternStats(summary, progress)} progress={progress} />;
 }
 
-function PatternCard({ pattern, progress, open, onToggle }) {
+function PatternEntry({ pattern, progress, open, onToggle }) {
   const st = patternStats(pattern, progress);
+  const share = st.total ? Math.round((st.solved / st.total) * 100) : 0;
+  const clues = (pattern.clues || []).slice(0, 3);
   return (
-    <div className="card pattern-card" id={pattern.id}>
-      <button type="button" className="pattern-head" onClick={onToggle} aria-expanded={open}>
-        <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-          <div style={{ fontWeight: 650 }}>
-            {pattern.name} {hasVisual(pattern) && <span className="badge badge-accent" title="Has an animation">▶ animated</span>}
-          </div>
-          <div className="small muted">{pattern.summary}</div>
-        </div>
-        <div style={{ width: 110 }}>
-          <div className="small mono muted" style={{ textAlign: 'right' }}>
+    <li className={`pi-entry ${open ? 'is-open' : ''}`} id={pattern.id}>
+      <div className="pi-entry-main">
+        <button type="button" className="pi-entry-head" onClick={onToggle} aria-expanded={open}>
+          <span className="pi-entry-name">{pattern.name}</span>
+          <span className="pi-dots" aria-hidden="true" />
+          <span className="pi-entry-folio folio">
             {st.solved}/{st.total}
-          </div>
-          <ProgressBar value={st.solved} max={st.total || 1} size="sm" label={`${pattern.name} progress`} />
-        </div>
-        <Icon name="chevronDown" size={16} />
-      </button>
+            <span className="sr-only"> solved</span>
+          </span>
+          <span className="pi-toggle" aria-hidden="true">
+            {open ? '−' : '+'}
+          </span>
+        </button>
+        <p className="pi-entry-sum">
+          {pattern.summary}
+          {hasVisual(pattern) && <span className="pi-tag">animated</span>}
+        </p>
+        <span className="pi-meter" aria-hidden="true">
+          <span style={{ width: `${share}%` }} />
+        </span>
+      </div>
+      {clues.length > 0 && (
+        <aside className="pi-clues" aria-label={`Clues for ${pattern.name}`}>
+          <span className="eyebrow">Look for</span>
+          <ul>
+            {clues.map((c) => (
+              <li key={c}>{c}</li>
+            ))}
+          </ul>
+        </aside>
+      )}
       {open && <PatternDetails summary={pattern} progress={progress} />}
-    </div>
+    </li>
   );
 }
 
 function PatternBody({ pattern, stats: st, progress }) {
+  const short = pattern.name.replace(/^.*?—\s*/, '');
   return (
-    <>
-      {(
-        <div className="pattern-body">
-          {hasVisual(pattern) && (
-            <section>
-              <h4>See it in motion</h4>
-              <PatternVisual pattern={pattern} />
-            </section>
-          )}
-          {pattern.whyItExists && (
-            <section>
-              <h4>Why does it exist?</h4>
-              <Markdown>{pattern.whyItExists}</Markdown>
-            </section>
-          )}
-          <div className="grid-2">
-            <section>
-              <h4>When to use it</h4>
-              <ul className="small">
-                {(pattern.whenToUse || []).map((x) => (
-                  <li key={x}>{x}</li>
-                ))}
-              </ul>
-            </section>
-            <section>
-              <h4>When NOT to use it</h4>
-              <ul className="small">
-                {(pattern.whenNotToUse || []).map((x) => (
-                  <li key={x}>{x}</li>
-                ))}
-              </ul>
-            </section>
-          </div>
-          <section className="recognition" style={{ margin: '0.5rem 0 1rem' }}>
-            <div className="recognition-title">
-              <Icon name="target" size={16} /> How to recognize it in an interview
-            </div>
-            <div className="recognition-body">
-              <ul className="recognition-clues">
-                {(pattern.clues || []).map((c) => (
-                  <li key={c}>{c}</li>
-                ))}
-              </ul>
-              <div className="recognition-arrow">
-                <Icon name="arrowRight" size={22} />
-              </div>
-              <div className="recognition-conclusion">Think {pattern.name.replace(/^.*?—\s*/, '')}</div>
-            </div>
-          </section>
-          {pattern.template && (
-            <section>
-              <h4>General template</h4>
-              <CodeBlock code={pattern.template} />
-            </section>
-          )}
-          {pattern.variations?.length > 0 && (
-            <section>
-              <h4>Variations</h4>
-              <div className="grid-2">
-                {pattern.variations.map((v) => (
-                  <div key={v.name} className="card card-tight">
-                    <div style={{ fontWeight: 600 }}>{v.name}</div>
-                    <Markdown className="small muted">{v.description}</Markdown>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-          {pattern.evolution && (
-            <section>
-              <h4>How it evolves: Easy → Medium → Hard</h4>
-              <div className="evolution">
-                {['easy', 'medium', 'hard'].map((d) => (
-                  <div key={d} className={`evolution-step evo-${d}`}>
-                    <div className={`badge badge-${d}`}>{d[0].toUpperCase() + d.slice(1)}</div>
-                    <Markdown className="small">{pattern.evolution[d]}</Markdown>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-          {pattern.mistakes?.length > 0 && (
-            <section>
-              <h4>Common mistakes</h4>
-              <ul className="small">
-                {pattern.mistakes.map((m) => (
-                  <li key={m}>{m}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-          {st.questions.length > 0 && (
-            <section>
-              <h4>Practice this pattern</h4>
-              <div className="row-wrap">
-                {st.questions.map((q) => (
-                  <Link key={q.id} to={`/topic/${q.topicId}/q/${q.id}`} className={`badge badge-${q.difficulty.toLowerCase()}`}>
-                    {progress.questions[q.id]?.status === 'solved' ? '✓ ' : ''}
-                    {q.title}
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-          <div style={{ marginTop: '0.75rem' }}>
-            <Link to={`/topic/${pattern.topicId}`} className="btn btn-sm">
-              Open the lesson <Icon name="arrowRight" size={14} />
-            </Link>
-          </div>
-        </div>
+    <div className="pi-body">
+      {hasVisual(pattern) && (
+        <section className="pi-sec pi-sec-wide">
+          <h4 className="eyebrow">Watch it run</h4>
+          <PatternVisual pattern={pattern} />
+        </section>
       )}
-    </>
+      {pattern.whyItExists && (
+        <section className="pi-sec pi-sec-wide">
+          <h4 className="eyebrow">Why it exists</h4>
+          <Markdown>{pattern.whyItExists}</Markdown>
+        </section>
+      )}
+      <section className="pi-sec">
+        <h4 className="eyebrow">Reach for it when</h4>
+        <ul className="pi-ticks">
+          {(pattern.whenToUse || []).map((x) => (
+            <li key={x}>{x}</li>
+          ))}
+        </ul>
+      </section>
+      <section className="pi-sec">
+        <h4 className="eyebrow">Leave it alone when</h4>
+        <ul className="pi-crosses">
+          {(pattern.whenNotToUse || []).map((x) => (
+            <li key={x}>{x}</li>
+          ))}
+        </ul>
+      </section>
+      {(pattern.clues || []).length > 0 && (
+        <section className="pi-sec pi-sec-wide">
+          <div className="recognition">
+            <div className="recognition-title">Spotting it in an interview</div>
+            <div className="recognition-body">
+              <div className="recognition-look">
+                <div className="recognition-k">Look for</div>
+                <ul className="recognition-clues">
+                  {pattern.clues.map((c) => (
+                    <li key={c}>{c}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="recognition-arrow" aria-hidden="true">
+                →
+              </div>
+              <div className="recognition-think">
+                <div className="recognition-k">Think</div>
+                <div className="recognition-conclusion">{short}</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+      {pattern.template && (
+        <section className="pi-sec pi-sec-wide">
+          <h4 className="eyebrow">The template</h4>
+          <CodeBlock code={pattern.template} />
+        </section>
+      )}
+      {pattern.variations?.length > 0 && (
+        <section className="pi-sec pi-sec-wide">
+          <h4 className="eyebrow">Variations</h4>
+          <dl className="pi-vars">
+            {pattern.variations.map((v) => (
+              <div key={v.name}>
+                <dt>{v.name}</dt>
+                <dd>
+                  <Markdown>{v.description}</Markdown>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
+      {pattern.evolution && (
+        <section className="pi-sec pi-sec-wide">
+          <h4 className="eyebrow">How it grows harder</h4>
+          <ol className="pi-evo">
+            {['easy', 'medium', 'hard'].map((d) => (
+              <li key={d} className={`pi-evo-${d}`}>
+                <span className="pi-evo-mark" aria-hidden="true">
+                  {d[0].toUpperCase()}
+                </span>
+                <span className="sr-only">{d}: </span>
+                <Markdown>{pattern.evolution[d]}</Markdown>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+      {pattern.mistakes?.length > 0 && (
+        <section className="pi-sec pi-sec-wide pi-mistakes">
+          <h4 className="eyebrow">Where people slip</h4>
+          <ul>
+            {pattern.mistakes.map((m) => (
+              <li key={m}>{m}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {st.questions.length > 0 && (
+        <section className="pi-sec pi-sec-wide">
+          <h4 className="eyebrow">Practise it on</h4>
+          <ul className="pi-practice">
+            {st.questions.map((q) => {
+              const solved = progress.questions[q.id]?.status === 'solved';
+              return (
+                <li key={q.id}>
+                  <span className={`pi-q-mark ${solved ? 'is-solved' : ''}`} aria-label={solved ? 'Solved' : 'Not solved yet'}>
+                    {solved ? '✓' : '○'}
+                  </span>
+                  <Link to={`/topic/${q.topicId}/q/${q.id}`}>{q.title}</Link>
+                  <span className={`rf-dm rf-dm-${q.difficulty.toLowerCase()}`} title={q.difficulty}>
+                    <span aria-hidden="true">{DIFF_MARK[q.difficulty]}</span>
+                    <span className="sr-only">{q.difficulty}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+      <div className="pi-sec pi-sec-wide">
+        <Link to={`/topic/${pattern.topicId}`} className="btn btn-sm">
+          Open the lesson →
+        </Link>
+      </div>
+    </div>
   );
 }
 
@@ -191,30 +233,70 @@ export default function PatternsPage() {
   const f = filter.toLowerCase();
   const matches = (p) => !f || p.name.toLowerCase().includes(f) || (p.clues || []).some((c) => c.toLowerCase().includes(f)) || (p.summary || '').toLowerCase().includes(f);
 
+  const visible = categories.map(([cat, ts]) => [cat, ts.flatMap((t) => t.patterns).filter(matches)]).filter(([, ps]) => ps.length);
+  const total = categories.reduce((n, [, ts]) => n + ts.reduce((m, t) => m + t.patterns.length, 0), 0);
+  const shown = visible.reduce((n, [, ps]) => n + ps.length, 0);
+
   return (
-    <div className="page">
-      <div className="page-header">
+    <div className="page page-wide pi ink-in">
+      <header className="page-header pi-head">
         <div>
-          <h1>Patterns</h1>
-          <p>The curriculum is organised around patterns. Each card shows why the pattern exists, the clues that reveal it, its template and how problems evolve.</p>
+          <span className="eyebrow">Index of patterns · {total} entries</span>
+          <h1>
+            Patterns, <em>filed by clue</em>
+          </h1>
+          <p>Every problem in this course is one of these shapes in disguise. Open an entry for why it exists, the words that give it away, its template and how it grows harder.</p>
         </div>
-        <span className="spacer" />
-        <input className="input" placeholder="Filter by name or clue (e.g. “at most k”)" value={filter} onChange={(e) => setFilter(e.target.value)} style={{ minWidth: 280 }} aria-label="Filter patterns" />
-      </div>
-      {categories.map(([cat, ts]) => {
-        const ps = ts.flatMap((t) => t.patterns).filter(matches);
-        if (!ps.length) return null;
-        return (
-          <section key={cat} style={{ marginBottom: '2rem' }}>
-            <div className="divider-label">{cat}</div>
-            <div className="stack-sm">
-              {ps.map((p) => (
-                <PatternCard key={p.id} pattern={p} progress={progress} open={open.has(p.id) || !!f} onToggle={() => toggle(p.id)} />
-              ))}
+        <label className="pi-search">
+          <span className="eyebrow">Look up</span>
+          <input className="input" placeholder="a name or a clue, e.g. “at most k”" value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Filter patterns" />
+        </label>
+      </header>
+
+      <div className="pi-layout">
+        <nav className="pi-toc" aria-label="Pattern sections">
+          <span className="eyebrow">Sections</span>
+          <ol>
+            {visible.map(([cat, ps], i) => (
+              <li key={cat}>
+                <a href={`#${slug(cat)}`}>
+                  <span className="folio">§{i + 1}</span>
+                  <span>{cat}</span>
+                  <span className="folio">{ps.length}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+
+        <div className="pi-main">
+          {f && (
+            <p className="pi-count folio" aria-live="polite">
+              {shown} of {total} entries match “{filter}”
+            </p>
+          )}
+          {visible.length === 0 && (
+            <div className="rf-empty">
+              <p>No pattern mentions “{filter}”. Try a word from the problem statement instead — “sorted”, “window”, “top k”.</p>
+              <button type="button" className="btn btn-sm" onClick={() => setFilter('')}>
+                Clear the search
+              </button>
             </div>
-          </section>
-        );
-      })}
+          )}
+          {visible.map(([cat, ps], i) => (
+            <section key={cat} id={slug(cat)} className="pi-cat" aria-labelledby={`${slug(cat)}-h`}>
+              <h2 className="pi-cat-h" id={`${slug(cat)}-h`}>
+                <span className="folio">§{i + 1}</span> {cat}
+              </h2>
+              <ol className="pi-list">
+                {ps.map((p) => (
+                  <PatternEntry key={p.id} pattern={p} progress={progress} open={open.has(p.id) || !!f} onToggle={() => toggle(p.id)} />
+                ))}
+              </ol>
+            </section>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

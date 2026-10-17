@@ -1,58 +1,84 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import CodeEditor from '../editor/CodeEditor.jsx';
-import Icon from '../ui/Icon.jsx';
 import { useProgress } from '../../state/ProgressContext.jsx';
 import { runInWorker } from '../../runner/runInWorker.js';
 import { describeTest, format, resolveExpected } from '../../runner/core.js';
 
 const VISIBLE_TESTS = 3;
 
+const MARK = { pass: '✓', fail: '×', skip: '–', ran: '·' };
+const MARK_LABEL = { pass: 'passed', fail: 'failed', skip: 'skipped', ran: 'ran' };
+
+// One line of the graded ledger: mark · scenario · time; opens to show input / expected / output.
 function ResultCard({ r, test, question, defaultOpen }) {
   const [open, setOpen] = useState(defaultOpen);
   const status = r.skipped ? 'skip' : r.passed === null ? 'ran' : r.passed ? 'pass' : 'fail';
   return (
-    <div className={`result result-${status}`}>
-      <button type="button" className="result-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-        <Icon name={status === 'pass' ? 'checkCircle' : status === 'fail' ? 'x' : status === 'skip' ? 'circle' : 'play'} size={15} />
-        <span>{test.scenario || test.name || `Test ${r.index + 1}`}</span>
-        {test.hidden && <span className="badge">hidden</span>}
-        <span className="spacer" />
-        <span className="small mono muted">{r.ms !== undefined ? `${r.ms.toFixed(1)} ms` : ''}</span>
-        <Icon name="chevronDown" size={14} />
+    <li className={`ledger-row ledger-${status} ${open ? 'is-open' : ''}`}>
+      <button type="button" className="ledger-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+        <span className="ledger-mark" aria-label={MARK_LABEL[status]}>
+          {MARK[status]}
+        </span>
+        <span className="ledger-name">{test.scenario || test.name || `Test ${r.index + 1}`}</span>
+        {test.hidden && <span className="ledger-tag">hidden</span>}
+        <span className="ledger-ms">{r.ms !== undefined ? `${r.ms.toFixed(1)} ms` : ''}</span>
+        <span className="ledger-caret" aria-hidden="true">
+          {open ? '−' : '+'}
+        </span>
       </button>
       {open && status === 'fail' && test.hint && (
-        <div className="result-hint small">
-          <Icon name="bulb" size={14} />
-          <span>
-            <strong>Scenario you missed: {test.scenario}.</strong> {test.hint}
-          </span>
-        </div>
+        <p className="ledger-hint">
+          <strong>The case you missed — {test.scenario}.</strong> {test.hint}
+        </p>
       )}
       {open && (
-        <div className="result-body mono small">
-          <div className="result-row">
-            <span className="result-k">Input</span>
-            <pre>{describeTest(question, test)}</pre>
+        <dl className="ledger-body">
+          <div className="ledger-line">
+            <dt>Input</dt>
+            <dd>
+              <pre>{describeTest(question, test)}</pre>
+            </dd>
           </div>
           {r.passed !== null && (
-            <div className="result-row">
-              <span className="result-k">Expected</span>
-              <pre>{test.expectedAnyOf ? test.expectedAnyOf.map((e) => format(e)).join('  or  ') : question.checker ? 'any valid answer (checked by rules)' : format(resolveExpected(test))}</pre>
+            <div className="ledger-line">
+              <dt>Expected</dt>
+              <dd>
+                <pre>{test.expectedAnyOf ? test.expectedAnyOf.map((e) => format(e)).join('  or  ') : question.checker ? 'any valid answer (checked by rules)' : format(resolveExpected(test))}</pre>
+              </dd>
             </div>
           )}
-          <div className="result-row">
-            <span className="result-k">{r.error ? 'Error' : 'Output'}</span>
-            <pre className={r.error ? 'result-error' : ''}>{r.error || r.output}</pre>
+          <div className="ledger-line">
+            <dt>{r.error ? 'Error' : 'Got'}</dt>
+            <dd>
+              <pre className={r.error ? 'ledger-error' : ''}>{r.error || r.output}</pre>
+            </dd>
           </div>
           {r.logs?.length > 0 && (
-            <div className="result-row">
-              <span className="result-k">Console</span>
-              <pre>{r.logs.join('\n')}</pre>
+            <div className="ledger-line">
+              <dt>Console</dt>
+              <dd>
+                <pre>{r.logs.join('\n')}</pre>
+              </dd>
             </div>
           )}
-        </div>
+        </dl>
       )}
-    </div>
+    </li>
+  );
+}
+
+function Targets({ question }) {
+  return (
+    <dl className="complexity-pills">
+      <div>
+        <dt className="eyebrow">Target time</dt>
+        <dd className="complexity-value">{question.complexity?.time}</dd>
+      </div>
+      <div>
+        <dt className="eyebrow">Target space</dt>
+        <dd className="complexity-value">{question.complexity?.space}</dd>
+      </div>
+    </dl>
   );
 }
 
@@ -143,172 +169,176 @@ export default function CodeWorkspace({ question }) {
   const accepted = summary && summary.passed === summary.total && run.mode === 'submit';
   const solved = qs.status === 'solved';
 
+  const failing = summary ? summary.total - summary.passed : 0;
+  const TABS = [
+    ['tests', 'Results'],
+    ['cases', 'Test cases'],
+    ['custom', 'Your own input'],
+    ['complexity', 'Complexity'],
+  ];
+
   return (
-    <div className="workspace">
-      <div className="workspace-toolbar">
-        <span className="badge badge-accent mono">JavaScript</span>
-        <span className="small faint">Toolkit classes (MinHeap, Deque, UnionFind…) are available globally.</span>
+    <div className="ws">
+      <div className="ws-toolbar">
+        <span className="ws-lang">JavaScript</span>
+        <span className="ws-note">MinHeap, Deque, UnionFind and the other toolkit classes are already loaded.</span>
         <span className="spacer" />
         <button type="button" className="btn btn-ghost btn-sm" onClick={reset} title="Reset to starter code">
-          <Icon name="rotate" size={14} /> Reset
+          Reset
         </button>
-        <button type="button" className="btn btn-sm" onClick={() => execute('run')} disabled={running} title="Run visible tests (Ctrl/⌘+Enter)">
-          <Icon name="play" size={14} /> Run
+        <button type="button" className="btn btn-sm" onClick={() => execute('run')} disabled={running} title="Run the example tests (Ctrl/⌘+Enter)">
+          Run <kbd className="ws-kbd">⌘↵</kbd>
         </button>
-        <button type="button" className="btn btn-primary btn-sm" onClick={() => execute('submit')} disabled={running} title="Run all tests (Ctrl/⌘+Shift+Enter)">
-          <Icon name="send" size={14} /> Submit
+        <button type="button" className="btn btn-primary btn-sm" onClick={() => execute('submit')} disabled={running} title="Run every test (Ctrl/⌘+Shift+Enter)">
+          Submit
         </button>
       </div>
-      <div className="workspace-editor">
+      <div className="ws-editor">
         <CodeEditor value={code} onChange={onChange} onRun={() => execute('run')} onSubmit={() => execute('submit')} label={`${question.title} solution editor`} />
       </div>
-      <div className="workspace-bottom">
-        <div className="tabs workspace-tabs" role="tablist">
-          <button type="button" role="tab" className="tab" aria-selected={tab === 'tests'} onClick={() => setTab('tests')}>
-            Test results
-          </button>
-          <button type="button" role="tab" className="tab" aria-selected={tab === 'cases'} onClick={() => setTab('cases')}>
-            Test cases
-          </button>
-          <button type="button" role="tab" className="tab" aria-selected={tab === 'custom'} onClick={() => setTab('custom')}>
-            Custom input
-          </button>
-          <button type="button" role="tab" className="tab" aria-selected={tab === 'complexity'} onClick={() => setTab('complexity')}>
-            Complexity
-          </button>
+      <div className="ws-bottom">
+        <div className="ws-tabs" role="tablist" aria-label="Test output">
+          {TABS.map(([id, label]) => (
+            <button key={id} type="button" role="tab" id={`ws-tab-${id}`} className="ws-tab" aria-selected={tab === id} onClick={() => setTab(id)}>
+              {label}
+              {id === 'tests' && summary && <span className="folio"> {summary.passed}/{summary.total}</span>}
+            </button>
+          ))}
         </div>
-        <div className="workspace-panel" aria-live="polite">
-          {running && <div className="muted small">Running…</div>}
+        <div className="ws-panel" role="tabpanel" aria-labelledby={`ws-tab-${tab}`} aria-live="polite" aria-busy={running}>
+          {running && <p className="ws-running">Running your code…</p>}
           {!running && tab === 'tests' && (
             <>
-              {!run && <div className="muted small">Press <strong>Run</strong> to test against the {Math.min(VISIBLE_TESTS, tests.length)} example cases, or <strong>Submit</strong> to run all {tests.length} tests.</div>}
+              {!run && (
+                <p className="ws-empty">
+                  <strong>Run</strong> checks the {Math.min(VISIBLE_TESTS, tests.length)} examples. <strong>Submit</strong> grades all {tests.length} tests, hidden ones included.
+                </p>
+              )}
               {run?.res.compileError && (
-                <div className="result result-fail">
-                  <div className="result-head">
-                    <Icon name="alert" size={15} /> {run.res.timeout ? 'Time Limit Exceeded' : 'Error'}
-                  </div>
-                  <pre className="result-error mono small" style={{ padding: '0 0.75rem 0.75rem' }}>{run.res.compileError}</pre>
+                <div className="grade grade-bad">
+                  <span className="stamp stamp-bad">{run.res.timeout ? 'Out of time' : "Didn't run"}</span>
+                  <p className="grade-sub">{run.res.timeout ? 'One test took too long — look for a loop that never ends, or work that repeats.' : "That didn't run. The first line of the error usually tells you why."}</p>
+                  <pre className="ledger-error grade-pre">{run.res.compileError}</pre>
                 </div>
               )}
               {summary && (
-                <div className={`run-summary ${accepted ? 'ok' : summary.passed === summary.total ? 'partial-ok' : 'bad'}`}>
-                  <Icon name={summary.passed === summary.total ? 'checkCircle' : 'alert'} size={18} />
-                  <div>
-                    <div className="run-summary-title">
-                      {accepted ? 'Accepted' : summary.passed === summary.total ? 'All example tests pass — now Submit' : `${summary.total - summary.passed} test${summary.total - summary.passed > 1 ? 's' : ''} failing`}
-                    </div>
-                    <div className="small muted">
-                      {summary.passed}/{summary.total} passed · {summary.ms.toFixed(1)} ms total
+                <div className={`grade ${accepted ? 'grade-ok' : summary.passed === summary.total ? 'grade-partial' : 'grade-bad'}`}>
+                  <div className="grade-score">
+                    <span className="grade-num">{summary.passed}</span>
+                    <span className="grade-of">/{summary.total}</span>
+                  </div>
+                  <div className="grade-text">
+                    {accepted ? (
+                      <span className="stamp stamp-good">Accepted</span>
+                    ) : summary.passed === summary.total ? (
+                      <span className="grade-title">Every example passes. Now submit it for the full set.</span>
+                    ) : (
+                      <span className="stamp stamp-bad">
+                        {failing} failing
+                      </span>
+                    )}
+                    <p className="grade-sub">
+                      {summary.passed} of {summary.total} passed · <span className="folio">{summary.ms.toFixed(1)} ms</span> total
                       {run.res.timeout && ' · stopped: one test ran out of time'}
-                      {accepted && question.complexity && ` · Target: ${question.complexity.time} time, ${question.complexity.space} space`}
-                    </div>
+                      {accepted && question.complexity && ` · target ${question.complexity.time} time, ${question.complexity.space} space`}
+                    </p>
                   </div>
                 </div>
               )}
               {summary && summary.passed < summary.total && (
-                <div className="missed-scenarios">
-                  <div className="small" style={{ fontWeight: 600 }}>Scenarios your code doesn't handle yet:</div>
-                  <div className="row-wrap">
+                <div className="missed">
+                  <div className="eyebrow">Cases your code doesn&apos;t handle yet</div>
+                  <ul className="missed-list">
                     {run.res.results
                       .filter((r) => !r.passed && !r.skipped)
                       .map((r) => (
-                        <span key={r.index} className="badge badge-danger" title={run.tests[r.index].hint}>
-                          {run.tests[r.index].scenario || `Test ${r.index + 1}`}
-                        </span>
+                        <li key={r.index} title={run.tests[r.index].hint}>
+                          × {run.tests[r.index].scenario || `Test ${r.index + 1}`}
+                        </li>
                       ))}
-                  </div>
+                  </ul>
                 </div>
               )}
               {summary && run.mode === 'run' && summary.passed === summary.total && tests.length > VISIBLE_TESTS && (
-                <div className="small muted">
+                <p className="ws-note">
                   Submit also checks: {tests.slice(VISIBLE_TESTS).map((t) => t.scenario).filter(Boolean).join(' · ')}
-                </div>
+                </p>
               )}
-              {run &&
-                run.res.results.map((r) => (
-                  <ResultCard key={`${run.mode}-${r.index}`} r={r} test={run.tests[r.index]} question={question} defaultOpen={!r.passed && run.res.results.filter((x) => !x.passed)[0] === r} />
-                ))}
+              {run && run.res.results.length > 0 && (
+                <ol className="ledger" aria-label="Test results">
+                  {run.res.results.map((r) => (
+                    <ResultCard key={`${run.mode}-${r.index}`} r={r} test={run.tests[r.index]} question={question} defaultOpen={!r.passed && run.res.results.filter((x) => !x.passed)[0] === r} />
+                  ))}
+                </ol>
+              )}
             </>
           )}
           {!running && tab === 'cases' && (
-            <div className="stack-sm">
+            <div className="ws-cases">
               {tests.slice(0, VISIBLE_TESTS).map((t, i) => (
-                <div key={i} className="case">
-                  <div className="small muted">
-                    Test {i + 1}
-                    {t.scenario ? ` · ${t.scenario}` : ''}
+                <div key={i} className="ws-case">
+                  <div className="ws-case-head">
+                    <span className="folio">Test {i + 1}</span>
+                    {t.scenario ? <span> · {t.scenario}</span> : null}
                   </div>
-                  <pre className="mono small">{describeTest(question, t)}</pre>
-                  <div className="small">
-                    Expected: <code>{t.expectedAnyOf ? t.expectedAnyOf.map((e) => format(e)).join(' or ') : question.checker ? 'any valid answer' : format(resolveExpected(t))}</code>
+                  <pre>{describeTest(question, t)}</pre>
+                  <div className="ws-case-expect">
+                    <span className="eyebrow">Expected</span> <code>{t.expectedAnyOf ? t.expectedAnyOf.map((e) => format(e)).join(' or ') : question.checker ? 'any valid answer' : format(resolveExpected(t))}</code>
                   </div>
                 </div>
               ))}
               {tests.length > VISIBLE_TESTS && (
-                <div className="small">
-                  <div className="muted" style={{ marginBottom: '0.35rem' }}>
-                    + {tests.length - VISIBLE_TESTS} hidden tests run on Submit. Think about whether your code handles each of these before submitting:
-                  </div>
-                  <div className="row-wrap">
+                <div className="ws-hidden">
+                  <p className="ws-note">
+                    {tests.length - VISIBLE_TESTS} more tests run on Submit. Before you submit, ask whether your code handles each of these:
+                  </p>
+                  <ul className="missed-list missed-list-plain">
                     {tests.slice(VISIBLE_TESTS).map((t, i) => (
-                      <span key={i} className="badge badge-outline">
-                        {t.scenario || `Hidden test ${i + 1}`}
-                        {t.timeLimitMs ? ' ⏱' : ''}
-                      </span>
+                      <li key={i}>
+                        ○ {t.scenario || `Hidden test ${i + 1}`}
+                        {t.timeLimitMs ? <span className="ws-timed"> · timed</span> : ''}
+                      </li>
                     ))}
-                  </div>
-                  {tests.some((t) => t.timeLimitMs) && <div className="faint" style={{ marginTop: '0.35rem' }}>⏱ = timed test: a correct but too-slow solution fails it.</div>}
+                  </ul>
+                  {tests.some((t) => t.timeLimitMs) && <p className="ws-note">Timed tests fail a correct answer that is too slow.</p>}
                 </div>
               )}
             </div>
           )}
           {!running && tab === 'custom' && (
-            <div className="stack-sm">
-              <label className="small muted" htmlFor={`custom-${question.id}`}>
+            <div className="ws-custom">
+              <label className="eyebrow" htmlFor={`custom-${question.id}`}>
                 {question.kind === 'design' ? 'Operations as JSON: {"ops": [...], "args": [...]}' : `Arguments as a JSON array: [${(question.paramNames || []).join(', ')}]`}
               </label>
               <textarea id={`custom-${question.id}`} className="textarea" rows={3} value={custom} onChange={(e) => setCustom(e.target.value)} spellCheck={false} />
-              <div className="row">
+              <div className="row-wrap">
                 <button type="button" className="btn btn-sm btn-primary" onClick={runCustom}>
-                  <Icon name="play" size={14} /> Run custom input
+                  Run this input
                 </button>
-                <span className="small faint">The reference solution runs on the same input so you can compare.</span>
+                <span className="ws-note">The reference solution runs on it too, so you can compare.</span>
               </div>
-              {customRun?.error && <div className="result-error small">{customRun.error}</div>}
+              {customRun?.error && <p className="ledger-error">{customRun.error}</p>}
               {customRun?.mine && (
-                <div className="grid-2">
-                  <div className="case">
-                    <div className="small muted">Your output</div>
-                    <pre className={`mono small ${customRun.mine.compileError || customRun.mine.results[0]?.error ? 'result-error' : ''}`}>
+                <div className="ws-compare">
+                  <div className="ws-case">
+                    <div className="eyebrow">Your output</div>
+                    <pre className={customRun.mine.compileError || customRun.mine.results[0]?.error ? 'ledger-error' : ''}>
                       {customRun.mine.compileError || customRun.mine.results[0]?.error || customRun.mine.results[0]?.output}
                     </pre>
-                    {customRun.mine.results[0]?.logs?.length > 0 && <pre className="mono small muted">{customRun.mine.results[0].logs.join('\n')}</pre>}
+                    {customRun.mine.results[0]?.logs?.length > 0 && <pre className="ws-logs">{customRun.mine.results[0].logs.join('\n')}</pre>}
                   </div>
-                  <div className="case">
-                    <div className="small muted">Expected (reference solution)</div>
-                    <pre className="mono small">{customRun.ref ? customRun.ref.compileError || customRun.ref.results[0]?.error || customRun.ref.results[0]?.output : '—'}</pre>
+                  <div className="ws-case">
+                    <div className="eyebrow">Expected (reference)</div>
+                    <pre>{customRun.ref ? customRun.ref.compileError || customRun.ref.results[0]?.error || customRun.ref.results[0]?.output : '—'}</pre>
                   </div>
                 </div>
               )}
             </div>
           )}
           {!running && tab === 'complexity' && (
-            <div className="stack-sm">
-              {solved || qs.solutionViewed ? (
-                <div className="complexity-pills">
-                  <div>
-                    <div className="small muted">Target time</div>
-                    <div className="complexity-value">{question.complexity?.time}</div>
-                  </div>
-                  <div>
-                    <div className="small muted">Target space</div>
-                    <div className="complexity-value">{question.complexity?.space}</div>
-                  </div>
-                </div>
-              ) : (
-                <ComplexityGuess question={question} />
-              )}
-              {summary && <div className="small muted">Last run: {summary.ms.toFixed(2)} ms across {summary.total} tests (small inputs — timing is a sanity check, not a complexity proof).</div>}
+            <div className="ws-custom">
+              {solved || qs.solutionViewed ? <Targets question={question} /> : <ComplexityGuess question={question} />}
+              {summary && <p className="ws-note">Last run: {summary.ms.toFixed(2)} ms across {summary.total} tests. The inputs are small, so timing is a sanity check, not a proof of complexity.</p>}
             </div>
           )}
         </div>
@@ -319,25 +349,13 @@ export default function CodeWorkspace({ question }) {
 
 function ComplexityGuess({ question }) {
   const [shown, setShown] = useState(false);
-  if (shown)
-    return (
-      <div className="complexity-pills">
-        <div>
-          <div className="small muted">Target time</div>
-          <div className="complexity-value">{question.complexity?.time}</div>
-        </div>
-        <div>
-          <div className="small muted">Target space</div>
-          <div className="complexity-value">{question.complexity?.space}</div>
-        </div>
-      </div>
-    );
+  if (shown) return <Targets question={question} />;
   return (
-    <div className="stack-sm">
-      <div className="small">Before looking: what time and space complexity is your solution? Check the constraints — they tell you the target (e.g. n ≤ 10⁵ usually means O(n) or O(n log n)).</div>
+    <div className="ws-custom">
+      <p>Before you look: what time and space does your solution use? The constraints hint at the target — n ≤ 10⁵ usually means O(n) or O(n log n).</p>
       <div>
         <button type="button" className="btn btn-sm" onClick={() => setShown(true)}>
-          Show target complexity
+          Show the target complexity
         </button>
       </div>
     </div>

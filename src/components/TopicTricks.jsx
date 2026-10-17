@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import Markdown from './ui/Markdown.jsx';
 import CodeBlock from './ui/CodeBlock.jsx';
-import Icon from './ui/Icon.jsx';
 import SheetSection from './SheetSection.jsx';
 import { SHEET_SECTIONS_BY_TOPIC, sectionByNum, loadTricks, hasTricks } from '../content/guides/index.js';
 
@@ -47,9 +46,9 @@ export default function TopicTricks({ topicId }) {
         <section>
           <div className="divider-label">Tricks & tips</div>
           {tricks.signals?.length > 0 && (
-            <div className="card card-tight" style={{ marginBottom: '1rem' }}>
-              <div className="small" style={{ fontWeight: 600, marginBottom: '0.4rem' }}>
-                <Icon name="target" size={14} /> More clues that point here
+            <div className="trick-clues">
+              <div className="eyebrow" style={{ marginBottom: '0.4rem' }}>
+                More clues that point here
               </div>
               <div className="row-wrap">
                 {tricks.signals.map((s) => (
@@ -74,7 +73,7 @@ export default function TopicTricks({ topicId }) {
           )}
           <div className="trick-grid">
             {shown.map((t) => (
-              <article key={t.title} className="card trick">
+              <article key={t.title} className="trick">
                 <div className="row" style={{ alignItems: 'flex-start', marginBottom: '0.35rem' }}>
                   <h4 style={{ margin: 0, flex: 1 }}>{t.title}</h4>
                   {t.kind && <span className="badge">{KIND_LABEL[t.kind] || t.kind}</span>}
@@ -85,8 +84,8 @@ export default function TopicTricks({ topicId }) {
             ))}
           </div>
           {tricks.traps?.length > 0 && (
-            <div className="card" style={{ marginTop: '1rem' }}>
-              <h4>Looks like… but it's actually…</h4>
+            <div className="trick-traps">
+              <h4>Looks like one thing, is actually another</h4>
               <div className="table-wrap">
                 <table>
                   <thead>
@@ -120,7 +119,11 @@ export default function TopicTricks({ topicId }) {
                 {tricks.sources.map((s) => (
                   <li key={s.url}>
                     <a href={s.url} target="_blank" rel="noreferrer">
-                      {s.label} <Icon name="external" size={10} />
+                      {s.label}
+                      <span aria-hidden="true" className="ext-mark">
+                        {' '}
+                        ↗
+                      </span>
                     </a>
                   </li>
                 ))}

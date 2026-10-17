@@ -24,6 +24,12 @@ const components = {
     return (
       <a href={href} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>
         {children}
+        {external && (
+          <span aria-hidden="true" className="ext-mark">
+            {' '}
+            ↗
+          </span>
+        )}
       </a>
     );
   },

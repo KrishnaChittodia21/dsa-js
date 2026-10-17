@@ -1,24 +1,34 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Callout, EmptyState, ProgressBar } from '../components/ui/primitives.jsx';
-import Icon from '../components/ui/Icon.jsx';
 import { CompanyEntryTable } from './TopicPage.jsx';
 import { useProgress } from '../state/ProgressContext.jsx';
 import { companyProgress } from '../state/selectors.js';
-import { companies, companyById, companyQuestions, companySources, EVIDENCE_LEVELS, topicById, topics } from '../content/index.js';
+import { companyById, companyQuestions, companySources, EVIDENCE_LEVELS, topicById, topics } from '../content/index.js';
 import NotFound from './NotFound.jsx';
 
-function EvidenceExplainer() {
+const EV_ORDER = ['verified', 'community', 'associated'];
+
+function EvidenceLabel({ level, children }) {
+  return <span className={`co-ev co-ev-${level}`}>{children || EVIDENCE_LEVELS[level]?.label || level}</span>;
+}
+
+function EvidenceKey() {
   return (
-    <Callout variant="insight" title="Evidence levels — nothing here is invented">
-      <ul className="small" style={{ margin: 0 }}>
+    <section className="co-key" aria-labelledby="co-key-h">
+      <h2 id="co-key-h" className="eyebrow">
+        How sure are we? Nothing here is invented.
+      </h2>
+      <dl>
         {Object.entries(EVIDENCE_LEVELS).map(([k, v]) => (
-          <li key={k}>
-            <strong>{v.label}:</strong> {v.description}
-          </li>
+          <div key={k}>
+            <dt>
+              <EvidenceLabel level={k} />
+            </dt>
+            <dd>{v.description}</dd>
+          </div>
         ))}
-      </ul>
-    </Callout>
+      </dl>
+    </section>
   );
 }
 
@@ -26,43 +36,53 @@ export function CompaniesIndex() {
   const { progress } = useProgress();
   const rows = companyProgress(progress);
   return (
-    <div className="page">
-      <div className="page-header">
+    <div className="page co ink-in">
+      <header className="page-header">
         <div>
-          <h1>Company Questions</h1>
-          <p>Questions linked to companies through public, citable sources. Each entry shows its evidence level and source.</p>
+          <span className="eyebrow">Directory</span>
+          <h1>Companies</h1>
+          <p>Questions tied to a company by a public source you can check yourself. Each entry says how strong that link is and where it came from.</p>
         </div>
-      </div>
-      <EvidenceExplainer />
-      {rows.length === 0 && <EmptyState icon="building" title="No company data yet" />}
-      <div className="grid-auto" style={{ marginTop: '1rem' }}>
-        {rows.map((r) => {
-          const entries = companyQuestions.filter((c) => c.company === r.company.id);
-          const counts = { verified: 0, community: 0, associated: 0 };
-          for (const e of entries) counts[e.evidence] = (counts[e.evidence] || 0) + 1;
-          return (
-            <Link key={r.company.id} to={`/companies/${r.company.id}`} className="card card-link">
-              <div className="row">
-                <h3 style={{ margin: 0, flex: 1 }}>{r.company.name}</h3>
-                <span className="badge">{entries.length}</span>
-              </div>
-              <div className="row-wrap small" style={{ margin: '0.5rem 0' }}>
-                {counts.verified > 0 && <span className="badge badge-success">{counts.verified} verified</span>}
-                {counts.community > 0 && <span className="badge badge-info">{counts.community} community</span>}
-                {counts.associated > 0 && <span className="badge">{counts.associated} associated</span>}
-              </div>
-              <div className="row small">
-                <div style={{ flex: 1 }}>
-                  <ProgressBar value={r.solved} max={r.total || 1} size="sm" label="Solved" />
-                </div>
-                <span className="mono muted">
-                  {r.solved}/{r.total} solved
-                </span>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+      </header>
+      <EvidenceKey />
+      {rows.length === 0 && <p className="rf-empty">No company lists have been filed yet. They'll appear here as soon as a sourced entry is added.</p>}
+      {rows.length > 0 && (
+        <ol className="co-dir" aria-label="Companies">
+          {rows.map((r) => {
+            const entries = companyQuestions.filter((c) => c.company === r.company.id);
+            const counts = { verified: 0, community: 0, associated: 0 };
+            for (const e of entries) counts[e.evidence] = (counts[e.evidence] || 0) + 1;
+            const share = r.total ? Math.round((r.solved / r.total) * 100) : 0;
+            return (
+              <li key={r.company.id}>
+                <Link to={`/companies/${r.company.id}`} className="co-row">
+                  <span className="co-initial" aria-hidden="true">
+                    {r.company.name[0]}
+                  </span>
+                  <span className="co-name">{r.company.name}</span>
+                  <span className="co-dots" aria-hidden="true" />
+                  <span className="co-count folio">{entries.length} entries</span>
+                  <span className="co-evs">
+                    {EV_ORDER.filter((k) => counts[k] > 0).map((k) => (
+                      <EvidenceLabel key={k} level={k}>
+                        {counts[k]} {k}
+                      </EvidenceLabel>
+                    ))}
+                  </span>
+                  <span className="co-solved">
+                    <span className="folio">
+                      {r.solved}/{r.total} solved
+                    </span>
+                    <span className="rf-meter" aria-hidden="true">
+                      <span style={{ width: `${share}%` }} />
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ol>
+      )}
       <SourcesList />
     </div>
   );
@@ -72,22 +92,24 @@ function SourcesList() {
   const entries = Object.entries(companySources);
   if (!entries.length) return null;
   return (
-    <details className="details" style={{ marginTop: '2rem' }}>
-      <summary>All sources ({entries.length})</summary>
-      <ul className="small">
+    <details className="co-sources">
+      <summary>
+        Bibliography <span className="folio">({entries.length} sources)</span>
+      </summary>
+      <ol>
         {entries.map(([k, s]) => (
-          <li key={k} style={{ marginBottom: '0.35rem' }}>
+          <li key={k}>
             <a href={s.url} target="_blank" rel="noreferrer">
-              {s.label} <Icon name="external" size={10} />
+              {s.label}
+              <span aria-hidden="true"> ↗</span>
+              <span className="sr-only"> (opens in a new tab)</span>
             </a>{' '}
-            <span className="faint">
-              ({EVIDENCE_LEVELS[s.evidence]?.label || s.evidence}
-              {s.accessed ? `, accessed ${s.accessed}` : ''})
-            </span>
-            {s.description && <div className="muted">{s.description}</div>}
+            <EvidenceLabel level={s.evidence} />
+            {s.accessed && <span className="folio"> accessed {s.accessed}</span>}
+            {s.description && <p>{s.description}</p>}
           </li>
         ))}
-      </ul>
+      </ol>
     </details>
   );
 }
@@ -102,23 +124,27 @@ export function CompanyDetail() {
   const shown = entries.filter((e) => (evidence === 'all' || e.evidence === evidence) && (topic === 'all' || e.topicId === topic));
   const topicIds = [...new Set(entries.map((e) => e.topicId))].filter(Boolean);
   return (
-    <div className="page page-wide">
-      <div className="page-header">
+    <div className="page page-wide co co-detail ink-in">
+      <header className="page-header">
         <div>
-          <Link to="/companies" className="small muted">
+          <Link to="/companies" className="co-back">
             ← All companies
           </Link>
           <h1>{company.name}</h1>
-          <p>{entries.length} sourced questions.</p>
+          <p>
+            {entries.length} sourced {entries.length === 1 ? 'question' : 'questions'} across {topicIds.length} {topicIds.length === 1 ? 'topic' : 'topics'}.
+          </p>
         </div>
-      </div>
-      <EvidenceExplainer />
-      <div className="filter-bar" style={{ marginTop: '1rem' }}>
-        {['all', 'verified', 'community', 'associated'].map((e) => (
-          <button key={e} type="button" className="chip" aria-pressed={evidence === e} onClick={() => setEvidence(e)}>
-            {e === 'all' ? 'All evidence' : EVIDENCE_LEVELS[e]?.label} ({e === 'all' ? entries.length : entries.filter((x) => x.evidence === e).length})
-          </button>
-        ))}
+      </header>
+      <EvidenceKey />
+      <div className="co-filter">
+        <div className="co-ev-tabs" role="group" aria-label="Filter by evidence">
+          {['all', ...EV_ORDER].map((e) => (
+            <button key={e} type="button" aria-pressed={evidence === e} onClick={() => setEvidence(e)}>
+              {e === 'all' ? 'All evidence' : EVIDENCE_LEVELS[e]?.label} <span className="folio">{e === 'all' ? entries.length : entries.filter((x) => x.evidence === e).length}</span>
+            </button>
+          ))}
+        </div>
         <select className="select" value={topic} onChange={(e) => setTopic(e.target.value)} aria-label="Topic">
           <option value="all">All topics</option>
           {topics
@@ -131,7 +157,11 @@ export function CompanyDetail() {
         </select>
       </div>
       <CompanyEntryTable entries={shown} />
-      {topic === 'all' && <p className="small faint" style={{ marginTop: '1rem' }}>Topics covered: {topicIds.map((t) => topicById[t]?.title).join(', ')}</p>}
+      {topic === 'all' && (
+        <p className="co-covered">
+          <span className="eyebrow">Topics covered</span> {topicIds.map((t) => topicById[t]?.title).join(' · ')}
+        </p>
+      )}
     </div>
   );
 }

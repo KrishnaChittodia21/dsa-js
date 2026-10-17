@@ -1,15 +1,20 @@
 import { useState } from 'react';
 import Markdown from '../ui/Markdown.jsx';
-import Icon from '../ui/Icon.jsx';
 import { useProgress } from '../../state/ProgressContext.jsx';
 
 const LETTERS = 'ABCDEFGH';
 
+/** Rubber-stamp verdict on an index card: CORRECT in green ink, NOT QUITE in red. */
+export function Stamp({ ok, children }) {
+  return <span className={`stamp ${ok ? 'stamp-good' : 'stamp-bad'}`}>{children || (ok ? 'Correct' : 'Not quite')}</span>;
+}
+
 /**
  * A multiple-choice question inside a lesson. Explain → Ask → Wait → Correct → Explain deeper.
  * Wrong answers show the specific misconception, then a deeper re-explanation, and let the learner retry.
+ * Drawn as an index card with a red top rule and a "Q n" folio.
  */
-export default function Checkpoint({ block, topicId, compact = false }) {
+export default function Checkpoint({ block, topicId, compact = false, number }) {
   const { progress, dispatch } = useProgress();
   const saved = progress.checkpoints[block.id];
   const passed = !!(saved && (saved.correct || saved.revealed));
@@ -17,6 +22,7 @@ export default function Checkpoint({ block, topicId, compact = false }) {
   const [feedback, setFeedback] = useState(null); // { correct, choice }
   const [review, setReview] = useState(false);
   const wrong = new Set(saved?.wrongChoices || []);
+  const folio = number ? `Q ${number}` : 'Q';
 
   const submit = () => {
     if (selected === null) return;
@@ -39,20 +45,18 @@ export default function Checkpoint({ block, topicId, compact = false }) {
     return (
       <div className="checkpoint checkpoint-done">
         <div className="checkpoint-head">
-          <span className="checkpoint-tag">
-            <Icon name="checkCircle" size={15} /> Checkpoint
-          </span>
-          <span className="small muted">{saved.firstTryCorrect ? 'Correct on first try' : saved.revealed ? 'Answer revealed' : `Solved after ${saved.attempts} attempts`}</span>
+          <span className="checkpoint-folio">{folio}</span>
+          <span className="checkpoint-tag">Checkpoint · done</span>
+          <span className="checkpoint-meta">{saved.firstTryCorrect ? '✓ right first time' : saved.revealed ? 'answer shown' : `✓ after ${saved.attempts} tries`}</span>
           <span className="spacer" />
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => setReview(true)}>
-            Review
+            Look again
           </button>
         </div>
         <Markdown className="checkpoint-q">{block.question}</Markdown>
         {!compact && (
-          <div className="small">
-            <strong>Answer: </strong>
-            {LETTERS[block.answer]}. {block.options[block.answer]}
+          <div className="checkpoint-answer">
+            <span className="eyebrow">Answer</span> <span className="option-letter">{LETTERS[block.answer]}</span> {block.options[block.answer]}
           </div>
         )}
       </div>
@@ -65,9 +69,8 @@ export default function Checkpoint({ block, topicId, compact = false }) {
   return (
     <div className={`checkpoint ${showResult ? (isCorrect ? 'is-correct' : 'is-wrong') : ''}`} role="group" aria-labelledby={`${block.id}-q`}>
       <div className="checkpoint-head">
-        <span className="checkpoint-tag">
-          <Icon name="help" size={15} /> Before continuing
-        </span>
+        <span className="checkpoint-folio">{folio}</span>
+        <span className="checkpoint-tag">Before you read on</span>
         {review && (
           <>
             <span className="spacer" />
@@ -101,51 +104,46 @@ export default function Checkpoint({ block, topicId, compact = false }) {
               <span className="option-text">
                 <Markdown>{opt}</Markdown>
               </span>
-              {state === 'correct' && <Icon name="check" size={16} />}
-              {state === 'wrong' && <Icon name="x" size={16} />}
+              {state === 'correct' && <span className="option-mark" aria-label="correct">✓</span>}
+              {state === 'wrong' && <span className="option-mark" aria-label="your answer, wrong">×</span>}
             </button>
           );
         })}
       </div>
 
       {!showResult && (
-        <div className="row" style={{ marginTop: '0.75rem' }}>
+        <div className="checkpoint-actions">
           <button type="button" className="btn btn-primary" disabled={selected === null} onClick={submit}>
-            Check answer
+            Check my answer
           </button>
           {wrong.size > 0 && !passed && (
             <button type="button" className="btn btn-ghost" onClick={reveal}>
               Show me the answer
             </button>
           )}
-          <span className="small faint">Think it through first — there is no penalty for being wrong.</span>
+          <span className="checkpoint-hint">Think it through first. A wrong answer costs nothing.</span>
         </div>
       )}
 
       {showResult && isCorrect && (
         <div className="feedback feedback-correct">
-          <div className="feedback-title">
-            <Icon name="checkCircle" size={17} /> {feedback.revealed ? `The answer is ${LETTERS[block.answer]}.` : saved && saved.attempts > 1 ? 'Correct — you got there!' : 'Correct!'}
-          </div>
+          <Stamp ok>{feedback.revealed ? `Answer: ${LETTERS[block.answer]}` : 'Correct'}</Stamp>
+          {!feedback.revealed && saved && saved.attempts > 1 && <p className="feedback-line">You got there.</p>}
           <Markdown>{block.explanation}</Markdown>
         </div>
       )}
 
       {showResult && !isCorrect && (
         <div className="feedback feedback-wrong">
-          <div className="feedback-title">
-            <Icon name="alert" size={17} /> Not quite.
-          </div>
+          <Stamp ok={false} />
           {block.misconceptions?.[feedback.choice] && <Markdown>{block.misconceptions[feedback.choice]}</Markdown>}
           {block.deeper && (
             <div className="feedback-deeper">
-              <div className="feedback-subtitle">
-                <Icon name="bulb" size={15} /> Let's look at it another way
-              </div>
+              <div className="feedback-subtitle">Another way to see it</div>
               <Markdown>{block.deeper}</Markdown>
             </div>
           )}
-          <div className="row" style={{ marginTop: '0.75rem' }}>
+          <div className="checkpoint-actions">
             <button type="button" className="btn btn-primary" onClick={retry}>
               Try again
             </button>

@@ -14,7 +14,8 @@ class Boundary extends Component {
       return (
         <div className="page">
           <div className="callout callout-danger">
-            <div className="callout-title">Something went wrong on this page</div>
+            <div className="callout-title">This page didn&apos;t load.</div>
+            <p className="small">The first line of the error usually tells you why:</p>
             <pre className="mono small" style={{ whiteSpace: 'pre-wrap' }}>{String(this.state.error?.message || this.state.error)}</pre>
             <button type="button" className="btn btn-sm" onClick={() => this.setState({ error: null })}>
               Try again

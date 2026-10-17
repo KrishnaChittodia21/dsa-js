@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Block from './Block.jsx';
-import Icon from '../ui/Icon.jsx';
 import { ProgressBar } from '../ui/primitives.jsx';
 import { useProgress } from '../../state/ProgressContext.jsx';
 import { checkpointPassed } from '../../state/selectors.js';
@@ -10,6 +9,7 @@ import { getCheckpoints } from '../../content/index.js';
  * Walks through a topic's lesson section by section.
  * Inside a section, content after an unanswered checkpoint stays hidden — the lesson
  * waits for the learner's answer before it continues explaining.
+ * Layout: a notebook page — a slim margin rail of § numbers beside a ~68ch text column.
  */
 export default function LessonPlayer({ topic, onFinish, initialSection, onSectionApplied }) {
   const { progress, dispatch } = useProgress();
@@ -42,9 +42,11 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
 
   const allCheckpoints = useMemo(() => getCheckpoints(topic), [topic]);
   const passedCount = allCheckpoints.filter((c) => checkpointPassed(progress, c.id)).length;
+  // checkpoint id → its number in the lesson, printed as the index card's folio ("Q 3")
+  const cpNumber = useMemo(() => new Map(allCheckpoints.map((c, i) => [c.id, i + 1])), [allCheckpoints]);
 
   if (!sections.length) {
-    return <div className="card muted">This lesson is being written. Check back soon — practice questions may already be available.</div>;
+    return <p className="lesson-empty">This lesson is still being written. The practice questions may already be open — try one.</p>;
   }
 
   const renderBlocks = (section, gated) => {
@@ -52,17 +54,17 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
     for (let i = 0; i < section.blocks.length; i++) {
       const b = section.blocks[i];
       out.push(
-        <div className="lesson-block" key={`${section.id}-${i}`}>
-          <Block block={b} topicId={topic.id} blockKey={`${topic.id}:${section.id}:${i}`} />
+        <div className={`lesson-block lesson-block-${b.type}`} key={`${section.id}-${i}`}>
+          <Block block={b} topicId={topic.id} blockKey={`${topic.id}:${section.id}:${i}`} number={b.type === 'checkpoint' ? cpNumber.get(b.id) : undefined} />
         </div>,
       );
       if (gated && b.type === 'checkpoint' && !checkpointPassed(progress, b.id)) {
         const remaining = section.blocks.length - i - 1;
         if (remaining > 0)
           out.push(
-            <div className="lesson-wait" key="wait">
-              <Icon name="lock" size={14} /> Answer the question above to continue the lesson.
-            </div>,
+            <p className="lesson-wait" key="wait">
+              The rest of this section waits for your answer above.
+            </p>,
           );
         break;
       }
@@ -76,58 +78,64 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
 
   return (
     <div className="lesson" ref={topRef}>
-      <aside className="lesson-nav" aria-label="Lesson sections">
-        <div className="lesson-nav-head">
-          <div className="small muted">
-            Checkpoints {passedCount}/{allCheckpoints.length}
-          </div>
-          <ProgressBar value={mode === 'full' || tState.lessonCompleted ? sections.length : index} max={sections.length} size="sm" label="Lesson progress" />
+      <nav className="lesson-rail" aria-label="Lesson sections">
+        <div className="lesson-rail-head">
+          <span className="eyebrow">Sections</span>
+          <span className="folio">
+            {passedCount}/{allCheckpoints.length} checks
+          </span>
         </div>
-        <ol className="lesson-nav-list">
+        <ProgressBar value={mode === 'full' || tState.lessonCompleted ? sections.length : index} max={sections.length} size="sm" label="Lesson progress" />
+        <ol className="lesson-toc">
           {sections.map((s, i) => {
             const reached = i <= (tState.maxSectionIndex || 0) || tState.lessonCompleted;
             const done = (reached && sectionDone(s) && i < index) || tState.lessonCompleted;
+            const active = mode === 'guided' && i === index;
             return (
               <li key={s.id}>
                 <button
                   type="button"
-                  className={`lesson-nav-item ${mode === 'guided' && i === index ? 'active' : ''}`}
+                  className={`lesson-toc-item ${active ? 'active' : ''} ${done ? 'done' : ''}`}
+                  aria-current={active ? 'step' : undefined}
                   onClick={() => {
                     if (mode === 'full') document.getElementById(`sec-${s.id}`)?.scrollIntoView({ behavior: 'smooth' });
                     else if (reached || i <= index) go(i);
                   }}
                   disabled={mode === 'guided' && !reached && i > index}
                 >
-                  <span className={`lesson-nav-dot ${done ? 'done' : ''}`}>{done ? <Icon name="check" size={11} strokeWidth={3} /> : i + 1}</span>
-                  <span>{s.title}</span>
+                  <span className="lesson-toc-num">§ {i + 1}</span>
+                  <span className="lesson-toc-title">{s.title}</span>
+                  {done && (
+                    <span className="lesson-toc-mark" aria-label="done">
+                      ✓
+                    </span>
+                  )}
                 </button>
               </li>
             );
           })}
         </ol>
-        <div className="lesson-mode">
-          <button type="button" className="btn btn-ghost btn-sm btn-block" onClick={() => setMode(mode === 'guided' ? 'full' : 'guided')}>
-            <Icon name={mode === 'guided' ? 'book' : 'play'} size={14} /> {mode === 'guided' ? 'Show full lesson' : 'Guided mode'}
-          </button>
-        </div>
-      </aside>
+        <button type="button" className="lesson-mode" onClick={() => setMode(mode === 'guided' ? 'full' : 'guided')}>
+          {mode === 'guided' ? 'Read the whole lesson on one page' : 'Go back to one step at a time'}
+        </button>
+      </nav>
 
       <div className="lesson-content">
         {mode === 'guided' ? (
           <>
-            <div className="lesson-section-head">
-              <span className="badge badge-accent">
-                Step {index + 1} of {sections.length}
+            <header className="lesson-section-head">
+              <span className="eyebrow">
+                § {index + 1} <span aria-hidden="true">·</span> step {index + 1} of {sections.length}
               </span>
               <h2>{current.title}</h2>
-            </div>
+            </header>
             <div className="lesson-blocks">{renderBlocks(current, true)}</div>
             <div className="lesson-footer">
               <button type="button" className="btn" disabled={index === 0} onClick={() => go(index - 1)}>
-                <Icon name="chevronLeft" size={16} /> Previous
+                ← Previous
               </button>
               <span className="spacer" />
-              {!currentDone && <span className="small muted">Answer the checkpoint to unlock the next step</span>}
+              {!currentDone && <span className="lesson-footer-note">Answer the checkpoint to turn the page.</span>}
               {isLast ? (
                 <button
                   type="button"
@@ -138,20 +146,23 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
                     onFinish?.();
                   }}
                 >
-                  <Icon name="trophy" size={16} /> {tState.lessonCompleted ? 'Lesson complete — practice' : 'Complete lesson'}
+                  {tState.lessonCompleted ? 'Lesson done — open the practice set' : 'Finish the lesson'}
                 </button>
               ) : (
-                <button type="button" className="btn btn-primary" disabled={!currentDone} onClick={() => go(index + 1)}>
-                  Next: {sections[index + 1].title} <Icon name="chevronRight" size={16} />
+                <button type="button" className="btn btn-primary lesson-next" disabled={!currentDone} onClick={() => go(index + 1)}>
+                  <span className="lesson-next-k">Next</span> {sections[index + 1].title} →
                 </button>
               )}
             </div>
           </>
         ) : (
           <>
-            {sections.map((s) => (
+            {sections.map((s, i) => (
               <section key={s.id} id={`sec-${s.id}`} className="lesson-full-section">
-                <h2>{s.title}</h2>
+                <header className="lesson-section-head">
+                  <span className="eyebrow">§ {i + 1}</span>
+                  <h2>{s.title}</h2>
+                </header>
                 <div className="lesson-blocks">{renderBlocks(s, false)}</div>
               </section>
             ))}
@@ -167,7 +178,7 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
                     onFinish?.();
                   }}
                 >
-                  {passedCount < allCheckpoints.length ? `Answer all checkpoints (${passedCount}/${allCheckpoints.length})` : 'Complete lesson'}
+                  {passedCount < allCheckpoints.length ? `Answer every checkpoint first (${passedCount}/${allCheckpoints.length})` : 'Finish the lesson'}
                 </button>
               </div>
             )}

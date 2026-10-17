@@ -1,5 +1,7 @@
 // UI icons: names used across the app mapped onto lucide-react (tree-shaken, stroke icons, currentColor).
-// Keeping this name → component map means every existing <Icon name="…" /> renders a lucide icon.
+// In the Study Ledger language icons are for meaning only (media controls, close, external link);
+// headings, cards, buttons and list items use typographic marks instead. The thin default stroke
+// matches the hairline rules.
 import {
   ArrowRight,
   BookOpen,
@@ -108,7 +110,7 @@ const ICONS = {
   sparkles: Sparkles,
 };
 
-export default function Icon({ name, size = 18, strokeWidth = 2, className, title }) {
+export default function Icon({ name, size = 18, strokeWidth = 1.75, className, title }) {
   const Cmp = ICONS[name] || Circle;
   return (
     <Cmp

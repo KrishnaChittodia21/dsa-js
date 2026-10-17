@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Highlight } from 'prism-react-renderer';
-import Icon from './Icon.jsx';
 
 // Prism theme expressed with CSS variables so it follows light/dark mode automatically.
 const varTheme = {
@@ -36,8 +35,8 @@ export default function CodeBlock({ code, language = 'javascript', title, captio
           <span>{title || (language === 'text' ? '' : 'JavaScript')}</span>
           <span className="spacer" />
           {copy && (
-            <button type="button" className="btn btn-ghost btn-sm" onClick={onCopy} aria-label="Copy code">
-              <Icon name={copied ? 'check' : 'copy'} size={14} /> {copied ? 'Copied' : 'Copy'}
+            <button type="button" className="btn btn-ghost btn-sm" onClick={onCopy} aria-label={copied ? 'Code copied' : 'Copy code'}>
+              {copied ? 'Copied ✓' : 'Copy'}
             </button>
           )}
         </div>

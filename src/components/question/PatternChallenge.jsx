@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Markdown from '../ui/Markdown.jsx';
-import Icon from '../ui/Icon.jsx';
 import { useProgress } from '../../state/ProgressContext.jsx';
+import { Stamp } from '../lesson/Checkpoint.jsx';
 
 const LETTERS = 'ABCD';
 
@@ -27,13 +27,12 @@ export default function PatternChallenge({ question }) {
   return (
     <div className={`checkpoint ${answered ? (result.correct ? 'is-correct' : 'is-wrong') : ''}`}>
       <div className="checkpoint-head">
-        <span className="checkpoint-tag">
-          <Icon name="target" size={15} /> Pattern recognition
-        </span>
-        {saved && <span className="small muted">{saved.correct ? 'Identified on first try' : 'Missed on first try'}</span>}
+        <span className="checkpoint-folio">P</span>
+        <span className="checkpoint-tag">Name the pattern</span>
+        {saved && <span className="checkpoint-meta">{saved.correct ? '✓ first try' : '× missed first try'}</span>}
       </div>
-      <div className="checkpoint-q">{pc.question || 'Before any hints: which pattern would you use?'}</div>
-      <div className="options">
+      <div className="checkpoint-q">{pc.question || 'Before any hints: which pattern would you reach for?'}</div>
+      <div className="options" role="radiogroup">
         {pc.options.map((opt, i) => {
           let state = '';
           if (answered && i === pc.answer && result.correct) state = 'correct';
@@ -42,38 +41,36 @@ export default function PatternChallenge({ question }) {
             <button key={i} type="button" role="radio" aria-checked={selected === i} className={`option ${selected === i && !answered ? 'selected' : ''} ${state}`} disabled={answered} onClick={() => setSelected(i)}>
               <span className="option-letter">{LETTERS[i]}</span>
               <span className="option-text">{opt}</span>
+              {state === 'correct' && <span className="option-mark" aria-label="correct">✓</span>}
+              {state === 'wrong' && <span className="option-mark" aria-label="your answer, wrong">×</span>}
             </button>
           );
         })}
       </div>
       {!answered && (
-        <div className="row" style={{ marginTop: '0.75rem' }}>
+        <div className="checkpoint-actions">
           <button type="button" className="btn btn-primary" disabled={selected === null} onClick={submit}>
             Lock in my answer
           </button>
-          <span className="small faint">Look for the clues in the problem statement.</span>
+          <span className="checkpoint-hint">The clues are in the statement: what is asked for, and in what shape.</span>
         </div>
       )}
       {answered && result.correct && (
         <div className="feedback feedback-correct">
-          <div className="feedback-title">
-            <Icon name="checkCircle" size={17} /> Right pattern!
-          </div>
+          <Stamp ok>Right pattern</Stamp>
           <Markdown>{pc.explanation}</Markdown>
         </div>
       )}
       {answered && !result.correct && (
         <div className="feedback feedback-wrong">
-          <div className="feedback-title">
-            <Icon name="alert" size={17} /> Not the best fit.
-          </div>
-          <p className="small">Re-read the statement: what is being optimised, and is the answer contiguous, ordered, or a choice among options? Then try once more.</p>
-          <div className="row">
+          <Stamp ok={false} />
+          <p>Read the statement again. What is being optimised — and is the answer contiguous, ordered, or a choice among options? Then have one more go.</p>
+          <div className="checkpoint-actions">
             <button type="button" className="btn btn-sm btn-primary" onClick={() => { setRetrying(true); setSelected(null); }}>
               Try again
             </button>
             <button type="button" className="btn btn-sm btn-ghost" onClick={() => setResult({ choice: pc.answer, correct: true })}>
-              Show the pattern
+              Show me the pattern
             </button>
           </div>
         </div>

@@ -1,17 +1,16 @@
 // The study loop every topic follows: the topic tabs in order, with per-step progress.
-// Used by the topic page's Study path stepper, the welcome tour and the Contents page.
-import { BookOpen, Building2, Code2, FileText, PlayCircle, RefreshCw } from 'lucide-react';
+// Used by the topic page's Study path, the guide and the Contents page.
 import { companyQuestionsForTopic } from '../../content/index.js';
 import { mistakeQuestions, missedCheckpoints, topicStats } from '../../state/selectors.js';
 import { hasVisual } from '../PatternVisual.jsx';
 
 export const TAB_META = {
-  learn: { label: 'Learn', icon: BookOpen, why: 'An interactive lesson that pauses at checkpoints until you answer.' },
-  visualize: { label: 'Visualize', icon: PlayCircle, why: 'Watch each pattern step by step and predict the next move.' },
-  practice: { label: 'Practice', icon: Code2, why: 'Name the pattern, then code and submit against hidden tests.' },
-  review: { label: 'Review', icon: RefreshCw, why: 'Redo missed checkpoints and the questions you struggled with.' },
-  company: { label: 'Company Qs', icon: Building2, why: 'Questions reported at named companies, with sources.' },
-  cheatsheet: { label: 'Cheatsheet', icon: FileText, why: 'The pattern, template, complexity and pitfalls on one card.' },
+  learn: { label: 'Learn', why: 'An interactive lesson that pauses at checkpoints until you answer.' },
+  visualize: { label: 'Visualize', why: 'Watch each pattern step by step and predict the next move.' },
+  practice: { label: 'Practice', why: 'Name the pattern, then code and submit against hidden tests.' },
+  review: { label: 'Review', why: 'Redo missed checkpoints and the questions you struggled with.' },
+  company: { label: 'Company Qs', why: 'Questions reported at named companies, with sources.' },
+  cheatsheet: { label: 'Cheatsheet', why: 'The pattern, template, complexity and pitfalls on one card.' },
 };
 
 /** the loop steps, in order (side tabs — company, cheatsheet — are extras) */
