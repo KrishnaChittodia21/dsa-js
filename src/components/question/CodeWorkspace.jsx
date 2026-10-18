@@ -4,54 +4,77 @@ import Icon from '../ui/Icon.jsx';
 import { useProgress } from '../../state/ProgressContext.jsx';
 import { runInWorker } from '../../runner/runInWorker.js';
 import { describeTest, format, resolveExpected } from '../../runner/core.js';
+import { bigoClass } from '../../visualizations/complexity.js';
 
 const VISIBLE_TESTS = 3;
+const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+const MOD = IS_MAC ? '⌘' : 'Ctrl';
 
+const expectedText = (question, test) =>
+  test.expectedAnyOf ? test.expectedAnyOf.map((e) => format(e)).join('  or  ') : question.checker ? 'any valid answer (checked by rules)' : format(resolveExpected(test));
+
+/** One test line: pass/fail/ran, runtime; opens to the input · expected · output diff. */
 function ResultCard({ r, test, question, defaultOpen }) {
   const [open, setOpen] = useState(defaultOpen);
   const status = r.skipped ? 'skip' : r.passed === null ? 'ran' : r.passed ? 'pass' : 'fail';
+  const cls = status === 'pass' ? 'test--pass' : status === 'fail' ? 'test--fail' : 'test--run';
   return (
-    <div className={`result result-${status}`}>
-      <button type="button" className="result-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-        <Icon name={status === 'pass' ? 'checkCircle' : status === 'fail' ? 'x' : status === 'skip' ? 'circle' : 'play'} size={15} />
-        <span>{test.scenario || test.name || `Test ${r.index + 1}`}</span>
-        {test.hidden && <span className="badge">hidden</span>}
-        <span className="spacer" />
-        <span className="small mono muted">{r.ms !== undefined ? `${r.ms.toFixed(1)} ms` : ''}</span>
-        <Icon name="chevronDown" size={14} />
+    <div className={`test qp-test ${cls}${status === 'skip' ? ' qp-test--skip' : ''}`}>
+      <button type="button" className="qp-test-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+        <span className="test-ico">
+          <Icon name={status === 'pass' ? 'check' : status === 'fail' ? 'x' : status === 'skip' ? 'circle' : 'play'} size={12} />
+        </span>
+        <span className="qp-test-name">
+          <b>{test.scenario || test.name || `Test ${r.index + 1}`}</b>
+          {test.hidden && <span className="qp-test-sc"> · hidden</span>}
+          {test.timeLimitMs ? <span className="qp-test-sc"> · ⏱ {test.timeLimitMs} ms limit</span> : null}
+        </span>
+        <span className="ms">{r.ms !== undefined ? `${r.ms.toFixed(1)} ms` : ''}</span>
+        <Icon name="chevronDown" size={14} className={`qp-test-chev${open ? ' is-open' : ''}`} />
       </button>
-      {open && status === 'fail' && test.hint && (
-        <div className="result-hint small">
-          <Icon name="bulb" size={14} />
-          <span>
-            <strong>Scenario you missed: {test.scenario}.</strong> {test.hint}
-          </span>
-        </div>
-      )}
       {open && (
-        <div className="result-body mono small">
-          <div className="result-row">
-            <span className="result-k">Input</span>
-            <pre>{describeTest(question, test)}</pre>
-          </div>
+        <div className="qp-diff">
+          <span className="qp-diff-k">Input</span>
+          <pre className="qp-diff-v">{describeTest(question, test)}</pre>
           {r.passed !== null && (
-            <div className="result-row">
-              <span className="result-k">Expected</span>
-              <pre>{test.expectedAnyOf ? test.expectedAnyOf.map((e) => format(e)).join('  or  ') : question.checker ? 'any valid answer (checked by rules)' : format(resolveExpected(test))}</pre>
-            </div>
+            <>
+              <span className="qp-diff-k">Expected</span>
+              <pre className="qp-diff-v exp">{expectedText(question, test)}</pre>
+            </>
           )}
-          <div className="result-row">
-            <span className="result-k">{r.error ? 'Error' : 'Output'}</span>
-            <pre className={r.error ? 'result-error' : ''}>{r.error || r.output}</pre>
-          </div>
+          <span className="qp-diff-k">{r.error ? 'Error' : 'Output'}</span>
+          <pre className={`qp-diff-v ${r.error ? 'qp-err' : status === 'fail' ? 'got' : status === 'pass' ? 'exp' : ''}`}>{r.error || r.output}</pre>
           {r.logs?.length > 0 && (
-            <div className="result-row">
-              <span className="result-k">Console</span>
-              <pre>{r.logs.join('\n')}</pre>
+            <>
+              <span className="qp-diff-k">Console</span>
+              <pre className="qp-diff-v">{r.logs.join('\n')}</pre>
+            </>
+          )}
+          {status === 'fail' && test.hint && (
+            <div className="qp-miss">
+              <Icon name="target" size={15} />
+              <span>
+                <b>Scenario you missed: {test.scenario}.</b> {test.hint}
+              </span>
             </div>
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function Targets({ question }) {
+  return (
+    <div className="qp-cx-targets">
+      <div>
+        <span className="lbl-mono">target time</span>
+        <span className={`bigo ${bigoClass(question.complexity?.time)}`}>{question.complexity?.time || '—'}</span>
+      </div>
+      <div>
+        <span className="lbl-mono">target space</span>
+        <span className={`bigo ${bigoClass(question.complexity?.space)}`}>{question.complexity?.space || '—'}</span>
+      </div>
     </div>
   );
 }
@@ -62,9 +85,10 @@ export default function CodeWorkspace({ question }) {
   const [code, setCode] = useState(qs.code ?? question.starterCode ?? '');
   const [tab, setTab] = useState('tests');
   const [running, setRunning] = useState(false);
-  const [run, setRun] = useState(null); // { mode, res, tests }
+  const [run, setRun] = useState(null); // { mode, res, tests, at }
   const [custom, setCustom] = useState('');
   const [customRun, setCustomRun] = useState(null);
+  const [saved, setSaved] = useState(true);
   const saveTimer = useRef(null);
 
   const tests = useMemo(() => (question.tests || []).map((t, i) => ({ ...t, hidden: i >= VISIBLE_TESTS })), [question]);
@@ -81,8 +105,12 @@ export default function CodeWorkspace({ question }) {
   const onChange = useCallback(
     (v) => {
       setCode(v);
+      setSaved(false);
       clearTimeout(saveTimer.current);
-      saveTimer.current = setTimeout(() => dispatch({ type: 'Q_SAVE_CODE', qid: question.id, code: v }), 600);
+      saveTimer.current = setTimeout(() => {
+        dispatch({ type: 'Q_SAVE_CODE', qid: question.id, code: v });
+        setSaved(true);
+      }, 600);
     },
     [dispatch, question.id],
   );
@@ -94,7 +122,7 @@ export default function CodeWorkspace({ question }) {
       setTab('tests');
       const subset = mode === 'submit' ? tests : tests.slice(0, VISIBLE_TESTS);
       const res = await runInWorker({ code, question, tests: subset });
-      setRun({ mode, res, tests: subset });
+      setRun({ mode, res, tests: subset, at: new Date() });
       const passed = res.results.filter((r) => r.passed).length;
       const total = subset.length;
       if (mode === 'submit') dispatch({ type: 'Q_SUBMIT', qid: question.id, passed, total, allPassed: !res.compileError && passed === total });
@@ -138,205 +166,258 @@ export default function CodeWorkspace({ question }) {
     passed: run.res.results.filter((r) => r.passed).length,
     total: run.res.results.length,
     ms: run.res.results.reduce((s, r) => s + (r.ms || 0), 0),
+    slowest: Math.max(0, ...run.res.results.map((r) => r.ms || 0)),
     timedOut: !!run.res.timeout,
   };
   const accepted = summary && summary.passed === summary.total && run.mode === 'submit';
+  const allPass = summary && summary.passed === summary.total;
+  const failing = summary ? summary.total - summary.passed : run?.res.compileError ? 1 : 0;
   const solved = qs.status === 'solved';
+  const firstFail = run?.res.results.find((r) => !r.passed && !r.skipped);
+  const tone = accepted ? 'ok' : allPass ? 'uv' : 'bad';
+  const at = run?.at ? run.at.toTimeString().slice(0, 5) : '';
 
   return (
-    <div className="workspace">
-      <div className="workspace-toolbar">
-        <span className="badge badge-accent mono">JavaScript</span>
-        <span className="small faint">Toolkit classes (MinHeap, Deque, UnionFind…) are available globally.</span>
-        <span className="spacer" />
-        <button type="button" className="btn btn-ghost btn-sm" onClick={reset} title="Reset to starter code">
-          <Icon name="rotate" size={14} /> Reset
-        </button>
-        <button type="button" className="btn btn-sm" onClick={() => execute('run')} disabled={running} title="Run visible tests (Ctrl/⌘+Enter)">
-          <Icon name="play" size={14} /> Run
-        </button>
-        <button type="button" className="btn btn-primary btn-sm" onClick={() => execute('submit')} disabled={running} title="Run all tests (Ctrl/⌘+Shift+Enter)">
-          <Icon name="send" size={14} /> Submit
-        </button>
-      </div>
-      <div className="workspace-editor">
-        <CodeEditor value={code} onChange={onChange} onRun={() => execute('run')} onSubmit={() => execute('submit')} label={`${question.title} solution editor`} />
-      </div>
-      <div className="workspace-bottom">
-        <div className="tabs workspace-tabs" role="tablist">
-          <button type="button" role="tab" className="tab" aria-selected={tab === 'tests'} onClick={() => setTab('tests')}>
-            Test results
+    <div className="qp-work">
+      {/* ---------- editor (dark island) ---------- */}
+      <section className="qp-ed" aria-label="Code editor">
+        <div className="qp-ed-bar">
+          <span className="qp-file">
+            <i aria-hidden="true" />
+            solution.js
+          </span>
+          <span className="tag qp-ed-lang">JavaScript</span>
+          <span className="qp-ed-hint">MinHeap, Deque, UnionFind… are global</span>
+          <span className="qp-sp" />
+          <button type="button" className="iconbtn qp-ed-reset" onClick={reset} title="Reset to starter code" aria-label="Reset to starter code">
+            <Icon name="rotate" size={16} />
           </button>
-          <button type="button" role="tab" className="tab" aria-selected={tab === 'cases'} onClick={() => setTab('cases')}>
-            Test cases
+          <button type="button" className="btn btn--chrome btn--sm" onClick={() => execute('run')} disabled={running} title={`Run the visible tests (${MOD}+Enter)`}>
+            <Icon name="play" size={14} /> Run
           </button>
-          <button type="button" role="tab" className="tab" aria-selected={tab === 'custom'} onClick={() => setTab('custom')}>
-            Custom input
-          </button>
-          <button type="button" role="tab" className="tab" aria-selected={tab === 'complexity'} onClick={() => setTab('complexity')}>
-            Complexity
+          <button type="button" className="btn btn--plasma btn--sm" onClick={() => execute('submit')} disabled={running} title={`Run all tests (${MOD}+Shift+Enter)`}>
+            Submit <Icon name="send" size={14} />
           </button>
         </div>
-        <div className="workspace-panel" aria-live="polite">
-          {running && <div className="muted small">Running…</div>}
+        <div className="qp-ed-body">
+          <CodeEditor value={code} onChange={onChange} onRun={() => execute('run')} onSubmit={() => execute('submit')} label={`${question.title} solution editor`} />
+        </div>
+        <div className="qp-ed-foot">
+          <span>{saved ? 'autosaved' : 'saving…'}</span>
+          <span className="qp-sp" />
+          <span>
+            <span className="kbd">{MOD} ↵</span> run
+          </span>
+          <span>
+            <span className="kbd">{MOD} ⇧ ↵</span> submit
+          </span>
+        </div>
+      </section>
+
+      {/* ---------- results console ---------- */}
+      <section className="qp-con" aria-label="Tests">
+        <div className="qp-con-tabs" role="tablist">
+          <button type="button" role="tab" aria-selected={tab === 'tests'} onClick={() => setTab('tests')}>
+            <Icon name="checkCircle" size={15} /> Test results
+            {failing > 0 && <span className="qp-con-n">{failing} failing</span>}
+          </button>
+          <button type="button" role="tab" aria-selected={tab === 'cases'} onClick={() => setTab('cases')}>
+            Test cases
+          </button>
+          <button type="button" role="tab" aria-selected={tab === 'custom'} onClick={() => setTab('custom')}>
+            Custom input
+          </button>
+          <button type="button" role="tab" aria-selected={tab === 'complexity'} onClick={() => setTab('complexity')}>
+            Complexity
+          </button>
+          <span className="qp-sp" />
+          {run && (
+            <span className="qp-con-meta">
+              {run.mode} · {at}
+            </span>
+          )}
+        </div>
+        <div className="qp-con-body" aria-live="polite">
+          {running && (
+            <div className="qp-running">
+              <span className="qp-running-dot" aria-hidden="true" /> Running in a sandboxed worker…
+            </div>
+          )}
           {!running && tab === 'tests' && (
             <>
-              {!run && <div className="muted small">Press <strong>Run</strong> to test against the {Math.min(VISIBLE_TESTS, tests.length)} example cases, or <strong>Submit</strong> to run all {tests.length} tests.</div>}
+              {!run && (
+                <div className="qp-empty">
+                  Press <b>Run</b> to test against the <span className="mono">{Math.min(VISIBLE_TESTS, tests.length)}</span> example cases, or <b>Submit</b> to run all{' '}
+                  <span className="mono">{tests.length}</span> tests.
+                </div>
+              )}
               {run?.res.compileError && (
-                <div className="result result-fail">
-                  <div className="result-head">
-                    <Icon name="alert" size={15} /> {run.res.timeout ? 'Time Limit Exceeded' : 'Error'}
+                <div className="qp-verdict qp-verdict--bad">
+                  <span className="qp-verdict-big">
+                    0<small> / {run.tests.length}</small>
+                  </span>
+                  <div>
+                    <h3>{run.res.timeout ? 'Time Limit Exceeded' : 'Your code threw before any test finished'}</h3>
+                    <pre className="qp-err qp-compile">{run.res.compileError}</pre>
                   </div>
-                  <pre className="result-error mono small" style={{ padding: '0 0.75rem 0.75rem' }}>{run.res.compileError}</pre>
+                  <span className="chip qp-chip--bad">
+                    <Icon name="alert" size={13} /> Error
+                  </span>
                 </div>
               )}
               {summary && (
-                <div className={`run-summary ${accepted ? 'ok' : summary.passed === summary.total ? 'partial-ok' : 'bad'}`}>
-                  <Icon name={summary.passed === summary.total ? 'checkCircle' : 'alert'} size={18} />
-                  <div>
-                    <div className="run-summary-title">
-                      {accepted ? 'Accepted' : summary.passed === summary.total ? 'All example tests pass — now Submit' : `${summary.total - summary.passed} test${summary.total - summary.passed > 1 ? 's' : ''} failing`}
+                <>
+                  <div className={`qp-verdict qp-verdict--${tone}`}>
+                    <span className="qp-verdict-big">
+                      {summary.passed}
+                      <small> / {summary.total}</small>
+                    </span>
+                    <div>
+                      <h3>
+                        {accepted
+                          ? 'Accepted'
+                          : allPass
+                            ? 'All example tests pass — now Submit'
+                            : firstFail
+                              ? `Wrong answer on “${run.tests[firstFail.index].scenario || `Test ${firstFail.index + 1}`}”`
+                              : `${failing} test${failing > 1 ? 's' : ''} failing`}
+                      </h3>
+                      <p>
+                        {run.mode === 'submit' ? 'Submit ran all' : 'Run checked'} <span className="mono">{summary.total}</span> tests · <span className="mono">{summary.ms.toFixed(1)} ms</span> total
+                        {run.res.timeout && ' · stopped: one test ran out of time'}
+                        {!allPass && ` · ${failing} scenario${failing > 1 ? 's' : ''} your code doesn't handle yet`}
+                      </p>
                     </div>
-                    <div className="small muted">
-                      {summary.passed}/{summary.total} passed · {summary.ms.toFixed(1)} ms total
-                      {run.res.timeout && ' · stopped: one test ran out of time'}
-                      {accepted && question.complexity && ` · Target: ${question.complexity.time} time, ${question.complexity.space} space`}
+                    <span className={`chip ${accepted ? 'qp-chip--ok' : allPass ? 'qp-chip--uv' : 'qp-chip--bad'}`}>
+                      <Icon name={accepted ? 'checkCircle' : allPass ? 'send' : 'x'} size={13} /> {accepted ? 'Accepted' : allPass ? 'Examples pass' : 'Rejected'}
+                    </span>
+                  </div>
+                  <div className="qp-cases" style={{ '--n': run.res.results.length }} aria-label={`${summary.total} tests: ${summary.passed} pass`}>
+                    {run.res.results.map((r) => (
+                      <i key={r.index} className={`${r.passed ? '' : r.skipped ? 's' : 'f'}${run.tests[r.index].timeLimitMs ? ' t' : ''}`} title={run.tests[r.index].scenario || `Test ${r.index + 1}`} />
+                    ))}
+                  </div>
+                  <div className="qp-cases-l">
+                    <span>
+                      1 – {Math.min(VISIBLE_TESTS, run.tests.length)} · examples
+                    </span>
+                    {run.tests.length > VISIBLE_TESTS && <span>{VISIBLE_TESTS + 1} – {run.tests.length} hidden</span>}
+                    <span>slowest {summary.slowest.toFixed(1)} ms</span>
+                  </div>
+                  {accepted && question.complexity && (
+                    <div className="qp-accepted-cx">
+                      <span className="lbl-mono">target</span>
+                      <span className={`bigo ${bigoClass(question.complexity.time)}`}>{question.complexity.time} time</span>
+                      <span className={`bigo ${bigoClass(question.complexity.space)}`}>{question.complexity.space} space</span>
                     </div>
-                  </div>
+                  )}
+                  {run.mode === 'run' && allPass && tests.length > VISIBLE_TESTS && (
+                    <div className="qp-also">
+                      Submit also checks: {tests.slice(VISIBLE_TESTS).map((t) => t.scenario).filter(Boolean).join(' · ')}
+                    </div>
+                  )}
+                </>
+              )}
+              {run && run.res.results.length > 0 && (
+                <div className="tests qp-tests">
+                  {run.res.results.map((r) => (
+                    <ResultCard key={`${run.mode}-${r.index}-${run.at?.getTime()}`} r={r} test={run.tests[r.index]} question={question} defaultOpen={firstFail === r} />
+                  ))}
                 </div>
               )}
-              {summary && summary.passed < summary.total && (
-                <div className="missed-scenarios">
-                  <div className="small" style={{ fontWeight: 600 }}>Scenarios your code doesn't handle yet:</div>
-                  <div className="row-wrap">
-                    {run.res.results
-                      .filter((r) => !r.passed && !r.skipped)
-                      .map((r) => (
-                        <span key={r.index} className="badge badge-danger" title={run.tests[r.index].hint}>
-                          {run.tests[r.index].scenario || `Test ${r.index + 1}`}
-                        </span>
-                      ))}
-                  </div>
-                </div>
-              )}
-              {summary && run.mode === 'run' && summary.passed === summary.total && tests.length > VISIBLE_TESTS && (
-                <div className="small muted">
-                  Submit also checks: {tests.slice(VISIBLE_TESTS).map((t) => t.scenario).filter(Boolean).join(' · ')}
-                </div>
-              )}
-              {run &&
-                run.res.results.map((r) => (
-                  <ResultCard key={`${run.mode}-${r.index}`} r={r} test={run.tests[r.index]} question={question} defaultOpen={!r.passed && run.res.results.filter((x) => !x.passed)[0] === r} />
-                ))}
             </>
           )}
           {!running && tab === 'cases' && (
-            <div className="stack-sm">
+            <div className="qp-stack">
               {tests.slice(0, VISIBLE_TESTS).map((t, i) => (
-                <div key={i} className="case">
-                  <div className="small muted">
+                <div key={i} className="qp-case">
+                  <div className="lbl-mono">
                     Test {i + 1}
                     {t.scenario ? ` · ${t.scenario}` : ''}
                   </div>
-                  <pre className="mono small">{describeTest(question, t)}</pre>
-                  <div className="small">
-                    Expected: <code>{t.expectedAnyOf ? t.expectedAnyOf.map((e) => format(e)).join(' or ') : question.checker ? 'any valid answer' : format(resolveExpected(t))}</code>
+                  <div className="qp-diff">
+                    <span className="qp-diff-k">Input</span>
+                    <pre className="qp-diff-v">{describeTest(question, t)}</pre>
+                    <span className="qp-diff-k">Expected</span>
+                    <pre className="qp-diff-v exp">{t.expectedAnyOf ? t.expectedAnyOf.map((e) => format(e)).join(' or ') : question.checker ? 'any valid answer' : format(resolveExpected(t))}</pre>
                   </div>
                 </div>
               ))}
               {tests.length > VISIBLE_TESTS && (
-                <div className="small">
-                  <div className="muted" style={{ marginBottom: '0.35rem' }}>
-                    + {tests.length - VISIBLE_TESTS} hidden tests run on Submit. Think about whether your code handles each of these before submitting:
-                  </div>
-                  <div className="row-wrap">
+                <div className="qp-hidden">
+                  <p>
+                    + <span className="mono">{tests.length - VISIBLE_TESTS}</span> hidden tests run on Submit. Think about whether your code handles each of these before submitting:
+                  </p>
+                  <div className="qp-chips">
                     {tests.slice(VISIBLE_TESTS).map((t, i) => (
-                      <span key={i} className="badge badge-outline">
+                      <span key={i} className="tag">
                         {t.scenario || `Hidden test ${i + 1}`}
                         {t.timeLimitMs ? ' ⏱' : ''}
                       </span>
                     ))}
                   </div>
-                  {tests.some((t) => t.timeLimitMs) && <div className="faint" style={{ marginTop: '0.35rem' }}>⏱ = timed test: a correct but too-slow solution fails it.</div>}
+                  {tests.some((t) => t.timeLimitMs) && <p className="qp-faint">⏱ = timed test: a correct but too-slow solution fails it.</p>}
                 </div>
               )}
             </div>
           )}
           {!running && tab === 'custom' && (
-            <div className="stack-sm">
-              <label className="small muted" htmlFor={`custom-${question.id}`}>
+            <div className="qp-stack">
+              <label className="lbl-mono" htmlFor={`custom-${question.id}`}>
                 {question.kind === 'design' ? 'Operations as JSON: {"ops": [...], "args": [...]}' : `Arguments as a JSON array: [${(question.paramNames || []).join(', ')}]`}
               </label>
-              <textarea id={`custom-${question.id}`} className="textarea" rows={3} value={custom} onChange={(e) => setCustom(e.target.value)} spellCheck={false} />
-              <div className="row">
-                <button type="button" className="btn btn-sm btn-primary" onClick={runCustom}>
+              <textarea id={`custom-${question.id}`} className="textarea qp-custom" rows={3} value={custom} onChange={(e) => setCustom(e.target.value)} spellCheck={false} />
+              <div className="qp-row">
+                <button type="button" className="btn btn--chrome btn--sm" onClick={runCustom}>
                   <Icon name="play" size={14} /> Run custom input
                 </button>
-                <span className="small faint">The reference solution runs on the same input so you can compare.</span>
+                <span className="qp-faint">The reference solution runs on the same input so you can compare.</span>
               </div>
-              {customRun?.error && <div className="result-error small">{customRun.error}</div>}
+              {customRun?.error && <div className="qp-err">{customRun.error}</div>}
               {customRun?.mine && (
-                <div className="grid-2">
-                  <div className="case">
-                    <div className="small muted">Your output</div>
-                    <pre className={`mono small ${customRun.mine.compileError || customRun.mine.results[0]?.error ? 'result-error' : ''}`}>
-                      {customRun.mine.compileError || customRun.mine.results[0]?.error || customRun.mine.results[0]?.output}
-                    </pre>
-                    {customRun.mine.results[0]?.logs?.length > 0 && <pre className="mono small muted">{customRun.mine.results[0].logs.join('\n')}</pre>}
-                  </div>
-                  <div className="case">
-                    <div className="small muted">Expected (reference solution)</div>
-                    <pre className="mono small">{customRun.ref ? customRun.ref.compileError || customRun.ref.results[0]?.error || customRun.ref.results[0]?.output : '—'}</pre>
-                  </div>
+                <div className="qp-diff qp-diff--custom">
+                  <span className="qp-diff-k">Yours</span>
+                  <pre className={`qp-diff-v ${customRun.mine.compileError || customRun.mine.results[0]?.error ? 'qp-err' : ''}`}>
+                    {customRun.mine.compileError || customRun.mine.results[0]?.error || customRun.mine.results[0]?.output}
+                  </pre>
+                  {customRun.mine.results[0]?.logs?.length > 0 && (
+                    <>
+                      <span className="qp-diff-k">Console</span>
+                      <pre className="qp-diff-v">{customRun.mine.results[0].logs.join('\n')}</pre>
+                    </>
+                  )}
+                  <span className="qp-diff-k">Reference</span>
+                  <pre className="qp-diff-v exp">{customRun.ref ? customRun.ref.compileError || customRun.ref.results[0]?.error || customRun.ref.results[0]?.output : '—'}</pre>
                 </div>
               )}
             </div>
           )}
           {!running && tab === 'complexity' && (
-            <div className="stack-sm">
-              {solved || qs.solutionViewed ? (
-                <div className="complexity-pills">
-                  <div>
-                    <div className="small muted">Target time</div>
-                    <div className="complexity-value">{question.complexity?.time}</div>
-                  </div>
-                  <div>
-                    <div className="small muted">Target space</div>
-                    <div className="complexity-value">{question.complexity?.space}</div>
-                  </div>
-                </div>
-              ) : (
-                <ComplexityGuess question={question} />
+            <div className="qp-stack">
+              {solved || qs.solutionViewed ? <Targets question={question} /> : <ComplexityGuess question={question} />}
+              {summary && (
+                <p className="qp-faint">
+                  Last run: <span className="mono">{summary.ms.toFixed(2)} ms</span> across <span className="mono">{summary.total}</span> tests (small inputs — timing is a sanity check, not a complexity proof).
+                </p>
               )}
-              {summary && <div className="small muted">Last run: {summary.ms.toFixed(2)} ms across {summary.total} tests (small inputs — timing is a sanity check, not a complexity proof).</div>}
             </div>
           )}
         </div>
-      </div>
+      </section>
     </div>
   );
 }
 
 function ComplexityGuess({ question }) {
   const [shown, setShown] = useState(false);
-  if (shown)
-    return (
-      <div className="complexity-pills">
-        <div>
-          <div className="small muted">Target time</div>
-          <div className="complexity-value">{question.complexity?.time}</div>
-        </div>
-        <div>
-          <div className="small muted">Target space</div>
-          <div className="complexity-value">{question.complexity?.space}</div>
-        </div>
-      </div>
-    );
+  if (shown) return <Targets question={question} />;
   return (
-    <div className="stack-sm">
-      <div className="small">Before looking: what time and space complexity is your solution? Check the constraints — they tell you the target (e.g. n ≤ 10⁵ usually means O(n) or O(n log n)).</div>
+    <div className="qp-stack">
+      <p className="qp-p">
+        Before looking: what time and space complexity is your solution? Check the constraints — they tell you the target (e.g. n ≤ 10⁵ usually means O(n) or O(n log n)).
+      </p>
       <div>
-        <button type="button" className="btn btn-sm" onClick={() => setShown(true)}>
+        <button type="button" className="btn btn--ghost btn--sm" onClick={() => setShown(true)}>
           Show target complexity
         </button>
       </div>

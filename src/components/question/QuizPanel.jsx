@@ -19,14 +19,16 @@ export default function QuizPanel({ question }) {
   };
 
   return (
-    <div className="quiz">
-      <div className={`checkpoint ${result ? (result.correct ? 'is-correct' : 'is-wrong') : ''}`}>
-        <div className="checkpoint-head">
-          <span className="checkpoint-tag">
-            <Icon name="help" size={15} /> Your answer
+    <div className="qp-quiz">
+      <section className={`tile qp-quiz-card ${result ? (result.correct ? 'is-correct' : 'is-wrong') : ''}`} aria-label="Your answer">
+        <div className="qp-quiz-h">
+          <span className="eyebrow">
+            <i className="pip pip--uv" />
+            Your answer
           </span>
+          {result && <span className={`chip ${result.correct ? 'qp-chip--ok' : 'qp-chip--bad'}`}>{result.correct ? 'Correct' : 'Not quite'}</span>}
         </div>
-        <div className="options">
+        <div className="options" role="radiogroup" aria-label="Answer options">
           {quiz.options.map((opt, i) => {
             let state = '';
             if (result && i === quiz.answer && result.correct) state = 'correct';
@@ -42,8 +44,8 @@ export default function QuizPanel({ question }) {
           })}
         </div>
         {!result && (
-          <div className="row" style={{ marginTop: '0.75rem' }}>
-            <button type="button" className="btn btn-primary" disabled={selected === null} onClick={submit}>
+          <div className="qp-row qp-quiz-act">
+            <button type="button" className="btn btn--plasma btn--sm" disabled={selected === null} onClick={submit}>
               Check answer
             </button>
           </div>
@@ -62,22 +64,27 @@ export default function QuizPanel({ question }) {
               <Icon name="alert" size={17} /> Not quite — count the work again.
             </div>
             {quiz.misconceptions?.[result.choice] && <Markdown>{quiz.misconceptions[result.choice]}</Markdown>}
-            <div className="row" style={{ marginTop: '0.5rem' }}>
-              <button type="button" className="btn btn-sm btn-primary" onClick={() => { setResult(null); setSelected(null); }}>
+            <div className="qp-row qp-quiz-act">
+              <button type="button" className="btn btn--plasma btn--sm" onClick={() => { setResult(null); setSelected(null); }}>
                 Try again
               </button>
-              <button type="button" className="btn btn-sm btn-ghost" onClick={() => setResult({ choice: quiz.answer, correct: true })}>
+              <button type="button" className="btn btn--ghost btn--sm" onClick={() => setResult({ choice: quiz.answer, correct: true })}>
                 Show explanation
               </button>
             </div>
           </div>
         )}
-      </div>
+      </section>
       {result?.correct && question.approach && (
-        <div className="card" style={{ marginTop: '1rem' }}>
-          <h4>How to analyse it</h4>
-          <Markdown>{question.approach}</Markdown>
-        </div>
+        <section className="tile qp-quiz-card">
+          <span className="eyebrow">
+            <i className="pip pip--ice" />
+            How to analyse it
+          </span>
+          <div className="qp-rung-body">
+            <Markdown>{question.approach}</Markdown>
+          </div>
+        </section>
       )}
     </div>
   );

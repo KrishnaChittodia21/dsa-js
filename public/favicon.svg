@@ -1,18 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Kinetic Voxel mark: three ascending voxel columns (a sorted array) on a graphite tile -->
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#6366f1"/>
-      <stop offset="0.45" stop-color="#8b5cf6"/>
-      <stop offset="1" stop-color="#06b6d4"/>
-    </linearGradient>
+    <linearGradient id="lgF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFB07A"/><stop offset=".55" stop-color="#FF6B2C"/><stop offset="1" stop-color="#FF2E88"/></linearGradient>
+    <linearGradient id="lgS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B8336A"/><stop offset="1" stop-color="#5E1238"/></linearGradient>
   </defs>
-  <rect width="64" height="64" rx="15" fill="url(#g)"/>
-  <!-- lucide "network" (v1.49.0), the same mark as the in-app brand tile -->
-  <g transform="translate(12 12) scale(1.6667)" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="16" y="16" width="6" height="6" rx="1"/>
-    <rect x="2" y="16" width="6" height="6" rx="1"/>
-    <rect x="9" y="2" width="6" height="6" rx="1"/>
-    <path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/>
-    <path d="M12 12V8"/>
+  <rect width="64" height="64" rx="16" fill="#16141A"/>
+  <g transform="translate(11 9) scale(1.62)">
+    <path d="M2 24V17h5v7z" fill="url(#lgF)"/><path d="M2 17l2.5-2.5h5L7 17z" fill="#FFD9C2"/><path d="M7 17l2.5-2.5V21.5L7 24z" fill="url(#lgS)"/>
+    <path d="M9.5 24V11.5h5V24z" fill="url(#lgF)"/><path d="M9.5 11.5L12 9h5l-2.5 2.5z" fill="#FFD9C2"/><path d="M14.5 11.5L17 9v12.5L14.5 24z" fill="url(#lgS)"/>
+    <path d="M17 24V5.5h5V24z" fill="url(#lgF)"/><path d="M17 5.5L19.5 3h5L22 5.5z" fill="#FFF1E8"/><path d="M22 5.5L24.5 3v18.5L22 24z" fill="url(#lgS)"/>
   </g>
 </svg>

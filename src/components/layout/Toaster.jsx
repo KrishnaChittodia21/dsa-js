@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { PartyPopper, X } from 'lucide-react';
 import { dismissToast, getToasts, subscribeToasts } from '../../lib/celebrate.js';
 
-/** Bottom-right toasts (auto-hide after 3s), announced politely to screen readers. */
+/** Kinetic Voxel capsule toasts, bottom-right above the dock (auto-hide after 3s), announced politely to screen readers. */
 export default function Toaster() {
   const toasts = useSyncExternalStore(subscribeToasts, getToasts);
   return (
@@ -19,13 +19,15 @@ export default function Toaster() {
             exit={{ opacity: 0, y: 8, transition: { duration: 0.15 } }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
           >
-            <PartyPopper size={20} aria-hidden="true" className="toast-icon" />
-            <div>
+            <span className="toast-icon" aria-hidden="true">
+              <PartyPopper />
+            </span>
+            <div className="toast-text">
               <strong>{t.title}</strong>
-              {t.detail && <div className="small muted">{t.detail}</div>}
+              {t.detail && <span className="toast-detail">{t.detail}</span>}
             </div>
-            <button type="button" className="btn btn-ghost btn-icon" aria-label="Dismiss" onClick={() => dismissToast(t.id)}>
-              <X size={16} aria-hidden="true" />
+            <button type="button" className="toast-x" aria-label="Dismiss" onClick={() => dismissToast(t.id)}>
+              <X aria-hidden="true" />
             </button>
           </motion.div>
         ))}

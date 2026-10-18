@@ -1,16 +1,13 @@
 import { Link } from 'react-router-dom';
 import Markdown from '../ui/Markdown.jsx';
 import CodeBlock from '../ui/CodeBlock.jsx';
-import Icon from '../ui/Icon.jsx';
-import { DifficultyBadge } from '../ui/primitives.jsx';
 import DryRunTable from '../lesson/DryRunTable.jsx';
 import PatternChallenge from './PatternChallenge.jsx';
 import Reveal from './Reveal.jsx';
 import { useProgress } from '../../state/ProgressContext.jsx';
 import { patternById, companiesForQuestion, companyById } from '../../content/index.js';
 import EvidenceBadge from '../EvidenceBadge.jsx';
-import PatternVisual, { hasVisual } from '../PatternVisual.jsx';
-import { useState } from 'react';
+import { bigoClass } from '../../visualizations/complexity.js';
 
 export function DryRun({ dryRun }) {
   if (!dryRun) return null;
@@ -18,9 +15,15 @@ export function DryRun({ dryRun }) {
   return <DryRunTable columns={dryRun.columns} rows={dryRun.rows} note={dryRun.note} title={dryRun.title} />;
 }
 
+/** Two-letter monogram for a company (text only, never a logo). */
+export const monogram = (name = '') => {
+  const words = name.replace(/[^A-Za-z0-9 ]/g, ' ').trim().split(/\s+/);
+  return (words.length > 1 ? words[0][0] + words[1][0] : (words[0] || '?').slice(0, 2)).replace(/^./, (c) => c.toUpperCase());
+};
+
 export function SolutionDetails({ question }) {
   return (
-    <div className="stack">
+    <div className="qp-sol">
       {question.solution?.code && <CodeBlock code={question.solution.code} title="Reference solution" />}
       {question.solution?.explanation && <Markdown>{question.solution.explanation}</Markdown>}
       {question.dryRun && (
@@ -30,15 +33,15 @@ export function SolutionDetails({ question }) {
         </div>
       )}
       {question.complexity && (
-        <div className="complexity-card">
-          <div className="complexity-pills">
+        <div className="qp-sol-cx">
+          <div className="qp-cx-targets">
             <div>
-              <div className="small muted">Time</div>
-              <div className="complexity-value">{question.complexity.time}</div>
+              <span className="lbl-mono">time</span>
+              <span className={`bigo ${bigoClass(question.complexity.time)}`}>{question.complexity.time}</span>
             </div>
             <div>
-              <div className="small muted">Space</div>
-              <div className="complexity-value">{question.complexity.space}</div>
+              <span className="lbl-mono">space</span>
+              <span className={`bigo ${bigoClass(question.complexity.space)}`}>{question.complexity.space}</span>
             </div>
           </div>
           {question.complexity.explanation && <Markdown>{question.complexity.explanation}</Markdown>}
@@ -49,7 +52,7 @@ export function SolutionDetails({ question }) {
           <h4>Alternative: {question.alternative.title}</h4>
           <Markdown>{question.alternative.md}</Markdown>
           {question.alternative.code && <CodeBlock code={question.alternative.code} />}
-          {question.alternative.complexity && <div className="small muted">Complexity: {question.alternative.complexity}</div>}
+          {question.alternative.complexity && <p className="qp-faint">Complexity: {question.alternative.complexity}</p>}
         </div>
       )}
       {question.mistakes?.length > 0 && (
@@ -68,7 +71,7 @@ export function SolutionDetails({ question }) {
   );
 }
 
-export default function ProblemPanel({ question, topic }) {
+export default function ProblemPanel({ question }) {
   const { progress, dispatch } = useProgress();
   const qs = progress.questions[question.id] || {};
   const solved = qs.status === 'solved';
@@ -80,151 +83,126 @@ export default function ProblemPanel({ question, topic }) {
   const approachOpen = !!qs.approachViewed || qs.solutionViewed || solved;
 
   return (
-    <div className="problem">
-      <div className="problem-head">
-        <div className="row-wrap small">
-          <Link to={`/topic/${topic.id}?tab=practice`} className="muted">
-            {topic.title}
-          </Link>
-          <Icon name="chevronRight" size={12} />
-          <DifficultyBadge difficulty={question.difficulty} />
-          {question.source?.platform === 'LeetCode' && question.source.url && (
-            <a href={question.source.url} target="_blank" rel="noreferrer" className="badge badge-outline">
-              LeetCode {question.source.number ? `#${question.source.number}` : ''} {question.source.premium ? '· Premium' : ''} <Icon name="external" size={11} />
-            </a>
-          )}
-          {question.source?.platform === 'Classic' && <span className="badge badge-outline">Classic problem</span>}
-          {solved && (
-            <span className="badge badge-success">
-              <Icon name="check" size={12} /> Solved
-            </span>
-          )}
-        </div>
-        <h1 className="problem-title">{question.title}</h1>
-      </div>
-
-      <section className="problem-section">
+    <div className="qp-prob">
+      <section className="qp-statement">
         <Markdown>{question.statement}</Markdown>
-        {question.examples?.map((ex, i) => (
-          <div key={i} className="example">
-            <div className="example-title">Example {i + 1}</div>
-            <div className="mono small">
-              <div>
-                <strong>Input:</strong> {ex.input}
-              </div>
-              <div>
-                <strong>Output:</strong> {ex.output}
-              </div>
-            </div>
-            {ex.explanation && <Markdown className="small muted">{ex.explanation}</Markdown>}
-          </div>
-        ))}
-        {question.constraints?.length > 0 && (
-          <div>
-            <div className="example-title">Constraints</div>
-            <ul className="constraints">
-              {question.constraints.map((c) => (
-                <li key={c}>
-                  <code>{c}</code>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
       </section>
+
+      {question.examples?.map((ex, i) => (
+        <div key={i} className="qp-ex-wrap">
+          <span className="lbl-mono">Example {i + 1}</span>
+          <div className="qp-ex">
+            <span className="k">Input</span>
+            <span className="v">{ex.input}</span>
+            <span className="k">Output</span>
+            <span className="v">{ex.output}</span>
+            {ex.explanation && (
+              <div className="why">
+                <Markdown>{ex.explanation}</Markdown>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+
+      {question.constraints?.length > 0 && (
+        <div className="qp-cons">
+          <span className="lbl-mono">Constraints</span>
+          <div className="qp-chips">
+            {question.constraints.map((c) => (
+              <code key={c} className="qp-il">
+                {c}
+              </code>
+            ))}
+          </div>
+        </div>
+      )}
 
       {question.kind !== 'quiz' && (
         <>
           {question.think && (
-            <section className="think">
-              <div className="reveal-title">
-                <Icon name="brain" size={16} /> Think about it first
-              </div>
+            <section className="qp-think">
+              <span className="eyebrow">
+                <i className="pip pip--uv" />
+                Think about it first
+              </span>
               <Markdown>{question.think}</Markdown>
             </section>
           )}
 
-          <PatternChallenge question={question} />
+          <div className="qp-ladder" aria-label="Hints ladder">
+            <PatternChallenge question={question} />
 
-          {pattern && hasVisual(pattern) && <PatternMotion pattern={pattern} locked={!guessed} />}
+            {hints.map((h, i) => (
+              <Reveal
+                key={i}
+                title={`Hint ${i + 1}`}
+                open={hintsShown > i}
+                onOpen={() => dispatch({ type: 'Q_HINT', qid: question.id, count: i + 1 })}
+                locked={!guessed || hintsShown < i}
+                lockedText={!guessed ? 'Answer the pattern question first.' : `Open hint ${i} first.`}
+                meta="opened"
+              >
+                <Markdown>{h}</Markdown>
+              </Reveal>
+            ))}
 
-          {hints.map((h, i) => (
             <Reveal
-              key={i}
-              title={`Hint ${i + 1}`}
-              open={hintsShown > i}
-              onOpen={() => dispatch({ type: 'Q_HINT', qid: question.id, count: i + 1 })}
-              locked={!guessed || hintsShown < i}
-              lockedText={!guessed ? 'Answer the pattern question first.' : `Open hint ${i} first.`}
+              title="Approach"
+              icon="map"
+              open={approachOpen}
+              onOpen={() => dispatch({ type: 'Q_APPROACH', qid: question.id })}
+              locked={!guessed}
+              lockedText="Answer the pattern question first."
+              confirmText="The approach explains the full idea. Have you tried with the hints?"
+              closedMeta="asks first"
             >
-              <Markdown>{h}</Markdown>
+              <Markdown>{question.approach}</Markdown>
+              {pattern && (
+                <p className="qp-faint">
+                  Pattern: <Link to={`/patterns#${pattern.id}`}>{pattern.name}</Link>
+                </p>
+              )}
             </Reveal>
-          ))}
 
-          <Reveal
-            title="Approach"
-            icon="map"
-            open={approachOpen}
-            onOpen={() => dispatch({ type: 'Q_APPROACH', qid: question.id })}
-            locked={!guessed}
-            lockedText="Answer the pattern question first."
-            confirmText="The approach explains the full idea. Have you tried with the hints?"
-          >
-            <Markdown>{question.approach}</Markdown>
-            {pattern && (
-              <p className="small muted">
-                Pattern: <Link to={`/patterns#${pattern.id}`}>{pattern.name}</Link>
-              </p>
-            )}
-          </Reveal>
-
-          <Reveal
-            title="Solution"
-            icon="code"
-            tone="solution"
-            open={!!qs.solutionViewed || solved}
-            onOpen={() => dispatch({ type: 'Q_VIEW_SOLUTION', qid: question.id })}
-            locked={!guessed}
-            lockedText="Answer the pattern question first."
-            confirmText={solved ? undefined : 'Viewing the solution before solving is recorded (it helps find weak areas). Show it?'}
-          >
-            <SolutionDetails question={question} />
-          </Reveal>
+            <Reveal
+              title="Solution"
+              icon="code"
+              tone="solution"
+              open={!!qs.solutionViewed || solved}
+              onOpen={() => dispatch({ type: 'Q_VIEW_SOLUTION', qid: question.id })}
+              locked={!guessed}
+              lockedText="Answer the pattern question first."
+              confirmText={solved ? undefined : 'Viewing the solution before solving is recorded (it helps find weak areas). Show it?'}
+              closedMeta={solved ? 'tap to reveal' : 'viewing is recorded'}
+            >
+              <SolutionDetails question={question} />
+            </Reveal>
+          </div>
         </>
       )}
 
       {companyRefs.length > 0 && (
-        <section className="problem-section">
-          <div className="example-title">Company associations</div>
-          <div className="row-wrap">
-            {companyRefs.map((c, i) => (
-              <span key={i} className="row small" style={{ gap: '0.35rem' }}>
-                <Link to={`/companies/${c.company}`}>{companyById[c.company]?.name || c.company}</Link>
-                <EvidenceBadge evidence={c.evidence} />
-              </span>
-            ))}
-          </div>
+        <section className="qp-cos">
+          <span className="lbl-mono">
+            Company associations · <span className="t-2">{companyRefs.length}</span>
+          </span>
+          <ul className="qp-cos-list">
+            {companyRefs.map((c, i) => {
+              const name = companyById[c.company]?.name || c.company;
+              return (
+                <li key={i}>
+                  <span className="mono-badge" aria-hidden="true">
+                    {monogram(name)}
+                  </span>
+                  <Link to={`/companies/${c.company}`}>{name}</Link>
+                  <EvidenceBadge evidence={c.evidence} />
+                </li>
+              );
+            })}
+          </ul>
         </section>
       )}
     </div>
-  );
-}
-
-function PatternMotion({ pattern, locked }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <Reveal
-      title="Pattern in motion"
-      icon="play"
-      open={open}
-      onOpen={() => setOpen(true)}
-      locked={locked}
-      lockedText="Answer the pattern question first — the animation would give it away."
-    >
-      <p className="small muted" style={{ marginTop: 0 }}>
-        Watch <strong>{pattern.name}</strong> on a small example, then map each step onto this problem.
-      </p>
-      <PatternVisual pattern={pattern} compact />
-    </Reveal>
   );
 }

@@ -1,86 +1,187 @@
 import { Link } from 'react-router-dom';
-import { BarChart3, Check, Compass, Moon, Sun } from 'lucide-react';
+import { ArrowRight, BarChart3, Check, Compass, Moon, RotateCcw, Sun } from 'lucide-react';
 import { ACCENTS, useTheme } from '../state/ThemeContext.jsx';
 import { saveUiPrefs, useUiPrefs } from '../lib/uiPrefs.js';
 import { openGuide } from '../lib/appEvents.js';
+import { showToast } from '../lib/celebrate.js';
 
-/** Appearance (theme + accent colour), the guide (coach tips, replay the tour) and a pointer to progress data. */
+const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+const MOD = isMac ? '⌘' : 'Ctrl';
+
+const THEMES = [
+  { id: 'dark', label: 'Graphite', sub: 'dark', Icon: Moon },
+  { id: 'light', label: 'Porcelain', sub: 'light', Icon: Sun },
+];
+const ACCENT_NOTE = { plasma: 'default', volt: 'hot pink', uv: 'ultraviolet', ice: 'cool cyan' };
+
+const SHORTCUTS = [
+  [[MOD, 'K'], 'search anything'],
+  [['/'], 'search (when not typing)'],
+  [['?'], 'open the guide'],
+  [['←', '→'], 'step the tour or an animation'],
+  [['Ctrl', 'Enter'], 'run code'],
+  [['Ctrl', 'Shift', 'Enter'], 'submit'],
+  [['Esc'], 'close a dialog'],
+];
+
+/** Appearance (theme + accent), the guide (coach tips, replay the tour), shortcuts and a pointer to progress data. */
 export default function SettingsPage() {
   const { theme, setTheme, accent, setAccent } = useTheme();
   const ui = useUiPrefs();
-  return (
-    <div className="page page-narrow settings-page">
-      <div className="page-header">
-        <div>
-          <h1>Settings</h1>
-          <p>Saved in this browser. Your study progress lives on the Progress page.</p>
-        </div>
-      </div>
+  const dismissed = Object.keys(ui.coachDismissed || {}).length;
 
-      <section className="card form" aria-labelledby="set-appearance">
-        <h3 id="set-appearance">Appearance</h3>
-        <div className="field">
-          <span className="field-label" id="theme-label">
-            Theme
+  return (
+    <div className="page page-narrow set-page">
+      <header className="set-hero rise">
+        <span className="eyebrow">
+          <i className="pip" aria-hidden="true" />
+          ~/journey/settings
+        </span>
+        <h1 className="display display--s chrome">Settings</h1>
+        <p className="lead">Saved in this browser. Your study progress lives on the Progress page.</p>
+      </header>
+
+      {/* ---------- appearance ---------- */}
+      <section className="tile set-panel rise" style={{ '--i': 1 }} aria-labelledby="set-appearance">
+        <div className="set-panel-head">
+          <span className="eyebrow" id="set-appearance">
+            <i className="pip pip--uv" aria-hidden="true" />
+            Appearance
           </span>
-          <div className="row-wrap" role="group" aria-labelledby="theme-label">
-            {[
-              ['light', 'Light', Sun],
-              ['dark', 'Dark', Moon],
-            ].map(([v, label, Icon]) => (
-              <button key={v} type="button" className="chip" aria-pressed={theme === v} onClick={() => setTheme(v)}>
-                <Icon size={14} aria-hidden="true" /> {label}
+        </div>
+
+        <div className="set-row">
+          <div className="set-row-text">
+            <b id="set-theme-label">Theme</b>
+            <span>Graphite is the dark stage; Porcelain the light one.</span>
+          </div>
+          <div className="seg set-theme" role="group" aria-labelledby="set-theme-label">
+            {THEMES.map(({ id, label, sub, Icon }) => (
+              <button key={id} type="button" aria-pressed={theme === id} onClick={() => setTheme(id)} aria-label={`${label} (${sub} theme)`}>
+                <Icon aria-hidden="true" />
+                {label}
               </button>
             ))}
           </div>
         </div>
-        <div className="field">
-          <span className="field-label" id="accent-label">
-            Accent colour
-          </span>
-          <div className="accent-picker" role="group" aria-labelledby="accent-label">
+
+        <div className="set-row set-row--stack">
+          <div className="set-row-text">
+            <b id="set-accent-label">Accent</b>
+            <span>The primary button, links and highlights. Charts keep their own colours so they stay comparable.</span>
+          </div>
+          <div className="set-swatches" role="group" aria-labelledby="set-accent-label">
             {ACCENTS.map((a) => {
               const on = accent === a.id;
               return (
-                <button key={a.id} type="button" className={`accent-swatch ${on ? 'on' : ''}`} data-value={a.id} aria-pressed={on} onClick={() => setAccent(a.id)}>
-                  <span className="accent-dot" aria-hidden="true">
-                    {on && <Check size={14} strokeWidth={3} />}
+                <button key={a.id} type="button" className="set-swatch" data-value={a.id} aria-pressed={on} onClick={() => setAccent(a.id)} aria-label={`${a.label} accent (${a.id})`}>
+                  <span className="set-swatch-cube" aria-hidden="true">
+                    {on && <Check strokeWidth={3} />}
                   </span>
-                  {a.label}
+                  <span className="set-swatch-text" aria-hidden="true">
+                    <b>{a.label}</b>
+                    <code>{a.id}</code>
+                    <small>{ACCENT_NOTE[a.id]}</small>
+                  </span>
                 </button>
               );
             })}
           </div>
-          <span className="muted small">Buttons, links and highlights. Charts keep their own colours so they stay comparable.</span>
         </div>
       </section>
 
-      <section className="card form" aria-labelledby="set-guide">
-        <h3 id="set-guide">Guide</h3>
-        <label className="check">
-          <input type="checkbox" checked={ui.showCoachTips} onChange={(e) => saveUiPrefs({ showCoachTips: e.target.checked })} />
-          <span>Show coach tips (a short how-to the first time you open each topic tab and question)</span>
-        </label>
-        <div className="row-wrap">
-          <button type="button" className="btn" onClick={openGuide}>
-            <Compass size={16} aria-hidden="true" /> Replay the welcome tour
-          </button>
-          <button type="button" className="btn btn-ghost" onClick={() => saveUiPrefs({ coachDismissed: {}, showCoachTips: true })}>
-            Show dismissed tips again
+      {/* ---------- guide ---------- */}
+      <section className="tile set-panel rise" style={{ '--i': 2 }} aria-labelledby="set-guide">
+        <div className="set-panel-head">
+          <span className="eyebrow" id="set-guide">
+            <i className="pip pip--ice" aria-hidden="true" />
+            Guide
+          </span>
+        </div>
+        <div className="set-row">
+          <div className="set-row-text">
+            <b id="set-coach-label">Show coach tips</b>
+            <span>A short how-to the first time you open each topic tab and question.</span>
+          </div>
+          <button
+            type="button"
+            className="toggle"
+            role="switch"
+            aria-checked={ui.showCoachTips}
+            aria-labelledby="set-coach-label"
+            onClick={() => saveUiPrefs({ showCoachTips: !ui.showCoachTips })}
+          />
+        </div>
+        <div className="set-row">
+          <div className="set-row-text">
+            <b>Dismissed tips</b>
+            <span>
+              <span className="mono">{dismissed}</span> tip{dismissed === 1 ? '' : 's'} dismissed. Bring them all back.
+            </span>
+          </div>
+          <button
+            type="button"
+            className="btn btn--ghost btn--sm"
+            onClick={() => {
+              saveUiPrefs({ coachDismissed: {}, showCoachTips: true });
+              showToast('Coach tips are back', dismissed ? `${dismissed} dismissed tip${dismissed === 1 ? '' : 's'} will show again.` : 'Every tip will show the first time.');
+            }}
+          >
+            <RotateCcw aria-hidden="true" /> Show dismissed tips again
           </button>
         </div>
-        <p className="muted small">
-          Shortcuts: <kbd>⌘</kbd>/<kbd>Ctrl</kbd> <kbd>K</kbd> or <kbd>/</kbd> search · <kbd>?</kbd> guide · <kbd>Ctrl</kbd> <kbd>Enter</kbd> run code ·{' '}
-          <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Enter</kbd> submit.
-        </p>
+        <div className="set-row">
+          <div className="set-row-text">
+            <b>Welcome tour</b>
+            <span>
+              Five steps: what this is, the study loop, where things are, how progress saves, your next step. Press <span className="kbd">?</span> any time.
+            </span>
+          </div>
+          <button type="button" className="btn btn--chrome btn--sm" onClick={openGuide}>
+            <Compass aria-hidden="true" /> Replay the welcome tour
+          </button>
+        </div>
       </section>
 
-      <section className="card form" aria-labelledby="set-data">
-        <h3 id="set-data">Your progress</h3>
-        <p className="muted small">Export a backup, import one from another device, or reset everything on the Progress page.</p>
-        <div>
-          <Link to="/progress" className="btn">
-            <BarChart3 size={16} aria-hidden="true" /> Open Progress
+      {/* ---------- shortcuts ---------- */}
+      <section className="tile set-panel rise" style={{ '--i': 3 }} aria-labelledby="set-keys">
+        <div className="set-panel-head">
+          <span className="eyebrow" id="set-keys">
+            <i className="pip pip--volt" aria-hidden="true" />
+            Keyboard
+          </span>
+        </div>
+        <dl className="set-keys">
+          {SHORTCUTS.map(([keys, what]) => (
+            <div key={what}>
+              <dt>
+                {keys.map((k) => (
+                  <span key={k} className="kbd">
+                    {k}
+                  </span>
+                ))}
+              </dt>
+              <dd>{what}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      {/* ---------- progress ---------- */}
+      <section className="tile set-panel rise" style={{ '--i': 4 }} aria-labelledby="set-data">
+        <div className="set-panel-head">
+          <span className="eyebrow" id="set-data">
+            <i className="pip pip--acid" aria-hidden="true" />
+            Your progress
+          </span>
+        </div>
+        <div className="set-row">
+          <div className="set-row-text">
+            <b>Back up, move or reset</b>
+            <span>Export a backup, import one from another device, or reset everything on the Progress page.</span>
+          </div>
+          <Link to="/progress" className="btn btn--ghost btn--sm">
+            <BarChart3 aria-hidden="true" /> Open Progress <ArrowRight aria-hidden="true" />
           </Link>
         </div>
       </section>

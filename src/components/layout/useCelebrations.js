@@ -1,7 +1,26 @@
 import { useEffect, useRef } from 'react';
 import { topics, questionById } from '../../content/index.js';
 import { streak, topicStatus } from '../../state/selectors.js';
-import { celebrate, showToast } from '../../lib/celebrate.js';
+import { showToast } from '../../lib/celebrate.js';
+import { prefersReducedMotion } from '../../lib/appEvents.js';
+
+/** Kinetic Voxel confetti: square "voxels" in plasma / volt / uv / ice / acid */
+const KV_COLORS = ['#FF6B2C', '#FFB07A', '#FF2E88', '#7B5CFF', '#8EE6FF', '#E8FF4A'];
+
+/** toast + a burst of voxel confetti (confetti skipped for reduced motion) */
+function celebrate(title, detail) {
+  showToast(title, detail);
+  if (prefersReducedMotion()) return;
+  import('canvas-confetti')
+    .then(({ default: confetti }) => {
+      const opts = { colors: KV_COLORS, shapes: ['square'], disableForReducedMotion: true };
+      confetti({ ...opts, particleCount: 90, spread: 70, origin: { y: 0.7 } });
+      setTimeout(() => confetti({ ...opts, particleCount: 50, spread: 100, origin: { y: 0.6 } }), 180);
+    })
+    .catch(() => {
+      // confetti is decoration; the toast already said it
+    });
+}
 
 const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100];
 // more changes than this in one update means an Import / bulk change, not a learner action

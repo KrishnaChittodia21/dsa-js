@@ -1,46 +1,65 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'motion/react';
-import { ArrowRight, History, Sparkles, Target } from 'lucide-react';
+import { ArrowRight, History, Sparkles } from 'lucide-react';
 
-const GO = { start: 'Start learning', lesson: 'Continue the lesson', pattern: 'Retry it', question: 'Solve it', revision: 'Revise', topic: 'Start the topic', done: 'Open Revision' };
+const WHY = {
+  lesson: 'An unfinished lesson always comes first',
+  pattern: 'A missed pattern challenge comes next',
+  question: 'Unsolved questions in your current topic come next',
+  revision: 'Nothing open in your current topic, so revision comes first',
+  topic: 'Your current topics are done, so the next unlocked topic is up',
+  start: 'Every journey starts with the first lesson',
+  done: 'Everything is complete',
+};
 
-/** Dashboard "Your next step": one big obvious action, plus revise / continue alternatives. */
-export default function NextStepCard({ step, resume }) {
+/**
+ * Dashboard "Your next step · and why": the deterministic next step (now), what follows it (then)
+ * and an alternative (or), plus "Continue where you left off" when the last study page differs.
+ * step: nextStep() result · then?: { title, detail, href } · resume?: { href, label }
+ */
+export default function NextStepCard({ step, then, resume }) {
+  const rows = [
+    { k: 'now', cls: 'nstep-row--now', title: step.title, href: step.href, detail: step.detail, why: WHY[step.kind] },
+    then && { k: 'then', cls: '', ...then },
+    step.secondary && { k: 'or', cls: 'nstep-row--or', title: step.secondary.title, href: step.secondary.href, detail: 'An alternative when you want a change: it targets what you got wrong before.' },
+  ].filter(Boolean);
   return (
-    <motion.section
-      className="card next-step featured"
-      aria-labelledby="next-step-title"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-    >
-      <div className="next-step-main">
-        <div className="eyebrow">
-          <Sparkles size={14} aria-hidden="true" /> Your next step
-        </div>
-        <h2 id="next-step-title">{step.title}</h2>
-        {step.detail && <p className="muted">{step.detail}</p>}
-        <div className="row-wrap">
-          <Link to={step.href} className="btn btn-primary btn-lg">
-            {GO[step.kind] || 'Go'} <ArrowRight size={18} aria-hidden="true" />
+    <section className="dash-nx" aria-labelledby="next-step-title">
+      <div className="dash-nx-head">
+        <h2 className="eyebrow" id="next-step-title">
+          <Sparkles size={14} aria-hidden="true" /> Your next step · and why
+        </h2>
+        {resume && (
+          <Link to={resume.href} className="dash-resume">
+            <History size={14} aria-hidden="true" />
+            <span className="dash-resume-k">left off at</span>
+            <span className="dash-resume-v">{resume.label}</span>
+            <ArrowRight size={14} aria-hidden="true" />
           </Link>
-          {step.secondary && (
-            <Link to={step.secondary.href} className="btn">
-              <Target size={16} aria-hidden="true" /> or {step.secondary.title.charAt(0).toLowerCase() + step.secondary.title.slice(1)}
-            </Link>
-          )}
-        </div>
+        )}
       </div>
-      {resume && (
-        <Link to={resume.href} className="resume-link">
-          <History size={16} aria-hidden="true" />
-          <span>
-            <span className="muted small">Continue where you left off</span>
-            <strong>{resume.label}</strong>
-          </span>
-          <ArrowRight size={16} aria-hidden="true" />
-        </Link>
-      )}
-    </motion.section>
+      <div className="nstep nstep--h" style={{ '--cols': rows.length }}>
+        {rows.map((r) => (
+          <div key={r.k} className={`nstep-row ${r.cls}`}>
+            <span className="nstep-k">{r.k}</span>
+            <div>
+              <div className="nstep-t">
+                <Link to={r.href}>{r.title}</Link>
+              </div>
+              {(r.detail || r.why) && (
+                <div className="nstep-d">
+                  {r.detail}
+                  {r.why && (
+                    <>
+                      {' '}
+                      <em>{r.why}.</em>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

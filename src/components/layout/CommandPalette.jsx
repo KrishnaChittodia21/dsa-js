@@ -15,7 +15,9 @@ import {
   ListChecks,
   Moon,
   Puzzle,
+  Search,
   Sparkles,
+  Sun,
 } from 'lucide-react';
 import { PAGES, search } from '../../search/searchIndex.js';
 import { topics } from '../../content/index.js';
@@ -25,6 +27,7 @@ import { nextStep } from '../../lib/nextStep.js';
 import { getUiPrefs, saveUiPrefs } from '../../lib/uiPrefs.js';
 
 const MAX_RECENT = 5;
+const SEARCH_KEY = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? '⌘K' : 'Ctrl K';
 const GROUP_ICON = {
   Pages: LayoutGrid,
   Topics: BookOpen,
@@ -73,6 +76,9 @@ export default function CommandPalette({ open, onOpenChange, onOpenGuide }) {
       <Icon size={16} aria-hidden="true" className="cmd-icon" />
       <span className="cmd-label">{it.title}</span>
       {it.sub && <span className="cmd-hint">{it.sub}</span>}
+      <span className="kbd cmd-enter" aria-hidden="true">
+        ↵
+      </span>
     </Command.Item>
   );
 
@@ -90,7 +96,13 @@ export default function CommandPalette({ open, onOpenChange, onOpenGuide }) {
       loop
       shouldFilter={false}
     >
-      <Command.Input value={query} onValueChange={setQuery} placeholder="Search topics, lessons, patterns, questions, JS APIs…" className="cmd-input" />
+      <div className="cmd-in">
+        <Search aria-hidden="true" className="cmd-in-ico" />
+        <Command.Input value={query} onValueChange={setQuery} placeholder="Search topics, lessons, patterns, questions, JS APIs…" className="cmd-input" />
+        <span className="kbd cmd-in-esc" aria-hidden="true">
+          esc
+        </span>
+      </div>
       <Command.List className="cmd-list">
         <Command.Empty className="cmd-empty">No results for “{query}”. Try fewer or shorter words.</Command.Empty>
         {!typing && (
@@ -105,14 +117,27 @@ export default function CommandPalette({ open, onOpenChange, onOpenGuide }) {
                 <Sparkles size={16} aria-hidden="true" className="cmd-icon" />
                 <span className="cmd-label">Go to my next step</span>
                 <span className="cmd-hint">{step.title}</span>
+                <span className="kbd cmd-enter" aria-hidden="true">
+                  ↵
+                </span>
               </Command.Item>
               <Command.Item value="action:guide" onSelect={run(onOpenGuide)}>
                 <Compass size={16} aria-hidden="true" className="cmd-icon" />
                 <span className="cmd-label">Open the guide (welcome tour)</span>
+                <span className="kbd cmd-hint-key" aria-hidden="true">
+                  ?
+                </span>
+                <span className="kbd cmd-enter" aria-hidden="true">
+                  ↵
+                </span>
               </Command.Item>
               <Command.Item value="action:theme" onSelect={run(toggle)}>
-                <Moon size={16} aria-hidden="true" className="cmd-icon" />
+                {theme === 'dark' ? <Sun size={16} aria-hidden="true" className="cmd-icon" /> : <Moon size={16} aria-hidden="true" className="cmd-icon" />}
                 <span className="cmd-label">Switch to {theme === 'dark' ? 'light' : 'dark'} mode</span>
+                <span className="cmd-hint">{theme === 'dark' ? 'Porcelain' : 'Graphite'}</span>
+                <span className="kbd cmd-enter" aria-hidden="true">
+                  ↵
+                </span>
               </Command.Item>
             </Command.Group>
             <Command.Group heading="Pages">{PAGES.map((p) => item({ ...p, group: 'Pages' }, `page:${p.to}`, LayoutGrid))}</Command.Group>
@@ -124,19 +149,22 @@ export default function CommandPalette({ open, onOpenChange, onOpenGuide }) {
           </Command.Group>
         ))}
       </Command.List>
-      <div className="cmd-foot small muted" aria-hidden="true">
+      <div className="cmd-foot" aria-hidden="true">
         <span>
-          <kbd>↑</kbd> <kbd>↓</kbd> move
+          <span className="kbd">↑</span>
+          <span className="kbd">↓</span> move
         </span>
         <span>
-          <CornerDownLeft size={12} /> open
+          <span className="kbd">
+            <CornerDownLeft size={11} />
+          </span>{' '}
+          open
         </span>
         <span>
-          <kbd>esc</kbd> close
+          <span className="kbd">esc</span> close
         </span>
         <span className="cmd-foot-tip">
-          <kbd>⌘</kbd>
-          <kbd>K</kbd> or <kbd>/</kbd> opens this anywhere
+          <span className="kbd">{SEARCH_KEY}</span> or <span className="kbd">/</span> opens this anywhere
         </span>
       </div>
     </Command.Dialog>
