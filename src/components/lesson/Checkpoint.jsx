@@ -37,25 +37,25 @@ export default function Checkpoint({ block, topicId, compact = false }) {
   // Already answered on a previous visit → compact summary with option to review.
   if (passed && !feedback && !review) {
     return (
-      <div className="checkpoint checkpoint-done">
-        <div className="checkpoint-head">
-          <span className="checkpoint-tag">
-            <Icon name="checkCircle" size={15} /> Checkpoint
+      <section className="ls-qc ls-qc--done" aria-label="Checkpoint (answered)">
+        <div className="ls-qc-head">
+          <span className="eyebrow ls-qc-k">
+            <Icon name="checkCircle" size={14} /> Checkpoint · answered
           </span>
-          <span className="small muted">{saved.firstTryCorrect ? 'Correct on first try' : saved.revealed ? 'Answer revealed' : `Solved after ${saved.attempts} attempts`}</span>
+          <span className="tag">{saved.firstTryCorrect ? 'first try' : saved.revealed ? 'answer revealed' : `after ${saved.attempts} attempts`}</span>
           <span className="spacer" />
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setReview(true)}>
+          <button type="button" className="btn btn--ghost btn--sm" onClick={() => setReview(true)}>
             Review
           </button>
         </div>
-        <Markdown className="checkpoint-q">{block.question}</Markdown>
+        <Markdown className="ls-qc-q">{block.question}</Markdown>
         {!compact && (
-          <div className="small">
-            <strong>Answer: </strong>
-            {LETTERS[block.answer]}. {block.options[block.answer]}
+          <div className="ls-qc-ans">
+            <span className="ls-qc-ans-k">{LETTERS[block.answer]}</span>
+            <Markdown className="inline-md">{block.options[block.answer]}</Markdown>
           </div>
         )}
-      </div>
+      </section>
     );
   }
 
@@ -63,24 +63,34 @@ export default function Checkpoint({ block, topicId, compact = false }) {
   const isCorrect = feedback?.correct;
 
   return (
-    <div className={`checkpoint ${showResult ? (isCorrect ? 'is-correct' : 'is-wrong') : ''}`} role="group" aria-labelledby={`${block.id}-q`}>
-      <div className="checkpoint-head">
-        <span className="checkpoint-tag">
-          <Icon name="help" size={15} /> Before continuing
+    <section className={`ls-qc ${showResult ? (isCorrect ? 'ls-qc--ok' : 'ls-qc--bad') : ''}`} role="group" aria-labelledby={`${block.id}-q`}>
+      <div className="ls-qc-head">
+        <span className="eyebrow ls-qc-k">
+          <i className="pip pip--uv" />
+          Checkpoint · before continuing
         </span>
+        {wrong.size > 0 && !showResult && <span className="tag">{wrong.size} ruled out</span>}
         {review && (
           <>
             <span className="spacer" />
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setReview(false); setFeedback(null); setSelected(null); }}>
+            <button
+              type="button"
+              className="btn btn--ghost btn--sm"
+              onClick={() => {
+                setReview(false);
+                setFeedback(null);
+                setSelected(null);
+              }}
+            >
               Close
             </button>
           </>
         )}
       </div>
       <div id={`${block.id}-q`}>
-        <Markdown className="checkpoint-q">{block.question}</Markdown>
+        <Markdown className="ls-qc-q">{block.question}</Markdown>
       </div>
-      <div className="options" role="radiogroup">
+      <div className="options" role="radiogroup" aria-labelledby={`${block.id}-q`}>
         {block.options.map((opt, i) => {
           const isSel = selected === i;
           const eliminated = !showResult && wrong.has(i) && !review && !passed;
@@ -101,29 +111,30 @@ export default function Checkpoint({ block, topicId, compact = false }) {
               <span className="option-text">
                 <Markdown>{opt}</Markdown>
               </span>
-              {state === 'correct' && <Icon name="check" size={16} />}
-              {state === 'wrong' && <Icon name="x" size={16} />}
+              {state === 'correct' && <span className="ls-qc-res ls-qc-res--ok">CORRECT</span>}
+              {state === 'wrong' && <span className="ls-qc-res ls-qc-res--bad">NOT IT</span>}
+              {eliminated && <span className="ls-qc-res">RULED OUT</span>}
             </button>
           );
         })}
       </div>
 
       {!showResult && (
-        <div className="row" style={{ marginTop: '0.75rem' }}>
-          <button type="button" className="btn btn-primary" disabled={selected === null} onClick={submit}>
+        <div className="ls-qc-act">
+          <button type="button" className="btn btn--plasma" disabled={selected === null} onClick={submit}>
             Check answer
           </button>
           {wrong.size > 0 && !passed && (
-            <button type="button" className="btn btn-ghost" onClick={reveal}>
+            <button type="button" className="btn btn--ghost" onClick={reveal}>
               Show me the answer
             </button>
           )}
-          <span className="small faint">Think it through first — there is no penalty for being wrong.</span>
+          <span className="ls-qc-hint">Think it through first — there is no penalty for being wrong.</span>
         </div>
       )}
 
       {showResult && isCorrect && (
-        <div className="feedback feedback-correct">
+        <div className="feedback feedback-correct" role="status">
           <div className="feedback-title">
             <Icon name="checkCircle" size={17} /> {feedback.revealed ? `The answer is ${LETTERS[block.answer]}.` : saved && saved.attempts > 1 ? 'Correct — you got there!' : 'Correct!'}
           </div>
@@ -132,7 +143,7 @@ export default function Checkpoint({ block, topicId, compact = false }) {
       )}
 
       {showResult && !isCorrect && (
-        <div className="feedback feedback-wrong">
+        <div className="feedback feedback-wrong" role="status">
           <div className="feedback-title">
             <Icon name="alert" size={17} /> Not quite.
           </div>
@@ -145,16 +156,16 @@ export default function Checkpoint({ block, topicId, compact = false }) {
               <Markdown>{block.deeper}</Markdown>
             </div>
           )}
-          <div className="row" style={{ marginTop: '0.75rem' }}>
-            <button type="button" className="btn btn-primary" onClick={retry}>
+          <div className="ls-qc-act">
+            <button type="button" className="btn btn--plasma" onClick={retry}>
               Try again
             </button>
-            <button type="button" className="btn btn-ghost" onClick={reveal}>
+            <button type="button" className="btn btn--ghost" onClick={reveal}>
               Show me the answer
             </button>
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }

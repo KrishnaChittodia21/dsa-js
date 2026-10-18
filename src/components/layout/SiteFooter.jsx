@@ -1,18 +1,18 @@
 import { Link } from 'react-router-dom';
-import { Network } from 'lucide-react';
+import LogoMark from '../ui/LogoMark.jsx';
 
-/** Footer at the end of every page: brand on the left, copyright on the right (stacks on phones). */
+/** Footer at the end of every page: logo + wordmark on the left, mono copyright line on the right. */
 export default function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="footer-row">
         <Link to="/" className="brand footer-brand">
-          <span className="brand-tile" aria-hidden="true">
-            <Network size={16} strokeWidth={2.4} />
+          <LogoMark size={22} />
+          <span className="brand-name">
+            DSA Journey<i>.js</i>
           </span>
-          <span className="brand-name">DSA Journey</span>
         </Link>
-        <span className="footer-copy">© 2026 DSA Journey</span>
+        <span className="footer-copy">© 2026 DSA Journey · learn it pattern by pattern</span>
       </div>
     </footer>
   );

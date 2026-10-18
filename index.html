@@ -4,23 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="DSA Journey — learn data structures and algorithms in JavaScript, pattern by pattern." />
-    <meta name="theme-color" content="#5b4fe9" />
+    <meta name="theme-color" content="#0b0a0c" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f1eee9" media="(prefers-color-scheme: light)" />
     <title>DSA Journey</title>
+    <meta name="color-scheme" content="dark light" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <script>
       // Apply the saved theme + accent before first paint to avoid a flash.
       try {
         var t = localStorage.getItem('dsa-journey:theme');
-        if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        if (t !== 'light' && t !== 'dark') t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', t);
       } catch (e) {
-        document.documentElement.setAttribute('data-theme', 'light');
+        document.documentElement.setAttribute('data-theme', 'dark');
       }
       try {
+        // Kinetic Voxel accents; ids saved by earlier versions are mapped onto them
         var a = localStorage.getItem('dsa-journey:accent');
-        document.documentElement.setAttribute('data-accent', /^(indigo|teal|rose|amber)$/.test(a) ? a : 'indigo');
+        var legacy = { indigo: 'plasma', amber: 'plasma', rose: 'volt', teal: 'ice' };
+        document.documentElement.setAttribute('data-accent', /^(plasma|volt|uv|ice)$/.test(a) ? a : legacy[a] || 'plasma');
       } catch (e) {
-        document.documentElement.setAttribute('data-accent', 'indigo');
+        document.documentElement.setAttribute('data-accent', 'plasma');
       }
     </script>
   </head>

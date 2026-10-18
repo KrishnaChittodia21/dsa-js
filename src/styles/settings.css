@@ -1,0 +1,83 @@
+/* =====================================================================
+   settings.css — owner: Achievements/overlays agent (wave 2).
+   Scope: SettingsPage (.set-page …: grouped capsule panels, theme seg, accent swatches, coach toggle,
+   shortcuts) and NotFound (.nf-page …). Accent ids: plasma · volt · uv · ice (ThemeContext.jsx).
+   Swatch previews are fixed colours (independent of the active accent). Numbers are mono.
+   ===================================================================== */
+
+/* ---------- settings ---------- */
+.set-hero { margin: 4px 4px 28px; }
+.set-hero .display { margin: 14px 0 14px -2px; }
+.set-hero .lead { margin: 0; }
+.set-panel { padding: 22px 26px; margin-bottom: var(--gap); border-radius: var(--r-xl); }
+.set-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.set-panel-head .eyebrow { margin: 0; }
+.set-row { display: flex; align-items: center; justify-content: space-between; gap: 14px 24px; padding: 16px 0; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.set-panel-head + .set-row { border-top: 0; }
+.set-row--stack { flex-direction: column; align-items: stretch; }
+.set-row--stack .set-row-text { flex: none; }
+.set-row-text { flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.set-row-text b { font: 650 14.5px/1.25 var(--f-ui); color: var(--text); }
+.set-row-text > span { font-size: 13px; line-height: 1.5; color: var(--muted); }
+.set-row .btn svg { width: 15px; height: 15px; }
+.set-theme button { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px; }
+.set-theme button svg { width: 15px; height: 15px; }
+
+.set-swatches { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.set-swatch { display: flex; align-items: center; gap: 14px; min-width: 0; padding: 12px 12px 12px 14px; border: 0; cursor: pointer; text-align: left; border-radius: 18px; background: var(--surface-2); color: var(--text-2); box-shadow: inset 0 0 0 1px var(--line); transition: box-shadow 0.2s, transform 0.2s var(--ease-out); }
+:root[data-theme='light'] .set-swatch { background: #fff; }
+.set-swatch:hover { box-shadow: inset 0 0 0 1px var(--line-3); }
+.set-swatch:active { transform: scale(0.98); }
+.set-swatch[aria-pressed='true'] { box-shadow: inset 0 0 0 1.5px var(--sw), 0 0 0 4px color-mix(in srgb, var(--sw) 18%, transparent); color: var(--text); }
+.set-swatch-cube { --c: var(--sw); position: relative; flex: none; width: 26px; height: 26px; margin: 9px 9px 0 0; display: grid; place-items: center; background: var(--fill); color: var(--ink); }
+.set-swatch-cube::before { content: ''; position: absolute; left: 0; bottom: 100%; width: 100%; height: 9px; background: color-mix(in srgb, var(--c) 50%, white); transform-origin: 0 100%; transform: skewX(-45deg); }
+.set-swatch-cube::after { content: ''; position: absolute; left: 100%; bottom: 0; width: 9px; height: 100%; background: color-mix(in srgb, var(--c) 55%, black); transform-origin: 0 100%; transform: skewY(-45deg); }
+.set-swatch-cube svg { width: 14px; height: 14px; }
+.set-swatch-text { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.set-swatch-text b { font: 650 14px/1.15 var(--f-ui); }
+.set-swatch-text code { padding: 0; border: 0; background: none; font: 500 11px/1 var(--f-mono); color: var(--muted); }
+.set-swatch-text small { font: 500 10.5px/1.25 var(--f-mono); color: var(--faint); }
+.set-swatch[data-value='plasma'] { --sw: #ff6b2c; --fill: linear-gradient(135deg, #ffb07a, #ff6b2c 38%, #ff2e88); --ink: #120a06; }
+.set-swatch[data-value='volt'] { --sw: #ff2e88; --fill: linear-gradient(135deg, #ffb3d4, #ff5fa3 40%, #ff2e88); --ink: #16030c; }
+.set-swatch[data-value='uv'] { --sw: #7b5cff; --fill: linear-gradient(135deg, #8f75ff, #6a4cf5 50%, #5536d8); --ink: #fff; }
+.set-swatch[data-value='ice'] { --sw: #3fc6ea; --fill: linear-gradient(135deg, #e0faff, #8ee6ff 45%, #3fc6ea); --ink: #04222b; }
+
+.set-keys { margin: 4px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
+.set-keys > div { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); min-width: 0; }
+.set-keys > div:nth-child(-n + 2) { border-top: 0; }
+.set-keys dt { flex: none; display: inline-flex; gap: 4px; min-width: 110px; }
+.set-keys dd { margin: 0; font-size: 13px; color: var(--text-2); }
+
+@media (max-width: 720px) {
+  .set-swatches { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .set-keys { grid-template-columns: minmax(0, 1fr); }
+  .set-keys > div:nth-child(2) { border-top: 1px solid var(--line); }
+}
+@media (max-width: 480px) {
+  .set-panel { padding: 18px 18px; }
+  .set-swatch { padding: 12px 10px; gap: 12px; }
+  .set-row > .btn, .set-row > .seg { width: 100%; justify-content: center; }
+  .set-theme button { flex: 1; justify-content: center; }
+}
+
+/* ---------- 404 (NotFound.jsx) ---------- */
+.nf-page .nf { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 40px; align-items: center; padding: 40px 44px; border-radius: var(--r-xl); max-width: 980px; margin: 24px auto 0; }
+.nf-art { position: relative; height: 240px; border-radius: var(--r-lg); background: radial-gradient(circle at center, var(--dot) 1px, transparent 1.5px) 0 0 / 16px 16px, var(--sunken); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
+.nf-art .vox { position: absolute; bottom: 44px; --u: 22px; --w: 24px; }
+.nf-v1 { left: 60px; }
+.nf-v2 { left: 120px; }
+.nf-v3 { left: 220px; bottom: 44px !important; transform: rotate(-90deg); transform-origin: 0 100%; }
+.nf-art .cube { position: absolute; }
+.nf-c1 { left: 176px; bottom: 42px; transform: rotate(14deg); }
+.nf-c2 { left: 210px; top: 54px; animation: float-y 4s ease-in-out infinite; }
+.nf-body .h2 { margin: 6px 0 8px; }
+.nf-body .body { margin: 0 0 14px; }
+.nf-code { margin: 10px 0 0 -4px; font: 800 clamp(72px, 12vw, 132px)/0.9 var(--f-mono); letter-spacing: -0.07em; --chrome-band: 0.9em; }
+.nf-path { display: inline-block; max-width: 100%; overflow-wrap: anywhere; font-size: 12px; color: var(--muted); }
+.nf-acts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+@media (max-width: 760px) {
+  .nf-page .nf { grid-template-columns: minmax(0, 1fr); padding: 24px 20px; gap: 24px; }
+  .nf-art { height: 180px; }
+  .nf-acts .btn { flex: 1 1 auto; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) { .nf-c2 { animation: none; } }

@@ -10,14 +10,14 @@ export function hasVisual(pattern) {
 }
 
 /** Animation window for a pattern (or nothing if the pattern has no suitable animation). */
-export default function PatternVisual({ pattern, compact }) {
+export default function PatternVisual({ pattern, compact, eyebrow }) {
   const v = visualForPattern(pattern);
   if (!v || !SCENARIO_TITLES[v.scenario]) return null;
   return (
-    <div className="stack-sm">
-      {v.related && <div className="small muted">This animation shows a closely related mechanism — the core idea carries over to “{pattern.name}”.</div>}
+    <div className="viz-pattern">
+      {v.related && <p className="viz-related">This animation shows a closely related mechanism — the core idea carries over to “{pattern.name}”.</p>}
       <Suspense fallback={<div className="card muted small loading-shimmer">Loading animation…</div>}>
-        <Visualizer scenario={v.scenario} input={v.input} compact={compact} />
+        <Visualizer scenario={v.scenario} input={v.input} compact={compact} eyebrow={eyebrow || `pattern · ${pattern.name}`} />
       </Suspense>
     </div>
   );

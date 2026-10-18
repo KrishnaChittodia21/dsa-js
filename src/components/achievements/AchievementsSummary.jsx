@@ -1,86 +1,88 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Award } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import Badge from './Badge.jsx';
-import { ProgressBar } from '../ui/primitives.jsx';
 import { ACHIEVEMENT_TOTAL, badgeLabel, formatEarnedDate, useAchievementEvaluations } from '../../state/achievements.js';
 import { closestNext, earnedList, TIER_LABEL } from '../../content/achievements.js';
 
-const SHOW = 8;
+const SHOW = 3;
 
-/** Dashboard section: recent badges, x / total earned, and the closest next badge. */
+/** Dashboard teaser tile: x / total earned, the most recent badges and the closest next badge. */
 export default function AchievementsSummary({ progress }) {
   const evs = useAchievementEvaluations(progress);
   const earned = earnedList(progress.achievements);
   const next = closestNext(evs);
-  const nextText = next ? `${Math.min(next.ev.value, next.ev.next.goal)} / ${next.ev.next.goal} ${next.achievement.unit}` : '';
   const nextStored = next && progress.achievements?.[next.achievement.id];
+  const goal = next?.ev.next.goal || 0;
+  const have = next ? Math.min(next.ev.value, goal) : 0;
+  const shown = earned.slice(0, next ? SHOW - 1 : SHOW);
 
   return (
-    <section className="dash-section" aria-labelledby="dash-ach">
-      <div className="dash-section-head">
-        <h2 id="dash-ach">Achievements</h2>
-        <Link to="/achievements" className="small">
-          All achievements →
+    <section className="tile dash-ach" aria-labelledby="dash-ach-t">
+      <div className="tile-head">
+        <h2 className="eyebrow" id="dash-ach-t">
+          <i className="pip" />
+          Achievements · <span className="mono">{earned.length} / {ACHIEVEMENT_TOTAL}</span>
+        </h2>
+        <Link to="/achievements" className="tile-link">
+          All <ArrowUpRight size={14} aria-hidden="true" />
         </Link>
       </div>
-      <div className="card ach-summary">
-        <div className="ach-summary-earned">
-          <div className="ach-summary-head">
-            <Award size={18} aria-hidden="true" className="card-icon" />
-            <strong>
-              {earned.length} / {ACHIEVEMENT_TOTAL}
-            </strong>
-            <span className="muted small">earned</span>
-          </div>
-          {earned.length ? (
-            <ul className="ach-mini-grid" aria-label="Most recent achievements">
-              {earned.slice(0, SHOW).map((e) => (
-                <li key={e.id} title={`${e.achievement.name}${TIER_LABEL[e.tier] ? ` · ${TIER_LABEL[e.tier]}` : ''} · ${formatEarnedDate(e.earnedAt)}`}>
-                  <Link to="/achievements" className="ach-mini" aria-label={badgeLabel(e.achievement, e)}>
-                    <Badge art={e.achievement.art} tier={e.tier} size="sm" />
-                    <span className="ach-mini-name" aria-hidden="true">
-                      {e.achievement.name}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="muted ach-empty">
-              No badges yet, and that is how every journey starts. Finish your first lesson or solve your first question to earn one. Bronze, silver, gold and
-              diamond tiers follow as you keep going.
-            </p>
-          )}
-          {earned.length > SHOW && <p className="small muted">+{earned.length - SHOW} more on the Achievements page.</p>}
-        </div>
-
-        {next && (
-          <div className="ach-summary-next">
-            <span className="eyebrow">Closest next badge</span>
-            <div className="ach-next">
-              <Badge
-                art={next.achievement.art}
-                tier={nextStored?.tier || 'standard'}
-                locked={!nextStored?.tier}
-                size="md"
-                label={badgeLabel(next.achievement, nextStored, next.ev)}
-              />
-              <div className="ach-next-body">
-                <strong>
-                  {next.achievement.name}
-                  {TIER_LABEL[next.ev.next.tier] && <span className={`ach-tier-pill tier-${next.ev.next.tier}`}>{TIER_LABEL[next.ev.next.tier]}</span>}
-                </strong>
-                <span className="small muted">{next.ev.requirement}</span>
-                <ProgressBar value={Math.min(next.ev.value, next.ev.next.goal)} max={next.ev.next.goal} size="sm" label={`${next.achievement.name}: ${nextText}`} />
-                <span className="small mono">{nextText}</span>
-              </div>
-            </div>
-            <Link to="/achievements" className="btn btn-sm">
-              View all achievements <ArrowRight size={14} aria-hidden="true" />
+      {earned.length === 0 && (
+        <p className="dash-ach-empty">
+          No badges yet, and that is how every journey starts. Finish your first lesson or solve your first question to earn one; bronze, silver, gold and
+          diamond tiers follow.
+        </p>
+      )}
+      <ul className="dash-medals" aria-label="Recent and next achievements">
+        {shown.map((e) => (
+          <li key={e.id} className="dash-medal" title={`${e.achievement.name}${TIER_LABEL[e.tier] ? ` · ${TIER_LABEL[e.tier]}` : ''} · ${formatEarnedDate(e.earnedAt)}`}>
+            <Link to="/achievements" aria-label={badgeLabel(e.achievement, e)}>
+              <Badge art={e.achievement.art} tier={e.tier} size="md" />
+              <b>{e.achievement.name}</b>
+              <span>{TIER_LABEL[e.tier] || 'earned'}</span>
             </Link>
-          </div>
+          </li>
+        ))}
+        {next && (
+          <li className="dash-medal dash-medal--next">
+            <Link to="/achievements" aria-label={badgeLabel(next.achievement, nextStored, next.ev)}>
+              <Badge art={next.achievement.art} tier={nextStored?.tier || 'standard'} locked={!nextStored?.tier} size="md" />
+              <b>{next.achievement.name}</b>
+              <span>
+                {have} / {goal}
+              </span>
+            </Link>
+          </li>
         )}
-      </div>
+      </ul>
+      {next && (
+        <div className="dash-ach-next">
+          <div className="dash-ach-next-row">
+            <span>
+              Next unlock: <b>{next.achievement.name}</b>
+              {TIER_LABEL[next.ev.next.tier] ? ` · ${TIER_LABEL[next.ev.next.tier]}` : ''}
+            </span>
+            <span className="mono t-plasma">{goal - have} to go</span>
+          </div>
+          <div
+            className="meter"
+            style={{ '--v': `${goal ? Math.round((have / goal) * 100) : 0}%` }}
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={goal}
+            aria-valuenow={have}
+            aria-label={`${next.achievement.name}: ${have} of ${goal} ${next.achievement.unit}`}
+          >
+            <i />
+          </div>
+          <span className="dash-ach-req">{next.ev.requirement}</span>
+        </div>
+      )}
+      {earned.length > shown.length && (
+        <p className="dash-ach-more">
+          +<span className="mono">{earned.length - shown.length}</span> more on the Achievements page
+        </p>
+      )}
     </section>
   );
 }

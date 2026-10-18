@@ -3,29 +3,32 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 const KEY = 'dsa-journey:theme';
 const ACCENT_KEY = 'dsa-journey:accent';
 
+// Kinetic Voxel accents (tokens.css § 4). The default, plasma, is the design's primary-action colour.
 export const ACCENTS = [
-  { id: 'indigo', label: 'Indigo' },
-  { id: 'teal', label: 'Teal' },
-  { id: 'rose', label: 'Rose' },
-  { id: 'amber', label: 'Amber' },
+  { id: 'plasma', label: 'Plasma' },
+  { id: 'volt', label: 'Volt' },
+  { id: 'uv', label: 'Ultraviolet' },
+  { id: 'ice', label: 'Ice' },
 ];
 const ACCENT_IDS = ACCENTS.map((a) => a.id);
+/** accents saved by earlier versions of the app → their Kinetic Voxel counterpart */
+const LEGACY_ACCENT = { indigo: 'plasma', amber: 'plasma', rose: 'volt', teal: 'ice' };
+const normalizeAccent = (a) => (ACCENT_IDS.includes(a) ? a : LEGACY_ACCENT[a] || 'plasma');
 
-const ThemeContext = createContext({ theme: 'light', toggle: () => {}, setTheme: () => {}, accent: 'indigo', setAccent: () => {} });
+const ThemeContext = createContext({ theme: 'dark', toggle: () => {}, setTheme: () => {}, accent: 'plasma', setAccent: () => {} });
 
 function initialTheme() {
   const attr = document.documentElement.getAttribute('data-theme');
   if (attr === 'light' || attr === 'dark') return attr;
   try {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
   } catch {
-    return 'light';
+    return 'dark';
   }
 }
 
 function initialAccent() {
-  const attr = document.documentElement.getAttribute('data-accent');
-  return ACCENT_IDS.includes(attr) ? attr : 'indigo';
+  return normalizeAccent(document.documentElement.getAttribute('data-accent'));
 }
 
 /** Theme (light/dark) and accent colour, mirrored onto <html data-theme data-accent> and saved locally. */
@@ -49,7 +52,7 @@ export function ThemeProvider({ children }) {
     }
   }, [accent]);
   const toggle = useCallback(() => setTheme((t) => (t === 'dark' ? 'light' : 'dark')), []);
-  const setAccent = useCallback((a) => setAccentState(ACCENT_IDS.includes(a) ? a : 'indigo'), []);
+  const setAccent = useCallback((a) => setAccentState(normalizeAccent(a)), []);
   return <ThemeContext.Provider value={{ theme, toggle, setTheme, accent, setAccent }}>{children}</ThemeContext.Provider>;
 }
 

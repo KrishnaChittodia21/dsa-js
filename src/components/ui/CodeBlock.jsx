@@ -2,17 +2,17 @@ import { useState } from 'react';
 import { Highlight } from 'prism-react-renderer';
 import Icon from './Icon.jsx';
 
-// Prism theme expressed with CSS variables so it follows light/dark mode automatically.
+// Prism theme from the Kinetic Voxel code palette (tokens.css § 3) — code blocks are dark in both themes.
 const varTheme = {
   plain: { color: 'var(--code-text)', backgroundColor: 'transparent' },
   styles: [
-    { types: ['comment', 'prolog', 'doctype', 'cdata'], style: { color: 'var(--code-comment)', fontStyle: 'italic' } },
-    { types: ['keyword', 'builtin', 'important', 'atrule'], style: { color: 'var(--code-keyword)' } },
-    { types: ['string', 'char', 'template-string', 'regex', 'attr-value'], style: { color: 'var(--code-string)' } },
-    { types: ['number', 'boolean', 'constant'], style: { color: 'var(--code-number)' } },
-    { types: ['function', 'class-name', 'method'], style: { color: 'var(--code-function)' } },
-    { types: ['punctuation', 'operator'], style: { color: 'var(--code-punct)' } },
-    { types: ['variable', 'property', 'parameter'], style: { color: 'var(--code-variable)' } },
+    { types: ['comment', 'prolog', 'doctype', 'cdata'], style: { color: 'var(--code-c)', fontStyle: 'italic' } },
+    { types: ['keyword', 'builtin', 'important', 'atrule'], style: { color: 'var(--code-k)' } },
+    { types: ['string', 'char', 'template-string', 'regex', 'attr-value'], style: { color: 'var(--code-s)' } },
+    { types: ['number', 'boolean', 'constant'], style: { color: 'var(--code-n)' } },
+    { types: ['function', 'class-name', 'method'], style: { color: 'var(--code-f)' } },
+    { types: ['punctuation', 'operator'], style: { color: 'var(--code-p)' } },
+    { types: ['variable', 'property', 'parameter'], style: { color: 'var(--code-v)' } },
   ],
 };
 

@@ -1,36 +1,60 @@
-import { Flame } from 'lucide-react';
-import { todayKey } from '../../state/progressReducer.js';
+import { activityWeeks } from '../../lib/dashMetrics.js';
 
-/** Consecutive study days plus a 7-day dot strip (progress.activity: actions per day). */
-export default function StreakCard({ activity = {}, current, longest }) {
-  const now = new Date();
-  const week = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6 + i);
-    const day = todayKey(d);
-    return { day, label: d.toLocaleDateString(undefined, { weekday: 'narrow' }), active: !!activity[day], today: i === 6 };
-  });
-  const active = week.filter((d) => d.active).length;
+const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+const fmt = (day) => new Date(`${day}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+
+/**
+ * Study streak: the big day count plus the last `weeks` calendar weeks as a heat grid
+ * (Monday first; progress.activity counts recorded actions per day). `compact` = this week only (phones).
+ */
+export default function StreakCard({ activity = {}, current, longest, weeks = 5, compact = false }) {
+  const grid = activityWeeks(activity, new Date(), compact ? 1 : weeks);
+  const cells = grid.flat();
+  const total = Object.keys(activity).length;
+  const activeThisWeek = grid[grid.length - 1].filter((d) => d.count).length;
+  const text = (d) => `${fmt(d.day)}${d.today ? ' (today)' : ''}: ${d.future ? 'upcoming' : d.count ? `${d.count} action${d.count === 1 ? '' : 's'}` : 'no activity'}`;
+  const cls = (d) => `l${d.level}${d.today ? ' today' : ''}${d.future ? ' future' : ''}`;
+
+  if (compact)
+    return (
+      <section className="dash-mcard" aria-label={`Study streak: ${current} days, active on ${activeThisWeek} days this week`}>
+        <span className="eyebrow">streak</span>
+        <span className="num plasma-text">{current}</span>
+        <div className="dash-wk" aria-hidden="true">
+          {cells.map((d) => (
+            <i key={d.day} className={cls(d)} title={text(d)} />
+          ))}
+        </div>
+      </section>
+    );
+
   return (
-    <section className="card streak-card" aria-label="Study streak">
-      <div className="streak-top">
-        <Flame size={28} aria-hidden="true" className={`streak-flame ${current ? 'lit' : ''}`} />
-        <div>
-          <div className="streak-count">
-            {current} day{current === 1 ? '' : 's'}
-          </div>
-          <div className="muted small">{current ? `study streak · longest ${longest}` : 'Study today to start a streak'}</div>
+    <section className="tile dash-streak" aria-labelledby="dash-streak-t">
+      <div className="tile-head">
+        <h2 className="eyebrow" id="dash-streak-t">
+          <i className="pip pip--acid" />
+          Streak
+        </h2>
+        <span className="tag">last {weeks} weeks</span>
+      </div>
+      <div className="dash-streak-top">
+        <span className="display chrome">{current}</span>
+        <div className="dash-streak-sub">
+          {current ? 'day streak' : 'study today to start one'}
+          <br />
+          best <b>{longest}</b> · total <b>{total}</b> {total === 1 ? 'day' : 'days'}
         </div>
       </div>
-      <ol className="streak-days" aria-label={`Studied on ${active} of the last 7 days`}>
-        {week.map((d) => (
-          <li key={d.day} className={`${d.active ? 'on' : ''} ${d.today ? 'today' : ''}`} title={d.day}>
-            <span className="streak-dot" aria-hidden="true" />
-            <span className="streak-label" aria-hidden="true">
-              {d.label}
-            </span>
-          </li>
+      <div className="dash-heat" role="group" aria-label={`Study activity, last ${weeks} weeks`}>
+        {DAYS.map((d, i) => (
+          <span key={i} className="hd" aria-hidden="true">
+            {d}
+          </span>
         ))}
-      </ol>
+        {cells.map((d) => (
+          <i key={d.day} role="img" aria-label={text(d)} title={text(d)} className={cls(d)} />
+        ))}
+      </div>
     </section>
   );
 }

@@ -1,32 +1,38 @@
-/* Self-hosted variable fonts (fontsource, pinned 5.3.0) — latin subset only, imported once from main.jsx.
-   Other scripts fall back to system fonts; the woff2 files stay separate assets (see vite.config.js). */
+/* fonts.css — owner: foundation (wave 1). Self-hosted variable fonts (fontsource, exact versions pinned in package.json):
+   - Archivo Variable 5.3.0  — display/"chrome" text. Uses the *wdth* file, which carries BOTH axes
+     (wght 100–900 + wdth 62–125%), so `font-stretch: 112%…125%` (expanded) works.      → var(--f-display)
+   - Onest Variable 5.3.1    — UI + reading text (wght 100–900).                         → var(--f-ui)
+   - Martian Mono Variable 5.3.0 — code, numbers, status line, eyebrows (wght 100–800). → var(--f-mono)
+   Latin subset only, imported once from main.jsx. Other scripts fall back to system fonts; the woff2 files
+   stay separate assets (see vite.config.js). */
 
-/* inter-latin-wght-normal */
+/* archivo-latin-wdth-normal (wght + wdth axes) */
 @font-face {
-  font-family: 'Inter Variable';
+  font-family: 'Archivo Variable';
   font-style: normal;
   font-display: swap;
   font-weight: 100 900;
-  src: url(../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2) format('woff2-variations');
+  font-stretch: 62% 125%;
+  src: url(../../node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2) format('woff2-variations');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
 }
 
-/* plus-jakarta-sans-latin-wght-normal */
+/* onest-latin-wght-normal */
 @font-face {
-  font-family: 'Plus Jakarta Sans Variable';
+  font-family: 'Onest Variable';
   font-style: normal;
   font-display: swap;
-  font-weight: 200 800;
-  src: url(../../node_modules/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2) format('woff2-variations');
+  font-weight: 100 900;
+  src: url(../../node_modules/@fontsource-variable/onest/files/onest-latin-wght-normal.woff2) format('woff2-variations');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
 }
 
-/* jetbrains-mono-latin-wght-normal */
+/* martian-mono-latin-wght-normal */
 @font-face {
-  font-family: 'JetBrains Mono Variable';
+  font-family: 'Martian Mono Variable';
   font-style: normal;
   font-display: swap;
   font-weight: 100 800;
-  src: url(../../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2) format('woff2-variations');
+  src: url(../../node_modules/@fontsource-variable/martian-mono/files/martian-mono-latin-wght-normal.woff2) format('woff2-variations');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
 }

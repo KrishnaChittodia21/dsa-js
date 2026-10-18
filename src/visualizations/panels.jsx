@@ -1,29 +1,57 @@
-// Renderers for visualization frames. All colours come from CSS variables (theme-aware).
+// Renderers for visualization frames in the Kinetic Voxel language: array cells are voxel cubes
+// (or value-tall voxel columns for sorting), pointers are hard-edged beams from above, a range is a
+// bracket on the floor, stacks are slab towers. All colours come from CSS variables (viz.css).
 const cellClass = (state) => (state ? `viz-cell viz-${state}` : 'viz-cell');
 
-export function ArrayPanel({ panel }) {
+/** Value-tall columns only make sense for small non-negative integers. */
+function barsFor(values) {
+  if (!values.length || values.length > 16) return null;
+  if (!values.every((v) => typeof v === 'number' && Number.isInteger(v) && v >= 0)) return null;
+  const max = Math.max(...values, 1);
+  if (max > 40) return null;
+  return { unit: Math.max(4, Math.min(16, Math.floor(150 / max))) };
+}
+
+function Pointers({ list }) {
+  if (!list?.length) return null;
+  return (
+    <div className="viz-ptrs">
+      {list.map((p) => (
+        <span key={p.label} className={`viz-pointer ptr-${p.color || 'a'}`}>
+          {p.label}
+        </span>
+      ))}
+      <span className={`viz-beam ptr-${list[0].color || 'a'}`} aria-hidden="true" />
+    </div>
+  );
+}
+
+export function ArrayPanel({ panel, bars: allowBars }) {
   const { values, highlights = {}, range, pointers = [], label, showIndices = true } = panel;
   const byIndex = {};
   for (const p of pointers) (byIndex[p.index] ||= []).push(p);
+  const bars = allowBars ? barsFor(values) : null;
   return (
-    <div className="viz-panel">
+    <div className="viz-panel viz-panel--array">
       {label && <div className="viz-label">{label}</div>}
-      <div className="viz-array" role="list">
+      <div className={`viz-array${bars ? ' viz-array--bars' : ''}`} role="list" style={bars ? { '--u': `${bars.unit}px` } : undefined}>
         {values.length === 0 && <div className="viz-empty">empty</div>}
         {values.map((v, i) => {
           const inRange = range && i >= range[0] && i <= range[1];
           const edge = inRange ? `${i === range[0] ? ' range-start' : ''}${i === range[1] ? ' range-end' : ''}` : '';
+          const st = highlights[i];
           return (
             <div key={i} className={`viz-col${inRange ? ' in-range' + edge : ''}`} role="listitem">
-              <div className={cellClass(highlights[i])}>{String(v)}</div>
+              <Pointers list={byIndex[i]} />
+              {bars ? (
+                <>
+                  <span className={`viz-bar-val${st ? ` viz-${st}` : ''}`}>{String(v)}</span>
+                  <div className={`vox viz-vox${st ? ` viz-${st}` : ''}`} style={{ '--h': Math.max(v, 0.3) }} aria-label={String(v)} />
+                </>
+              ) : (
+                <div className={cellClass(st)}>{String(v)}</div>
+              )}
               {showIndices && <div className="viz-index">{i}</div>}
-              <div className="viz-pointers">
-                {(byIndex[i] || []).map((p) => (
-                  <span key={p.label} className={`viz-pointer ptr-${p.color || 'a'}`}>
-                    ▲ {p.label}
-                  </span>
-                ))}
-              </div>
             </div>
           );
         })}
@@ -32,17 +60,21 @@ export function ArrayPanel({ panel }) {
   );
 }
 
+/** The stack as a voxel tower: slabs grow upward, the top slab glows (uv = current). */
 export function StackPanel({ panel }) {
   const items = [...panel.values].reverse();
   return (
-    <div className="viz-panel">
-      <div className="viz-label">{panel.label || 'stack'}</div>
-      <div className="viz-stack">
-        {items.length === 0 && <div className="viz-empty">empty</div>}
+    <div className="viz-panel viz-panel--stack">
+      <div className="viz-label">
+        {panel.label || 'stack'} <span className="viz-label-sub">· grows up</span>
+      </div>
+      <div className="viz-tower">
+        {items.length === 0 && <div className="viz-slab viz-slab--ghost">empty</div>}
         {items.map((v, i) => (
-          <div key={items.length - i} className={`viz-cell viz-stack-cell${i === 0 ? ' viz-active' : ''}`}>
-            {String(v)}
-            {i === 0 && <span className="viz-top">top</span>}
+          <div key={items.length - i} className={`viz-slab${i === 0 ? ' viz-slab--top' : ''}${i === items.length - 1 ? ' viz-slab--base' : ''}`}>
+            <span className="viz-slab-d">#{items.length - 1 - i}</span>
+            <span className="viz-slab-v">{String(v)}</span>
+            {i === 0 && <span className="viz-slab-t">top</span>}
           </div>
         ))}
       </div>
@@ -52,12 +84,12 @@ export function StackPanel({ panel }) {
 
 export function QueuePanel({ panel }) {
   return (
-    <div className="viz-panel">
+    <div className="viz-panel viz-panel--queue">
       <div className="viz-label">{panel.label || 'queue'}</div>
       <div className="viz-queue">
         {panel.values.length === 0 ? <div className="viz-empty">empty</div> : <span className="viz-queue-end">front</span>}
         {panel.values.map((v, i) => (
-          <div key={i} className={`viz-cell viz-queue-cell${i === 0 ? ' viz-visited' : ''}`}>
+          <div key={i} className={`viz-cell viz-queue-cell${i === 0 ? ' viz-window' : ''}`}>
             {String(v)}
           </div>
         ))}
@@ -69,13 +101,19 @@ export function QueuePanel({ panel }) {
 
 export function VarsPanel({ panel }) {
   return (
-    <div className="viz-panel viz-vars">
-      {Object.entries(panel.vars).map(([k, v]) => (
-        <span key={k} className="viz-var">
-          <span className="viz-var-k">{k}</span>
-          <span className="viz-var-v">{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
-        </span>
-      ))}
+    <div className="viz-panel viz-panel--vars">
+      <div className="viz-label">variables</div>
+      <div className="viz-vars">
+        {Object.entries(panel.vars).map(([k, v]) => {
+          const text = typeof v === 'object' ? JSON.stringify(v) : String(v);
+          return (
+            <span key={k} className={`viz-var${text.length > 7 ? ' viz-var--wide' : ''}`}>
+              <span className="viz-var-k">{k}</span>
+              <span className="viz-var-v">{text}</span>
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -85,7 +123,7 @@ export function ListPanel({ panel }) {
   const byIndex = {};
   for (const p of pointers) (byIndex[p.index] ||= []).push(p);
   return (
-    <div className="viz-panel">
+    <div className="viz-panel viz-panel--list">
       <div className="viz-list">
         {next[0] === null && values.length > 0 && <span className="viz-null">∅ ←</span>}
         {values.map((v, i) => {
@@ -98,14 +136,8 @@ export function ListPanel({ panel }) {
           return (
             <div key={i} className="viz-list-item">
               <div className="viz-col">
+                <Pointers list={byIndex[i]} />
                 <div className={`${cellClass(highlights[i])} viz-node-box`}>{String(v)}</div>
-                <div className="viz-pointers">
-                  {(byIndex[i] || []).map((p) => (
-                    <span key={p.label} className={`viz-pointer ptr-${p.color || 'a'}`}>
-                      ▲ {p.label}
-                    </span>
-                  ))}
-                </div>
               </div>
               {link}
             </div>
@@ -140,7 +172,7 @@ export function NodesPanel({ panel }) {
       <svg viewBox={`0 0 ${width} ${height}`} width={Math.min(width, 900)} style={{ maxWidth: '100%', height: 'auto' }} role="img" aria-label="diagram">
         <defs>
           <marker id={markerId} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--viz-edge)" />
+            <path d="M 0 0 L 10 5 L 0 10 z" className="viz-arrowhead" />
           </marker>
         </defs>
         {panel.edges.map((e, i) => {
@@ -170,9 +202,16 @@ export function NodesPanel({ panel }) {
           if (n.state === 'hidden') return null;
           const p = pos[n.id];
           const long = n.label.length > 3;
+          const w = Math.max(2 * r, n.label.length * 8.4);
           return (
             <g key={n.id} className={`viz-node ${n.state ? `viz-node-${n.state}` : ''}`}>
-              {long ? <rect x={p.x - Math.max(r, n.label.length * 4.2)} y={p.y - 14} width={Math.max(2 * r, n.label.length * 8.4)} height={28} rx={8} /> : <circle cx={p.x} cy={p.y} r={r} />}
+              {/* the puck's side: an offset copy underneath gives each node voxel depth */}
+              {long ? (
+                <rect className="viz-node-side" x={p.x - w / 2 + 3} y={p.y - 14 + 4} width={w} height={28} rx={8} />
+              ) : (
+                <circle className="viz-node-side" cx={p.x + 2.5} cy={p.y + 4} r={r} />
+              )}
+              {long ? <rect className="viz-node-face" x={p.x - w / 2} y={p.y - 14} width={w} height={28} rx={8} /> : <circle className="viz-node-face" cx={p.x} cy={p.y} r={r} />}
               <text x={p.x} y={p.y + 4.5} textAnchor="middle">
                 {n.label}
               </text>
@@ -188,7 +227,7 @@ export function GridPanel({ panel }) {
   return (
     <div className="viz-panel">
       {panel.label && <div className="viz-label">{panel.label}</div>}
-      <div className="viz-grid" style={{ gridTemplateColumns: `repeat(${panel.cells[0]?.length || 1}, 38px)` }}>
+      <div className="viz-grid" style={{ gridTemplateColumns: `repeat(${panel.cells[0]?.length || 1}, var(--viz-gc, 38px))` }}>
         {panel.cells.flatMap((row, r) =>
           row.map((v, c) => (
             <div key={`${r}-${c}`} className={`viz-grid-cell viz-${panel.states?.[r]?.[c] || 'none'}`}>
@@ -237,7 +276,7 @@ export function IntervalsPanel({ panel }) {
   const step = Math.max(1, Math.ceil(span / 12));
   for (let t = panel.min; t <= panel.max; t += step) ticks.push(t);
   return (
-    <div className="viz-panel">
+    <div className="viz-panel viz-panel--intervals">
       <div className="viz-label">{panel.label}</div>
       <div className="viz-intervals">
         {panel.items.length === 0 && <div className="viz-empty">none yet</div>}
@@ -263,10 +302,10 @@ export function IntervalsPanel({ panel }) {
   );
 }
 
-export function Panel({ panel }) {
+export function Panel({ panel, bars }) {
   switch (panel.kind) {
     case 'array':
-      return <ArrayPanel panel={panel} />;
+      return <ArrayPanel panel={panel} bars={bars} />;
     case 'stack':
       return <StackPanel panel={panel} />;
     case 'queue':

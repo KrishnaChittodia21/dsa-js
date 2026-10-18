@@ -47,15 +47,13 @@ export default function TopicTricks({ topicId }) {
         <section>
           <div className="divider-label">Tricks & tips</div>
           {tricks.signals?.length > 0 && (
-            <div className="card card-tight" style={{ marginBottom: '1rem' }}>
-              <div className="small" style={{ fontWeight: 600, marginBottom: '0.4rem' }}>
+            <div className="tile tile--flat trick-signals">
+              <div className="trick-signals-h">
                 <Icon name="target" size={14} /> More clues that point here
               </div>
-              <div className="row-wrap">
+              <div className="trick-sig">
                 {tricks.signals.map((s) => (
-                  <span key={s} className="badge badge-accent mono">
-                    {s}
-                  </span>
+                  <span key={s}>{s}</span>
                 ))}
               </div>
             </div>
@@ -74,10 +72,10 @@ export default function TopicTricks({ topicId }) {
           )}
           <div className="trick-grid">
             {shown.map((t) => (
-              <article key={t.title} className="card trick">
-                <div className="row" style={{ alignItems: 'flex-start', marginBottom: '0.35rem' }}>
-                  <h4 style={{ margin: 0, flex: 1 }}>{t.title}</h4>
-                  {t.kind && <span className="badge">{KIND_LABEL[t.kind] || t.kind}</span>}
+              <article key={t.title} className="tile trick">
+                <div className="trick-head">
+                  <h4>{t.title}</h4>
+                  {t.kind && <span className="tag">{KIND_LABEL[t.kind] || t.kind}</span>}
                 </div>
                 <Markdown className="small">{t.md}</Markdown>
                 {t.code && <CodeBlock code={t.code} copy />}
@@ -85,7 +83,7 @@ export default function TopicTricks({ topicId }) {
             ))}
           </div>
           {tricks.traps?.length > 0 && (
-            <div className="card" style={{ marginTop: '1rem' }}>
+            <div className="tile trick-traps">
               <h4>Looks like… but it's actually…</h4>
               <div className="table-wrap">
                 <table>
