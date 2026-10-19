@@ -29,7 +29,7 @@ import './styles/companies.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       {/* OS "reduce motion" turns off transform/layout animations (opacity fades remain) */}
       <MotionConfig reducedMotion="user">
         <ThemeProvider>
