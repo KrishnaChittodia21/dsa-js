@@ -9,6 +9,9 @@ const VENDOR = {
 };
 
 export default defineConfig({
+  // GitHub Pages serves the app from /dsa-js/ (set by .github/workflows/deploy.yml); local dev and builds stay at /.
+  // BrowserRouter routes need an absolute base, so './' won't do here.
+  base: process.env.PAGES_BASE || '/',
   plugins: [react(), contentManifest()],
   worker: { format: 'es' },
   build: {
