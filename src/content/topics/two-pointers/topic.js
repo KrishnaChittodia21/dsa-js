@@ -598,6 +598,7 @@ Invariant: **\`nums[0 .. write − 1]\` is exactly the answer for \`nums[0 .. re
 - If the element should be kept, copy it to \`nums[write]\` and \`write++\`.
 - At the end, \`write\` is the new length.`,
           },
+          { type: 'visual', scenario: 'read-write-pointers', caption: "read visits everything; write only advances for kept values, so nums[0..write) is always the answer so far." },
           {
             type: 'code',
             title: 'Remove duplicates from a sorted array',
@@ -648,6 +649,7 @@ Invariant: **\`nums[0 .. write − 1]\` is exactly the answer for \`nums[0 .. re
 
 **Merging in place** (\`nums1\` has room for \`nums2\` at the end): fill from the **back**. Write the larger of \`nums1[i]\` and \`nums2[j]\` at position \`k = m + n − 1\` and move left. Why the back? The free slots are at the back, and the write position \`k\` is always ≥ \`i\` — it can never overwrite an element of nums1 that we have not read yet.`,
           },
+          { type: 'visual', scenario: 'merge-sorted-inplace', caption: 'Three pointers: i and j read the largest unread values, k writes into the free slots from the back.' },
           {
             type: 'code',
             title: 'Merge nums2 into nums1 (in place, from the back)',

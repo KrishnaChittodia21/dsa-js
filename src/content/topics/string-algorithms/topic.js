@@ -620,6 +620,7 @@ For \`s = "aabxaab"\`:
 
 Each successful comparison in step 2 pushes r to the right, and r never moves left, so there are at most n successful comparisons in total (plus one failing comparison per i) → **O(n)**.`,
           },
+          { type: 'visual', scenario: 'z-algorithm', caption: "Inside the z-box, copy the mirror value z[i − l] (capped at r − i); compare only past r, so r never moves left." },
           {
             type: 'reflect',
             prompt: 'Why do we need `Math.min(r − i, z[i − l])` instead of simply copying `z[i − l]`?',
@@ -740,6 +741,7 @@ Also: \`%\` in JS keeps the sign of the left operand (\`-3 % 5 === -3\`), so nor
 
 Count of palindromic substrings from Manacher: \`sum over i of ceil(rad[i] / 2)\` in the transformed string.`,
           },
+          { type: 'visual', scenario: 'palindrome-expand', caption: "Expand from each of the 2n − 1 centres (characters and gaps) while the two ends match; keep the widest." },
           {
             type: 'checkpoint',
             id: 'string-algorithms-cp-8',

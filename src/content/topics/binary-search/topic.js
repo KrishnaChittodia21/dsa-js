@@ -809,6 +809,11 @@ valid  ⇔  Aleft <= Bright  &&  Bleft <= Aright
 If \`Aleft > Bright\`, i is too big → move it left. If \`Bleft > Aright\`, i is too small → move right. That is monotonic in i, so binary search i over the **shorter** array: O(log min(m, n)). Median = max of the lefts (odd total) or the average of max(lefts) and min(rights) (even total).`,
           },
           {
+            type: 'visual',
+            scenario: 'median-partition',
+            caption: 'i is binary searched over the shorter array and j = half − i follows. Watch which neighbour pair breaks the rule: a too-big left neighbour in A moves i left, a too-big one in B moves i right. −∞ / +∞ stand in past the ends.',
+          },
+          {
             type: 'checkpoint',
             id: 'binary-search-cp-10',
             question: '`nums = [1, 2, 1, 3, 5, 6, 4]`, `mid = 3` (`nums[3] = 3`, `nums[4] = 5`). Why is it safe to discard indices 0..3 even though index 1 (value 2) is a peak?',

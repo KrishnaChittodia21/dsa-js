@@ -119,7 +119,8 @@ export function VarsPanel({ panel }) {
 }
 
 export function ListPanel({ panel }) {
-  const { values, next, pointers = [], highlights = {} } = panel;
+  // doubly: forward links are drawn as ⇄ (each node also points back to its prev).
+  const { values, next, pointers = [], highlights = {}, doubly = false } = panel;
   const byIndex = {};
   for (const p of pointers) (byIndex[p.index] ||= []).push(p);
   return (
@@ -131,7 +132,7 @@ export function ListPanel({ panel }) {
           if (i < values.length - 1) {
             const fwd = next[i] === i + 1;
             const back = next[i + 1] === i;
-            link = <span className={`viz-link${fwd || back ? '' : ' viz-link-none'}`}>{fwd ? '→' : back ? '←' : ' '}</span>;
+            link = <span className={`viz-link${fwd || back ? '' : ' viz-link-none'}`}>{fwd ? (doubly ? '⇄' : '→') : back ? '←' : ' '}</span>;
           }
           return (
             <div key={i} className="viz-list-item">
@@ -156,7 +157,9 @@ export function NodesPanel({ panel }) {
   const sx = free ? 70 : 52;
   const sy = free ? 70 : 64;
   const r = 18;
-  const pad = 30;
+  // Self-loops (from === to) are drawn as a small arc pointing away from the diagram's centre.
+  const hasLoop = panel.edges.some((e) => e.from === e.to);
+  const pad = hasLoop ? 62 : 30;
   const xs = panel.nodes.map((n) => n.x * sx);
   const ys = panel.nodes.map((n) => n.y * sy);
   const minX = Math.min(...xs);
@@ -180,6 +183,27 @@ export function NodesPanel({ panel }) {
           const a = pos[e.from];
           const b = pos[e.to];
           if (!a || !b) return null;
+          if (e.from === e.to) {
+            const cx = width / 2;
+            const cy = height / 2;
+            const ang = Math.hypot(a.x - cx, a.y - cy) < 1 ? -Math.PI / 2 : Math.atan2(a.y - cy, a.x - cx);
+            const at = (t, d) => [a.x + Math.cos(t) * d, a.y + Math.sin(t) * d];
+            const [x1, y1] = at(ang - 0.55, r);
+            const [x2, y2] = at(ang + 0.55, r + 3);
+            const [c1x, c1y] = at(ang - 0.95, r * 3.4);
+            const [c2x, c2y] = at(ang + 0.95, r * 3.4);
+            const [lx, ly] = at(ang, r * 2.9 + Math.abs(Math.cos(ang)) * 14);
+            return (
+              <g key={i}>
+                <path d={`M ${x1} ${y1} C ${c1x} ${c1y} ${c2x} ${c2y} ${x2} ${y2}`} fill="none" className={`viz-edge ${e.state ? `viz-edge-${e.state}` : ''}`} markerEnd={panel.directed ? `url(#${markerId})` : undefined} />
+                {e.label && (
+                  <text x={lx} y={ly + 4} className="viz-edge-label" textAnchor="middle">
+                    {e.label}
+                  </text>
+                )}
+              </g>
+            );
+          }
           const dx = b.x - a.x;
           const dy = b.y - a.y;
           const len = Math.hypot(dx, dy) || 1;

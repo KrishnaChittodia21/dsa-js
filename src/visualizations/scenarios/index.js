@@ -6,6 +6,10 @@ import * as dp from './dp.js';
 import * as xg from './extra-graphs.js';
 import * as xa from './extra-arrays.js';
 import * as xs from './extra-structures.js';
+import * as pl from './patterns-linear.js';
+import * as pdg from './patterns-dp-graph.js';
+import * as pl2 from './patterns-linear-2.js'; // patterns-linear-2
+import * as pdt from './patterns-dp-tree.js'; // patterns-dp-tree
 
 export const SCENARIOS = {
   'two-pointers-pair-sum': arrays.twoPointersPairSum,
@@ -59,4 +63,40 @@ export const SCENARIOS = {
   'zero-one-bfs': xg.zeroOneBfs,
   'floyd-warshall': xg.floydWarshall,
   'bipartite-check': xg.bipartite,
+  // patterns-linear
+  'palindrome-expand': pl.palindromeExpand,
+  'boyer-moore': pl.boyerMoore,
+  'next-permutation': pl.nextPermutation,
+  'z-algorithm': pl.zAlgorithm,
+  'difference-array': pl.differenceArray,
+  'prefix-sum-2d': pl.prefixSum2d,
+  'read-write-pointers': pl.readWritePointers,
+  'dummy-head': pl.dummyHead,
+  'expression-eval': pl.expressionEval,
+  'circular-buffer': pl.circularBuffer,
+  // patterns-dp-graph
+  'interval-dp-burst': pdg.intervalBurstBalloons,
+  'bitmask-tsp': pdg.bitmaskTsp,
+  'stock-state-machine': pdg.stateMachineStock,
+  'grid-dp': pdg.gridDp,
+  'hierholzer-itinerary': pdg.hierholzerItinerary,
+  'minimax-game': pdg.minimaxPredictWinner,
+  // patterns-dp-tree
+  'median-partition': pdt.medianPartition,
+  'decode-ways': pdt.decodeWays,
+  'word-break': pdt.wordBreak,
+  'tree-from-traversals': pdt.treeFromTraversals,
+  'functional-graph': pdt.functionalGraph,
+  'fast-power': pdt.fastPower,
+  'bst-build-balanced': pdt.bstBuildBalanced,
+  'digit-dp': pdt.digitDpOnes,
+  // patterns-linear-2
+  'spiral-matrix': pl2.spiralMatrix,
+  'merge-sorted-inplace': pl2.mergeSortedInPlace,
+  'interval-intersection': pl2.intervalIntersection,
+  'jump-game': pl2.jumpGame,
+  'min-stack': pl2.minStack,
+  'lru-cache': pl2.lruCache,
+  'gray-code': pl2.grayCode,
+  'sparse-table': pl2.sparseTable,
 };

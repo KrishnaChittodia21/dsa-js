@@ -766,6 +766,12 @@ A traversal of values alone is ambiguous: \`[1,2]\` in preorder could be 2 as le
 Give the root (row 0, col 0); a left child is (row + 1, col − 1), a right child (row + 1, col + 1). Collect \`[col, row, val]\` for every node, sort by col, then row, then value, and group by column.`,
           },
           {
+            type: 'visual',
+            scenario: 'tree-from-traversals',
+            input: { preorder: [3, 9, 20, 15, 7], inorder: [9, 3, 15, 20, 7] },
+            caption: 'The example above: the preorder pointer only moves forward, the Map finds each root in inorder, and the inorder range shrinks to the subtree being built.',
+          },
+          {
             type: 'checkpoint',
             id: 'trees-cp-9',
             question: 'Why is the preorder `"1,2,3"` **without** null markers not enough to rebuild a tree?',

@@ -456,6 +456,12 @@ Twist the combine step and you get the whole family:
 - **Maximal square:** \`dp[r][c]\` = side of the largest all-1 square whose **bottom-right corner** is (r, c) = \`1 + min(top, left, top-left)\`.`,
           },
           {
+            type: 'visual',
+            scenario: 'grid-dp',
+            input: { grid: [[0, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0]], mode: 'count-paths' },
+            caption: 'Unique paths with one obstacle: each cell adds the cell above and the cell to the left; the blocked cell holds 0. Switch the mode to min-sum to see cost + min(top, left).',
+          },
+          {
             type: 'checkpoint',
             id: 'dp-2d-cp-4',
             question: 'Maximal square: why is `dp[r][c] = 1 + min(dp[r−1][c], dp[r][c−1], dp[r−1][c−1])` (for a 1-cell) and not `1 + max(...)`?',

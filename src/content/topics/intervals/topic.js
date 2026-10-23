@@ -781,6 +781,7 @@ So some optimal answer contains \`g\`. Remove \`g\` and everything overlapping i
 
 Each step advances one pointer → at most \`n + m\` steps: **O(n + m)**. This is the same "discard what can't matter any more" idea you saw in Two Pointers.`,
           },
+          { type: 'visual', scenario: 'interval-intersection', caption: 'Overlap = [max of starts, min of ends] when lo ≤ hi; the interval that ends first is dropped.' },
           {
             type: 'code',
             title: 'Interval List Intersections',

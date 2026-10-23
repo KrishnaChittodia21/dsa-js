@@ -295,6 +295,35 @@ Use `{ type: 'visual', scenario: '<id>', input: {…} }`. Input is optional (def
 | `kruskal` / `prim` | `{ n, edges: [u,v,w][] }` (+ `start` for prim) |
 | `bellman-ford` / `zero-one-bfs` / `floyd-warshall` | `{ n, edges, start }` / same / `{ n, edges }` |
 | `bipartite-check` | `{ n, edges }` |
+| `palindrome-expand` / `z-algorithm` | `{ s }` (≤ 16 chars) |
+| `boyer-moore` / `next-permutation` | `{ nums }` (≤ 14 / ≤ 12) |
+| `difference-array` | `{ n, updates: [l, r, v][] }` (n ≤ 12, ≤ 6 updates) |
+| `prefix-sum-2d` | `{ matrix, query: [r1, c1, r2, c2] }` (≤ 5×6) |
+| `read-write-pointers` | `{ nums, mode: 'remove duplicates (sorted)'\|'move zeroes' }` |
+| `dummy-head` | `{ values, val }` (remove all nodes equal to val) |
+| `expression-eval` | `{ expr }` (infix with + − × ÷ and parentheses, or space-separated RPN) |
+| `circular-buffer` | `{ capacity, ops: ['push x' \| 'pop' \| 'front' \| 'rear'] }` |
+| `grid-dp` | `{ grid, mode: 'min-sum'\|'count-paths' }` (≤ 5×6; count-paths: 1 = obstacle) |
+| `interval-dp-burst` | `{ nums }` (burst balloons, ≤ 6) |
+| `bitmask-tsp` | `{ dist }` (n×n matrix, n ≤ 5, null = no road) |
+| `stock-state-machine` | `{ prices }` (buy/sell with cooldown, ≤ 8 days) |
+| `hierholzer-itinerary` | `{ tickets: [from, to][], start }` |
+| `minimax-game` | `{ nums }` (take from either end, ≤ 4) |
+| `median-partition` | `{ a, b }` (two sorted arrays, ≤ 10 each; binary search the cut) |
+| `decode-ways` / `word-break` | `{ s }` (digits, ≤ 12) / `{ s, words }` (≤ 16 letters, ≤ 10 words) |
+| `tree-from-traversals` | `{ preorder, inorder }` (unique values, ≤ 12) |
+| `bst-build-balanced` | `{ nums }` (sorted array → balanced BST, ≤ 15) |
+| `functional-graph` | `{ f }` (node i → f[i], ≤ 10 nodes) |
+| `fast-power` | `{ x, n }` (x^n by halving; negative n allowed) |
+| `digit-dp` | `{ n }` (count the digit 1 in 0…N, N ≤ 9999) |
+| `spiral-matrix` | `{ matrix }` (spiral order, ≤ 6×6) |
+| `merge-sorted-inplace` | `{ nums1, nums2 }` (nums1 = its m real values; merged from the back, ≤ 7 each) |
+| `interval-intersection` | `{ A, B }` (two sorted, disjoint `[start, end][]` lists, ≤ 6 each) |
+| `jump-game` | `{ nums, mode: 'can reach the end (Jump Game I)'\|'fewest jumps (Jump Game II)' }` (≤ 14) |
+| `min-stack` | `{ ops: ['push x' \| 'pop' \| 'top' \| 'getMin'], mode: 'min stack'\|'queue from two stacks' }` |
+| `lru-cache` | `{ capacity, ops: ['put k v' \| 'get k'] }` (capacity ≤ 5, ≤ 16 ops) |
+| `gray-code` | `{ n, mode: 'i ^ (i >> 1)'\|'reflect and prefix' }` (n ≤ 4) |
+| `sparse-table` | `{ nums, l, r }` (range-min query, ≤ 10 numbers) |
 
 **Pattern animations.** Each pattern is linked to an animation in `src/visualizations/patternVisuals.js`
 (shown in the topic's Visualize tab, on the Patterns page, on question pages and in the Visualizer gallery).

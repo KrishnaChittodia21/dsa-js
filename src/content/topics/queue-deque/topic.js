@@ -414,6 +414,7 @@ index:  0   1   2   3
         ↑back wrapped  ↑front
 \`\`\``,
           },
+          { type: 'visual', scenario: 'circular-buffer', caption: "The back slot is (head + count) % cap — watch it wrap to index 0, and count tell FULL from EMPTY when head = tail." },
           {
             type: 'callout',
             variant: 'warning',

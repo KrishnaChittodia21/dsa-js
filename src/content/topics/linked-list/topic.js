@@ -474,6 +474,7 @@ With \`const dummy = new ListNode(0, head)\`, the head's predecessor is \`dummy\
 
 At the end you return \`dummy.next\` — the real (possibly new) head.`,
           },
+          { type: 'visual', scenario: 'dummy-head', caption: "Removing every node equal to val: the dummy is the head’s predecessor, so deleting the head needs no special case." },
           {
             type: 'code',
             title: 'Remove the n-th node from the end — dummy + gap pointers, one pass',
@@ -742,6 +743,7 @@ Merging relinks existing nodes, so the merge step needs no extra array (unlike a
 - Two sentinel nodes (\`head\`, \`tail\`) mean the list is never empty — no null checks.
 - Nodes store their **key**, so when we evict \`tail.prev\` we can also \`map.delete(node.key)\`.`,
           },
+          { type: 'visual', scenario: 'lru-cache', caption: 'The Map jumps straight to a node; the doubly linked list moves it to the front or evicts T.prev in O(1).' },
           {
             type: 'callout',
             variant: 'tip',

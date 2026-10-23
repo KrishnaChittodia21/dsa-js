@@ -654,6 +654,16 @@ If you swap the loops (numbers outside, amounts inside), each number is "introdu
 **Word break:** \`dp[i]\` = can the first i characters be segmented? \`dp[i] = true\` if for some j, \`dp[j]\` is true and \`s.slice(j, i)\` is in the dictionary Set. Word break II needs all sentences: a memoized DFS \`sentences(start)\` returns the list of sentences for the suffix from start; memoizing by start avoids re-exploring shared suffixes.`,
           },
           {
+            type: 'visual',
+            scenario: 'decode-ways',
+            caption: 'Each dp[i] adds the one-digit way (if the digit is not 0) and the two-digit way (if it is 10–26). Try 06, 30 or 100 to see the zero traps drive dp to 0.',
+          },
+          {
+            type: 'visual',
+            scenario: 'word-break',
+            caption: 'For each end i, only split points j with dp[j] = ✓ are tried; the first dictionary word s[j..i) sets dp[i]. Following the stored j back rebuilds one sentence.',
+          },
+          {
             type: 'checkpoint',
             id: 'dp-1d-cp-9',
             question: 'Decode ways for `s = "106"`. Which is correct?',

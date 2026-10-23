@@ -551,6 +551,11 @@ x^0 = 1                   base case
 Each call halves n, so there are only about log2(n) calls: **O(log n)**. For n = 2^31, that is 31 calls instead of 2 billion.`,
           },
           {
+            type: 'visual',
+            scenario: 'fast-power',
+            caption: 'pow(10) → pow(5) → pow(2) → pow(1) → pow(0): the stack grows by one frame per halving. On the way back each call squares its half, and odd exponents multiply by x once more.',
+          },
+          {
             type: 'steps',
             title: 'myPow(x, n) with negative exponents',
             steps: [
@@ -812,6 +817,11 @@ diff(i, i) = nums[i]
 \`\`\`
 
 Player 1 wins (ties count) iff \`diff(0, n−1) >= 0\`. This is **minimax** written compactly: maximising my difference *is* minimising the opponent's.`,
+          },
+          {
+            type: 'visual',
+            scenario: 'minimax-game',
+            caption: 'The same game as an explicit MAX / MIN tree: Player 1 levels keep the larger child, Player 2 levels the smaller. Taking the 1 first looks bad but wins by 222 — greedy (take 7) would lose.',
           },
           {
             type: 'reflect',

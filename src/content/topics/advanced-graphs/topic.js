@@ -887,6 +887,11 @@ while (stack.length) {
 path.reverse();                                  // nodes were collected end-first`,
           },
           {
+            type: 'visual',
+            scenario: 'hierholzer-itinerary',
+            caption: 'JFK → ATL is tried first (smallest) and dead-ends at DEN. DEN and ATL are fixed at the END of the path, then the detour JFK → SFO → ORD → JFK is spliced in front of them.',
+          },
+          {
             type: 'checkpoint',
             id: 'advanced-graphs-cp-8',
             question: 'Tickets: JFK→A, A→JFK, JFK→B. Greedy lexical walk: JFK → A → JFK → B uses all tickets. But what if we had JFK→A, JFK→B, B→JFK? Greedy goes JFK → A and is stuck with tickets left. What does Hierholzer do?',
@@ -1034,6 +1039,11 @@ contains 00, 01, 11, 10 ✓   length 2^2 + 1 = 5 ✓
 \`\`\`
 
 **How to separate the cycles from the trees:** a tree leaf has in-degree 0. Remove it (decrease its target's in-degree), repeat — exactly Kahn's topological sort. Nodes never removed are on cycles. As a bonus, while peeling you can compute \`depth[v]\` = the longest chain of tree nodes ending at v.`,
+          },
+          {
+            type: 'visual',
+            scenario: 'functional-graph',
+            caption: 'The graph from the diagram: 5 and 6 are peeled first, then 4 and 3; node 0 keeps an arrow from 2, so 0 → 1 → 2 is never peeled. That leftover is the cycle, with a longest chain of 2 feeding into 0.',
           },
           {
             type: 'text',

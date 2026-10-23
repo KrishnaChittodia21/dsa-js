@@ -792,6 +792,11 @@ When the range has even length there are two middles. Both are fine — there ar
   return build(0, nums.length - 1);
 }`,
           },
+          {
+            type: 'visual',
+            scenario: 'bst-build-balanced',
+            caption: 'Each call takes the middle of its range as the root and hands the halves to its children, so the tree fills level by level to the minimum height ⌈log₂(n + 1)⌉.',
+          },
         ],
       },
       {

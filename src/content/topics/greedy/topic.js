@@ -456,6 +456,7 @@ Why safe? Suppose an optimal assignment gives that child a bigger cookie B and g
               'If the loop finishes, the last index was ≤ reach → return true.',
             ],
           },
+          { type: 'visual', scenario: 'jump-game', caption: 'reach only grows; the first i beyond it is a gap. Switch the question to "fewest jumps" to see Jump Game II as BFS levels (curEnd / farthest).' },
           {
             type: 'text',
             md: `**Jump Game II (minimum jumps)** is BFS in disguise. Indices reachable with exactly 1 jump form a contiguous block, with 2 jumps the next block, etc. Scan the current block, track the farthest reach from it (\`farthest\`); when you pass the end of the block (\`curEnd\`), you *must* jump: \`jumps++\`, \`curEnd = farthest\`.

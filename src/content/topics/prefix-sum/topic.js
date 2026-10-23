@@ -546,6 +546,7 @@ sum = P[r2+1][c2+1] − P[r1][c2+1] − P[r2+1][c1] + P[r1][c1]
       (whole)        (strip above)  (strip left)  (corner removed twice → add back)
 \`\`\``,
           },
+          { type: 'visual', scenario: 'prefix-sum-2d', caption: "Build P cell by cell (cell + above + left − overlap), then answer a rectangle with four lookups." },
           {
             type: 'checkpoint',
             id: 'prefix-sum-cp-5',
@@ -721,6 +722,7 @@ prefix:  [0,  5, 5, 5,  0]      ← final array
 
 So u updates cost O(u), and one O(n) prefix pass produces the final array. Prefix sums and difference arrays are **inverse operations**, like integration and differentiation.`,
           },
+          { type: 'visual', scenario: 'difference-array', caption: "Each range update writes two marks; one prefix-sum pass turns the marks into the final values." },
           {
             type: 'checkpoint',
             id: 'prefix-sum-cp-9',

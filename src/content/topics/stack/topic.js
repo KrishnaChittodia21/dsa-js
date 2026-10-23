@@ -600,6 +600,7 @@ for (const token of input) {
 
 This is called a **sign stack**: it remembers, for each open parenthesis, what to add the inner value to and with which sign.`,
           },
+          { type: 'visual', scenario: 'expression-eval', caption: "The two-stack (operands + operators) version handles × ÷ precedence and parentheses; enter postfix like \"3 4 + 2 *\" to see RPN." },
           {
             type: 'dryrun',
             title: 'Calculator: "1 - (4 + 5 - 2) + 3"',
@@ -702,6 +703,7 @@ pop    → [(5,5)]                 getMin = 5  ← recovered for free
 
 **Queue from two stacks.** Push into \`inbox\`. To dequeue, take from \`outbox\`; if \`outbox\` is empty, pour **all** of \`inbox\` into it (this reverses the order, so the oldest element ends on top).`,
           },
+          { type: 'visual', scenario: 'min-stack', caption: 'Each push records the minimum so far, so getMin survives pops. Switch the design to "queue from two stacks" to watch inbox pour into outbox.' },
           {
             type: 'callout',
             variant: 'insight',

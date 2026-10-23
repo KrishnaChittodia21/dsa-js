@@ -718,6 +718,7 @@ The algorithm performs this pairing on the fly with one candidate and one counte
 - Same as candidate → \`count++\` (another supporter).
 - Different → \`count--\` (cancel one supporter against this voter).`,
           },
+          { type: 'visual', scenario: 'boyer-moore', caption: "Matching votes add up, different votes cancel in pairs — a strict majority can never be fully cancelled. Verify the survivor at the end." },
           {
             type: 'callout',
             variant: 'insight',
@@ -786,6 +787,7 @@ The algorithm performs this pairing on the fly with one candidate and one counte
 
 If no pivot exists (the whole array is descending, e.g. \`[3, 2, 1]\`), it is the last permutation: reverse everything to get the first one, \`[1, 2, 3]\`.`,
           },
+          { type: 'visual', scenario: 'next-permutation', caption: "Pivot from the right, swap with the smallest larger value in the suffix, then reverse the descending suffix." },
           {
             type: 'dryrun',
             title: 'nextPermutation([1, 3, 5, 4, 2])',

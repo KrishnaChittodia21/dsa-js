@@ -1126,6 +1126,7 @@ answer = min(st[2][1], st[2][2]) = min(1, 1) = 1
 
 The overlap (indices 2..4) is counted twice — harmless because **min is idempotent**: min(x, x) = x. For **sum** it would be wrong (overlap added twice), which is why sparse tables are used for min/max/gcd, not sums.`,
           },
+          { type: 'visual', scenario: 'sparse-table', caption: 'Each level is built from two halves of the level below; the query [1, 5] uses two overlapping blocks of length 4.' },
           {
             type: 'checkpoint',
             id: 'advanced-structures-cp-10',

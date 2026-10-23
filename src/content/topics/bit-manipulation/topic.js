@@ -817,6 +817,7 @@ The seam is safe because the reversed list starts where the forward list ended; 
 
 **Inverse:** given g, recover i by prefix-XOR from the top: \`i = g ^ (g >> 1) ^ (g >> 2) ^ …\`.`,
           },
+          { type: 'visual', scenario: 'gray-code', caption: 'g = i ^ (i >> 1) flips exactly one bit per step; switch to "reflect and prefix" to build the same list by mirroring.' },
         ],
       },
       {

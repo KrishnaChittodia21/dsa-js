@@ -671,6 +671,11 @@ answer  = max(sold[n-1], rest[n-1])
             md: 'A DP whose state is **(position, mode)** where "mode" is one of a few named situations. Transitions are exactly the arrows of the diagram. Because each day depends only on the previous day, you only need O(#modes) variables.',
           },
           {
+            type: 'visual',
+            scenario: 'stock-state-machine',
+            caption: 'Each day, every state takes the best arrow into it — computed from YESTERDAY\'s column only. Buying is only allowed from rest, which is what enforces the cooldown.',
+          },
+          {
             type: 'checkpoint',
             id: 'dp-advanced-cp-6',
             question: 'Why is `hold` initialised to `-Infinity` (not 0) before day 0?',
@@ -991,6 +996,12 @@ dp[i][j] = (pos[j] − pos[i]) + min over i < k < j of dp[i][k] + dp[k][j]
             ],
             note: 'dp[0][4] = 159 (burst 1, then 5, then 3 with 8 as the right wall). Final answer 167.',
           },
+          {
+            type: 'visual',
+            scenario: 'interval-dp-burst',
+            input: { nums: [3, 1, 5, 8] },
+            caption: 'The same dry run, step by step: ranges are filled by length, and for each range every k is tried as the LAST balloon burst.',
+          },
         ],
       },
       {
@@ -1085,6 +1096,11 @@ for (let mask = 1; mask < N; mask++) {
 }
 // pick the best last in dp[N - 1][*], then walk parent[][] backwards to rebuild the order`,
           },
+          {
+            type: 'visual',
+            scenario: 'bitmask-tsp',
+            caption: 'Each move switches on one bit (mask | 1 << j). Several orders reach the same (mask, last) state — only the cheapest survives, which is why 2ⁿ·n states replace n! orders.',
+          },
         ],
       },
       {
@@ -1110,6 +1126,12 @@ count of 1s at place p =
 \`\`\`
 
 Example n = 13, p = 1: high = 1, cur = 3, low = 0 → 1·1 + 1 = 2 (the 1s in 1 and 11). p = 10: high = 0, cur = 1, low = 3 → 0 + 4 (10, 11, 12, 13). Total 6 ✓.`,
+          },
+          {
+            type: 'visual',
+            scenario: 'digit-dp',
+            input: { n: 235 },
+            caption: 'go(pos, tight, ones) for n = 235: choosing 0 or 1 first frees the rest, choosing 2 stays tight. Free states fill memo[pos][ones] once; later calls on the same state are memo hits.',
           },
           {
             type: 'checkpoint',
