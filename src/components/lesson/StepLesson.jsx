@@ -121,7 +121,8 @@ function Task({ task, panels, onSolved }) {
       <TaskBox q={task.question} msg={msg}>
         {rotated(task.options.map((o, i) => [o, i]), task.question).map(([o, i]) => (
           <button key={i} type="button" className="st-opt" onClick={() => (i === task.answer ? onSolved() : wrong(o.why))}>
-            {rich(o.text)}
+            {/* one span, so text and `code` stay one wrapping line inside the flex button */}
+            <span>{rich(o.text)}</span>
           </button>
         ))}
       </TaskBox>
@@ -163,7 +164,7 @@ function Task({ task, panels, onSolved }) {
         return (
           <button key={t} type="button" className={`st-opt ${at >= 0 ? 'st-opt--done' : ''}`} disabled={at >= 0} onClick={() => tap(t)}>
             {at >= 0 && <span className="st-ord mono">{at + 1}</span>}
-            {rich(t)}
+            <span>{rich(t)}</span>
           </button>
         );
       })}

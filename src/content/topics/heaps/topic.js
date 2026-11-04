@@ -782,18 +782,18 @@ The same idea works for **implicit** sorted sequences. *Find K pairs with smalle
           {
             type: 'checkpoint',
             id: 'heaps-cp-10',
-            question: 'A teammate writes `const h = new MinHeap(); h.push([3, "c"]); h.push([1, "a"]);` and is surprised that `h.peek()` is `[3, "c"]`. Why?',
+            question: 'A teammate writes `const h = new MinHeap(); h.push([1, "a"]); h.push([3, "c"]);` and is surprised that `h.peek()` is `[3, "c"]`. Why?',
             options: [
               'MinHeap only supports strings',
-              'The default key is x => x; subtracting two arrays gives NaN, every comparison fails, and elements never move — pass a key like p => p[0]',
+              'The default key is x => x; subtracting two arrays gives NaN, every comparison fails, and the order becomes meaningless — pass a key like p => p[0]',
               'Heaps always return the first inserted element',
               'peek() returns the maximum by design',
             ],
             answer: 1,
-            explanation: '`[1,"a"] - [3,"c"]` is `NaN`. `NaN >= anything` is false and `NaN < anything` is false, so sift up/down decide nothing. Use `new MinHeap((p) => p[0])` or a `PriorityQueue` with a comparator.',
+            explanation: '`[3,"c"] - [1,"a"]` is `NaN`. Sift-up stops only when the comparison is `>= 0`, and `NaN >= 0` is false, so every new push rises to the top; sift-down swaps only when it is `< 0`, so it never moves anything. The heap just shows the newest element. Use `new MinHeap((p) => p[0])` or a `PriorityQueue` with a comparator.',
             misconceptions: {
               0: 'It supports anything — as long as the key returns numbers.',
-              2: 'That is a queue (FIFO), not a heap. Here it only looks FIFO because comparisons are broken.',
+              2: 'No: `[1, "a"]` went in first, yet `[3, "c"]` is on top. The broken comparisons put the newest push on top.',
               3: 'peek() returns the top, which is the minimum for a MinHeap.',
             },
           },

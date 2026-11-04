@@ -809,7 +809,7 @@ out   = [0, 1, 2, 3, 3]
 
 Left-to-right placement keeps equal keys in input order → stable.
 
-**Capping trick.** Sometimes only values up to n matter. For H-Index, a paper with 5000 citations counts the same as one with n citations (h can never exceed n). Clamp values to n and a counting array of size n + 1 suffices, even though citations can be 1000.`,
+**Capping trick.** Sometimes only values up to n matter. For H-Index, a paper with 5000 citations counts the same as one with n citations (h can never exceed n). Clamp values to n and a counting array of size n + 1 suffices, even though citations can be far larger than n.`,
           },
           {
             type: 'checkpoint',

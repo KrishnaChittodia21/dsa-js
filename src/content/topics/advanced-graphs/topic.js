@@ -315,7 +315,7 @@ None of these needs new data structures — just an adjacency list, a few arrays
             md: `Every question in this topic has an obvious but slow answer:
 
 - **Bridges:** remove each edge, run a BFS, put it back → E × O(V + E). For 10^5 edges that is ~10^10 operations.
-- **SCCs:** for every pair (u, v), check u → v and v → u → V × O(V + E).
+- **SCCs:** one search from every vertex records what it reaches; u and v share an SCC when each reaches the other → V × O(V + E).
 - **Euler path:** backtrack over edge orders → exponential.
 
 The algorithms here do each job in **one or two DFS passes, O(V + E)**. They work because a DFS tree has a very rigid structure: in an undirected graph every non-tree edge connects a node to one of its **ancestors** (there are no "cross edges"). That single fact is what makes low-link values meaningful.`,

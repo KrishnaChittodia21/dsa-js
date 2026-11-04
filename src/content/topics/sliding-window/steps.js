@@ -390,8 +390,8 @@ export default {
       kind: 'turn',
       title: 'Your turn: find the contiguity word',
       lines: ['Check 1 looks for a word that rules out gaps.'],
-      panels: [arr(['number', 'of', 'substrings', 'with', 'at', 'most', 'k', 'distinct'], { label: 'the statement', showIndices: false })],
-      task: { type: 'cell', question: 'Tap the word that answers **check 1 (contiguous?)**.', answer: 2, hints: { 0: '"number" answers check 2: it asks for a count.', 4: '"at most" is a clue for the rule, not for contiguity.', 7: '"distinct" describes the rule inside the window.' } },
+      panels: [arr(['number', 'of', 'substrings', 'with', '≤ k', 'distinct'], { label: 'the statement (≤ k = at most k)', showIndices: false })],
+      task: { type: 'cell', question: 'Tap the word that answers **check 1 (contiguous?)**.', answer: 2, hints: { 0: '"number" answers check 2: it asks for a count.', 4: '"at most k" is a clue for the rule, not for contiguity.', 5: '"distinct" describes the rule inside the window.' } },
       solved: '"substrings": a substring has no gaps.',
     },
     {

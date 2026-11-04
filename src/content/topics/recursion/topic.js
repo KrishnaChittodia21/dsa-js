@@ -548,7 +548,7 @@ x^n = (x^(n/2))² · x      if n is odd   (n/2 rounded down)
 x^0 = 1                   base case
 \`\`\`
 
-Each call halves n, so there are only about log2(n) calls: **O(log n)**. For n = 2^31, that is 31 calls instead of 2 billion.`,
+Each call halves n, so there are only about log2(n) calls: **O(log n)**. For n = 2^31, that is 33 calls (2^31, 2^30, …, 1, then 0) instead of 2 billion.`,
           },
           {
             type: 'visual',
@@ -714,7 +714,7 @@ modPow(5n, 10n ** 15n);               // ~50 calls, exact result`,
               ['pow(1)', '1', 'no', 'pow(0) = 1', '1 · 1 · 2 = 2'],
               ['pow(0)', '0', '—', 'base case', '1'],
             ],
-            note: 'Read the "returns" column bottom-up: that is the unwinding phase. 5 calls instead of 10 multiplications; for n = 2^31 it would be 32 calls instead of 2 billion.',
+            note: 'Read the "returns" column bottom-up: that is the unwinding phase. 5 calls instead of 10 multiplications; for n = 2^31 it would be 33 calls instead of 2 billion.',
           },
           {
             type: 'reflect',
@@ -750,10 +750,10 @@ Merge sort is the most famous example (you will study it in detail in the next t
 \`\`\`text
 last op = '*' (first):  2  *  (3-4*5)      → left {2},     right {-17, -5}
 last op = '-':         (2*3) - (4*5)       → left {6},     right {20}
-last op = '*' (last):  (2*3-4) * 5         → left {-10, 2}, right {5}
+last op = '*' (last):  (2*3-4) * 5         → left {-2, 2},  right {5}
 \`\`\`
 
-Combine every left value with every right value: \`{-34, -10, -14, -50, 10}\`. The base case is a string with no operator — just a number.`,
+Combine every left value with every right value: \`[-34, -10, -14, -10, 10]\` (-10 appears twice: two different groupings give it). The base case is a string with no operator — just a number.`,
           },
           {
             type: 'code',

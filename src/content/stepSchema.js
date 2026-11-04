@@ -5,7 +5,8 @@
 //   Step = { kind: 'watch', title, lines: string[], frames: Frame[] }
 //        | { kind: 'turn',  title, lines: string[], panels: Panel[], task: Task, solved: string, then?: Frame[] }
 //   Frame = { say?: number (the line it explains, 0-based), note: string, panels: Panel[] }
-//   Panel = a Visualizer panel (visualizations/panels.jsx): array, stack, queue, vars, list, nodes, grid, table, intervals
+//   Panel = a Visualizer panel (visualizations/panels.jsx): array, stack, queue, vars, list, nodes, grid, table,
+//           intervals ({ items: [{ start, end, state? }], min, max, label })
 //   Task  = { type: 'choose', question, options: [{ text, why? }], answer }          pick one option
 //         | { type: 'order',  question, items: string[] (right order), hint }        tap them in order
 //         | { type: 'number', question, options: number[], answer: number, hint }     pick the count
@@ -24,7 +25,7 @@ const isStr = (s) => typeof s === 'string' && s.trim().length > 0;
 
 function checkPanel(p, at, errs) {
   if (!p || !PANEL_KINDS.includes(p.kind)) return errs.push(`${at}: panel kind "${p?.kind}" is not one of ${PANEL_KINDS.join(', ')}`);
-  const need = { array: ['values'], stack: ['values'], queue: ['values'], list: ['values'], vars: ['vars'], nodes: ['nodes', 'edges'], grid: ['cells'], table: ['cells', 'rowLabels', 'colLabels'], intervals: ['intervals'] }[p.kind];
+  const need = { array: ['values'], stack: ['values'], queue: ['values'], list: ['values'], vars: ['vars'], nodes: ['nodes', 'edges'], grid: ['cells'], table: ['cells', 'rowLabels', 'colLabels'], intervals: ['items', 'min', 'max'] }[p.kind];
   for (const k of need) if (p[k] === undefined) errs.push(`${at}: ${p.kind} panel needs "${k}"`);
   if (p.kind === 'array') {
     for (const [i, st] of Object.entries(p.highlights || {})) {

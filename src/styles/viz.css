@@ -266,6 +266,10 @@
 .viz-edge-done { stroke: var(--plasma); stroke-width: 3; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--plasma) 60%, transparent)); }
 .viz-edge-active { stroke: var(--uv); stroke-width: 3; }
 .viz-edge-muted { opacity: 0.3; stroke-dasharray: 4 4; }
+/* the other panel states, so an edge can be marked like a node (a bridge, a rejected or conflicting edge) */
+.viz-edge-bad { stroke: var(--bad); stroke-width: 3; }
+.viz-edge-visited { stroke: var(--ice); stroke-width: 2.5; }
+.viz-edge-window { stroke: var(--plasma); stroke-width: 2.5; stroke-dasharray: 6 4; }
 .viz-arrowhead { fill: var(--line-3); }
 .viz-edge-label { fill: var(--text-2); font: 600 11px var(--f-mono); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; }
 :root[data-theme='light'] .viz-edge-label { stroke: #fff; }

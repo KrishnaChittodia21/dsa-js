@@ -422,7 +422,7 @@ There is no single "shortest path algorithm". There is a **family**, and the rea
         blocks: [
           {
             type: 'text',
-            md: `The obvious brute force is "try every path". In a graph a node can be reached through exponentially many paths — a 20×20 grid already has more than **10^11** monotone paths from corner to corner. Exploring them all is hopeless.
+            md: `The obvious brute force is "try every path". In a graph a node can be reached through exponentially many paths — a 20×20 grid already has about **3.5 × 10^10** monotone paths from corner to corner. Exploring them all is hopeless.
 
 Shortest-path algorithms work because of one structural fact:
 
@@ -739,7 +739,7 @@ The greedy proof said "any other path must go through a frontier node that is al
               'Skip it: it is a stale entry pushed before u was improved to 5, and u\'s edges were already relaxed with 5',
             ],
             answer: 3,
-            explanation: 'Lazy deletion leaves outdated entries in the heap. When one surfaces, `d > dist[u]` identifies it. Relaxing with 7 cannot improve anything (the 5-version already did better) and only wastes time — in path-counting problems it would even double-count.',
+            explanation: 'Lazy deletion leaves outdated entries in the heap. When one surfaces, `d > dist[u]` identifies it. Relaxing with 7 cannot improve anything (the 5-version already did better) and only wastes time. Code that relaxes with `dist[u]` instead of `d` would go further wrong: in path-counting problems it would double-count.',
             misconceptions: {
               0: 'Relaxing with a worse distance never produces an improvement; it just burns time (and breaks counting problems).',
               1: 'Distances only ever decrease. Raising dist[u] to 7 would destroy a correct, better answer.',
@@ -753,7 +753,7 @@ The greedy proof said "any other path must go through a frontier node that is al
 - **Max of edges** (minimax / bottleneck): extending can only keep or raise the max → relax with \`Math.max(d, w)\`.
 - **Product of probabilities in [0, 1]**: extending can only keep or lower the product → use a **max**-heap and maximise.
 
-**Counting shortest paths.** Keep \`ways[v]\`. When \`d + w < dist[v]\` (strictly better), \`ways[v] = ways[u]\`; when \`d + w === dist[v]\` (a tie), \`ways[v] += ways[u]\`. Because nodes are finalised in distance order, \`ways[u]\` is complete before u relaxes its edges — *provided you skip stale entries*.`,
+**Counting shortest paths.** Keep \`ways[v]\`. When \`d + w < dist[v]\` (strictly better), \`ways[v] = ways[u]\`; when \`d + w === dist[v]\` (a tie), \`ways[v] += ways[u]\`. Because nodes are finalised in distance order, \`ways[u]\` is complete before u relaxes its edges. *Skip stale entries* anyway: with \`d + w\` a stale copy can never tie, but code that relaxes with \`dist[u]\` would add \`ways[u]\` again on every tie.`,
           },
         ],
       },
@@ -1012,7 +1012,7 @@ Also: if \`k ≥ R + C − 3\` you can bulldoze a straight L-shaped path, so the
           {
             type: 'reflect',
             prompt: 'Do you understand why **counting** shortest paths (Number of Ways to Arrive) needs the stale-entry check to be correct, not just fast?',
-            deeper: `When u is popped, we add \`ways[u]\` to each neighbour on a tie. If a stale copy of u were processed again, we would add \`ways[u]\` to the neighbours a **second time** — double-counting. Worse, if u were processed before all its shortest predecessors were finalised, \`ways[u]\` would be incomplete.
+            deeper: `When u is popped, we add \`ways[u]\` to each neighbour on a tie. If a stale copy of u were processed again by code that relaxes with \`dist[u]\`, it would hit the same ties and add \`ways[u]\` a **second time** — double-counting. (Relaxing with the popped \`d\` is safe by itself: a stale \`d\` is too big to tie.) Worse, if u were processed before all its shortest predecessors were finalised, \`ways[u]\` would be incomplete.
 
 Dijkstra's order guarantees every predecessor of u on a shortest path has a strictly smaller distance (weights ≥ 1 in that problem) and is popped earlier, so \`ways[u]\` is final when u is popped. The \`d > dist[u]\` skip guarantees u contributes exactly once.`,
           },

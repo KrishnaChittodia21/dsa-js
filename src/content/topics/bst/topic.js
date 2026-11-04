@@ -137,7 +137,7 @@ export default {
       id: 'bst-build-balanced',
       name: 'BST — Build Balanced from Sorted Data',
       summary: 'Pick the middle element as the root, recursively build the left half into the left subtree and the right half into the right subtree.',
-      whyItExists: 'A BST is only fast if it is shallow. Inserting sorted data one by one makes a linked list (height n). Choosing the middle as the root splits the remaining elements in half at every level, so the height is ⌈log₂(n+1)⌉ — the best possible.',
+      whyItExists: 'A BST is only fast if it is shallow. Inserting sorted data one by one makes a linked list (n levels). Choosing the middle as the root splits the remaining elements in half at every level, so the tree has ⌈log₂(n+1)⌉ levels — the fewest possible.',
       whenToUse: [
         'Convert a sorted array / sorted list into a height-balanced BST',
         'Rebalance an existing BST (in-order → sorted array → rebuild)',
@@ -292,7 +292,7 @@ A BST is the structure that is **fast at everything at once** — including orde
             type: 'callout',
             variant: 'warning',
             title: 'Only if it stays balanced',
-            md: `Insert \`1, 2, 3, 4, 5\` in that order and each new value goes to the right of the previous one:
+            md: `Insert \`1, 2, 3, 4\` in that order and each new value goes to the right of the previous one:
 
 \`\`\`text
 1
@@ -323,7 +323,7 @@ Height is n − 1, so search is O(n) — no better than a list. Real libraries u
               2: 'Plain BST insertion never changes the root. The first value inserted (10) stays at the root forever.',
               3: '1000 is at the very bottom of the chain, so it is the worst case, not the average.',
             },
-            deeper: 'This is exactly why "Convert Sorted Array to BST" picks the **middle** element as the root: it prevents the chain and guarantees height ⌈log₂(n+1)⌉.',
+            deeper: 'This is exactly why "Convert Sorted Array to BST" picks the **middle** element as the root: it prevents the chain and guarantees the minimum ⌈log₂(n+1)⌉ levels.',
           },
         ],
       },
@@ -773,7 +773,7 @@ The same bounds let you **prune**. For range sum in [L, R]: if \`node.val < L\`,
         blocks: [
           {
             type: 'text',
-            md: `Given a sorted array, the best root is the **middle** element: half the values go left, half go right. Recurse on each half with index bounds \`[lo, hi]\` (no slicing). Every level halves the range, so the height is ⌈log₂(n + 1)⌉ and every node is created once: O(n) time, O(log n) recursion depth.
+            md: `Given a sorted array, the best root is the **middle** element: half the values go left, half go right. Recurse on each half with index bounds \`[lo, hi]\` (no slicing). Every level halves the range, so the tree has ⌈log₂(n + 1)⌉ levels and every node is created once: O(n) time, O(log n) recursion depth.
 
 When the range has even length there are two middles. Both are fine — there are many valid balanced BSTs for the same input, which is why that problem's tests use a checker that verifies "height-balanced" and "in-order equals the input".`,
           },
@@ -795,7 +795,7 @@ When the range has even length there are two middles. Both are fine — there ar
           {
             type: 'visual',
             scenario: 'bst-build-balanced',
-            caption: 'Each call takes the middle of its range as the root and hands the halves to its children, so the tree fills level by level to the minimum height ⌈log₂(n + 1)⌉.',
+            caption: 'Each call takes the middle of its range as the root and hands the halves to its children, so the tree fills level by level to the minimum ⌈log₂(n + 1)⌉ levels.',
           },
         ],
       },
@@ -951,7 +951,7 @@ while (cur || st.length) { while (cur) { st.push(cur); cur = cur.left; } cur = s
     'In-order traversal of a BST is sorted — kth smallest, min difference, recover, iterator all use it.',
     'Every node lives in an interval (low, high) inherited from its ancestors — pass it down to validate or prune.',
     'Delete with two children: replace with the in-order successor (leftmost of right subtree), then delete that.',
-    'Build balanced from sorted data by choosing the middle as root: height ⌈log₂(n+1)⌉.',
+    'Build balanced from sorted data by choosing the middle as root: ⌈log₂(n+1)⌉ levels.',
     'Bottom-up summaries (isBST, min, max, sum) find BST subtrees inside a plain tree in O(n).',
   ],
 
