@@ -789,7 +789,7 @@ If \`left[i]\` = number of choices for the left end (distance to the previous sm
 answer = Σ nums[i] × left[i] × right[i]
 \`\`\`
 
-**Duplicates.** In \`[2, 2]\` the subarray \`[2, 2]\` has two equal minimums. If both sides use "strictly smaller" as the boundary, both 2s claim it — double counting. If both use "smaller or equal", neither claims it. Fix: **strict on one side, non-strict on the other** — e.g. previous *strictly* smaller on the left, next *smaller-or-equal* on the right. Then each subarray is credited to exactly one minimum (the leftmost one, with this choice).`,
+**Duplicates.** In \`[2, 2]\` the subarray \`[2, 2]\` has two equal minimums. If both sides use "strictly smaller" as the boundary, both 2s claim it — double counting. If both use "smaller or equal", neither claims it. Fix: **strict on one side, non-strict on the other** — e.g. previous *strictly* smaller on the left, next *smaller-or-equal* on the right. Then each subarray is credited to exactly one minimum (the rightmost one, with this choice).`,
           },
           {
             type: 'checkpoint',

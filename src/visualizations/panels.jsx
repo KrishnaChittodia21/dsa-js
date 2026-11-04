@@ -27,7 +27,8 @@ function Pointers({ list }) {
 }
 
 export function ArrayPanel({ panel, bars: allowBars }) {
-  const { values, highlights = {}, range, pointers = [], label, showIndices = true } = panel;
+  // indexBase: a slice of a longer array (split to fit a phone) labels its cells with their real indexes
+  const { values, highlights = {}, range, pointers = [], label, showIndices = true, indexBase = 0 } = panel;
   const byIndex = {};
   for (const p of pointers) (byIndex[p.index] ||= []).push(p);
   const bars = allowBars ? barsFor(values) : null;
@@ -51,7 +52,7 @@ export function ArrayPanel({ panel, bars: allowBars }) {
               ) : (
                 <div className={cellClass(st)}>{String(v)}</div>
               )}
-              {showIndices && <div className="viz-index">{i}</div>}
+              {showIndices && <div className="viz-index">{i + indexBase}</div>}
             </div>
           );
         })}

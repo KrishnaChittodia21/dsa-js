@@ -878,7 +878,7 @@ reverse(a, i + 1, n - 1);`,
 5. **Advancing i after a swap** in cyclic sort — the newly arrived value is never placed.
 6. **Index marking without \`Math.abs\`** — negative index, \`undefined\`, wrong answer.
 7. **Voting without verification** when a majority is not guaranteed.
-8. **Next permutation with \`>\` instead of \`>=\`** in the pivot scan — duplicates like \`[1, 5, 1]\` break.`,
+8. **Next permutation with \`>\` instead of \`>=\`** in the pivot scan — an equal pair like the 5s in \`[1, 5, 5]\` is taken as the pivot and the answer breaks.`,
           },
         ],
       },

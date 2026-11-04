@@ -324,3 +324,20 @@ a.pg-ev:hover b { color: var(--plasma-t); }
 :root[data-theme='light'] .pg-page .vox--ghost::after { background: #d9d2c9; }
 :root[data-theme='light'] .pg-page .vox--ghost { background: #ece7e0; box-shadow: inset 0 0 0 1px rgba(40, 28, 20, 0.1); }
 .pg-stat .small, .rv-kpis .small { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: -0.01em; }
+
+/* ---------- M1: backup nudge (Progress), Save button, Saved page ---------- */
+.pg-backup { margin: 8px 0 0; padding-left: 10px; border-left: 2px solid var(--line); color: var(--text-2); font-size: 13.5px; }
+.pg-backup--warn { border-left-color: var(--warn); color: var(--text); }
+
+.save-btn { margin-top: 10px; gap: 6px; }
+.save-btn--on { color: var(--plasma-t); }
+.ls-full-sec > .save-btn { margin: 0 0 8px; }
+
+.sv-seg { margin: 20px 0 16px; max-width: 100%; overflow-x: auto; }
+.sv-seg button { white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; }
+.sv-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.sv-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--r-md, 12px); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+.sv-link { flex: 1; min-width: 0; display: grid; gap: 3px; color: var(--text); }
+.sv-link:hover { text-decoration: none; color: var(--plasma-t); }
+.sv-link b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sv-link small { color: var(--muted); font: 500 11.5px/1.3 var(--f-mono); }

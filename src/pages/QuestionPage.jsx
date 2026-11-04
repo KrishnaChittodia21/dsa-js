@@ -5,6 +5,7 @@ import CodeWorkspace from '../components/question/CodeWorkspace.jsx';
 import QuizPanel from '../components/question/QuizPanel.jsx';
 import PatternVisual, { hasVisual } from '../components/PatternVisual.jsx';
 import Icon from '../components/ui/Icon.jsx';
+import SaveButton from '../components/ui/SaveButton.jsx';
 import CoachTip from '../components/guide/CoachTip.jsx';
 import { useProgress } from '../state/ProgressContext.jsx';
 import { formatDuration } from '../state/selectors.js';
@@ -168,6 +169,7 @@ export default function QuestionPage() {
               ))}
             </div>
             <h1 className="display display--s chrome qp-title">{question.title}</h1>
+            <SaveButton saveKey={`q:${question.id}`} item={{ kind: 'question', id: question.id, topicId: question.topicId, title: question.title }} />
           </div>
           {!quiz && (
             <div className="qp-stats">

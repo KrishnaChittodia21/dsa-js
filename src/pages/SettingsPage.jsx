@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BarChart3, Check, Compass, Moon, RotateCcw, Sun } from 'lucide-react';
+import { ArrowRight, BarChart3, Check, Compass, Monitor, Moon, RotateCcw, Sun } from 'lucide-react';
 import { ACCENTS, useTheme } from '../state/ThemeContext.jsx';
 import { saveUiPrefs, useUiPrefs } from '../lib/uiPrefs.js';
 import { openGuide } from '../lib/appEvents.js';
@@ -11,6 +11,7 @@ const MOD = isMac ? '⌘' : 'Ctrl';
 const THEMES = [
   { id: 'dark', label: 'Graphite', sub: 'dark', Icon: Moon },
   { id: 'light', label: 'Porcelain', sub: 'light', Icon: Sun },
+  { id: 'system', label: 'System', sub: 'follows your device', Icon: Monitor },
 ];
 const ACCENT_NOTE = { plasma: 'default', volt: 'hot pink', uv: 'ultraviolet', ice: 'cool cyan' };
 
@@ -26,7 +27,7 @@ const SHORTCUTS = [
 
 /** Appearance (theme + accent), the guide (coach tips, replay the tour), shortcuts and a pointer to progress data. */
 export default function SettingsPage() {
-  const { theme, setTheme, accent, setAccent } = useTheme();
+  const { pref, setTheme, accent, setAccent } = useTheme();
   const ui = useUiPrefs();
   const dismissed = Object.keys(ui.coachDismissed || {}).length;
 
@@ -53,11 +54,11 @@ export default function SettingsPage() {
         <div className="set-row">
           <div className="set-row-text">
             <b id="set-theme-label">Theme</b>
-            <span>Graphite is the dark stage; Porcelain the light one.</span>
+            <span>Graphite is the dark stage, Porcelain the light one; System follows your device.</span>
           </div>
           <div className="seg set-theme" role="group" aria-labelledby="set-theme-label">
             {THEMES.map(({ id, label, sub, Icon }) => (
-              <button key={id} type="button" aria-pressed={theme === id} onClick={() => setTheme(id)} aria-label={`${label} (${sub} theme)`}>
+              <button key={id} type="button" aria-pressed={pref === id} onClick={() => setTheme(id)} aria-label={`${label} (${sub} theme)`}>
                 <Icon aria-hidden="true" />
                 {label}
               </button>

@@ -111,6 +111,8 @@ function Heat({ activity, now }) {
   );
 }
 
+const BACKUP_DAYS = 14;
+
 export default function ProgressPage() {
   const { progress, dispatch } = useProgress();
   const now = useMemo(() => new Date(), []);
@@ -151,6 +153,7 @@ export default function ProgressPage() {
     link.download = `dsa-journey-progress-${todayKey()}.json`;
     link.click();
     URL.revokeObjectURL(url);
+    dispatch({ type: 'EXPORTED' });
     setMsg({ ok: true, text: 'Backup downloaded.' });
   };
   const importData = async (e) => {
@@ -167,6 +170,15 @@ export default function ProgressPage() {
     e.target.value = '';
   };
 
+  // the only copy of progress is this browser's storage, so nudge towards a backup once there is something to lose
+  const hasWork = Object.keys(progress.questions).length + Object.keys(progress.topics).length > 0;
+  const days = progress.exportedAt ? Math.floor((Date.now() - progress.exportedAt) / 86400000) : null;
+  const backupNote = !hasWork
+    ? null
+    : days === null
+      ? { warn: true, text: 'No backup yet. Clearing browser data would erase your progress: press Export to keep a copy.' }
+      : { warn: days >= BACKUP_DAYS, text: `Last backup ${days === 0 ? 'today' : days === 1 ? 'yesterday' : `${days} days ago`}.${days >= BACKUP_DAYS ? ' Time for a fresh one.' : ''}` };
+
   let lastDay = null;
   const curStage = stages.findIndex((s) => s.topics.some((t) => t.id === rec.current?.id));
 
@@ -182,6 +194,7 @@ export default function ProgressPage() {
             Your progress
           </h1>
           <p className="pg-sub">Everything lives in your browser. Export a backup to move it between devices.</p>
+          {backupNote && <p className={`pg-backup ${backupNote.warn ? 'pg-backup--warn' : ''}`}>{backupNote.text}</p>}
         </div>
         <div className="pg-acts">
           <button type="button" className="btn btn--ghost btn--sm" onClick={exportData}>

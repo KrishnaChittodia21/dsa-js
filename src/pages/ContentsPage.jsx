@@ -25,7 +25,7 @@ import { hasVisual } from '../components/PatternVisual.jsx';
 import { TAB_META } from '../components/guide/studyLoop.js';
 import { useProgress } from '../state/ProgressContext.jsx';
 import { mistakeQuestions, recommendations, topicStats, topicStatus } from '../state/selectors.js';
-import { allPatterns, allQuestions, companies, companyQuestions, companyQuestionsForTopic, getCheckpoints, jsSections, stages, toolkit, topics } from '../content/index.js';
+import { allPatterns, allQuestions, companies, companiesForQuestion, companyById, companyQuestions, companyQuestionsForTopic, EVIDENCE_LEVELS, getCheckpoints, jsSections, stages, toolkit, topics } from '../content/index.js';
 import { fmtH, pad2, stageSummary } from './LearningPath.jsx';
 
 /** Highlights every case-insensitive occurrence of `q` in `text`. */
@@ -408,11 +408,24 @@ function TopicEntry({ view, q, current, open, onToggle }) {
             {questions.map((x) => {
               const st = progress.questions[x.id]?.status;
               const lc = x.source?.number ? `${x.source.platform === 'LeetCode' ? 'LC' : x.source.platform || ''} ${x.source.number}` : '';
+              // one tag per company (a company can have several entries for the same question)
+              const cos = [...new Map(companiesForQuestion(x.id).map((c) => [c.company, c])).values()];
               return (
                 <Link key={x.id} to={`/topic/${t.id}/q/${x.id}`} className={`cx-prob ${st === 'solved' ? 'cx-prob--solved' : ''}`}>
                   <i className={`cx-d cx-d--${st === 'solved' ? 's' : st === 'attempted' ? 'a' : 't'}`} aria-label={st || 'to do'} />
                   <span className="cx-prob-t">
-                    <Hl text={x.title} q={q} />
+                    <span className="cx-prob-n">
+                      <Hl text={x.title} q={q} />
+                    </span>
+                    {cos.length > 0 && (
+                      <span className="cx-cos" aria-label={`Asked at ${cos.map((c) => companyById[c.company]?.name || c.company).join(', ')}`}>
+                        {cos.map((c) => (
+                          <span key={c.company} className="tag cx-co" title={EVIDENCE_LEVELS[c.evidence]?.label}>
+                            {companyById[c.company]?.name || c.company}
+                          </span>
+                        ))}
+                      </span>
+                    )}
                   </span>
                   <span className={`cx-df ${DIFF_CLS[x.difficulty]}`} title={x.difficulty}>
                     {DIFF_LETTER[x.difficulty]}

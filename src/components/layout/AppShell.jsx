@@ -9,6 +9,7 @@ import {
   Building2,
   ChevronDown,
   Code2,
+  Bookmark,
   Compass,
   FileText,
   Flame,
@@ -72,6 +73,7 @@ const TAB_LABEL = { home: 'Home', path: 'Path', practice: 'Practice', revision: 
 /** routes only reachable from "More" on desktop (the sheet on touch also lists the dock routes that aren't tabs) */
 const MORE = [
   { to: '/finder', label: 'Pattern Finder', icon: Target, sub: 'which pattern?' },
+  { to: '/saved', label: 'Saved', icon: Bookmark, sub: 'for later' },
   { to: '/progress', label: 'Progress', icon: BarChart3, sub: 'stats' },
   { to: '/cheatsheet', label: 'Cheat Sheet', icon: FileText, sub: 'all patterns' },
   { to: '/js', label: 'JavaScript for DSA', icon: Code2, sub: 'reference' },
@@ -117,6 +119,7 @@ function describeRoute(pathname, stats) {
     questions: ['practice', `${stats.total} problems`],
     visualize: ['visualize', 'step-through animations'],
     revision: ['revision', 'weak areas · mistakes'],
+    saved: ['saved', 'bookmarked for later'],
     progress: ['progress', `${stats.overall}% overall mastery`],
     companies: ['companies', 'interview questions by company'],
     toolkit: ['toolkit', 'JS data structures'],

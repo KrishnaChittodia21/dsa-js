@@ -19,6 +19,7 @@ export const PAGES = [
   { to: '/progress', title: 'Progress', sub: 'Stats, export / import, reset', words: 'backup export import' },
   { to: '/achievements', title: 'Achievements', sub: 'Badges you have earned and what unlocks next', words: 'badges milestones rewards trophies medals' },
   { to: '/revision', title: 'Revision', sub: 'Weak areas and questions to retry', words: 'review mistakes retry' },
+  { to: '/saved', title: 'Saved', sub: 'Questions, lesson sections and scenes saved for later', words: 'bookmarks saved later favourites' },
   { to: '/cheatsheet', title: 'Cheat Sheet', sub: 'Every topic on one printable page', words: 'summary print' },
   { to: '/settings', title: 'Settings', sub: 'Theme, accent colour, guide and tips', words: 'dark mode accent colour tour coach' },
 ];

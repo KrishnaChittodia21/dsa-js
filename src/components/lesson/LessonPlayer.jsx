@@ -2,6 +2,19 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Block, { CALLOUT_TITLES } from './Block.jsx';
 import Icon from '../ui/Icon.jsx';
+import SaveButton from '../ui/SaveButton.jsx';
+import StepLesson from './StepLesson.jsx';
+import GoDeeper from './GoDeeper.jsx';
+
+const MODE_KEY = 'dsa-journey:steps-mode';
+/** Read · Steps per section ({ 'topic/section': 'steps' }); Read is the default, so only Steps is stored */
+function loadStepModes() {
+  try {
+    return JSON.parse(localStorage.getItem(MODE_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
 import Markdown from '../ui/Markdown.jsx';
 import { useProgress } from '../../state/ProgressContext.jsx';
 import { checkpointPassed } from '../../state/selectors.js';
@@ -85,6 +98,20 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialSection]);
 
+  const [stepModes, setStepModes] = useState(loadStepModes);
+  const setStepMode = (key, mode) =>
+    setStepModes((m) => {
+      const next = { ...m };
+      if (mode === 'steps') next[key] = 'steps';
+      else delete next[key];
+      try {
+        localStorage.setItem(MODE_KEY, JSON.stringify(next));
+      } catch {
+        /* storage unavailable: the choice lasts until reload */
+      }
+      return next;
+    });
+
   const sectionDone = (s) => (s.blocks || []).every((b) => b.type !== 'checkpoint' || checkpointPassed(progress, b.id));
 
   const allCheckpoints = useMemo(() => getCheckpoints(topic), [topic]);
@@ -99,8 +126,24 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
 
   const renderBlocks = (section, gated) => {
     const out = [];
+    // sections with a step lesson get a Read · Steps switch; Steps shows the lesson, then only the checkpoints
+    const modeKey = `${topic.id}/${section.id}`;
+    const stepsOn = !!section.steps && stepModes[modeKey] === 'steps';
+    if (section.steps)
+      out.push(
+        <div className="seg st-mode" role="group" aria-label="How to learn this section" key="mode">
+          <button type="button" aria-pressed={!stepsOn} onClick={() => setStepMode(modeKey, 'read')}>
+            Read
+          </button>
+          <button type="button" aria-pressed={stepsOn} onClick={() => setStepMode(modeKey, 'steps')}>
+            Steps
+          </button>
+        </div>,
+      );
+    if (stepsOn) out.push(<StepLesson key={`steps-${modeKey}`} steps={section.steps} />);
     for (let i = 0; i < section.blocks.length; i++) {
       const b = section.blocks[i];
+      if (stepsOn && b.type !== 'checkpoint') continue;
       out.push(
         <div className={`ls-block ls-block--${b.type}`} id={`blk-${section.id}-${i}`} key={`${section.id}-${i}`}>
           <Block block={b} topicId={topic.id} blockKey={`${topic.id}:${section.id}:${i}`} />
@@ -114,9 +157,10 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
               <Icon name="lock" size={14} /> Answer the question above to continue the lesson · {remaining} more part{remaining === 1 ? '' : 's'} in this step
             </div>,
           );
-        break;
+        return out; // the rest of the section, Go deeper included, waits for the checkpoint
       }
     }
+    out.push(<GoDeeper key="deeper" topic={topic} section={section} progress={progress} />);
     return out;
   };
 
@@ -205,6 +249,7 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
               <h2 id="ls-title" className="ls-big chrome">
                 {current.title}
               </h2>
+              <SaveButton saveKey={`sec:${topic.id}/${index}`} item={{ kind: 'section', topicId: topic.id, index, title: current.title }} />
               <div className="ls-blocks">{renderBlocks(current, true)}</div>
               <nav className="ls-pager" aria-label="Lesson pager">
                 {index > 0 ? (
@@ -257,6 +302,7 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
                     <span className="ls-sub-n">§{si + 1}</span>
                     {s.title}
                   </h3>
+                  <SaveButton saveKey={`sec:${topic.id}/${si}`} item={{ kind: 'section', topicId: topic.id, index: si, title: s.title }} />
                   <div className="ls-blocks">{renderBlocks(s, false)}</div>
                 </section>
               ))}

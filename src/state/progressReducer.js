@@ -3,8 +3,10 @@ import { tierRank } from '../content/achievements.js';
 
 export const STORAGE_KEY = 'dsa-journey:progress:v1';
 
+export const VERSION = 2;
+
 export const initialProgress = () => ({
-  version: 1,
+  version: VERSION,
   topics: {},
   checkpoints: {},
   reflections: {},
@@ -13,7 +15,25 @@ export const initialProgress = () => ({
   lastVisited: null,
   // earned badges: { [id]: { tier, earnedAt, tiers: { [tier]: earnedAt } } } (see src/content/achievements.js)
   achievements: {},
+  // v2: saved for later { ['q:id' | 'sec:topic/index' | 'viz:topic/scenario']: { kind, title, at, …ids } }
+  saved: {},
+  // v2: when the last backup was exported (ms), for the "back up" nudge on the Progress page
+  exportedAt: null,
 });
+
+/**
+ * Bring stored or imported progress up to the current shape: every field present, nothing the learner did dropped.
+ * Each version step adds what that version introduced; fields it doesn't know are kept as they are.
+ */
+export function migrate(raw) {
+  const s = raw && typeof raw === 'object' ? raw : {};
+  const out = { ...initialProgress(), ...s };
+  for (const k of ['topics', 'checkpoints', 'reflections', 'questions', 'activity', 'achievements', 'saved'])
+    if (!out[k] || typeof out[k] !== 'object' || Array.isArray(out[k])) out[k] = {};
+  // v1 → v2 only added `saved` and `exportedAt`, both filled in above
+  out.version = VERSION;
+  return out;
+}
 
 export const todayKey = (d = new Date()) => {
   const y = d.getFullYear();
@@ -162,7 +182,15 @@ export function progressReducer(state, action) {
       return { ...state, achievements };
     }
     case 'IMPORT':
-      return { ...initialProgress(), ...action.state };
+      return migrate(action.state);
+    case 'SAVE_TOGGLE': {
+      const saved = { ...state.saved };
+      if (saved[action.key]) delete saved[action.key];
+      else saved[action.key] = { ...action.item, at: now() };
+      return { ...state, saved };
+    }
+    case 'EXPORTED':
+      return { ...state, exportedAt: now() };
     case 'RESET_ALL':
       return initialProgress();
     default:

@@ -6,6 +6,7 @@ import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { TOPIC_META, TOPIC_ORDER } from '../src/content/curriculum.js';
 import { runTests } from '../src/runner/core.js';
+import { validateSteps } from '../src/content/stepSchema.js';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const topicsDir = path.join(root, 'src/content/topics');
@@ -19,6 +20,7 @@ const DIFFS = new Set(['Easy', 'Medium', 'Hard']);
 const CALLOUTS = new Set(['analogy', 'tip', 'warning', 'insight', 'definition']);
 
 const errors = [];
+let stepSections = 0;
 const warnings = [];
 const err = (where, msg) => errors.push(`${where}: ${msg}`);
 const warn = (where, msg) => warnings.push(`${where}: ${msg}`);
@@ -50,6 +52,22 @@ for (const topicId of TOPIC_ORDER) {
   }
   if (topic.id !== topicId) err(`${topicId}/topic.js`, `id "${topic.id}" does not match folder`);
   for (const k of ['summary', 'patterns', 'lesson', 'cheatsheet', 'keyConcepts', 'jsTools']) if (!topic[k]) err(`${topicId}/topic.js`, `missing "${k}"`);
+
+  // step lessons (M2): every key is a real section and every section's steps match content/stepSchema.js
+  const stepsFile = path.join(dir, 'steps.js');
+  if (fs.existsSync(stepsFile)) {
+    try {
+      const steps = (await import(pathToFileURL(stepsFile).href)).default;
+      const ids = new Set((topic.lesson?.sections || []).map((s) => s.id));
+      for (const [sid, list] of Object.entries(steps)) {
+        if (!ids.has(sid)) err(`${topicId}/steps.js`, `"${sid}" is not a section of this topic`);
+        for (const e of validateSteps(list, sid)) err(`${topicId}/steps.js`, e);
+        stepSections++;
+      }
+    } catch (e) {
+      err(`${topicId}/steps.js`, `failed to import: ${e.message}`);
+    }
+  }
 
   const localPatterns = new Set();
   for (const p of topic.patterns || []) {
@@ -197,4 +215,4 @@ if (errors.length) {
   for (const e of errors) console.log('  ' + e);
   process.exit(1);
 }
-console.log('\n✔ content valid');
+console.log(`\n✔ content valid · ${stepSections} sections with step lessons`);

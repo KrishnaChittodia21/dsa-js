@@ -15,15 +15,23 @@ const ACCENT_IDS = ACCENTS.map((a) => a.id);
 const LEGACY_ACCENT = { indigo: 'plasma', amber: 'plasma', rose: 'volt', teal: 'ice' };
 const normalizeAccent = (a) => (ACCENT_IDS.includes(a) ? a : LEGACY_ACCENT[a] || 'plasma');
 
-const ThemeContext = createContext({ theme: 'dark', toggle: () => {}, setTheme: () => {}, accent: 'plasma', setAccent: () => {} });
+const ThemeContext = createContext({ theme: 'dark', pref: 'system', toggle: () => {}, setTheme: () => {}, accent: 'plasma', setAccent: () => {} });
 
-function initialTheme() {
-  const attr = document.documentElement.getAttribute('data-theme');
-  if (attr === 'light' || attr === 'dark') return attr;
+const LIGHT_QUERY = '(prefers-color-scheme: light)';
+const deviceTheme = () => {
   try {
-    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    return window.matchMedia(LIGHT_QUERY).matches ? 'light' : 'dark';
   } catch {
     return 'dark';
+  }
+};
+/** the saved choice: 'light', 'dark' or 'system' (anything else, including nothing saved, means system) */
+function initialPref() {
+  try {
+    const t = localStorage.getItem(KEY);
+    return t === 'light' || t === 'dark' ? t : 'system';
+  } catch {
+    return 'system';
   }
 }
 
@@ -31,18 +39,36 @@ function initialAccent() {
   return normalizeAccent(document.documentElement.getAttribute('data-accent'));
 }
 
-/** Theme (light/dark) and accent colour, mirrored onto <html data-theme data-accent> and saved locally. */
+/**
+ * Theme and accent colour, mirrored onto <html data-theme data-accent> and saved locally. `pref` is the choice
+ * (light, dark or system); `theme` is what is on screen, following the device while `pref` is system.
+ */
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(initialTheme);
+  const [pref, setTheme] = useState(initialPref);
+  const [device, setDevice] = useState(deviceTheme);
   const [accent, setAccentState] = useState(initialAccent);
+  const theme = pref === 'system' ? device : pref;
+  useEffect(() => {
+    let mq;
+    try {
+      mq = window.matchMedia(LIGHT_QUERY);
+    } catch {
+      return undefined;
+    }
+    const on = () => setDevice(mq.matches ? 'light' : 'dark');
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+  useEffect(() => {
     try {
-      localStorage.setItem(KEY, theme);
+      localStorage.setItem(KEY, pref);
     } catch {
       /* ignore */
     }
-  }, [theme]);
+  }, [pref]);
   useEffect(() => {
     document.documentElement.setAttribute('data-accent', accent);
     try {
@@ -51,9 +77,9 @@ export function ThemeProvider({ children }) {
       /* ignore */
     }
   }, [accent]);
-  const toggle = useCallback(() => setTheme((t) => (t === 'dark' ? 'light' : 'dark')), []);
+  const toggle = useCallback(() => setTheme(theme === 'dark' ? 'light' : 'dark'), [theme]);
   const setAccent = useCallback((a) => setAccentState(normalizeAccent(a)), []);
-  return <ThemeContext.Provider value={{ theme, toggle, setTheme, accent, setAccent }}>{children}</ThemeContext.Provider>;
+  return <ThemeContext.Provider value={{ theme, pref, toggle, setTheme, accent, setAccent }}>{children}</ThemeContext.Provider>;
 }
 
 export const useTheme = () => useContext(ThemeContext);

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import Icon from '../components/ui/Icon.jsx';
+import SaveButton from '../components/ui/SaveButton.jsx';
 import CoachTip from '../components/guide/CoachTip.jsx';
 import { stages } from '../content/index.js';
 import { visualForPattern } from '../visualizations/patternVisuals.js';
@@ -154,6 +155,12 @@ export default function VisualizePage() {
               </>
             )}
             <span className="vz-sp" />
+            {current.topic && (
+              <SaveButton
+                saveKey={`viz:${current.topic.id}/${current.scenario}`}
+                item={{ kind: 'scene', topicId: current.topic.id, scenario: current.scenario, title: SCENARIO_TITLES[current.scenario] }}
+              />
+            )}
             {selected && (
               <button type="button" className="btn btn--ghost btn--sm" onClick={() => setParams({})}>
                 <Icon name="x" size={14} /> Clear
