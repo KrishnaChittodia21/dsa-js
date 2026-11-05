@@ -20,6 +20,13 @@ import * as mtr from './m3-trees.js'; // M3
 import * as mht from './m3-heaps-tries.js'; // M3
 import * as mgr from './m3-graphs.js'; // M3
 import * as mtp from './m3-topo.js'; // M3
+import * as muf from './m3-uf-paths.js'; // M3
+import * as mma from './m3-mst-adv.js'; // M3
+import * as mbs from './m3-binary-search.js'; // M3
+import * as mgy from './m3-greedy.js'; // M3
+import * as mdp from './m3-dp.js'; // M3
+import * as mbi from './m3-bits.js'; // M3
+import * as mrg from './m3-range.js'; // M3
 
 export const SCENARIOS = {
   'two-pointers-pair-sum': arrays.twoPointersPairSum,
@@ -156,4 +163,37 @@ export const SCENARIOS = {
   'topo-three-color': mtp.topoThreeColor,
   'topo-leaf-trimming': mtp.topoLeafTrimming,
   'topo-dag-dp': mtp.topoDagDp,
+  // M3 batch 3d
+  'uf-accounts-merge': muf.ufAccountsMerge,
+  'uf-evaluate-division': muf.ufEvaluateDivision,
+  'uf-islands-online': muf.ufIslandsOnline,
+  'sp-min-effort': muf.spMinEffort,
+  'sp-obstacle-elimination': muf.spObstacleElimination,
+  'mst-dense-prim': mma.mstDensePrim,
+  'mst-virtual-node-wells': mma.mstVirtualNode,
+  'mst-critical-edges': mma.mstCriticalEdges,
+  'tarjan-bridges': mma.tarjanBridges,
+  'kosaraju-scc': mma.kosarajuScc,
+  'bus-routes-meta-bfs': mma.busRoutesMetaBfs,
+  // M3 batch 3e
+  'bs-first-last': mbs.bsFirstLast,
+  'bs-rotated-search': mbs.bsRotated,
+  'bs-on-answer-koko': mbs.bsOnAnswerKoko,
+  'bs-peak': mbs.bsPeak,
+  'greedy-max-units': mgy.greedyMaxUnits,
+  'greedy-min-arrows': mgy.greedyMinArrows,
+  'greedy-refuel-heap': mgy.greedyRefuelHeap,
+  'greedy-candy-two-pass': mgy.greedyCandyTwoPass,
+  'dp-linear-robber': mdp.dpLinearRobber,
+  'dp-frog-jump-map': mdp.dpFrogJumpMap,
+  'dp-unbounded-coin-ways': mdp.dpUnboundedCoinWays,
+  'dp-palindrome-subseq': mdp.dpPalindromeSubseq,
+  'dp-tree-robber': mdp.dpTreeRobber,
+  'bit-count-mod-k': mbi.bitCountsModK,
+  'letter-mask-product': mbi.letterMaskProduct,
+  'trie-max-xor-limit': mbi.trieMaxXorWithLimit,
+  'bit-count-smaller': mrg.bitCountSmaller,
+  'lazy-segment-tree': mrg.lazySegmentTree,
+  'index-lists-range-freq': mrg.indexListsRangeFreq,
+  'boundary-map-bookings': mrg.boundaryMapBookings,
 };

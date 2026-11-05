@@ -32,6 +32,16 @@
 .qp-p { margin: 0; font-size: 13.5px; color: var(--text-2); }
 .qp-stack { display: flex; flex-direction: column; gap: 12px; }
 .qp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.qp-anim-test { cursor: pointer; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qp-anim-test.on { color: var(--uv-t); background: color-mix(in srgb, var(--uv) 13%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--uv) 40%, transparent); }
+.qp-anim-pick { width: auto; min-width: 140px; height: 32px; }
+.qp-anim-hist { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; max-height: 180px; overflow: auto; }
+.qp-anim-hist li { padding: 4px 8px; border-radius: 8px; background: var(--sunken); font-size: 12px; max-width: 100%; overflow-wrap: anywhere; }
+.qp-anim-meter-wrap { overflow-x: auto; }
+.qp-anim-meter { border-collapse: collapse; font: 500 12.5px/1.4 var(--f-mono); min-width: 100%; }
+.qp-anim-meter th, .qp-anim-meter td { padding: 5px 8px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.qp-anim-meter th:first-child, .qp-anim-meter td:first-child { text-align: left; }
+.qp-anim-meter th { color: var(--muted); font-weight: 600; }
 .qp .coach-tip { margin-bottom: 18px; }
 
 /* ---------- top bar ---------- */
@@ -182,6 +192,9 @@
 .qp-con-meta { flex: none; padding-left: 8px; font: 500 11px/1 var(--f-mono); color: var(--muted); white-space: nowrap; }
 .qp-con-body { flex: 1; min-height: 0; overflow-y: auto; padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 12px; }
 .qp-con-body > * { flex-shrink: 0; }
+/* Animate tab: the player needs the height, the editor stays in view for the line numbers */
+.qp-work--anim .qp-ed { flex-basis: 24%; min-height: 150px; }
+.qp-work--anim .qp-con { flex-basis: 76%; }
 .qp-empty { font-size: 13.5px; color: var(--muted); }
 .qp-empty b { color: var(--text); }
 .qp-running { display: flex; align-items: center; gap: 10px; font: 500 12px/1 var(--f-mono); color: var(--text-2); }

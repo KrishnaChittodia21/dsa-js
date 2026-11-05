@@ -128,8 +128,9 @@ const parse = (field, text) => {
  * (state column + complexity readout beside the stage once the player is wide enough); `eyebrow`
  * replaces the default "step-through" label.
  */
-export default function Visualizer({ scenario, input, caption, compact = false, wide = false, eyebrow }) {
-  const def = SCENARIOS[scenario];
+/** A scene by id, or ready-made `frames` (with `title`): "Animate my run" plays a recorded run in the same player. */
+export default function Visualizer({ scenario, input, caption, compact = false, wide = false, eyebrow, frames: given, title, autoPlay = false, bars: barsProp }) {
+  const def = useMemo(() => (given ? { title, description: caption } : SCENARIOS[scenario]), [given, title, caption, scenario]);
   const initial = useMemo(() => ({ ...(def?.defaultInput || {}), ...(input || {}) }), [def, input]);
   const [data, setData] = useState(initial);
   const [draft, setDraft] = useState(null);
@@ -146,13 +147,14 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
   const timer = useRef(null);
 
   const frames = useMemo(() => {
+    if (given) return given;
     if (!def) return [];
     try {
       return def.generate(structuredClone(data));
     } catch (e) {
       return [{ note: `Could not run this input: ${e.message}`, panels: [] }];
     }
-  }, [def, data]);
+  }, [def, data, given]);
 
   const totalPredicts = useMemo(() => frames.filter((f) => f.predict).length, [frames]);
   const restart = () => {
@@ -164,7 +166,12 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
     setVerdicts({});
     setScore({ correct: 0, total: 0 });
   };
-  useEffect(restart, [frames]);
+  useEffect(() => {
+    restart();
+    // a fresh recorded run plays by itself, unless the reader asked for reduced motion
+    if (autoPlay && frames.length > 1 && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) setPlaying(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [frames]);
 
   // Every forward move goes through here so predictions can interrupt it.
   const next = () => {
@@ -208,7 +215,7 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
   if (!def) return <div className="card muted small">Unknown visualization “{scenario}”.</div>;
   const frame = frames[Math.min(step, frames.length - 1)] || { note: '', panels: [] };
   const last = frames.length - 1;
-  const bars = BAR_SCENARIOS.has(scenario);
+  const bars = barsProp ?? BAR_SCENARIOS.has(scenario);
   const stagePanels = frame.panels.filter((p) => !SIDE_KINDS.has(p.kind));
   const sidePanels = frame.panels.filter((p) => SIDE_KINDS.has(p.kind));
   const showCx = wide && !!SCENARIO_COMPLEXITY[scenario];

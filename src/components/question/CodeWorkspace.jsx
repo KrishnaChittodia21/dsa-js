@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import CodeEditor from '../editor/CodeEditor.jsx';
 import Icon from '../ui/Icon.jsx';
 import { useProgress } from '../../state/ProgressContext.jsx';
@@ -6,6 +6,7 @@ import { runInWorker } from '../../runner/runInWorker.js';
 import { describeTest, format, resolveExpected } from '../../runner/core.js';
 import { bigoClass } from '../../visualizations/complexity.js';
 
+const AnimateRun = lazy(() => import('./AnimateRun.jsx'));
 const VISIBLE_TESTS = 3;
 const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
 const MOD = IS_MAC ? '⌘' : 'Ctrl';
@@ -178,7 +179,7 @@ export default function CodeWorkspace({ question }) {
   const at = run?.at ? run.at.toTimeString().slice(0, 5) : '';
 
   return (
-    <div className="qp-work">
+    <div className={`qp-work${tab === 'animate' ? ' qp-work--anim' : ''}`}>
       {/* ---------- editor (dark island) ---------- */}
       <section className="qp-ed" aria-label="Code editor">
         <div className="qp-ed-bar">
@@ -229,6 +230,9 @@ export default function CodeWorkspace({ question }) {
           </button>
           <button type="button" role="tab" aria-selected={tab === 'complexity'} onClick={() => setTab('complexity')}>
             Complexity
+          </button>
+          <button type="button" role="tab" aria-selected={tab === 'animate'} onClick={() => setTab('animate')}>
+            <Icon name="play" size={14} /> Animate
           </button>
           <span className="qp-sp" />
           {run && (
@@ -391,6 +395,11 @@ export default function CodeWorkspace({ question }) {
                 </div>
               )}
             </div>
+          )}
+          {!running && tab === 'animate' && (
+            <Suspense fallback={<div className="qp-faint">Loading…</div>}>
+              <AnimateRun code={code} question={question} tests={tests.slice(0, VISIBLE_TESTS)} />
+            </Suspense>
           )}
           {!running && tab === 'complexity' && (
             <div className="qp-stack">

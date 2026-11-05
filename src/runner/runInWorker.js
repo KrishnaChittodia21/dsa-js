@@ -9,6 +9,24 @@ export function runnableQuestion(q) {
 
 let seq = 0;
 
+/** "Animate my run": run `code` on one test with every step recorded (src/runner/recorder.js). A run that never
+ *  finishes is killed after `timeoutMs`; the recorder itself stops runaway loops sooner and keeps its steps. */
+export function recordInWorker({ code, question, test, refCode, timeoutMs = 10000 }) {
+  return new Promise((resolve) => {
+    const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+    const id = ++seq;
+    const end = (res) => {
+      clearTimeout(timer);
+      worker.terminate();
+      resolve(res);
+    };
+    const timer = setTimeout(() => end({ timeout: true, compileError: `Time Limit Exceeded: stopped after ${timeoutMs / 1000}s.`, steps: [], logs: [] }), timeoutMs);
+    worker.onmessage = (e) => e.data.id === id && end(e.data);
+    worker.onerror = (e) => end({ compileError: e.message || 'Worker error', steps: [], logs: [] });
+    worker.postMessage({ id, type: 'record', code, question: runnableQuestion(question), test, refCode });
+  });
+}
+
 export function runInWorker({ code, question, tests, opts, timeoutMs = 10000 }) {
   return new Promise((resolve) => {
     const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });

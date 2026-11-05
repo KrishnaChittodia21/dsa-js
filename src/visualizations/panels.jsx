@@ -240,6 +240,11 @@ export function NodesPanel({ panel }) {
               <text x={p.x} y={p.y + 4.5} textAnchor="middle">
                 {n.label}
               </text>
+              {n.tag && (
+                <text x={p.x} y={p.y - r - 7} textAnchor="middle" className="viz-node-tag">
+                  {n.tag}
+                </text>
+              )}
             </g>
           );
         })}

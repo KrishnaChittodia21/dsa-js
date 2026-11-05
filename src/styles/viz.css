@@ -277,6 +277,9 @@
 .viz-node-side { fill: color-mix(in srgb, var(--viz-c2) 60%, black); }
 :root[data-theme='light'] .viz-node-side { fill: #cfc7be; }
 .viz-node text { fill: var(--text); font: 700 11px var(--f-mono); letter-spacing: -0.04em; pointer-events: none; }
+/* a variable pointing at this node (Animate my run): cur, slow, fast… */
+.viz-node .viz-node-tag { fill: #a58bff; font: 700 10px var(--f-mono); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; }
+:root[data-theme='light'] .viz-node .viz-node-tag { fill: #5b3fd6; stroke: #fff; }
 .viz-node-active .viz-node-face { fill: #7b5cff; stroke: #c9bbff; filter: drop-shadow(0 0 8px rgba(123, 92, 255, 0.7)); }
 .viz-node-active .viz-node-side { fill: #3a2a9e; }
 .viz-node-active text { fill: #fff; }

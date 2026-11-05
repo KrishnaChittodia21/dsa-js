@@ -1,0 +1,465 @@
+// "Animate my run" (M4): turns a recorded run (src/runner/recorder.js) into Visualizer frames
+// ({ note, line, panels }, drawn by panels.jsx). Generic for every question, picked by the value's shape and name:
+// arrays → cell rows (stacks / queues / heaps by name), 2-D arrays → grids (DP tables by name), adjacency lists →
+// graphs, parent arrays → union-find forests, TreeNode / ListNode → trees / lists (other variables pointing into
+// them become tags), Maps → key/value tables, Sets → rows, toolkit objects (MinHeap, Stack, Queue, UnionFind,
+// Graph) → their structure, `this` (design classes) → one panel per field. Cells that changed since the previous
+// step are highlighted. A scene file (src/visualizations/scenes/) can rename, filter and narrate on top.
+import { layoutCircle, layoutHeap, layoutLevelOrderTree, layoutNary } from './layout.js';
+
+const INDEX_NAME = /^(i|j|k|l|r|lo|hi|left|right|mid|m|start|end|p|q|slow|fast|idx|index|ptr|cur|pos|write|read|w)$/;
+const STACK_NAME = /stack|^st$|^stk$/i;
+const QUEUE_NAME = /queue|^q$|^dq$|deque/i;
+const HEAP_NAME = /heap|^pq$|priority/i;
+const ADJ_NAME = /adj|graph|^g$|nei|neighbou?rs|children|^out$/i;
+const PARENT_NAME = /^(parent|parents|par|fa|leader|uf)$/i;
+const VISITED_NAME = /visited|seen|^vis$|colou?r/i;
+const AT_NODE = /^(node|u|cur|curr|current|at|from|src)$/;
+const NEXT_NODE = /^(v|nei|nb|next|to|neighbou?r|child)$/;
+const DP_NAME = /dp|memo|table|cost|dist/i;
+const MAX_NODES = 16;
+
+const isPrim = (v) => v === null || v === undefined || ['number', 'string', 'boolean'].includes(typeof v);
+const isRow = (v) => Array.isArray(v) && v.every(isPrim);
+const isGrid = (v, max = 12) => Array.isArray(v) && v.length > 0 && v.length <= max && v.every((r) => isRow(r) && r.length <= max);
+const isObj = (v, tag) => v !== null && typeof v === 'object' && !Array.isArray(v) && tag in v;
+const isInt = (v) => Number.isInteger(v);
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const clip = (t, n) => (t.length > n ? `${t.slice(0, n - 1)}…` : t);
+
+/** short text for a snapshot (recorder tags: $text $array $map $set $tree $list $obj) */
+export function text(v) {
+  if (v === undefined) return 'undefined';
+  if (isPrim(v)) return typeof v === 'string' ? JSON.stringify(v) : String(v);
+  if (Array.isArray(v)) return `[${v.map(text).join(',')}]`;
+  if ('$text' in v) return v.$text;
+  if ('$array' in v) return `[${v.$array.slice(0, 8).map(text).join(',')},… ${v.$length} items]`;
+  if ('$map' in v) return `{${v.$map.map(([k, x]) => `${text(k)}: ${text(x)}`).join(', ')}${v.$size > v.$map.length ? ', …' : ''}}`;
+  if ('$set' in v) return `{${v.$set.map(text).join(', ')}${v.$size > v.$set.length ? ', …' : ''}}`;
+  if ('$tree' in v) return `tree [${v.$tree.map(text).join(',')}]`;
+  if ('$list' in v) return `${v.$list.values.map(text).join(' → ')}${v.$list.cycleTo !== undefined ? ' ↺' : ' → ∅'}`;
+  if ('$obj' in v) return `{${Object.entries(v.$obj).map(([k, x]) => `${k}: ${text(x)}`).join(', ')}}`;
+  return JSON.stringify(v);
+}
+const label = (v) => clip(typeof v === 'string' ? v : text(v), 6);
+
+function changedCells(cur, prev) {
+  const out = {};
+  if (!Array.isArray(prev)) return out;
+  cur.forEach((v, i) => {
+    if (!same(v, prev[i])) out[i] = 'active';
+  });
+  return out;
+}
+
+// ---------- shape tests ----------
+/** adjacency list as an array: adj[u] = [v, …] with every v a vertex index */
+function asAdj(v) {
+  if (isObj(v, '$map')) {
+    if (v.$size > v.$map.length || !v.$map.every(([k, x]) => isInt(k) && k >= 0 && isRow(x) && x.every(isInt))) return null;
+    const n = Math.max(-1, ...v.$map.flatMap(([k, x]) => [k, ...x])) + 1;
+    if (n < 1 || n > MAX_NODES) return null;
+    const adj = Array.from({ length: n }, () => []);
+    for (const [k, x] of v.$map) adj[k] = x;
+    return adj;
+  }
+  if (!Array.isArray(v) || !v.length || v.length > MAX_NODES) return null;
+  return v.every((r) => isRow(r) && r.every((x) => isInt(x) && x >= 0 && x < v.length)) ? v : null;
+}
+const isParentRow = (v) => isRow(v) && v.length > 0 && v.length <= MAX_NODES && v.every((x) => isInt(x) && x >= 0 && x < v.length) && v.some((x, i) => x === i);
+
+// ---------- panel builders ----------
+function heapPanel(name, row, prev) {
+  const { nodes, edges } = layoutHeap(row);
+  const hl = changedCells(row, Array.isArray(prev) ? prev : undefined);
+  return {
+    kind: 'nodes',
+    label: `${name} (heap: top = index 0)`,
+    nodes: nodes.map((n) => ({ id: n.id, label: label(n.val), x: n.x, y: n.y, state: hl[n.id] || (n.id === 0 ? 'done' : '') })),
+    edges: edges.map(([from, to]) => ({ from, to })),
+  };
+}
+
+function forestPanel(name, parent) {
+  const kids = parent.map(() => []);
+  const roots = [];
+  parent.forEach((p, i) => (p === i ? roots.push(i) : kids[p].push(i)));
+  // a parent array with a cycle (a bug) leaves some nodes under no root: the caller draws it as a row instead
+  const seen = new Set();
+  const build = (i) => {
+    seen.add(i);
+    return { id: i, label: String(i), children: kids[i].map(build) };
+  };
+  const top = { id: -1, label: '', children: roots.map(build) };
+  if (seen.size !== parent.length) return null;
+  const { nodes, edges } = layoutNary(top);
+  return {
+    kind: 'nodes',
+    label: `${name} (each root is one group)`,
+    nodes: nodes.filter((n) => n.id !== -1).map((n) => ({ id: n.id, label: String(n.id), x: n.x, y: n.y - 1, state: parent[n.id] === n.id ? 'done' : '' })),
+    edges: edges.filter(([f]) => f !== -1).map(([from, to]) => ({ from: to, to: from })),
+    directed: true,
+  };
+}
+
+function graphPanel(name, adj, vars) {
+  const n = adj.length;
+  const directed = adj.some((row, u) => row.some((v) => !adj[v].includes(u)));
+  const visited = new Set();
+  for (const [k, v] of Object.entries(vars)) {
+    if (!VISITED_NAME.test(k)) continue;
+    if (isObj(v, '$set')) v.$set.forEach((x) => visited.add(x));
+    else if (isRow(v)) v.forEach((x, i) => x && x !== -1 && visited.add(i));
+  }
+  const node = (re) => Object.entries(vars).find(([k, v]) => re.test(k) && isInt(v) && v >= 0 && v < n)?.[1];
+  const at = node(AT_NODE);
+  const nxt = node(NEXT_NODE);
+  const edges = [];
+  adj.forEach((row, u) =>
+    row.forEach((v) => {
+      if (!directed && u > v) return;
+      const hot = (u === at && v === nxt) || (!directed && v === at && u === nxt);
+      edges.push({ from: u, to: v, state: hot ? 'active' : '' });
+    }),
+  );
+  return {
+    kind: 'nodes',
+    label: `${name} (graph)`,
+    nodes: layoutCircle(n).map((p) => ({ id: p.id, label: String(p.id), x: p.x, y: p.y, state: p.id === at ? 'active' : p.id === nxt ? 'done' : visited.has(p.id) ? 'visited' : '' })),
+    edges,
+    directed,
+    freeLayout: true,
+  };
+}
+
+function treePanel(name, snap, tags) {
+  const { nodes, edges } = layoutLevelOrderTree(snap.$tree);
+  const ids = (snap.$ids || []).filter((x) => x !== null); // node k of the layout = the k-th non-null slot
+  return {
+    kind: 'nodes',
+    label: name,
+    nodes: nodes.map((n, k) => {
+      const tag = tags.get(ids[k]);
+      return { id: n.id, label: label(n.val), x: n.x, y: n.y, state: tag ? 'active' : '', ...(tag ? { tag: tag.join(',') } : {}) };
+    }),
+    edges: edges.map(([from, to]) => ({ from, to })),
+  };
+}
+
+function mapPanel(name, v, prev) {
+  const before = new Map(isObj(prev, '$map') ? prev.$map.map(([k, x]) => [JSON.stringify(k), JSON.stringify(x)]) : []);
+  return {
+    kind: 'table',
+    label: v.$size > v.$map.length ? `${name} (first ${v.$map.length} of ${v.$size})` : `${name} (map)`,
+    rowLabels: v.$map.map(([k]) => clip(text(k), 12)),
+    colLabels: ['value'],
+    cells: v.$map.map(([, x]) => [clip(text(x), 24)]),
+    states: v.$map.map(([k, x]) => [before.get(JSON.stringify(k)) === JSON.stringify(x) ? '' : 'active']),
+  };
+}
+
+function dpPanel(name, v, prev) {
+  return {
+    kind: 'table',
+    label: `${name} (table)`,
+    rowLabels: v.map((_, r) => String(r)),
+    colLabels: v[0].map((_, c) => String(c)),
+    cells: v.map((row) => row.map((x) => (x === null || x === undefined ? '·' : x === Infinity ? '∞' : label(x)))),
+    states: v.map((row, r) => row.map((x, c) => (Array.isArray(prev) && Array.isArray(prev[r]) && !same(x, prev[r][c]) ? 'active' : ''))),
+  };
+}
+
+/** toolkit objects as a structure: MinHeap / PriorityQueue, Stack, Queue, Deque, UnionFind, Graph */
+function unwrap(v) {
+  const o = v.$obj;
+  if (isRow(o.heap)) return ['heap', o.heap];
+  if (isRow(o.items) && isInt(o.head)) return ['queue', o.items.slice(o.head)];
+  if (isRow(o.items)) return ['stack', o.items];
+  if (isRow(o.buf) && isInt(o.head) && isInt(o.count)) return ['queue', Array.from({ length: o.count }, (_, k) => o.buf[(o.head + k) % o.buf.length])];
+  if (isParentRow(o.parent)) return ['parent', o.parent];
+  if (o.adj && asAdj(o.adj)) return ['adj', asAdj(o.adj)];
+  return null;
+}
+
+/** `this.x` for every field of `this` (design classes), so each field gets its own panel */
+function flatten(vars) {
+  if (!isObj(vars.this, '$obj')) return vars;
+  const out = {};
+  for (const [k, v] of Object.entries(vars)) {
+    if (k === 'this') for (const [f, x] of Object.entries(v.$obj)) out[`this.${f}`] = x;
+    else out[k] = v;
+  }
+  return out;
+}
+
+/**
+ * the panels for one step; `prev` is the previous step's vars (for highlights)
+ * @param opts.pointers names drawn as pointers on the main array (default: index-like names)
+ * @param opts.range [loName, hiName], or a list of such pairs (the first pair present is used): a bracket over the main array
+ * @param opts.labels { name: shown label }
+ */
+export function panelsFor(rawVars, rawPrev = {}, opts = {}) {
+  const vars = flatten(rawVars);
+  const prev = flatten(rawPrev);
+  const labels = opts.labels || {};
+  const nameOf = (n) => labels[n] || n;
+  const panels = [];
+  const scalars = {};
+  const names = Object.keys(vars);
+  const main = names.find((n) => isRow(vars[n]) && vars[n].length && !STACK_NAME.test(n) && !QUEUE_NAME.test(n) && !HEAP_NAME.test(n));
+
+  // node structures: the biggest tree / list is drawn; other variables pointing into it become tags on its nodes
+  const trees = names.filter((n) => isObj(vars[n], '$tree') && vars[n].$tree.length).sort((a, b) => vars[b].$tree.length - vars[a].$tree.length);
+  const lists = names.filter((n) => isObj(vars[n], '$list') && vars[n].$list.values.length).sort((a, b) => vars[b].$list.values.length - vars[a].$list.values.length);
+  const drawn = new Map(); // drawn structure name → Map(node id → [pointer names])
+  const pointerOf = new Set();
+  const place = (group, idsOf) => {
+    for (const n of group) {
+      const head = idsOf(vars[n])[0];
+      const host = head != null && [...drawn.keys()].find((d) => group.includes(d) && idsOf(vars[d]).includes(head));
+      if (host) {
+        const tags = drawn.get(host);
+        tags.set(head, [...(tags.get(head) || []), n]);
+        pointerOf.add(n);
+      } else drawn.set(n, new Map());
+    }
+  };
+  place(trees, (v) => v.$ids || []);
+  place(lists, (v) => v.$list.ids || []);
+
+  for (const name of names) {
+    if (pointerOf.has(name)) continue;
+    const v = vars[name];
+    const p = prev[name];
+    const shown = nameOf(name);
+    const obj = isObj(v, '$obj') ? unwrap(v) : null;
+    const kind = obj?.[0];
+    const val = obj ? obj[1] : v;
+    const pv = obj && isObj(p, '$obj') ? unwrap(p)?.[1] : p;
+    const forest = (kind === 'parent' || (!kind && PARENT_NAME.test(name))) && isParentRow(val) ? forestPanel(shown, val) : null;
+    if ((kind === 'heap' || (!kind && HEAP_NAME.test(name))) && isRow(val) && val.length <= 31) panels.push(heapPanel(shown, val, pv));
+    else if ((kind === 'adj' || (!kind && ADJ_NAME.test(name))) && asAdj(val)) panels.push(graphPanel(shown, asAdj(val), vars));
+    else if (forest) panels.push(forest);
+    else if (kind === 'stack' || kind === 'queue') panels.push({ kind, label: shown, values: val.map((x) => (x === undefined ? 'undefined' : x)) });
+    else if (Array.isArray(v) && v.length && v.length <= 16 && v.every((x) => isObj(x, '$tree') || isObj(x, '$list'))) {
+      // a queue / stack of tree or list nodes (BFS over a tree): each node shown by its value
+      const k = STACK_NAME.test(name) ? 'stack' : QUEUE_NAME.test(name) ? 'queue' : 'array';
+      const values = v.map((x) => label(x.$tree ? x.$tree[0] : x.$list.values[0]));
+      panels.push(k === 'array' ? { kind: k, label: `${shown} (nodes)`, values, highlights: {} } : { kind: k, label: `${shown} (nodes)`, values });
+    }
+    else if (isRow(v)) {
+      const k = STACK_NAME.test(name) ? 'stack' : QUEUE_NAME.test(name) ? 'queue' : 'array';
+      const panel = { kind: k, label: shown, values: v.map((x) => (x === undefined ? 'undefined' : x === Infinity ? '∞' : x)) };
+      if (k === 'array') {
+        panel.highlights = changedCells(v, p);
+        if (name === main) {
+          const ptr = opts.pointers ? (n) => opts.pointers.includes(n) : (n) => INDEX_NAME.test(n);
+          panel.pointers = names
+            .filter((n) => ptr(n) && isInt(vars[n]) && vars[n] >= 0 && vars[n] < v.length)
+            .slice(0, 3)
+            .map((n, c) => ({ label: nameOf(n), index: vars[n], color: 'abc'[c] }));
+          const pairs = Array.isArray(opts.range?.[0]) ? opts.range : opts.range ? [opts.range] : [];
+          const [lo, hi] = (pairs.find(([a, b]) => isInt(vars[a]) && isInt(vars[b])) || []).map((n) => vars[n]);
+          if (isInt(lo) && isInt(hi) && lo <= hi && lo < v.length && hi >= 0) panel.range = [Math.max(0, lo), Math.min(v.length - 1, hi)];
+        }
+      }
+      panels.push(panel);
+    } else if (isGrid(v, 16) && DP_NAME.test(name) && v.every((r) => r.length === v[0].length && r.every((x) => typeof x !== 'string'))) panels.push(dpPanel(shown, v, p));
+    else if (isGrid(v)) {
+      const states = v.map((row, r) => row.map((x, c) => (Array.isArray(p) && Array.isArray(p[r]) && !same(x, p[r][c]) ? 'active' : '')));
+      panels.push({ kind: 'grid', label: shown, cells: v.map((row) => row.map((x) => (x === null || x === undefined ? '·' : x))), states });
+    } else if (isObj(v, '$array') && v.$array.every(isPrim)) {
+      panels.push({ kind: 'array', label: `${shown} (first ${v.$array.length} of ${v.$length})`, values: v.$array, highlights: {} });
+    } else if (isObj(v, '$tree') && drawn.has(name)) {
+      panels.push(treePanel(shown, v, drawn.get(name)));
+    } else if (isObj(v, '$list') && drawn.has(name)) {
+      const { values, ids = [], cycleTo } = v.$list;
+      const next = values.map((_, i) => (i + 1 < values.length ? i + 1 : cycleTo ?? null));
+      const pointers = [...drawn.get(name)].flatMap(([id, ns]) => ns.map((n) => ({ label: nameOf(n), index: ids.indexOf(id) })));
+      panels.push({ kind: 'list', label: shown, values: values.map(label), next, pointers: pointers.map((x, c) => ({ ...x, color: 'abc'[c % 3] })) });
+    } else if (isObj(v, '$map') && v.$map.length && v.$map.length <= 12) panels.push(mapPanel(shown, v, p));
+    else if (isObj(v, '$set') && v.$set.length && v.$set.length <= 16 && v.$set.every(isPrim)) {
+      panels.push({ kind: 'array', label: `${shown} (set)`, values: v.$set, highlights: {}, showIndices: false });
+    } else scalars[shown] = clip(text(v), 40);
+  }
+  if (Object.keys(scalars).length) panels.push({ kind: 'vars', vars: scalars });
+  return panels;
+}
+
+/** what changed since the previous step, for the note: "nums[1] = 5, i = 2" (at most 4 items) */
+export function changes(vars, prev) {
+  const out = [];
+  for (const [name, v] of Object.entries(vars)) {
+    const p = prev[name];
+    if (same(v, p)) continue;
+    if (!(name in prev)) out.push(`${name} = ${clip(text(v), 30)}`); // first seen: show its value
+    else if (isRow(v) && isRow(p) && v.length === p.length) v.forEach((x, i) => !same(x, p[i]) && out.push(`${name}[${i}] = ${text(x)}`));
+    else if (isPrim(v)) out.push(`${name} = ${text(v)}`);
+    else out.push(`${name} changed`);
+  }
+  return out.length > 4 ? [...out.slice(0, 4), '…'] : out;
+}
+
+const opText = (o) => clip(`${o.name}(${(Array.isArray(o.args) ? o.args : []).map(text).join(', ')})`, 22);
+
+/** design classes: a window of the operation list around the current one */
+function opsPanel(ops, cur) {
+  const from = Math.max(0, Math.min(cur - 2, ops.length - 5)); // 5 ops: still readable at phone width
+  const shown = ops.slice(from, from + 5);
+  const highlights = {};
+  shown.forEach((_, k) => (highlights[k] = from + k < cur ? 'done' : from + k === cur ? 'active' : ''));
+  return { kind: 'array', label: `operations (${cur + 1} of ${ops.length})`, values: shown.map(opText), highlights, indexBase: from, pointers: [{ label: 'now', index: cur - from, color: 'a' }] };
+}
+
+/**
+ * "Predict next step" for runs without a scene: up to `max` steps, spread over the run, where exactly one cell of
+ * an array is written. The question is asked before that step is shown: which index changes?
+ * @returns Map(frame index → predict)
+ */
+export function autoPredicts(steps, code, max = 3) {
+  const lines = code.split('\n');
+  const cands = [];
+  for (let i = 1; i < steps.length; i++) {
+    const cur = steps[i].vars;
+    const prev = steps[i - 1].vars;
+    const main = Object.keys(cur).find((n) => isRow(cur[n]) && cur[n].length >= 3 && isRow(prev[n]) && prev[n].length === cur[n].length && !STACK_NAME.test(n) && !QUEUE_NAME.test(n));
+    if (!main) continue;
+    const diff = cur[main].map((x, k) => (same(x, prev[main][k]) ? -1 : k)).filter((k) => k >= 0);
+    if (diff.length === 1) cands.push({ i, main, at: diff[0], len: cur[main].length, line: steps[i].line });
+  }
+  const out = new Map();
+  const gap = Math.max(1, Math.floor(cands.length / max));
+  for (let c = 0; c < cands.length && out.size < max; c += gap) {
+    const { i, main, at, len, line } = cands[c];
+    const options = [...[at - 1, at + 1, at + 2, at - 2].filter((k) => k >= 0 && k < len).slice(0, 3), at].sort((a, b) => a - b);
+    out.set(i, {
+      question: `Line ${line} runs next: \`${clip((lines[line - 1] || '').trim(), 40)}\`. Which cell of ${main} does it change?`,
+      options: options.map((k) => `${main}[${k}]`),
+      answer: options.indexOf(at),
+      explain: `It writes ${main}[${at}] = ${text(steps[i].vars[main][at])}.`,
+    });
+  }
+  return out;
+}
+
+/** interaction kit "inspect": the values `name` took, in order (repeats in a row collapsed); step = frame number */
+export function historyOf(steps, name) {
+  const out = [];
+  steps.forEach((s, i) => {
+    const vars = flatten(s.vars);
+    if (!(name in vars)) return;
+    const t = clip(text(vars[name]), 40);
+    if (out[out.length - 1]?.value !== t) out.push({ step: i + 1, line: s.line, value: t });
+  });
+  return out;
+}
+
+/** interaction kit "complexity meter": the input size n of a test (longest array / string / grid, else the largest number) */
+export function inputSize(args) {
+  let n = 0;
+  let num = 0;
+  const walk = (v, depth) => {
+    if (typeof v === 'string') n = Math.max(n, v.length);
+    else if (typeof v === 'number') num = Math.max(num, Math.abs(v));
+    else if (Array.isArray(v)) {
+      n = Math.max(n, v.length);
+      if (v.length && v.every(Array.isArray)) n = Math.max(n, v.reduce((s, r) => s + r.length, 0)); // grid / edge list
+      if (depth < 1) v.forEach((x) => walk(x, depth + 1));
+    }
+  };
+  (Array.isArray(args) ? args : [args]).forEach((a) => walk(a, 0));
+  return n || num || 1;
+}
+
+/** "O(n log n)" → n => n·log2(n). Every variable (m, k, V, E…) is taken as n, so this is a rough curve only. */
+export function bigO(time) {
+  const m = /O\((.*)\)/.exec(time || '');
+  if (!m) return null;
+  const expr = m[1]
+    .replace(/[·×]/g, '*')
+    .replace(/√\s*([a-z])/gi, '($1**0.5)')
+    .replace(/\blog\s*\(?\s*([a-z])\s*\)?/gi, 'L($1)')
+    .replace(/\b[a-zA-Z]\b(?!\()/g, 'n')
+    .replace(/\^/g, '**')
+    .replace(/(\d|\)|n)\s*(?=[nL(])/g, '$1*');
+  if (!/^[\dnL()+\-*/. ]*$/.test(expr)) return null;
+  try {
+    // only digits, n, L, brackets and operators can reach here (checked just above)
+    const f = new Function('n', 'L', `return ${expr || '1'};`);
+    const L = (x) => Math.max(1, Math.log2(Math.max(2, x)));
+    return Number.isFinite(f(16, L)) ? (n) => Math.max(1, f(n, L)) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * @param run the recorder's result ({ steps, ops, passed, outputText, error, compileError, truncated, stride })
+ * @param code the source that was run (the note quotes the line)
+ * @param scene optional scene file (src/visualizations/scenes/): { watch, labels, pointers, range, narrate, predict }
+ * @param params the question's parameter names (scenes find "the array" and "the target" by position)
+ * @returns Visualizer frames; the last one states the verdict
+ */
+export function buildRunFrames(run, code, scene = {}, params = []) {
+  const lines = code.split('\n');
+  const ops = run.ops || [];
+  const watch = scene.watch && new Set(scene.watch);
+  const keep = (vars) => (watch ? Object.fromEntries(Object.entries(vars).filter(([k]) => watch.has(k))) : vars);
+  const opts = { labels: scene.labels, pointers: scene.pointers, range: scene.range };
+  const steps = run.steps.map((s) => ({ ...s, vars: keep(s.vars) }));
+  const predicts = scene.predict ? new Map() : autoPredicts(steps, code);
+  const frames = [];
+  let prev = {};
+  steps.forEach((s, i) => {
+    const src = (lines[s.line - 1] || '').trim();
+    const what = changes(flatten(s.vars), flatten(prev));
+    const ctx = { vars: s.vars, prev, line: s.line, src, lines, changes: what, index: i, next: steps[i + 1], params };
+    const told = scene.narrate?.(ctx);
+    const at = s.op !== undefined && ops[s.op] ? `op ${s.op + 1} · ${opText(ops[s.op])} · ` : '';
+    const panels = panelsFor(s.vars, prev, opts);
+    if (ops.length && s.op !== undefined) panels.unshift(opsPanel(ops, s.op));
+    const frame = { line: s.line, note: `${at}Line ${s.line}: ${told || `\`${clip(src, 48)}\`${what.length ? ` → ${what.join(', ')}` : ''}`}`, panels };
+    if (predicts.has(i)) frame.predict = predicts.get(i);
+    if (scene.predict && ctx.next && predicts.size < (scene.maxPredicts ?? 3)) {
+      const asked = scene.predict(ctx);
+      if (asked) predicts.set(i + 1, asked);
+    }
+    frames.push(frame);
+    prev = s.vars;
+  });
+  const last = steps.length ? panelsFor(prev, prev, opts) : [];
+  if (ops.length && Array.isArray(run.output)) last.unshift({ kind: 'array', label: 'returned by each operation', values: run.output.slice(0, 16).map(label), highlights: {} });
+  const sampled = run.truncated ? ` (a long run: every ${run.stride}th step is shown)` : '';
+  if (run.compileError) frames.push({ note: `Could not run: ${run.compileError}`, panels: last });
+  else if (run.error) frames.push({ note: `Stopped with an error: ${run.error}${sampled}`, panels: last });
+  else frames.push({ note: `Returned ${clip(run.outputText || '', 80)}: ${run.passed ? 'correct ✓' : 'not the expected answer ✗'}${sampled}`, panels: last });
+  return frames;
+}
+
+/**
+ * For questions that ask for a specific algorithm: the first step where `name` takes a value the reference run
+ * did not have at that point. Compares the sequences of distinct values (repeats in a row collapsed).
+ * @returns index into userSteps of the first wrong step, or -1 when the user's run follows the reference
+ */
+export function firstDivergence(userSteps, refSteps, name) {
+  const key = (s) => JSON.stringify(s.vars[name]);
+  const ref = [];
+  for (const s of refSteps) if (name in s.vars && key(s) !== ref[ref.length - 1]) ref.push(key(s));
+  let at = -1;
+  let last;
+  for (let i = 0; i < userSteps.length; i++) {
+    const s = userSteps[i];
+    if (!(name in s.vars) || key(s) === last) continue;
+    last = key(s);
+    at++;
+    if (ref[at] !== last) return i;
+  }
+  return at + 1 < ref.length ? userSteps.length - 1 : -1; // stopped early: the last step is where it went wrong
+}
+
+/** every variable name in a run (fields of `this` as this.x), for the inspect picker */
+export function varNames(steps) {
+  const names = new Set();
+  for (const s of steps) for (const k of Object.keys(flatten(s.vars))) names.add(k);
+  return [...names];
+}
