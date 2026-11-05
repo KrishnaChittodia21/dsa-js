@@ -822,7 +822,7 @@ where \`maxLeft[i]\` is the tallest bar in \`h[0..i]\` and \`maxRight[i]\` the t
             type: 'callout',
             variant: 'insight',
             title: 'Proof: why the smaller side is safe to finalise',
-            md: `Keep \`leftMax = max(h[0..l])\` and \`rightMax = max(h[r..n−1]\`.
+            md: `Keep \`leftMax = max(h[0..l])\` and \`rightMax = max(h[r..n−1])\`.
 
 Suppose \`leftMax < rightMax\`. Look at bar \`l\`:
 - Its true \`maxLeft[l]\` is exactly \`leftMax\` (we have seen everything to its left).

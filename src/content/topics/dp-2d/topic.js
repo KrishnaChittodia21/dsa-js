@@ -966,7 +966,7 @@ So: **count subsets with sum P**. If \`total + target\` is odd or \`|target| > t
               ['(3, 20)', '[0, 15, 15, 20, 35]', 'c=4: max(15, dp[1] + 20 = 35); c=3: max(15, dp[0]+20)'],
               ['(4, 30)', '[0, 15, 15, 20, 35]', 'c=4: max(35, dp[0] + 30 = 30) → keep 35'],
             ],
-            note: 'Answer 35 = items 1 and 3 (weights 1 + 3). With a forward loop, the first row would become [0,15,30,45,60] — item 1 taken four times.',
+            note: 'Answer 35 = the items of weight 1 and 3 (15 + 20). With a forward loop, the first row would become [0,15,30,45,60] — item 1 taken four times.',
           },
         ],
       },
@@ -1105,7 +1105,7 @@ function permutations(nums, target) {         // combination sum IV (DP 1D)
 6. **Loop order in counting:** coins outer = combinations, amount outer = permutations.
 7. **Dungeon game forwards:** the constraint depends on the future; go backwards and clamp with \`max(1, …)\`.
 8. **Regex \`*\`:** treating it as its own token instead of a unit with the previous character, or forgetting the empty-string row (\`"" ~ "a*"\`).
-9. **Target sum edge cases:** odd \`total + target\`, or \`|target| > total\` → 0 ways (and a negative array index otherwise).`,
+9. **Target sum edge cases:** odd \`total + target\`, or \`|target| > total\` → 0 ways (without that guard, a target below −total gives a negative array index).`,
           },
           {
             type: 'checkpoint',

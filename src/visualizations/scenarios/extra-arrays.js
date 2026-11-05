@@ -484,7 +484,7 @@ export const cyclicSort = {
 export const sweepLine = {
   title: 'Sweep line: meeting rooms II',
   description: 'Turn each meeting [start, end) into a +1 and a −1 event, sort them (ends first on ties), and sweep: the peak running total is the number of rooms. Up to 8 meetings; zero-length ones are ignored.',
-  defaultInput: { intervals: [[0, 30], [5, 10], [10, 20], [15, 25], [25, 35]] },
+  defaultInput: { intervals: [[0, 30], [5, 10], [10, 20], [15, 25]] }, // 8 events: fits a phone
   fields: [{ key: 'intervals', type: 'json', label: 'intervals [[start, end], …]' }],
   testInputs: [{ intervals: [] }, { intervals: [[1, 5]] }, { intervals: [[1, 5], [5, 9]] }, { intervals: [[1, 4], [1, 4], [1, 4]] }, { intervals: [[9, 3], [2, 2], [0, 1]] }, { intervals: Array.from({ length: 10 }, (_, k) => [k, k + 3]) }],
   generate({ intervals }) {

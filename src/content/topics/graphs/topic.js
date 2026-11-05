@@ -25,7 +25,7 @@ export default {
       whenNotToUse: ['The answer needs reachability or distances — build the list, then traverse it with DFS/BFS', 'The graph is a grid — neighbours are computed from coordinates, no list needed'],
       template: `function buildGraph(n, edges, directed = false) {
   const adj = Array.from({ length: n }, () => []);
-  const degree = new Array(n).fill(0);
+  const degree = new Array(n).fill(0); // directed: this is out-degree
   for (const [u, v] of edges) {
     adj[u].push(v);
     degree[u]++;

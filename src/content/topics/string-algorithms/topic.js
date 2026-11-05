@@ -572,7 +572,7 @@ function makeHasher(s) {
               ['3', 'a', '0', 'a = p[0]', '1'],
               ['4', 'a', '1', 'a = p[1]', '2'],
               ['5', 'a', '2', 'a ≠ p[2]="b" → j = lps[1] = 1; a = p[1] → j++', '2'],
-              ['6', 'b', '2', 'b = p[2] → MATCH at 4', '3'],
+              ['6', 'b', '2', 'b = p[2] → j++ → MATCH at 4; j = lps[2] = 0', '0'],
             ],
             note: 'At i = 5 the naive search would restart at start 4 and re-read text[4]. KMP knows the last "a" already matches p[0], so it keeps j = 1 and continues. i only moves forward: 7 steps for n = 7.',
           },

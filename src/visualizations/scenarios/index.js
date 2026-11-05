@@ -11,6 +11,16 @@ import * as pdg from './patterns-dp-graph.js';
 import * as pl2 from './patterns-linear-2.js'; // patterns-linear-2
 import * as pdt from './patterns-dp-tree.js'; // patterns-dp-tree
 
+import * as ma from './m3-arrays.js'; // M3
+import * as mh from './m3-hash-pointers.js'; // M3
+import * as mp from './m3-prefix-stack-queue.js'; // M3
+import * as mls from './m3-list-sort.js'; // M3
+import * as mbt from './m3-backtracking.js'; // M3
+import * as mtr from './m3-trees.js'; // M3
+import * as mht from './m3-heaps-tries.js'; // M3
+import * as mgr from './m3-graphs.js'; // M3
+import * as mtp from './m3-topo.js'; // M3
+
 export const SCENARIOS = {
   'two-pointers-pair-sum': arrays.twoPointersPairSum,
   'dutch-flag': arrays.dutchFlag,
@@ -99,4 +109,51 @@ export const SCENARIOS = {
   'lru-cache': pl2.lruCache,
   'gray-code': pl2.grayCode,
   'sparse-table': pl2.sparseTable,
+  // M3 batch 3a
+  'running-state-stock': ma.runningStateStock,
+  'rotate-by-reversal': ma.rotateByReversal,
+  'product-except-self': ma.productExceptSelf,
+  'run-length-builder': ma.runLengthBuilder,
+  'index-marking-negation': ma.indexMarkingNegation,
+  'two-sum-complement': mh.complementLookup,
+  'group-anagrams-key': mh.canonicalKeyGroups,
+  'randomized-set': mh.randomizedSetDesign,
+  'three-sum': mh.threeSumDedup,
+  'hoare-partition': mh.hoarePartitionParity,
+  'trap-rain-water': mh.trapBottleneck,
+  'prefix-sum-hashmap': mp.prefixSumHashmap,
+  'prefix-sum-modulo': mp.prefixSumModulo,
+  'histogram-stack': mp.histogramPrevSmaller,
+  'subarray-min-contribution': mp.subarrayMinContribution,
+  'ticket-queue-simulation': mp.ticketQueueSimulation,
+  'shortest-subarray-deque': mp.shortestSubarrayDeque,
+  'jump-game-deque-dp': mp.jumpGameDequeDp,
+  // M3 batch 3b
+  'list-merge-sort': mls.listMergeSort,
+  'recursive-descent-bool': mls.recursiveDescentBool,
+  'sort-then-scan-hindex': mls.sortThenScanHIndex,
+  'greedy-earliest-end': mls.greedyEarliestEnd,
+  'backtracking-combination-sum': mbt.backtrackingCombinationSum,
+  'backtracking-parentheses': mbt.backtrackingParentheses,
+  'backtracking-word-search': mbt.backtrackingWordSearch,
+  'tree-good-nodes': mtr.treeGoodNodes,
+  'tree-path-sum-ii': mtr.treePathSumII,
+  'tree-lca-recursive': mtr.treeLcaRecursive,
+  'tree-serialize-preorder': mtr.treeSerializePreorder,
+  'bst-validate-bounds': mtr.bstValidateBounds,
+  'bst-max-sum-bottom-up': mtr.bstMaxSumBottomUp,
+  // M3 batch 3c
+  'two-heaps-median': mht.twoHeapsMedian,
+  'k-way-merge-heap': mht.kWayMergeHeap,
+  'last-stone-weight-heap': mht.lastStoneWeightHeap,
+  'trie-wildcard-search': mht.trieWildcardSearch,
+  'trie-max-xor': mht.trieMaxXor,
+  'trie-word-search-grid': mht.trieWordSearchGrid,
+  'graph-adjacency-build': mgr.graphAdjacencyBuild,
+  'bidirectional-bfs-ladder': mgr.bidirectionalBfs,
+  'state-space-bfs': mgr.stateSpaceBfs,
+  'topo-town-judge': mtp.topoTownJudge,
+  'topo-three-color': mtp.topoThreeColor,
+  'topo-leaf-trimming': mtp.topoLeafTrimming,
+  'topo-dag-dp': mtp.topoDagDp,
 };

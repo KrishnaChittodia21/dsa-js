@@ -424,7 +424,7 @@ If you cannot say the state in one sentence, you are not ready to code.`,
           {
             type: 'reflect',
             prompt: 'Do you understand **why** the house-robber recursion is exponential even though it only has two branches per call?',
-            deeper: 'Every call spawns two more, and the depth is about n, so the tree has up to ~2ⁿ (more precisely ~1.6ⁿ) nodes. But the calls only ever ask about `rob(k)` for k in −1..n−1 — at most n + 1 distinct questions. The huge tree is the same few questions asked again and again. That mismatch (exponential calls, linear distinct states) is the signal that memoization will help.',
+            deeper: 'Every call spawns two more, and the depth is about n, so the tree has up to ~2ⁿ (more precisely ~1.6ⁿ) nodes. But the calls only ever ask about `rob(k)` for k in −2..n−1 — at most n + 2 distinct questions (both negative ones just return 0). The huge tree is the same few questions asked again and again. That mismatch (exponential calls, linear distinct states) is the signal that memoization will help.',
           },
         ],
       },

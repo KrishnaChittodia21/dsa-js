@@ -1,9 +1,10 @@
 // The "Steps" view of a lesson section (M2): Watch steps play hand-written frames drawn with the Visualizer's own
 // panels (array, stack, nodes, table…), and Your-turn steps ask one small task about the picture. Format and rules:
 // content/stepSchema.js. Every task is plain buttons, so it works by keyboard, screen reader and on a phone.
-import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Pause, Play, Check } from 'lucide-react';
 import { Panel } from '../../visualizations/panels.jsx';
+import { useFitZoom } from '../../visualizations/useFitZoom.js';
 
 const FRAME_MS = 2200;
 const reducedMotion = () => {
@@ -37,29 +38,7 @@ function rotated(list, seed) {
 }
 
 function Stage({ panels, note }) {
-  // on a narrow screen a long array (8–16 cells) is wider than the stage: zoom the drawing down to fit instead of
-  // making the reader scroll sideways inside it (never below 55%, so values stay readable)
-  const stageRef = useRef(null);
-  const [zoom, setZoom] = useState(1);
-  useLayoutEffect(() => {
-    const stage = stageRef.current;
-    if (!stage) return undefined;
-    const fit = () => {
-      // measure at natural size: drop the zoom for the measurement, then let React set the new one
-      const prev = stage.style.zoom;
-      stage.style.zoom = '';
-      const cs = getComputedStyle(stage);
-      const avail = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-      // a panel shrinks to the stage and its array overflows inside it, so use each panel's content width
-      const widest = Math.max(...[...stage.children].map((c) => Math.max(c.scrollWidth, ...[...c.children].map((g) => g.scrollWidth))), 1);
-      stage.style.zoom = prev;
-      setZoom(widest > avail ? Math.max(0.55, Math.floor((avail / widest) * 100) / 100) : 1);
-    };
-    fit();
-    const ro = new ResizeObserver(fit);
-    ro.observe(stage.parentElement);
-    return () => ro.disconnect();
-  }, [panels]);
+  const [stageRef, zoom] = useFitZoom(panels);
   return (
     <div className="viz st-viz">
       <div className="viz-stage st-stage" ref={stageRef} style={zoom < 1 ? { zoom } : undefined}>

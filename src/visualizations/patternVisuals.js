@@ -4,10 +4,10 @@
 // Patterns that are not step-by-step processes (complexity rules, comparators, design) are omitted.
 export const PATTERN_VISUALS = {
   // arrays & strings
-  'array-prefix-suffix-products': { scenario: 'prefix-sum', related: true },
+  'array-prefix-suffix-products': { scenario: 'product-except-self' },
   'kadane-max-subarray': { scenario: 'kadane' },
   'cyclic-sort': { scenario: 'cyclic-sort' },
-  'index-marking-negation': { scenario: 'cyclic-sort', related: true },
+  'index-marking-negation': { scenario: 'index-marking-negation' },
   // patterns-linear
   'boyer-moore-voting': { scenario: 'boyer-moore' },
   'next-permutation': { scenario: 'next-permutation' },
@@ -16,15 +16,15 @@ export const PATTERN_VISUALS = {
   // hashing
   'hash-set-membership': { scenario: 'hash-map' },
   'hash-frequency-map': { scenario: 'frequency-map' },
-  'hash-complement-lookup': { scenario: 'hash-map', related: true },
-  'hash-canonical-key': { scenario: 'frequency-map', related: true },
-  'hash-index-map-design': { scenario: 'hash-map', related: true },
+  'hash-complement-lookup': { scenario: 'two-sum-complement' },
+  'hash-canonical-key': { scenario: 'group-anagrams-key' },
+  'hash-index-map-design': { scenario: 'randomized-set' },
   // two pointers
   'two-pointers-opposite': { scenario: 'two-pointers-pair-sum' },
-  'sort-two-pointers-ksum': { scenario: 'two-pointers-pair-sum', related: true },
+  'sort-two-pointers-ksum': { scenario: 'three-sum' },
   'dutch-national-flag': { scenario: 'dutch-flag' },
-  'two-pointers-partition': { scenario: 'quick-sort', related: true },
-  'two-pointers-bottleneck': { scenario: 'two-pointers-pair-sum', related: true },
+  'two-pointers-partition': { scenario: 'hoare-partition' },
+  'two-pointers-bottleneck': { scenario: 'trap-rain-water' },
   // patterns-linear
   'two-pointers-read-write': { scenario: 'read-write-pointers' },
   // patterns-linear-2
@@ -34,19 +34,19 @@ export const PATTERN_VISUALS = {
   'variable-window': { scenario: 'sliding-window-variable' },
   // prefix sums
   'prefix-sum-1d': { scenario: 'prefix-sum' },
-  'prefix-sum-hashmap': { scenario: 'prefix-sum', related: true },
-  'prefix-sum-modulo': { scenario: 'prefix-sum', related: true },
+  'prefix-sum-hashmap': { scenario: 'prefix-sum-hashmap' },
+  'prefix-sum-modulo': { scenario: 'prefix-sum-modulo' },
   // patterns-linear
   'difference-array': { scenario: 'difference-array' },
   'prefix-sum-2d': { scenario: 'prefix-sum-2d' },
   // stack & queue
   'stack-matching': { scenario: 'stack-parentheses' },
   'monotonic-stack-next-greater': { scenario: 'monotonic-stack' },
-  'monotonic-stack-previous-smaller': { scenario: 'monotonic-stack', related: true },
-  'monotonic-stack-contribution': { scenario: 'monotonic-stack', related: true },
+  'monotonic-stack-previous-smaller': { scenario: 'histogram-stack' },
+  'monotonic-stack-contribution': { scenario: 'subarray-min-contribution' },
   'monotonic-deque-window': { scenario: 'monotonic-deque' },
-  'monotonic-deque-prefix-sum': { scenario: 'monotonic-deque', related: true },
-  'monotonic-deque-dp': { scenario: 'monotonic-deque', related: true },
+  'monotonic-deque-prefix-sum': { scenario: 'shortest-subarray-deque' },
+  'monotonic-deque-dp': { scenario: 'jump-game-deque-dp' },
   // patterns-linear
   'stack-expression-eval': { scenario: 'expression-eval' },
   'circular-buffer': { scenario: 'circular-buffer' },
@@ -63,7 +63,7 @@ export const PATTERN_VISUALS = {
   // linked list
   'linked-list-in-place-reversal': { scenario: 'linked-list-reverse' },
   'linked-list-fast-slow': { scenario: 'fast-slow-pointers' },
-  'linked-list-merge-split': { scenario: 'merge-sort', related: true },
+  'linked-list-merge-split': { scenario: 'list-merge-sort' },
   // patterns-linear
   'linked-list-dummy-node': { scenario: 'dummy-head' },
   // patterns-linear-2
@@ -71,7 +71,7 @@ export const PATTERN_VISUALS = {
   // recursion & sorting
   'recursion-reduce-and-trust': { scenario: 'recursion-tree' },
   'recursion-divide-conquer': { scenario: 'merge-sort' },
-  'recursion-descent-parsing': { scenario: 'stack-parentheses', related: true },
+  'recursion-descent-parsing': { scenario: 'recursive-descent-bool' },
   'complexity-recursion-analysis': { scenario: 'recursion-tree' },
   'complexity-logarithmic-halving': { scenario: 'binary-search', related: true },
   // patterns-dp-tree
@@ -83,18 +83,18 @@ export const PATTERN_VISUALS = {
   'sorting-counting-bucket': { scenario: 'counting-sort' },
   // intervals
   'intervals-merge': { scenario: 'interval-merge' },
-  'intervals-greedy-end': { scenario: 'interval-merge', related: true },
+  'intervals-greedy-end': { scenario: 'greedy-earliest-end' },
   'intervals-sweep-line': { scenario: 'sweep-line' },
   'dynamic-interval-coverage': { scenario: 'sweep-line', related: true },
   // patterns-linear-2
   'intervals-two-pointer-intersection': { scenario: 'interval-intersection' },
   // backtracking
   'backtracking-subsets': { scenario: 'backtracking-subsets' },
-  'backtracking-combinations': { scenario: 'backtracking-subsets', related: true },
+  'backtracking-combinations': { scenario: 'backtracking-combination-sum' },
   'backtracking-permutations': { scenario: 'backtracking-permutations' },
-  'backtracking-string-construction': { scenario: 'backtracking-permutations', related: true },
+  'backtracking-string-construction': { scenario: 'backtracking-parentheses' },
   'backtracking-constraint': { scenario: 'n-queens' },
-  'backtracking-grid-path': { scenario: 'grid-dfs', related: true },
+  'backtracking-grid-path': { scenario: 'backtracking-word-search' },
   // trees
   'tree-dfs-traversal': { scenario: 'tree-traversal', input: { order: 'preorder' } },
   'tree-level-order': { scenario: 'tree-traversal', input: { order: 'level' } },
@@ -105,24 +105,24 @@ export const PATTERN_VISUALS = {
   'tree-serialization': { scenario: 'tree-traversal', related: true, input: { order: 'level' } },
   'bst-guided-descent': { scenario: 'bst-operations' },
   'bst-inorder-sorted': { scenario: 'tree-traversal', input: { tree: [5, 3, 8, 2, 4, 7, 9], order: 'inorder' } },
-  'bst-range-bounds': { scenario: 'bst-operations', related: true },
+  'bst-range-bounds': { scenario: 'bst-validate-bounds' },
   'bst-bottom-up-info': { scenario: 'tree-traversal', related: true, input: { order: 'postorder' } },
   // patterns-dp-tree
   'tree-construction': { scenario: 'tree-from-traversals' },
   'bst-build-balanced': { scenario: 'bst-build-balanced' },
   // heaps & tries
   'heap-top-k': { scenario: 'heap-operations' },
-  'heap-two-heaps': { scenario: 'heap-operations', related: true },
-  'heap-k-way-merge': { scenario: 'heap-operations', related: true },
-  'heap-greedy-scheduling': { scenario: 'heap-operations', related: true },
+  'heap-two-heaps': { scenario: 'two-heaps-median' },
+  'heap-k-way-merge': { scenario: 'k-way-merge-heap' },
+  'heap-greedy-scheduling': { scenario: 'last-stone-weight-heap' },
   'greedy-heap-regret': { scenario: 'heap-operations', related: true },
   'greedy-interval-scheduling': { scenario: 'interval-merge', related: true },
   // patterns-linear-2
   'greedy-reach-frontier': { scenario: 'jump-game' },
   'trie-prefix-tree': { scenario: 'trie-insert' },
-  'trie-wildcard-dfs': { scenario: 'trie-insert', related: true },
+  'trie-wildcard-dfs': { scenario: 'trie-wildcard-search' },
   'trie-binary-xor': { scenario: 'trie-insert', related: true, input: { words: ['101', '110', '011', '100'] } },
-  'trie-backtracking-search': { scenario: 'trie-insert', related: true },
+  'trie-backtracking-search': { scenario: 'trie-word-search-grid' },
   'bit-trie-max-xor': { scenario: 'trie-insert', related: true, input: { words: ['101', '110', '011', '100'] } },
   // graphs
   'graph-dfs': { scenario: 'graph-dfs' },
@@ -130,14 +130,14 @@ export const PATTERN_VISUALS = {
   'grid-graph-traversal': { scenario: 'grid-dfs' },
   'grid-component-labeling': { scenario: 'grid-dfs' },
   'multi-source-bfs': { scenario: 'grid-bfs' },
-  'bidirectional-bfs': { scenario: 'graph-bfs', related: true },
-  'graph-state-space-bfs': { scenario: 'graph-bfs', related: true },
+  'bidirectional-bfs': { scenario: 'bidirectional-bfs-ladder' },
+  'graph-state-space-bfs': { scenario: 'state-space-bfs' },
   'graph-bipartite-coloring': { scenario: 'bipartite-check' },
   'topo-kahn-indegree': { scenario: 'topo-sort' },
-  'topo-degree-counting': { scenario: 'topo-sort', related: true },
-  'topo-dfs-three-color': { scenario: 'graph-dfs', related: true },
-  'topo-leaf-trimming': { scenario: 'topo-sort', related: true },
-  'topo-dag-dp': { scenario: 'topo-sort', related: true },
+  'topo-degree-counting': { scenario: 'topo-town-judge' },
+  'topo-dfs-three-color': { scenario: 'topo-three-color' },
+  'topo-leaf-trimming': { scenario: 'topo-leaf-trimming' },
+  'topo-dag-dp': { scenario: 'topo-dag-dp' },
   'union-find-connectivity': { scenario: 'union-find' },
   'union-find-key-mapping': { scenario: 'union-find', related: true },
   'union-find-weighted': { scenario: 'union-find', related: true },
@@ -199,6 +199,18 @@ export const PATTERN_VISUALS = {
   // patterns-linear
   'string-z-algorithm': { scenario: 'z-algorithm' },
   'string-palindrome-expand-center': { scenario: 'palindrome-expand' },
+  'array-traversal-running-state': { scenario: 'running-state-stock' },
+  'array-in-place-reversal': { scenario: 'rotate-by-reversal' },
+  'string-builder': { scenario: 'run-length-builder' },
+  'queue-simulation': { scenario: 'ticket-queue-simulation' },
+  'sorting-preprocess': { scenario: 'sort-then-scan-hindex' },
+  'tree-top-down': { scenario: 'tree-good-nodes' },
+  'tree-path-backtracking': { scenario: 'tree-path-sum-ii' },
+  'tree-lca': { scenario: 'tree-lca-recursive' },
+  'tree-serialization': { scenario: 'tree-serialize-preorder' },
+  'bst-bottom-up-info': { scenario: 'bst-max-sum-bottom-up' },
+  'trie-binary-xor': { scenario: 'trie-max-xor' },
+  'graph-adjacency-representation': { scenario: 'graph-adjacency-build' },
 };
 
 export function visualForPattern(pattern) {

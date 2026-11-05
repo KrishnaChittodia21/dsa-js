@@ -68,7 +68,7 @@ const PATTERNS = [
     if (s >= lastEnd) {   // compatible with everything kept so far
       kept++;
       lastEnd = e;
-    }                     // else: skip it (it ends later than lastEnd anyway)
+    }                     // else: skip it (it ends at or after lastEnd anyway)
   }
   return kept;
 }`,

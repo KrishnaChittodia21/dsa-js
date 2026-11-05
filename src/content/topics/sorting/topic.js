@@ -226,7 +226,7 @@ items.sort((a, b) =>
       variations: [
         { name: 'Sort + greedy', description: 'Process from smallest (or by |x|) and commit to the forced choice (Array of Doubled Pairs).' },
         { name: 'Sort + scan from one end', description: 'Cars sorted by position, scanned from the target backwards (Car Fleet).' },
-        { name: 'Sort + index threshold', description: 'After sorting descending, the answer is the largest i with a[i] ≥ i + 1 (H-Index).' },
+        { name: 'Sort + index threshold', description: 'After sorting descending, the answer is i + 1 for the largest i with a[i] ≥ i + 1 (H-Index).' },
         { name: 'Sort + two pointers', description: 'Pair sums, 3Sum — you met these in Two Pointers.' },
       ],
       mistakes: [

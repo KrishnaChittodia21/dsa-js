@@ -247,7 +247,7 @@ export default {
 // answer   = Σ nums[i] * left[i] * right[i]`,
       variations: [
         { name: 'Maximum instead of minimum', description: 'Use greater instead of smaller boundaries.' },
-        { name: 'Single-pass version', description: 'When index j is popped by i, its right boundary is i and its left boundary is the new top — add nums[j] × (j − top) × (i − j) right there.' },
+        { name: 'Single-pass version', description: 'When index j is popped by i, its right boundary is i and its left boundary is the new top — add nums[j] × (j − top) × (i − j) right there (top = −1 if the stack is empty). Pop while nums[top] ≥ nums[i] so equal values count once, and finish with a −∞ sentinel so every index is popped.' },
       ],
       mistakes: [
         'Duplicates counted twice: use strict on one side and non-strict on the other',

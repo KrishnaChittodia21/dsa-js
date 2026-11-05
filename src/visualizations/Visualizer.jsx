@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SCENARIOS } from './scenarios/index.js';
 import { Panel } from './panels.jsx';
+import { useFitZoom } from './useFitZoom.js';
 import { SCENARIO_COMPLEXITY, bigoClass } from './complexity.js';
 import Icon from '../components/ui/Icon.jsx';
 
@@ -203,6 +204,7 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing, step, speed]);
 
+  const [stageRef, zoom] = useFitZoom(frames[step]); // before the early return: hooks run in the same order
   if (!def) return <div className="card muted small">Unknown visualization “{scenario}”.</div>;
   const frame = frames[Math.min(step, frames.length - 1)] || { note: '', panels: [] };
   const last = frames.length - 1;
@@ -312,7 +314,7 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
       )}
 
       <div className={`viz-body${sidePanels.length || showCx ? ' viz-body--side' : ''}`}>
-        <div className="viz-stage">
+        <div className="viz-stage" ref={stageRef} style={zoom < 1 ? { zoom } : undefined}>
           {stagePanels.map((p, i) => (
             <Panel key={i} panel={p} bars={bars} />
           ))}
