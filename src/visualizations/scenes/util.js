@@ -42,7 +42,8 @@ export function options(question, right, wrong, explain) {
 /** [[key, value], …] of a Map ($map) or a plain object used as one ($obj), else null: scenes read counters with it */
 export function entriesOf(v) {
   if (v && v.$map) return v.$map;
-  if (v && v.$obj) return Object.entries(v.$obj);
+  // only a plain counter / lookup: every value simple (a toolkit MinHeap { heap: [...] } is not a counter)
+  if (v && v.$obj && Object.values(v.$obj).every((x) => x === null || typeof x !== 'object')) return Object.entries(v.$obj);
   return null;
 }
 
@@ -53,4 +54,18 @@ export function cellAt(v, i) {
   if (i < v.$array.length) return v.$array[i];
   if (v.$sparse) return v.$sparse.find(([k]) => k === i)?.[1] ?? (i < v.$length ? 0 : undefined);
   return undefined;
+}
+
+/**
+ * the items of a stack / queue / deque / heap, front (or bottom) first: a plain row, or a toolkit object snapshot
+ * (Queue { items, head }, Deque ring { buf, head, count }, Stack { items }, MinHeap / PriorityQueue { heap })
+ */
+export function itemsOf(v) {
+  if (Array.isArray(v)) return v;
+  const o = v && v.$obj;
+  if (!o) return null;
+  if (Array.isArray(o.heap)) return o.heap;
+  if (Array.isArray(o.items)) return Number.isInteger(o.head) ? o.items.slice(o.head) : o.items;
+  if (Array.isArray(o.buf) && Number.isInteger(o.head) && Number.isInteger(o.count)) return Array.from({ length: o.count }, (_, k) => o.buf[(o.head + k) % o.buf.length]);
+  return null;
 }

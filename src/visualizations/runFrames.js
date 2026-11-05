@@ -37,6 +37,7 @@ export function text(v) {
   if ('$map' in v) return `{${v.$map.map(([k, x]) => `${text(k)}: ${text(x)}`).join(', ')}${v.$size > v.$map.length ? ', …' : ''}}`;
   if ('$set' in v) return `{${v.$set.map(text).join(', ')}${v.$size > v.$set.length ? ', …' : ''}}`;
   if ('$tree' in v) return `tree [${v.$tree.map(text).join(',')}]`;
+  if ('$trie' in v) return `trie of ${v.$trie.nodes.length}${v.$trie.more ? '+' : ''} nodes`;
   if ('$list' in v) return `${v.$list.values.map(text).join(' → ')}${v.$list.cycleTo !== undefined ? ' ↺' : ' → ∅'}`;
   if ('$obj' in v) return `{${Object.entries(v.$obj).map(([k, x]) => `${k}: ${text(x)}`).join(', ')}}`;
   return JSON.stringify(v);
@@ -143,6 +144,25 @@ function treePanel(name, snap, tags) {
       return { id: n.id, label: label(n.val), x: n.x, y: n.y, state: tag ? 'active' : '', ...(tag ? { tag: tag.join(',') } : {}) };
     }),
     edges: edges.map(([from, to]) => ({ from, to })),
+  };
+}
+
+/** a trie: letters on the nodes, word ends highlighted, variables pointing into it as tags */
+function triePanel(name, snap, tags) {
+  const { nodes, edges, more } = snap.$trie;
+  const kids = nodes.map(() => []);
+  for (const [f, t] of edges) kids[f].push(t);
+  const tag = (n) => (n.num === undefined ? '' : ` ${n.num}`); // a node's counter (prefix count, sum) beside its letter
+  const build = (i) => ({ id: i, label: (i === 0 ? '·' : nodes[i].ch) + tag(nodes[i]), children: kids[i].map(build) });
+  const laid = layoutNary(build(0));
+  return {
+    kind: 'nodes',
+    label: `${name} (trie${more ? ', first 48 nodes' : ''}: lit = a word ends here)`,
+    nodes: laid.nodes.map((n) => {
+      const tag = tags.get(nodes[n.id].id);
+      return { id: n.id, label: String(n.val), x: n.x, y: n.y, state: tag ? 'active' : nodes[n.id].end ? 'done' : '', ...(tag ? { tag: tag.join(',') } : {}) };
+    }),
+    edges: laid.edges.map(([from, to]) => ({ from, to })),
   };
 }
 
@@ -264,7 +284,9 @@ export function panelsFor(rawVars, rawPrev = {}, opts = {}) {
       } else drawn.set(n, new Map());
     }
   };
+  const tries = names.filter((n) => isObj(vars[n], '$trie')).sort((a, b) => vars[b].$trie.nodes.length - vars[a].$trie.nodes.length);
   place(trees, (v) => v.$ids || []);
+  place(tries, (v) => v.$trie.nodes.map((x) => x.id));
   place(lists, (v) => v.$list.ids || []);
 
   for (const name of names) {
@@ -316,6 +338,8 @@ export function panelsFor(rawVars, rawPrev = {}, opts = {}) {
       panels.push({ kind: 'grid', label: shown, cells: v.map((row) => row.map((x) => (x === null || x === undefined ? '·' : x))), states });
     } else if (isObj(v, '$array') && v.$array.every(isPrim)) {
       panels.push({ kind: 'array', label: `${shown} (first ${v.$array.length} of ${v.$length})`, values: v.$array, highlights: {} });
+    } else if (isObj(v, '$trie') && drawn.has(name)) {
+      panels.push(triePanel(shown, v, drawn.get(name)));
     } else if (isObj(v, '$tree') && drawn.has(name)) {
       panels.push(treePanel(shown, v, drawn.get(name)));
     } else if (isObj(v, '$list') && drawn.has(name)) {
@@ -330,7 +354,7 @@ export function panelsFor(rawVars, rawPrev = {}, opts = {}) {
       panels.push({ ...mapPanel(shown, asMap(v), asMap(p)), label: `${shown} (object)` });
     }
     else if (isObj(v, '$set') && v.$set.length && v.$set.length <= 16 && v.$set.every(isPrim)) {
-      panels.push({ kind: 'array', label: `${shown} (set)`, values: v.$set, highlights: {}, showIndices: false });
+      panels.push(...wrapRow({ kind: 'array', label: `${shown} (set)`, values: v.$set.map(label), highlights: {}, showIndices: false }));
     } else scalars[shown] = clip(text(v), 40);
   }
   if (Object.keys(scalars).length) panels.push({ kind: 'vars', vars: scalars });
@@ -448,14 +472,16 @@ export function bigO(time) {
  * @param run the recorder's result ({ steps, ops, passed, outputText, error, compileError, truncated, stride })
  * @param code the source that was run (the note quotes the line)
  * @param scene optional scene file (src/visualizations/scenes/): { watch, labels, pointers, range, narrate, predict }
- * @param params the question's parameter names (scenes find "the array" and "the target" by position)
+ * @param questionParams the question's parameter names, or [] for a harness question (scenes find "the array" and
+ *   "the target" by position)
  * @returns Visualizer frames; the last one states the verdict
  */
 export function buildRunFrames(run, code, scene = {}, questionParams = []) {
   const lines = code.split('\n');
-  // a learner may rename a parameter (grid for matrix): parameters are recorded first, so take the name in its place
-  const first = Object.keys(run.steps[0]?.vars || {});
-  const params = first.length ? questionParams.map((p, i) => (first.includes(p) ? p : first[i] ?? p)) : questionParams;
+  // a learner may rename a parameter (grid for matrix): the recorder read their own names off the function
+  const own = run.params || [];
+  // no question names (a harness question: its paramNames describe the test data, not the function): theirs
+  const params = own.length === questionParams.length || !questionParams.length ? own : questionParams;
   const ops = run.ops || [];
   const watch = scene.watch && new Set(scene.watch);
   const keep = (vars) => (watch ? Object.fromEntries(Object.entries(vars).filter(([k]) => watch.has(k))) : vars);
@@ -467,7 +493,7 @@ export function buildRunFrames(run, code, scene = {}, questionParams = []) {
   steps.forEach((s, i) => {
     const src = (lines[s.line - 1] || '').trim();
     const what = changes(flatten(s.vars), flatten(prev));
-    const ctx = { vars: s.vars, prev, line: s.line, src, lines, changes: what, index: i, next: steps[i + 1], params, op: s.op, ops };
+    const ctx = { vars: s.vars, prev, line: s.line, src, lines, changes: what, index: i, next: steps[i + 1], params, op: s.op, ops, result: run.output, ret: !!s.ret, value: s.value, input: run.input };
     const told = scene.narrate?.(ctx);
     const at = s.op !== undefined && ops[s.op] ? `op ${s.op + 1} · ${opText(ops[s.op])} · ` : '';
     const panels = panelsFor(s.vars, prev, opts);

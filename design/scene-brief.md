@@ -9,26 +9,52 @@ mechanism with real values, 1–3 "predict the next step" questions, and the que
 2. The three gold scenes: `sort-an-array.js`, `binary-search.js`, `find-if-path-exists-in-graph.js`.
 3. `src/visualizations/scenes/util.js`: helpers you may import (`row`, `changedIdx`, `swapped`, `sorted`,
    `firstInt`, `visitedSet`, `options`, `entriesOf`: a Map or a plain-object counter as [[key, value]…]; learners
-   use both, so read counters with it; `cellAt(v, i)`: a cell of a plain or a long `{ $array, $length, $sparse }` array).
+   use both, so read counters with it; `cellAt(v, i)`: a cell of a plain or a long `{ $array, $length, $sparse }` array; `itemsOf(v)`: a stack / queue /
+   deque / heap front first, plain or toolkit object).
 4. The question file: `src/content/topics/<topic>/questions/<id>.js` (statement, `paramNames`, `solution.code`,
    `hints`, `mistakes`, tests).
 5. Real recorded steps: `node scripts/dump-run.mjs <id> 1 80` (and test 2, 3). **Design narration and predictions
    from these snapshots, not from guesses.** Snapshot shapes: plain arrays / numbers / strings; `{ $map: [[k, v]…],
-   $size }`, `{ $set: […], $size }`, `{ $tree: [level order], $ids }`, `{ $list: { values, ids, cycleTo } }`,
+   $size }`, `{ $set: […], $size }`, `{ $tree: [level order], $ids }`, `{ $list: { values, ids, cycleTo } }`, `{ $trie: { nodes: [{ id, ch, end, num }], edges:
+   [[from, to]], more } }` (any node with `children` / `next` / `kids`… as a Map, object or 26-slot array; `num` is its
+   counter such as `count` / `sum` when it has one; breadth first; `nodes[0]` is the node itself),
    `{ $obj: { field: … } }` (class instances; `this` in design classes is `ctx.vars.this.$obj`), `{ $text }`,
    `{ $array: [first 64], $length }`.
 
 ## How a run is recorded (what your functions see)
-- A step is the state **after** its statement ran. `ctx.prev` is `{}` on the first step. Steps come after
+- A step is the state **after** its statement ran. `ctx.prev` is `{}` on the first step, and holds the previous
+  step's variables only (no `line`; `ctx.next` is a whole step). When you test a shape with `every` ("all items are
+  pairs"), also require length > 0: `[].every(…)` is true. Steps come after
   assignments, calls, declarations and `if` statements (an `if` step only when something changed), and before
   `return` / `break` / `continue` / `throw`. One statement can change several things at once.
-- Recursion: steps appear in every call, but variables are the current call's (plus enclosing functions').
-- Return values are never in `vars`. A step recorded just before a `return` has `ret: true`: use `ctx.next?.ret`
+- An `if` line records its own step only when something changed that no step has shown yet: when its body runs,
+  the body's steps show the change and the `if` step is dropped. So "ask at the `if`" only sees the case where
+  the body did not run; ask one step earlier instead. (Statements in the body always record, even when the value
+  stays the same, e.g. `best = Math.min(best, d)`. After a recursive call inside an `if`, the `if` records a step
+  back in the caller, since the last step was in the deeper call.)
+- A `for` loop's update (`i++`) is not a step of its own: the next step shows the new index together with the
+  first change of the next round, so compare the variable you narrate with `ctx.prev` even when the index moved.
+- Recursion: steps appear in every call, but variables are the current call's (plus enclosing functions'). A tree /
+  list passed in as a parameter stays visible as `<name> (whole)` (e.g. `root (whole)`) in steps where the original
+  node is out of scope, and the call's own `root` is drawn as a tag on it: read the whole structure from there.
+- `ctx.input` holds the arguments as given (in parameter order): read the original input there, not off the first
+  step (a learner's first statement may already have changed a parameter).
+- `ctx.result` is what the learner's run finally returned: when the decision lives only in the return value (an
+  O(1) question that is one `return`), ask about it with `ctx.result` as the answer, never an answer you compute
+  from the input (on buggy code the card must show what *their* code does).
+- A `return expr` step is recorded after `expr` ran (so `return st.pop()` already shows the pop) and carries
+  `value` (what it returns) next to `ret: true` (on the current step: `ctx.ret`, `ctx.value`). Return values are never in `vars`. Steps with `ret: true`: use `ctx.next?.ret`
   to ask "does it return now?" (an `if (…) return x;` line also records a step when it does not return).
   `ctx.src` is the current line only; the whole code is `ctx.lines`.
 - Design classes: `ctx.vars.this.$obj` holds the fields; `ctx.op` is the running operation's index into
   `ctx.ops = [{ name, args }]`. Panels show fields as `this.x`, so `pointers: ['this.head']` works. Names like
   `size` are ambiguous (count in one solution, capacity in another): check before trusting them.
+- Node ids (`$ids`, `$list.ids`) are handed out the first time a node is recorded, in parameter order and level
+  order (lists: front to back), and never change: usually the input trees / lists get ids 1…n and nodes made later
+  get bigger ids, but when a helper's own parameters are recorded first they get the first ids, so check the range.
+  Use that to tell input nodes from new ones (`ctx.input` holds plain values, without ids).
+- Long Maps / Sets / arrays are cut to their first 64 entries: count them with `$size` / `$length`, not the
+  length of the kept list.
 - Snapshots stop 3 levels deep (deeper values are `{ $text }`, e.g. nested trie nodes). `Infinity` stays
   `Infinity` (the dump prints it as `null`). Long arrays wrap onto rows of 13 cells automatically.
 - `predict` is called at every step, in order, until `maxPredicts` (default 3) questions exist: it must pick the
@@ -38,9 +64,15 @@ mechanism with real values, 1–3 "predict the next step" questions, and the que
   not "… too small, go right" when the next question is "which half is dropped?").
 - Two statements on one line (`{ c1 = x; n1 = 1; }`, `n1--; n2--;`) and a swap through a temp variable are
   recorded as **two steps**: the first is half done (a temp swap leaves a duplicate). Guard predictions against the
-  half-done state; to narrate a temp swap, compare `ctx.next` with `ctx.prev` (`swapped(next[n], prev[n])`).
+  half-done state (on a tree, a node reached twice is shown once and `null` in its second place, so a half-done
+  child swap shows "left is the old right, right is not the old left"); to narrate a temp swap, compare `ctx.next` with `ctx.prev` (`swapped(next[n], prev[n])`).
+- Sweeps over a sorted list: when the code unpacks the next item in its own statement (`const [s, e] = arr[i]`),
+  the keep/drop decision is two steps away; ask at the step where the item has just arrived and nothing has been
+  decided yet, and word it for the item already on screen ("this meeting", not "the next meeting").
 - Right after a helper function returns, `ctx.prev` is the helper's last step (other names): require one of the
   main function's names in `ctx.prev` before comparing prev with now.
+- Finding a variable by what the code does with it is often more reliable than by its name: match a pattern in
+  `ctx.lines` (`(\w+) = \1 & -\1`, `(\w+) = \(\1 \^ x\) & ~(\w+)`) or by behaviour (the runner that hops twice).
 - When you guess a working variable by name or shape (`dp`, `prefix`, `count`…), skip the parameters (`ctx.params`):
   a learner's input `grid` must not be mistaken for their prefix table.
 - Renamed parameters are handled for you: `ctx.params` holds the learner's own names (by position) when they

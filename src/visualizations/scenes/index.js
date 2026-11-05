@@ -18,9 +18,11 @@
 //   interactions which kit buttons to show: 'edit', 'predict', 'inspect', 'compare', 'break', 'meter' (default: all)
 //
 // ctx = { vars, prev, line, src, lines, changes, index, next, params, op, ops } (op: the design-class operation
-// running now, an index into ops = [{ name, args }]; undefined for function questions): vars / prev are this and the previous step's
+// running now, an index into ops = [{ name, args }]; undefined for function questions; result: what the learner's
+// run returned in the end, as a snapshot (design classes: one value per operation)): vars / prev are this and the previous step's
 // snapshots (recorder tags: $map $set $tree $list $obj), next is the next step ({ line, vars, ret }) or undefined (ret: true = that step
-// is a `return` about to run),
+// is a `return`, recorded after its expression ran, with value = what it returns; ctx.ret / ctx.value are the same for the current step; ctx.input: the arguments as given, in
+// parameter order, before the code changed any of them),
 // params are the question's parameter names. Scenes must not assume the user's variable names beyond the
 // parameters: check that a name exists before using it, and return null to fall back to the generic note.
 // Helpers for scenes: ./util.js. Gold standard: sort-an-array.js, binary-search.js, find-if-path-exists-in-graph.js.

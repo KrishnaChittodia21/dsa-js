@@ -135,3 +135,10 @@ Grouped so each day reuses the same renderers:
 2026-11-05 · W5 batch 1 · 25 scenes (arrays, array-techniques), 48/48 pass QA; ~0.75M tokens for the batch
 2026-11-05 · W5 batch 2 · 25 scenes (two-pointers, sliding-window part), 73/73 pass QA; ~0.7M tokens
 2026-11-05 · W5 batch 3 · 25 scenes (sliding-window end, prefix-sum, sorting), 98/98 pass QA; ~0.75M tokens
+2026-11-05 · W5 batch 4 · 25 scenes (binary-search, intervals part), 123/123 pass QA; ~0.75M tokens
+2026-11-05 · W5 batch 5 · 25 scenes (intervals end, greedy, hashing part), 148/148 pass QA; ~0.74M tokens
+2026-11-05 · W5 batch 6 · 25 scenes (hashing end, string-algorithms, bit-manipulation part), 173/173 pass QA; ~0.82M tokens
+2026-11-05 · W5 batch 7 · 25 scenes (bit-manipulation end, linked-list, stack part), 198/198 pass QA; ~0.84M tokens
+2026-11-05 · W5 batch 8 · 25 scenes (stack end, queue-deque, heaps part), 223/223 pass QA; ~0.75M tokens
+2026-11-05 · W5 batch 9 · 25 scenes (heaps end, trees part), 248/248 pass QA; ~0.81M tokens
+2026-11-05 · W5 batch 10 · 25 scenes (trees end, bst, tries part), 273/273 pass QA; ~0.89M tokens incl. a fix-up

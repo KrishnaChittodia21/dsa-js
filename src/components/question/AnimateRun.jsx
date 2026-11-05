@@ -94,7 +94,7 @@ export default function AnimateRun({ code, question, tests }) {
   const record = (c, test) =>
     recordInWorker({ code: c, question, test, refCode });
   const framesOf = (run, c) =>
-    buildRunFrames(run, c, scene || {}, question.paramNames || []);
+    buildRunFrames(run, c, scene || {}, question.harness ? [] : question.paramNames || []);
 
   const choose = (i) => {
     if (i === "own" && pick !== "own") setOwn(ownText(question, tests[pick]));

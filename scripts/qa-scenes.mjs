@@ -35,8 +35,8 @@ function width(p) {
   switch (p.kind) {
     case 'array':
       return p.values.reduce((s, v) => s + cell(v), 0);
-    case 'list':
-      return p.values.reduce((s, v) => s + cell(v) + 26, 0);
+    case 'list': // .viz-list wraps onto more lines (viz.css), so only the widest node + its arrow must fit
+      return Math.max(0, ...p.values.map((v) => cell(v) + 26));
     case 'queue':
       return p.values.reduce((s, v) => s + cell(v), 90);
     case 'table': {
@@ -118,7 +118,7 @@ export async function qaScene(id, file, qPath) {
     }
     let frames;
     try {
-      frames = buildRunFrames(run, code, wrapped, q.paramNames || []);
+      frames = buildRunFrames(run, code, wrapped, q.harness ? [] : q.paramNames || []);
     } catch (e) {
       errors.push(`${at}: building frames threw: ${e.message}`);
       continue;

@@ -68,7 +68,14 @@ export function instrument(code) {
     if (firstPlain?.name === 'MethodDeclaration') list.push('["this",()=>this]');
     const call = `__rec(${lineOf(node.from)},[${list.join(',')}]${node.name === 'IfStatement' ? ',1' : node.name === 'ReturnStatement' ? ',2' : ''});`;
     const bare = !LIST_OK.has(parent.name); // e.g. the body of `if (x) a++;` — wrap it in braces
-    if (node.name === 'IfStatement') {
+    let arg = node.name === 'ReturnStatement' ? node.firstChild?.nextSibling : null;
+    while (arg && /Comment/.test(arg.name)) arg = arg.nextSibling;
+    if (arg && arg.name !== ';') {
+      // `return expr`: record AFTER expr ran (so `return st.pop()` shows the pop) and keep the returned value
+      const open = `__rv(${lineOf(node.from)},[${list.join(',')}],(`;
+      if (bare) inserts.push([node.from, '{'], [arg.from, open], [arg.to, '))'], [node.to, '}']);
+      else inserts.push([arg.from, open], [arg.to, '))']);
+    } else if (node.name === 'IfStatement') {
       // after the whole if, including a braces-wrap its own body got at the same position (late = goes last)
       if (bare) inserts.push([node.from, '{'], [node.to, `;${call}}`, LATE]);
       else inserts.push([node.to, `;${call}`, LATE]);

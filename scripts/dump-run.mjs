@@ -43,7 +43,7 @@ console.log(`passed=${run.passed} steps=${run.steps.length} calls=${run.calls}${
 if (showFrames) {
   const sceneFile = path.resolve('src/visualizations/scenes', `${id}.js`);
   const scene = fs.existsSync(sceneFile) ? (await import(pathToFileURL(sceneFile).href)).default : {};
-  buildRunFrames(run, code, scene, q.paramNames || [])
+  buildRunFrames(run, code, scene, q.harness ? [] : q.paramNames || [])
     .slice(0, Number(max))
     .forEach((f, i) => {
       if (f.predict) console.log(`    PREDICT: ${f.predict.question} [${f.predict.options.map((o, k) => (k === f.predict.answer ? `*${o}*` : o)).join(' | ')}]`);
@@ -51,7 +51,7 @@ if (showFrames) {
     });
 } else {
   run.steps.slice(0, Number(max)).forEach((s, i) => {
-    console.log(`#${i} line ${s.line}${s.op !== undefined ? ` op ${s.op}` : ''}: ${(lines[s.line - 1] || '').trim().slice(0, 70)}`);
+    console.log(`#${i} line ${s.line}${s.op !== undefined ? ` op ${s.op}` : ''}${s.ret ? ' RETURN' : ''}: ${(lines[s.line - 1] || '').trim().slice(0, 70)}`);
     console.log(`    ${JSON.stringify(s.vars).slice(0, 400)}`);
   });
 }

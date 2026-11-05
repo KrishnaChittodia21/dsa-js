@@ -218,6 +218,41 @@ format gets a `language` field and a "variables per line" shape, so Java/C++ (M8
   (12); 98/98 pass QA. Engine: long counting arrays keep their non-zero cells (`$sparse`, wherever they are) and draw
   as an index → value table (relative-sort-array: ~3300 px → fits at 390 px); util `cellAt`. Brief: skip parameters
   when guessing working arrays by name. Remaining: 328.
+- **Production batch 4 done 2026-11-05 (W5):** 25 scenes: the rest of binary-search (13) and 12 of intervals; 123/123
+  pass QA. Engine: the recorder reads the learner's own parameter names off their function (`run.params`; replaces
+  the first-step guess, which broke when a run starts in a helper); scenes get `ctx.result` (the run's return value)
+  for questions decided only by a `return`; dump-run marks return steps. determine-if-two-events-have-conflict now
+  answers its prediction from the run, not from the input. Brief: the sweep-a-sorted-list pattern. Spot-checked at
+  390 px: time-based-key-value-store (fit 0.72). Remaining: 303.
+- **Production batch 5 done 2026-11-05 (W5):** 25 scenes: the last 2 intervals, all of greedy (15) and 8 of hashing;
+  148/148 pass QA. Engine: `ctx.ret` (the current step is a return). Spot-checked at 390 px: the-skyline-problem
+  (fit 1.13). Remaining: 278.
+- **Production batch 6 done 2026-11-05 (W5):** 25 scenes: the last 4 hashing, all of string-algorithms (12) and 9 of
+  bit-manipulation; 173/173 pass QA. Engine: `ctx.input` (the arguments as given), Set panels wrap by width. Brief:
+  long collections are cut to 64 (count with $size), `if` and `for`-update recording. Spot-checked at 390 px:
+  maximum-xor-with-an-element-from-array (720 frames, recorded in 0.26 s, fit 1.04). Cleanup later: the five KMP
+  scenes each carry the same helper block (could move to util.js). Remaining: 253.
+- **Production batch 7 done 2026-11-05 (W5):** 25 scenes: the last 4 bit-manipulation, all of linked-list (15, incl.
+  LRU / LFU cache) and 6 of stack; 198/198 pass QA. Engine: a `return expr` step is recorded after `expr` ran and
+  carries `value` (so `return st.pop()` shows the pop); harness questions use the learner's own parameter names;
+  list panels show their label (also fixes an unlabelled lesson panel in m3-list-sort). Spot-checked at 390 px in
+  dark mode: reverse-linked-list (fit 0.99, prev / head / cur / next tags). Cleanup later: the five linked-list
+  scenes of group 3 each carry a list helper (could move to util.js). Remaining: 228.
+- **Production batch 8 done 2026-11-05 (W5):** 25 scenes: the last 9 stack, all of queue-deque (12) and 4 heaps;
+  223/223 pass QA. Engine: `ctx.value` (the current return step's value), util `itemsOf` (stack / queue / deque / heap
+  front first, plain or toolkit). Spot-checked at 390 px: sliding-window-maximum (fit 0.76; the toolkit Deque draws
+  front to back). Small leftover: the first generic note prints a toolkit Deque's raw {buf: …} text. Remaining: 203.
+- **Production batch 9 done 2026-11-05 (W5):** 25 scenes: the last 11 heaps and 14 of trees; 248/248 pass QA. Engine:
+  in recursion the input tree / list stays visible as `<param> (whole)` (the call's own node is a tag on it; the biggest
+  structure per name wins, so deep-first runs settle on the top root); util `entriesOf` only takes plain counters; QA
+  no longer warns on lists (they wrap). Brief: node id order, tree half-done swaps. Content gap found: in
+  sliding-window-median the classic "forgot to prune after moving a top" mistake passes every test (a test is
+  missing). Spot-checked at 390 px: diameter-of-binary-tree (fit 1.11, node tag on the tree). Remaining: 178.
+- **Production batch 10 done 2026-11-05 (W5):** 25 scenes: the last 2 trees, all of bst (12) and 11 of tries;
+  273/273 pass QA. Engine: a trie renderer. Trie nodes (children / next / kids… as a Map, an object or a 26-slot array)
+  snapshot as `$trie` at any depth and draw as a letter tree with word ends lit, counters beside the letters and
+  `node` / `cur` as tags. implement-trie-prefix-tree and longest-word-in-dictionary were updated for the new
+  snapshot. Spot-checked at 390 px: replace-words (fit 0.99, trie drawn). Remaining: 153.
 
 ### M5 · Animate my run for every question · = `animate-my-run-plan.md` W5–W6
 One unique, interactive scene per coding question (426), 100 a day, the QA harness on each, just like

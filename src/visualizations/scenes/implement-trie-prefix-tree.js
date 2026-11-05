@@ -20,9 +20,10 @@ const strOf = (vars) => vars?.[pick(vars, STR, (v) => typeof v === 'string')];
 const chOf = (vars) => vars?.[pick(vars, CH, (v) => typeof v === 'string' && v.length === 1)];
 /** the "word ends here" flag of the current node: true / false, null when the node is missing, undefined when unknown */
 function endOf(vars) {
-  const k = pick(vars, NODE, (v) => v === null || v === undefined || (v && v.$obj));
+  const k = pick(vars, NODE, (v) => v === null || v === undefined || (v && (v.$obj || v.$trie)));
   if (!k) return undefined;
   const v = vars[k];
+  if (v && v.$trie) return v.$trie.nodes[0].end; // a trie node: { $trie: { nodes: [this node, …] } }
   if (!v || !v.$obj) return null;
   const f = Object.keys(v.$obj).find((x) => /end|word|leaf|term|last|complete/i.test(x) && typeof v.$obj[x] === 'boolean');
   return f ? v.$obj[f] : undefined;

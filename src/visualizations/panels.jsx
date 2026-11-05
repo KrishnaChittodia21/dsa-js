@@ -126,6 +126,7 @@ export function ListPanel({ panel }) {
   for (const p of pointers) (byIndex[p.index] ||= []).push(p);
   return (
     <div className="viz-panel viz-panel--list">
+      {panel.label && <div className="viz-label">{panel.label}</div>}
       <div className="viz-list">
         {next[0] === null && values.length > 0 && <span className="viz-null">∅ ←</span>}
         {values.map((v, i) => {
