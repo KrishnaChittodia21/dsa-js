@@ -192,6 +192,46 @@ function flatten(vars) {
   return out;
 }
 
+/** [[index, value]…] of the non-zero cells of a long counting array (≥ 27 cells, numbers / booleans), else null */
+function sparseOf(v) {
+  if (isObj(v, '$array')) return v.$sparse || null;
+  if (!isRow(v) || v.length < 27 || !v.every((x) => typeof x === 'number' || typeof x === 'boolean')) return null;
+  const cells = v.map((x, i) => [i, x]).filter(([, x]) => x);
+  return cells.length * 3 <= v.length ? cells : null; // mostly zeros: the table is easier to read than the row
+}
+
+const ROW = 13; // cells per line: a longer array wraps onto more lines so it stays readable on a phone
+
+/** an array panel longer than ROW cells as several panels of ROW cells (real indexes kept via indexBase) */
+const ROW_PX = 420; // and at most about this wide (long words: fewer cells per line; ~70 % zoom on a phone)
+const cellPx = (v) => Math.max(44, String(v).length * 9.5 + 18) + 8; // measured in the browser at 390 px
+
+function wrapRow(panel, per = ROW) {
+  const n = panel.values.length;
+  const starts = [0];
+  for (let i = 1, w = cellPx(panel.values[0]); i < n; i++) {
+    const c = cellPx(panel.values[i]);
+    if (i - starts[starts.length - 1] >= per || w + c > ROW_PX) {
+      starts.push(i);
+      w = c;
+    } else w += c;
+  }
+  if (starts.length === 1) return [panel];
+  const out = [];
+  for (const [k, from] of starts.entries()) {
+    const to = (starts[k + 1] ?? n) - 1;
+    const part = { ...panel, label: from === 0 ? panel.label : undefined, values: panel.values.slice(from, to + 1), indexBase: from, highlights: {} };
+    for (const [i, st] of Object.entries(panel.highlights || {})) if (+i >= from && +i <= to) part.highlights[+i - from] = st;
+    part.pointers = (panel.pointers || []).filter((x) => x.index >= from && x.index <= to).map((x) => ({ ...x, index: x.index - from }));
+    if (panel.range) {
+      const [a, b] = [Math.max(panel.range[0], from), Math.min(panel.range[1], to)];
+      part.range = a <= b ? [a - from, b - from] : undefined;
+    }
+    out.push(part);
+  }
+  return out;
+}
+
 /**
  * the panels for one step; `prev` is the previous step's vars (for highlights)
  * @param opts.pointers names drawn as pointers on the main array (default: index-like names)
@@ -240,16 +280,22 @@ export function panelsFor(rawVars, rawPrev = {}, opts = {}) {
     if ((kind === 'heap' || (!kind && HEAP_NAME.test(name))) && isRow(val) && val.length <= 31) panels.push(heapPanel(shown, val, pv));
     else if ((kind === 'adj' || (!kind && ADJ_NAME.test(name))) && asAdj(val)) panels.push(graphPanel(shown, asAdj(val), vars));
     else if (forest) panels.push(forest);
-    else if (kind === 'stack' || kind === 'queue') panels.push({ kind, label: shown, values: val.map((x) => (x === undefined ? 'undefined' : x)) });
+    else if (kind === 'stack' || kind === 'queue') panels.push({ kind, label: shown, values: val.map((x) => (x === undefined ? '·' : x)) });
     else if (Array.isArray(v) && v.length && v.length <= 16 && v.every((x) => isObj(x, '$tree') || isObj(x, '$list'))) {
       // a queue / stack of tree or list nodes (BFS over a tree): each node shown by its value
       const k = STACK_NAME.test(name) ? 'stack' : QUEUE_NAME.test(name) ? 'queue' : 'array';
       const values = v.map((x) => label(x.$tree ? x.$tree[0] : x.$list.values[0]));
       panels.push(k === 'array' ? { kind: k, label: `${shown} (nodes)`, values, highlights: {} } : { kind: k, label: `${shown} (nodes)`, values });
     }
+    else if (sparseOf(v) && sparseOf(v).length <= 12) {
+      // a long, mostly empty counting array: only its non-zero cells, as index → value
+      const cells = sparseOf(v);
+      const before = new Map(sparseOf(p) || []);
+      panels.push({ kind: 'table', label: `${shown} (non-zero cells of ${v.$length ?? v.length})`, rowLabels: cells.map(([i]) => String(i)), colLabels: ['value'], cells: cells.map(([, x]) => [label(x)]), states: cells.map(([i, x]) => [before.get(i) === x ? '' : 'active']) });
+    }
     else if (isRow(v)) {
       const k = STACK_NAME.test(name) ? 'stack' : QUEUE_NAME.test(name) ? 'queue' : 'array';
-      const panel = { kind: k, label: shown, values: v.map((x) => (x === undefined ? 'undefined' : x === Infinity ? '∞' : x)) };
+      const panel = { kind: k, label: shown, values: v.map((x) => (x === undefined ? '·' : x === Infinity ? '∞' : x)) };
       if (k === 'array') {
         panel.highlights = changedCells(v, p);
         if (name === main) {
@@ -263,7 +309,7 @@ export function panelsFor(rawVars, rawPrev = {}, opts = {}) {
           if (isInt(lo) && isInt(hi) && lo <= hi && lo < v.length && hi >= 0) panel.range = [Math.max(0, lo), Math.min(v.length - 1, hi)];
         }
       }
-      panels.push(panel);
+      panels.push(...(k === 'array' ? wrapRow(panel) : [panel]));
     } else if (isGrid(v, 16) && DP_NAME.test(name) && v.every((r) => r.length === v[0].length && r.every((x) => typeof x !== 'string'))) panels.push(dpPanel(shown, v, p));
     else if (isGrid(v)) {
       const states = v.map((row, r) => row.map((x, c) => (Array.isArray(p) && Array.isArray(p[r]) && !same(x, p[r][c]) ? 'active' : '')));
@@ -278,6 +324,11 @@ export function panelsFor(rawVars, rawPrev = {}, opts = {}) {
       const pointers = [...drawn.get(name)].flatMap(([id, ns]) => ns.map((n) => ({ label: nameOf(n), index: ids.indexOf(id) })));
       panels.push({ kind: 'list', label: shown, values: values.map(label), next, pointers: pointers.map((x, c) => ({ ...x, color: 'abc'[c % 3] })) });
     } else if (isObj(v, '$map') && v.$map.length && v.$map.length <= 12) panels.push(mapPanel(shown, v, p));
+    else if (!obj && isObj(v, '$obj') && Object.keys(v.$obj).length && Object.keys(v.$obj).length <= 12 && Object.values(v.$obj).every(isPrim)) {
+      // a plain object used as a counter / lookup ({ a: 2, b: 1 }): drawn like a Map
+      const asMap = (o) => (isObj(o, '$obj') ? { $map: Object.entries(o.$obj), $size: Object.keys(o.$obj).length } : undefined);
+      panels.push({ ...mapPanel(shown, asMap(v), asMap(p)), label: `${shown} (object)` });
+    }
     else if (isObj(v, '$set') && v.$set.length && v.$set.length <= 16 && v.$set.every(isPrim)) {
       panels.push({ kind: 'array', label: `${shown} (set)`, values: v.$set, highlights: {}, showIndices: false });
     } else scalars[shown] = clip(text(v), 40);
@@ -300,15 +351,15 @@ export function changes(vars, prev) {
   return out.length > 4 ? [...out.slice(0, 4), '…'] : out;
 }
 
-const opText = (o) => clip(`${o.name}(${(Array.isArray(o.args) ? o.args : []).map(text).join(', ')})`, 22);
+const opText = (o, n = 22) => clip(`${o.name}(${(Array.isArray(o.args) ? o.args : []).map(text).join(', ')})`, n);
 
 /** design classes: a window of the operation list around the current one */
 function opsPanel(ops, cur) {
-  const from = Math.max(0, Math.min(cur - 2, ops.length - 5)); // 5 ops: still readable at phone width
-  const shown = ops.slice(from, from + 5);
+  const from = Math.max(0, Math.min(cur - 1, ops.length - 3)); // previous, now, next: readable at phone width
+  const shown = ops.slice(from, from + 3);
   const highlights = {};
   shown.forEach((_, k) => (highlights[k] = from + k < cur ? 'done' : from + k === cur ? 'active' : ''));
-  return { kind: 'array', label: `operations (${cur + 1} of ${ops.length})`, values: shown.map(opText), highlights, indexBase: from, pointers: [{ label: 'now', index: cur - from, color: 'a' }] };
+  return { kind: 'array', label: `operations (${cur + 1} of ${ops.length})`, values: shown.map((o) => opText(o, 14)), highlights, indexBase: from, pointers: [{ label: 'now', index: cur - from, color: 'a' }] };
 }
 
 /**
@@ -400,8 +451,11 @@ export function bigO(time) {
  * @param params the question's parameter names (scenes find "the array" and "the target" by position)
  * @returns Visualizer frames; the last one states the verdict
  */
-export function buildRunFrames(run, code, scene = {}, params = []) {
+export function buildRunFrames(run, code, scene = {}, questionParams = []) {
   const lines = code.split('\n');
+  // a learner may rename a parameter (grid for matrix): parameters are recorded first, so take the name in its place
+  const first = Object.keys(run.steps[0]?.vars || {});
+  const params = first.length ? questionParams.map((p, i) => (first.includes(p) ? p : first[i] ?? p)) : questionParams;
   const ops = run.ops || [];
   const watch = scene.watch && new Set(scene.watch);
   const keep = (vars) => (watch ? Object.fromEntries(Object.entries(vars).filter(([k]) => watch.has(k))) : vars);
@@ -413,7 +467,7 @@ export function buildRunFrames(run, code, scene = {}, params = []) {
   steps.forEach((s, i) => {
     const src = (lines[s.line - 1] || '').trim();
     const what = changes(flatten(s.vars), flatten(prev));
-    const ctx = { vars: s.vars, prev, line: s.line, src, lines, changes: what, index: i, next: steps[i + 1], params };
+    const ctx = { vars: s.vars, prev, line: s.line, src, lines, changes: what, index: i, next: steps[i + 1], params, op: s.op, ops };
     const told = scene.narrate?.(ctx);
     const at = s.op !== undefined && ops[s.op] ? `op ${s.op + 1} · ${opText(ops[s.op])} · ` : '';
     const panels = panelsFor(s.vars, prev, opts);
@@ -428,7 +482,7 @@ export function buildRunFrames(run, code, scene = {}, params = []) {
     prev = s.vars;
   });
   const last = steps.length ? panelsFor(prev, prev, opts) : [];
-  if (ops.length && Array.isArray(run.output)) last.unshift({ kind: 'array', label: 'returned by each operation', values: run.output.slice(0, 16).map(label), highlights: {} });
+  if (ops.length && Array.isArray(run.output)) last.unshift(...wrapRow({ kind: 'array', label: 'returned by each operation', values: run.output.slice(0, 26).map(label), highlights: {} }, 6));
   const sampled = run.truncated ? ` (a long run: every ${run.stride}th step is shown)` : '';
   if (run.compileError) frames.push({ note: `Could not run: ${run.compileError}`, panels: last });
   else if (run.error) frames.push({ note: `Stopped with an error: ${run.error}${sampled}`, panels: last });

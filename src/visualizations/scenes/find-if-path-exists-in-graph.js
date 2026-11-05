@@ -49,6 +49,12 @@ export default {
   },
   bugs: [
     {
+      label: 'if instead of while: one round only',
+      find: 'while (stack.length)',
+      replace: 'if (stack.length)',
+      explain: 'The source tells its neighbours once and the search stops: nobody passes the news further, so anything two hops away is never reached.',
+    },
+    {
       label: 'Store each edge one way only',
       find: 'adj[v].push(u);',
       replace: '',

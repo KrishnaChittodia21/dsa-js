@@ -99,9 +99,9 @@ Every question gets its own **scene file** (`src/visualizations/scenes/<question
 - [ ] W3.4 (Review/Fix) **M2.**
 
 ## Week 4 — Wed Nov 18 → Tue Nov 24 · Pipeline + pilot → **M3**
-- [ ] W4.1 (Build) Generator brief: question file + gold scenes → new scene file. Batch runner for 25 questions.
-- [ ] W4.2 (Build) QA harness, run on every scene: reference solution must PASS, an auto-injected bug must FAIL at a sensible step, no crash, no empty frames, renders at phone width.
-- [ ] W4.3 (Finish) **Pilot: 20 questions** across all families. Measure `/usage` % per 25-question batch → project whether 426 questions (≈17 batches) fit in one weekly limit or spill into the next week.
+- [x] W4.1 (Build) Generator brief: question file + gold scenes → new scene file. Batch runner for 25 questions.
+- [x] W4.2 (Build) QA harness, run on every scene: reference solution must PASS, an auto-injected bug must FAIL at a sensible step, no crash, no empty frames, renders at phone width.
+- [x] W4.3 (Finish) **Pilot: 20 questions** across all families. Measure `/usage` % per 25-question batch → project whether 426 questions (≈17 batches) fit in one weekly limit or spill into the next week.
 - [ ] W4.4 (Review) Watch all 20; tighten the brief where scenes feel samey or confusing.
 - [ ] W4.5 (Fix) Merge pilot scenes. **M3.**
 
@@ -131,3 +131,7 @@ Grouped so each day reuses the same renderers:
 ## Progress log
 <!-- one line per session: date · task · result · /usage % after -->
 2026-11-05 · W3.1–W3.3 · renderers, interaction kit, scene format + 3 gold scenes done (batch 4c); W3.4 = your browser review
+2026-11-05 · W4.1–W4.3 · QA harness + brief + 20-scene pilot (23/23 pass); ~25k tokens/scene; W4.4 = your review of the 20
+2026-11-05 · W5 batch 1 · 25 scenes (arrays, array-techniques), 48/48 pass QA; ~0.75M tokens for the batch
+2026-11-05 · W5 batch 2 · 25 scenes (two-pointers, sliding-window part), 73/73 pass QA; ~0.7M tokens
+2026-11-05 · W5 batch 3 · 25 scenes (sliding-window end, prefix-sum, sorting), 98/98 pass QA; ~0.75M tokens

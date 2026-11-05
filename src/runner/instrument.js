@@ -6,7 +6,9 @@
 import { parser } from '@lezer/javascript';
 
 const FUNCS = new Set(['FunctionDeclaration', 'FunctionExpression', 'ArrowFunction', 'MethodDeclaration']);
-const AFTER = new Set(['ExpressionStatement', 'VariableDeclaration']);
+// IfStatement: a condition-only line like `if (!uf.union(a, b)) return false;` changes state too (recorded "quiet")
+const LATE = 1e9; // insert-order bonus: an if statement's record call goes after everything else at its end
+const AFTER = new Set(['ExpressionStatement', 'VariableDeclaration', 'IfStatement']);
 const BEFORE = new Set(['ReturnStatement', 'BreakStatement', 'ContinueStatement', 'ThrowStatement']);
 const LIST_OK = new Set(['Block', 'Script']); // statement lists where code can be added next to a statement
 
@@ -50,6 +52,7 @@ export function instrument(code) {
     if (!after && !BEFORE.has(node.name)) continue;
     const parent = node.parent;
     if (!parent || parent.name === 'ForSpec') continue; // `for (let i = 0; …)` header
+    if (node.name === 'IfStatement' && parent.name === 'IfStatement') continue; // `else if`: the outer if records
     // the enclosing functions, innermost first; top-level code (outside any function) is not recorded
     const fns = [];
     for (let p = parent; p; p = p.parent) if (FUNCS.has(p.name)) fns.push(p);
@@ -63,9 +66,13 @@ export function instrument(code) {
     // `this` in a class method (design questions), when only arrow functions sit between it and the statement
     const firstPlain = fns.find((f) => f.name !== 'ArrowFunction');
     if (firstPlain?.name === 'MethodDeclaration') list.push('["this",()=>this]');
-    const call = `__rec(${lineOf(node.from)},[${list.join(',')}]);`;
+    const call = `__rec(${lineOf(node.from)},[${list.join(',')}]${node.name === 'IfStatement' ? ',1' : node.name === 'ReturnStatement' ? ',2' : ''});`;
     const bare = !LIST_OK.has(parent.name); // e.g. the body of `if (x) a++;` — wrap it in braces
-    if (after) {
+    if (node.name === 'IfStatement') {
+      // after the whole if, including a braces-wrap its own body got at the same position (late = goes last)
+      if (bare) inserts.push([node.from, '{'], [node.to, `;${call}}`, LATE]);
+      else inserts.push([node.to, `;${call}`, LATE]);
+    } else if (after) {
       if (bare) inserts.push([node.from, '{'], [node.to, `;${call}}`]);
       else inserts.push([node.to, `;${call}`]);
     } else if (bare) inserts.push([node.from, `{${call}`], [node.to, '}']);
@@ -74,7 +81,7 @@ export function instrument(code) {
 
   // apply from the end so earlier positions stay valid; at one position the later insert goes in first, so the
   // texts end up in the order they were added (`a++;b++` → a's record call, then b's)
-  const order = inserts.map((x, i) => [x[0], x[1], i]).sort((a, b) => b[0] - a[0] || b[2] - a[2]);
+  const order = inserts.map((x, i) => [x[0], x[1], i + (x[2] || 0)]).sort((a, b) => b[0] - a[0] || b[2] - a[2]);
   let out = code;
   for (const [pos, text] of order) out = out.slice(0, pos) + text + out.slice(pos);
   return out;

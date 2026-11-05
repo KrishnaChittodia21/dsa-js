@@ -32,7 +32,11 @@ export function snapshot(v, depth = 0) {
   const typed = ArrayBuffer.isView(v) && !(v instanceof DataView); // Uint8Array etc. read as plain rows
   if (Array.isArray(v) || typed) {
     const out = Array.from(v.slice(0, MAX_ITEMS), (x) => (typed ? (typeof x === 'bigint' ? { $text: `${x}n` } : x) : snapshot(x, depth + 1)));
-    return v.length > MAX_ITEMS ? { $array: out, $length: v.length } : out;
+    if (v.length <= MAX_ITEMS) return out;
+    // a long counting array (count[1001], seen[26]…): also keep its non-zero cells, wherever they are
+    const sparse = [];
+    for (let i = 0; i < v.length && sparse.length <= MAX_ITEMS; i++) if (v[i] && (typeof v[i] === 'number' || typeof v[i] === 'boolean')) sparse.push([i, v[i]]);
+    return sparse.length <= MAX_ITEMS ? { $array: out, $length: v.length, $sparse: sparse } : { $array: out, $length: v.length };
   }
   if (v instanceof Map) return { $map: [...v].slice(0, MAX_ITEMS).map(([k, x]) => [snapshot(k, depth + 1), snapshot(x, depth + 1)]), $size: v.size };
   if (v instanceof Set) return { $set: [...v].slice(0, MAX_ITEMS).map((x) => snapshot(x, depth + 1)), $size: v.size };
@@ -98,16 +102,18 @@ export function recordRun(code, question, test, { maxSteps = MAX_STEPS, refCode 
   const ops = [];
   let op;
   let skipped = null; // the last statement left out by sampling: recorded at the end so the final state shows
-  const rec = (line, getters) => {
+  // kind 1 (after an `if` statement): kept only when something changed since the last kept step;
+  // kind 2 (just before a `return`): the step is marked ret: true, so a scene can tell "returns here" apart
+  const rec = (line, getters, quiet) => {
     if (++calls > MAX_CALLS) throw new Error(`Stopped after ${MAX_CALLS.toLocaleString('en')} steps: an infinite loop, or an input too big to animate`);
     if ((calls - 1) % stride) {
-      skipped = [line, getters];
+      skipped = [line, getters, quiet];
       return;
     }
     skipped = null;
-    take(line, getters);
+    take(line, getters, quiet);
   };
-  const take = (line, getters) => {
+  const take = (line, getters, quiet) => {
     const vars = {};
     for (const [name, get] of getters) {
       let v;
@@ -118,7 +124,10 @@ export function recordRun(code, question, test, { maxSteps = MAX_STEPS, refCode 
       }
       if (typeof v !== 'function') vars[name] = snapshot(v);
     }
-    steps.push(op === undefined ? { line, vars } : { line, vars, op });
+    if (quiet === 1 && steps.length && JSON.stringify(steps[steps.length - 1].vars) === JSON.stringify(vars)) return;
+    const step = op === undefined ? { line, vars } : { line, vars, op };
+    if (quiet === 2) step.ret = true;
+    steps.push(step);
     if (steps.length >= maxSteps) {
       // keep every other step and record half as often from now on: the whole run stays evenly covered
       steps = steps.filter((_, i) => i % 2 === 0);

@@ -197,6 +197,27 @@ format gets a `language` field and a "variables per line" shape, so Java/C++ (M8
   scenes: sort-an-array, binary-search, find-if-path-exists-in-graph. 36 tests (frames build for all 426 reference
   solutions; each gold scene narrates, predicts and has a failing bug). Browser-checked at 390 px: binary search (kit),
   BFS path, LRU cache, invert tree. Next: 4d = generator brief, QA harness, 20-question pilot (W4).
+- **Batch 4d done 2026-11-05 (W4, pipeline + pilot):** `scripts/qa-scenes.mjs` (in `npm run validate`): per scene,
+  reference passes with the scene on, frames well-formed, narrate tells ≥ 1 step, predict asks ≥ 1 valid question,
+  an injected bug fails a test, phone-width warning. `scripts/dump-run.mjs` (steps, `--frames` preview, `--code`
+  learner-style file). Brief: `design/scene-brief.md`, revised with the pilot's feedback. Pilot: 20 scenes by 4
+  agents (two-pointers … design classes), 23/23 pass QA; spot-checked at 390 px: group-anagrams, edit-distance,
+  design-circular-queue, course-schedule-ii. Engine fixes from the pilot: `if` statements are recorded (quiet),
+  long arrays wrap at 13 cells, empty cells show "·", op timeline = previous / now / next, ctx gets op / ops.
+  Cost: ~25k tokens per scene (≈ 0.5M for 20) → 406 remaining ≈ 10M tokens, more than one weekly limit.
+- **Production batch 1 done 2026-11-05 (W5):** 25 scenes, all of arrays (13) and array-techniques (12); 48/48 scenes
+  pass QA. Engine: renamed parameters mapped by position (ctx.params), rows wrap by width (≤ ~420 px), QA warns when a
+  listed bug fails no test. Gold binary-search note no longer gives away its prediction. Brief: half-done steps
+  (two statements on a line, temp swaps), helper-function prev. Spot-checked at 390 px: integer-to-english-words
+  (fit 0.80), spiral-matrix (0.91). Remaining: 378 questions.
+- **Production batch 2 done 2026-11-05 (W5):** 25 scenes, all of two-pointers (13) and 12 of sliding-window; 73/73 pass
+  QA. Engine: a step just before a `return` carries `ret: true` (an `if (…) return x;` line records both outcomes on
+  the same line), plain-object counters draw as key/value tables, util `entriesOf` reads Map or object counters.
+  Spot-checked at 390 px: trapping-rain-water (fit 1.02), minimum-window-substring (1.09). Remaining: 353.
+- **Production batch 3 done 2026-11-05 (W5):** 25 scenes: the last sliding-window, all of prefix-sum (12) and sorting
+  (12); 98/98 pass QA. Engine: long counting arrays keep their non-zero cells (`$sparse`, wherever they are) and draw
+  as an index → value table (relative-sort-array: ~3300 px → fits at 390 px); util `cellAt`. Brief: skip parameters
+  when guessing working arrays by name. Remaining: 328.
 
 ### M5 · Animate my run for every question · = `animate-my-run-plan.md` W5–W6
 One unique, interactive scene per coding question (426), 100 a day, the QA harness on each, just like

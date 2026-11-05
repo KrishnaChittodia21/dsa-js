@@ -17,8 +17,10 @@
 //   bugs         [{ label, find, replace, explain }]: "Break it" tries these before the generic bugs (runner/bugs.js)
 //   interactions which kit buttons to show: 'edit', 'predict', 'inspect', 'compare', 'break', 'meter' (default: all)
 //
-// ctx = { vars, prev, line, src, lines, changes, index, next, params }: vars / prev are this and the previous step's
-// snapshots (recorder tags: $map $set $tree $list $obj), next is the next step ({ line, vars }) or undefined,
+// ctx = { vars, prev, line, src, lines, changes, index, next, params, op, ops } (op: the design-class operation
+// running now, an index into ops = [{ name, args }]; undefined for function questions): vars / prev are this and the previous step's
+// snapshots (recorder tags: $map $set $tree $list $obj), next is the next step ({ line, vars, ret }) or undefined (ret: true = that step
+// is a `return` about to run),
 // params are the question's parameter names. Scenes must not assume the user's variable names beyond the
 // parameters: check that a name exists before using it, and return null to fall back to the generic note.
 // Helpers for scenes: ./util.js. Gold standard: sort-an-array.js, binary-search.js, find-if-path-exists-in-graph.js.

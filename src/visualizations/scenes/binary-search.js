@@ -25,8 +25,8 @@ export default {
     const t = ctx.vars[tName];
     const [mName, m] = firstInt(ctx.vars, MID);
     if (a && mName && m !== ctx.prev[mName] && m >= 0 && m < a.length) {
-      const verdict = a[m] === t ? 'found it' : a[m] < t ? 'too small: the target can only be to the right' : 'too big: the target can only be to the left';
-      return `guess the middle: ${arrName}[${m}] = ${a[m]} vs target ${t} → ${verdict}`;
+      // no verdict here: the prediction asked right after this step is "which half is dropped?"
+      return `guess the middle: ${arrName}[${m}] = ${a[m]}, the target is ${t}`;
     }
     const pair = pairOf(ctx.vars);
     if (!pair) return null;

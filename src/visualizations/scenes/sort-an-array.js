@@ -24,11 +24,19 @@ export default {
     if (d.length === 1) return `${name}[${d[0]}] = ${a[d[0]]}: a card is put down in slot ${d[0]}${sorted(a) ? ` · ${name} is sorted` : ''}`;
     return null;
   },
-  // before a swap: which pair trades places next?
+  // before a swap: which pair trades places next? before a single write: which card lands in that slot?
   predict(ctx) {
     const name = arrOf(ctx);
     const a = row(ctx.vars[name]);
-    const sw = ctx.next && swapped(ctx.next.vars[name], a);
+    const after = ctx.next && row(ctx.next.vars[name]);
+    if (!a || !after) return null;
+    const d = changedIdx(after, a);
+    if (d.length === 1 && changedIdx(a, row(ctx.prev[name])).length !== 1) {
+      const k = d[0];
+      const wrong = [...new Set(a.filter((x) => x !== after[k]))].slice(0, 3);
+      return options(`Slot ${k} of ${name} is about to be overwritten (it holds ${a[k]}). Which card lands there?`, after[k], wrong, `The next smallest card for slot ${k} is ${after[k]}.`);
+    }
+    const sw = swapped(after, a);
     if (!sw || swapped(a, row(ctx.prev[name]))) return null;
     const [x, y] = sw;
     const pair = (i, j) => `${name}[${i}] ↔ ${name}[${j}]`;

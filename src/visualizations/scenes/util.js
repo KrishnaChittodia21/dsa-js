@@ -38,3 +38,19 @@ export function options(question, right, wrong, explain) {
   opts.sort();
   return { question, options: opts, answer: opts.indexOf(String(right)), explain };
 }
+
+/** [[key, value], …] of a Map ($map) or a plain object used as one ($obj), else null: scenes read counters with it */
+export function entriesOf(v) {
+  if (v && v.$map) return v.$map;
+  if (v && v.$obj) return Object.entries(v.$obj);
+  return null;
+}
+
+/** cell i of an array snapshot: a plain row, or a long array ({ $array: first 64, $length, $sparse: non-zero cells }) */
+export function cellAt(v, i) {
+  if (Array.isArray(v)) return v[i];
+  if (!v || !v.$array) return undefined;
+  if (i < v.$array.length) return v.$array[i];
+  if (v.$sparse) return v.$sparse.find(([k]) => k === i)?.[1] ?? (i < v.$length ? 0 : undefined);
+  return undefined;
+}
