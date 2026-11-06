@@ -43,6 +43,8 @@ Remove as many edges as possible such that, afterwards, **Alice can still reach 
 
   functionName: 'maxNumEdgesToRemove',
   paramNames: ['n', 'edges'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} edges

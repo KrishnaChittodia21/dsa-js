@@ -34,6 +34,8 @@ Return an array with the **sizes** of the parts, in order.`,
 
   functionName: 'partitionLabels',
   paramNames: ['s'],
+  paramTypes: ['string'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {string} s
  * @return {number[]}

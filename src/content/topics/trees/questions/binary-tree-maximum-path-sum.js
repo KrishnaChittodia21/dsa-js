@@ -41,6 +41,8 @@ Every path has exactly one highest node, so checking the candidate at every node
 
   functionName: 'maxPathSum',
   paramNames: ['root'],
+  paramTypes: ['TreeNode'],
+  returnType: 'int',
   starterCode: `/**
  * @param {TreeNode} root
  * @return {number}

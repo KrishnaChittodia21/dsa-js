@@ -36,6 +36,8 @@ export default {
 
   functionName: 'summaryRanges',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'string[]',
   starterCode: `/**
  * @param {number[]} nums
  * @return {string[]}

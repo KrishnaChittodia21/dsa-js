@@ -41,6 +41,8 @@ Answer: \`diff(0, n − 1) >= 0\`.
 
   functionName: 'predictTheWinner',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[]} nums
  * @return {boolean}

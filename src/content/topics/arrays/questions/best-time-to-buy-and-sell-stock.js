@@ -30,6 +30,8 @@ You may buy **one** share on some day and sell it on a **later** day. Return the
 
   functionName: 'maxProfit',
   paramNames: ['prices'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} prices
  * @return {number}

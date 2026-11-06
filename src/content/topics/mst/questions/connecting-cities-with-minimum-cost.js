@@ -34,6 +34,8 @@ Return the minimum total cost to build roads so that **every pair of cities is c
 
   functionName: 'minimumCost',
   paramNames: ['n', 'connections'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} connections

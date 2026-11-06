@@ -41,6 +41,8 @@ Each pointer moves at most n steps in total.`,
 
   functionName: 'isPalindrome',
   paramNames: ['s'],
+  paramTypes: ['string'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {string} s
  * @return {boolean}

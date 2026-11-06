@@ -44,6 +44,8 @@ Passing \`hour\`/\`minute\` as **arguments** means there is nothing to undo — 
 
   functionName: 'readBinaryWatch',
   paramNames: ['turnedOn'],
+  paramTypes: ['int'],
+  returnType: 'string[]',
   starterCode: `/**
  * @param {number} turnedOn
  * @return {string[]}

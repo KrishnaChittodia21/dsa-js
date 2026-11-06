@@ -36,6 +36,8 @@ Return the h-index.`,
 
   functionName: 'hIndex',
   paramNames: ['citations'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} citations
  * @return {number}

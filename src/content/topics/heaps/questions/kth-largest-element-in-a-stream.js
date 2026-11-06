@@ -56,6 +56,10 @@ It is guaranteed that there are at least \`k\` numbers whenever \`add\` returns.
 Each call is O(log k). The toolkit's \`MinHeap\` is used here.`,
 
   className: 'KthLargest',
+  methodTypes: {
+    constructor: { params: ['int', 'int[]'] },
+    add: { params: ['int'], returns: 'int' },
+  },
   starterCode: `class KthLargest {
   /**
    * @param {number} k

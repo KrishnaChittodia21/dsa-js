@@ -34,6 +34,8 @@ Return \`true\` if you can reach the **last index**, otherwise \`false\`.`,
 
   functionName: 'canJump',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[]} nums
  * @return {boolean}

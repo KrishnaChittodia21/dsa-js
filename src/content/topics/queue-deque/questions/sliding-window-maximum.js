@@ -38,6 +38,8 @@ Each index is pushed and popped once.`,
 
   functionName: 'maxSlidingWindow',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

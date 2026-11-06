@@ -42,6 +42,8 @@ Because each value is the smallest forced lower bound, the total is minimal. The
 
   functionName: 'candy',
   paramNames: ['ratings'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} ratings
  * @return {number}

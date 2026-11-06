@@ -46,6 +46,10 @@ Because a tree with n nodes has n + 1 null children, the string has 2n + 1 token
 
   functionName: 'Codec',
   paramNames: ['root'],
+  methodTypes: {
+    serialize: { params: ['TreeNode'], returns: 'string' },
+    deserialize: { params: ['string'], returns: 'TreeNode' },
+  },
   starterCode: `/**
  * TreeNode is available globally: new TreeNode(val, left, right)
  */

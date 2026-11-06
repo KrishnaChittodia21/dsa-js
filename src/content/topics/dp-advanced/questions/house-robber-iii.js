@@ -38,6 +38,8 @@ Each node is visited once → O(n). The tests pass the tree as a \`TreeNode\` ro
 
   functionName: 'rob',
   paramNames: ['root'],
+  paramTypes: ['TreeNode'],
+  returnType: 'int',
   io: { params: ['tree'] },
   starterCode: `/**
  * Definition: TreeNode { val, left, right }

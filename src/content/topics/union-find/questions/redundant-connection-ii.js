@@ -47,6 +47,8 @@ Why is skipping cand2 the right test? If cand2 was the bad edge, removing it lea
 
   functionName: 'findRedundantDirectedConnection',
   paramNames: ['edges'],
+  paramTypes: ['int[][]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[][]} edges
  * @return {number[]}

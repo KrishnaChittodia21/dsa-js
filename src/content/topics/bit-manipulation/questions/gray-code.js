@@ -46,6 +46,8 @@ A checker accepts any valid sequence.`,
 
   functionName: 'grayCode',
   paramNames: ['n'],
+  paramTypes: ['int'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number} n
  * @return {number[]}

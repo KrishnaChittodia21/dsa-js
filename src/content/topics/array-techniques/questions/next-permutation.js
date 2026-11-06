@@ -39,6 +39,8 @@ If \`nums\` is already the greatest arrangement (fully non-increasing), rearrang
 
   functionName: 'nextPermutation',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'void',
   io: { mutates: 0 },
   starterCode: `/**
  * @param {number[]} nums

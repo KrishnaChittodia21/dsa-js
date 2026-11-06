@@ -36,6 +36,8 @@ Pass **indices**, not slices — a slice copies O(n) characters per call and bre
 
   functionName: 'reverseString',
   paramNames: ['s'],
+  paramTypes: ['char[]'],
+  returnType: 'void',
   io: { params: ['any'], mutates: 0 },
   starterCode: `/**
  * @param {character[]} s

@@ -37,6 +37,8 @@ One pass, O(1) extra space.`,
 
   functionName: 'sortArrayByParity',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number[]}

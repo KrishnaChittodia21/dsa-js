@@ -38,6 +38,8 @@ export default {
 
   functionName: 'reversePairs',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

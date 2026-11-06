@@ -47,6 +47,10 @@ Implement \`StockSpanner\` with \`next(price)\` returning today's span.`,
 **Monotonic stack (amortized O(1)):** a price p that is ≤ today's price is "covered" by today: any future day that reaches back to p must first pass today (which is ≥ p). So pop p and add its span to today's. The stack stays strictly decreasing; each day is pushed and popped once.`,
 
   className: 'StockSpanner',
+  methodTypes: {
+    constructor: { params: [] },
+    next: { params: ['int'], returns: 'int' },
+  },
   starterCode: `class StockSpanner {
   constructor() {
     

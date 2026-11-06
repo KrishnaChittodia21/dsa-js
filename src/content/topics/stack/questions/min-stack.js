@@ -57,6 +57,13 @@ Every operation must run in O(1) time. pop, top and getMin are only called on a 
 **Space optimisation:** a second stack that only receives a value when it is ≤ the current minimum (pop it when the popped value equals its top).`,
 
   className: 'MinStack',
+  methodTypes: {
+    constructor: { params: [] },
+    push: { params: ['int'], returns: 'void' },
+    getMin: { params: [], returns: 'int' },
+    pop: { params: [], returns: 'void' },
+    top: { params: [], returns: 'int' },
+  },
   starterCode: `class MinStack {
   constructor() {
     

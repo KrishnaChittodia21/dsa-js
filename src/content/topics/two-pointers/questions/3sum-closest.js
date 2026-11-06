@@ -38,6 +38,8 @@ Track the best sum. No de-duplication is needed because we return a single numbe
 
   functionName: 'threeSumClosest',
   paramNames: ['nums', 'target'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} target

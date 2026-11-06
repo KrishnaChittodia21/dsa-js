@@ -28,6 +28,8 @@ When one string runs out, append the remaining characters of the other one. Retu
 
   functionName: 'mergeAlternately',
   paramNames: ['word1', 'word2'],
+  paramTypes: ['string', 'string'],
+  returnType: 'string',
   starterCode: `/**
  * @param {string} word1
  * @param {string} word2

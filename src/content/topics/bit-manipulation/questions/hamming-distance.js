@@ -31,6 +31,8 @@ export default {
 
   functionName: 'hammingDistance',
   paramNames: ['x', 'y'],
+  paramTypes: ['int', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} x
  * @param {number} y

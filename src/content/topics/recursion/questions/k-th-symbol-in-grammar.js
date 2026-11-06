@@ -44,6 +44,8 @@ Given \`n\` and \`k\` (1-indexed), return the \`k\`-th symbol of row \`n\`.`,
 
   functionName: 'kthGrammar',
   paramNames: ['n', 'k'],
+  paramTypes: ['int', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number} k

@@ -33,6 +33,8 @@ export default {
 
   functionName: 'longestCommonSubsequence',
   paramNames: ['text1', 'text2'],
+  paramTypes: ['string', 'string'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string} text1
  * @param {string} text2

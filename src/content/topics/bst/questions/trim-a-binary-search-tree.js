@@ -40,6 +40,8 @@ The surviving children are re-attached to the nearest surviving ancestor automat
 
   functionName: 'trimBST',
   paramNames: ['root', 'low', 'high'],
+  paramTypes: ['TreeNode', 'int', 'int'],
+  returnType: 'TreeNode',
   starterCode: `/**
  * @param {TreeNode} root
  * @param {number} low

@@ -36,6 +36,8 @@ Start at the top and move down one row at a time. From index \`j\` in one row yo
 
   functionName: 'minimumTotal',
   paramNames: ['triangle'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} triangle
  * @return {number}

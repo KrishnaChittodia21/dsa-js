@@ -41,6 +41,8 @@ Then \`exactly(k) = atMost(k) − atMost(k − 1)\`: subtracting removes exactly
 
   functionName: 'subarraysWithKDistinct',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

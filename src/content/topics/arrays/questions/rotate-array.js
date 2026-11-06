@@ -33,6 +33,8 @@ Modify \`nums\` **in place** — do not return anything. Try to use only O(1) ex
 
   functionName: 'rotate',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'void',
   starterCode: `/**
  * Do not return anything, modify nums in place.
  * @param {number[]} nums

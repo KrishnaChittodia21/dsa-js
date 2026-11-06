@@ -62,6 +62,11 @@ export default {
 The stack always holds the not-yet-visited ancestors along one path → O(h) memory. Across all n calls every node is pushed once and popped once → O(n) total → **O(1) amortized** per call.`,
 
   className: 'BSTIterator',
+  methodTypes: {
+    constructor: { params: ['TreeNode'] },
+    next: { params: [], returns: 'int' },
+    hasNext: { params: [], returns: 'boolean' },
+  },
   io: { ctorParams: ['tree'] },
   starterCode: `class BSTIterator {
   /**

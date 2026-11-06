@@ -39,6 +39,8 @@ The traversal uses an explicit stack: a 500×500 all-land grid would be 250,000 
 
   functionName: 'largestIsland',
   paramNames: ['grid'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} grid
  * @return {number}

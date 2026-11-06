@@ -38,6 +38,8 @@ Each node is enqueued and dequeued once → O(n). A head index keeps dequeue O(1
 
   functionName: 'levelOrder',
   paramNames: ['root'],
+  paramTypes: ['TreeNode'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {TreeNode} root
  * @return {number[][]}

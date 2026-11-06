@@ -74,6 +74,11 @@ The toolkit \`LazySegmentTree\` has exactly this interface (\`rangeAdd\`, \`rang
 
   kind: 'design',
   className: 'RangeSumArray',
+  methodTypes: {
+    constructor: { params: ['int[]'] },
+    rangeSum: { params: ['int', 'int'], returns: 'long' },
+    rangeAdd: { params: ['int', 'int', 'int'], returns: 'void' },
+  },
   starterCode: `class RangeSumArray {
   /**
    * @param {number[]} nums

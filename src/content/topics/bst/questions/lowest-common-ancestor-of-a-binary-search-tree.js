@@ -37,6 +37,8 @@ export default {
 
   functionName: 'lowestCommonAncestor',
   paramNames: ['root', 'p', 'q'],
+  paramTypes: ['TreeNode', 'TreeNode', 'TreeNode'],
+  returnType: 'TreeNode',
   starterCode: `/**
  * @param {TreeNode} root
  * @param {TreeNode} p

@@ -35,6 +35,8 @@ Return every coordinate \`[r, c]\` from which water can reach **both** oceans (a
 
   functionName: 'pacificAtlantic',
   paramNames: ['heights'],
+  paramTypes: ['int[][]'],
+  returnType: 'int[][]',
   compare: 'unordered',
   starterCode: `/**
  * @param {number[][]} heights

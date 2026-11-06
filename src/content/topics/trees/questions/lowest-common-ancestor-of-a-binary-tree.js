@@ -40,6 +40,8 @@ If \`left\` and \`right\` are both non-null, p and q are on different sides → 
 
   functionName: 'lowestCommonAncestor',
   paramNames: ['root', 'p', 'q'],
+  paramTypes: ['TreeNode', 'TreeNode', 'TreeNode'],
+  returnType: 'TreeNode',
   starterCode: `/**
  * @param {TreeNode} root
  * @param {TreeNode} p

@@ -38,6 +38,8 @@ Using a plain character array and \`join('')\` at the end keeps it O(n log n).`,
 
   functionName: 'smallestStringWithSwaps',
   paramNames: ['s', 'pairs'],
+  paramTypes: ['string', 'int[][]'],
+  returnType: 'string',
   starterCode: `/**
  * @param {string} s
  * @param {number[][]} pairs

@@ -42,6 +42,10 @@ An event is the half-open interval \`[start, end)\`. Implement the class \`MyCal
 Only neighbours can conflict: bookings before the predecessor end even earlier; bookings after the successor start even later. Lookup is O(log n); \`splice\` shifts elements, O(n) worst case (a balanced BST would give O(log n); JS has none built in).`,
 
   className: 'MyCalendar',
+  methodTypes: {
+    constructor: { params: [] },
+    book: { params: ['int', 'int'], returns: 'boolean' },
+  },
   starterCode: `class MyCalendar {
   constructor() {
     

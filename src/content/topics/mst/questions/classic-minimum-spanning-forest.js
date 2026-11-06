@@ -36,6 +36,8 @@ With Prim you would have to restart from every unvisited node — Kruskal handle
 
   functionName: 'minSpanningForest',
   paramNames: ['n', 'edges'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} edges  [u, v, w]

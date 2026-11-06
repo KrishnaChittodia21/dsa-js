@@ -41,6 +41,8 @@ The order of the quadruplets (and of the values inside each) does not matter, bu
 
   functionName: 'fourSum',
   paramNames: ['nums', 'target'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} target

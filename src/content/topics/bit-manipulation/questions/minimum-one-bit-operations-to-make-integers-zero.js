@@ -46,6 +46,8 @@ n ≤ 10^9 < 2^30, so 32-bit ops are safe and the answer < 2^30.`,
 
   functionName: 'minimumOneBitOperations',
   paramNames: ['n'],
+  paramTypes: ['int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @return {number}

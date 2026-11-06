@@ -42,6 +42,8 @@ Empty subtree → \`(true, +∞, −∞, 0)\`, the neutral element. \`best\` sta
 
   functionName: 'maxSumBST',
   paramNames: ['root'],
+  paramTypes: ['TreeNode'],
+  returnType: 'int',
   starterCode: `/**
  * @param {TreeNode} root
  * @return {number}

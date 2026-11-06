@@ -37,6 +37,8 @@ The solution must run in **O(log n)**.`,
 
   functionName: 'searchRange',
   paramNames: ['nums', 'target'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} target

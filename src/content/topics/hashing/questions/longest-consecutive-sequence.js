@@ -33,6 +33,8 @@ Iterate over the **set** (not nums) so duplicates like [0, 0, …] do not repeat
 
   functionName: 'longestConsecutive',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

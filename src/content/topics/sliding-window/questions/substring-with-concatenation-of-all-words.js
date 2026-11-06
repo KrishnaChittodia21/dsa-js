@@ -45,6 +45,8 @@ Each word position enters and leaves one window once → O(n) word operations, e
 
   functionName: 'findSubstring',
   paramNames: ['s', 'words'],
+  paramTypes: ['string', 'string[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {string} s
  * @param {string[]} words

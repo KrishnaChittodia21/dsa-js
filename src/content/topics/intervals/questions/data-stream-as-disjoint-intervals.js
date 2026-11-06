@@ -49,6 +49,11 @@ For example, after adding 1, 3, 7, 2, 6 the summary is \`[[1,3],[6,7]]\`.`,
 The invariant (sorted, disjoint, and no two intervals adjacent) is preserved by each case, so \`getIntervals\` just returns copies.`,
 
   className: 'SummaryRanges',
+  methodTypes: {
+    constructor: { params: [] },
+    addNum: { params: ['int'], returns: 'void' },
+    getIntervals: { params: [], returns: 'int[][]' },
+  },
   starterCode: `class SummaryRanges {
   constructor() {
     

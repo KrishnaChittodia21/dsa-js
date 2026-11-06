@@ -37,6 +37,8 @@ Everyone plays optimally. Return \`"Radiant"\` or \`"Dire"\` — the party that 
 
   functionName: 'predictPartyVictory',
   paramNames: ['senate'],
+  paramTypes: ['string'],
+  returnType: 'string',
   starterCode: `/**
  * @param {string} senate
  * @return {string}

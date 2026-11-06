@@ -4,7 +4,7 @@
 // "break it" (a classic bug injected), a variable's history and a complexity meter. Loaded only when the tab opens.
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import Icon from "../ui/Icon.jsx";
-import { recordInWorker } from "../../runner/runInWorker.js";
+import { recordInWorker, runInWorker } from "../../runner/runInWorker.js";
 import { describeTest, resolveArgs, resolveDesign } from "../../runner/core.js";
 import { mutants } from "../../runner/bugs.js";
 import {
@@ -70,7 +70,21 @@ function verdictOf(run, own) {
   return run.passed ? "correct" : "wrong answer";
 }
 
-export default function AnimateRun({ code, question, tests }) {
+/** Java / C++ (M8 option A): your code runs on the test (M7 runner) and the JS reference's run is animated */
+async function runYours(lang, code, question, test, own, refCode) {
+  let t = test;
+  if (own) {
+    // your own input has no expected answer: the reference decides it, then the usual checker judges yours
+    const ref = await runInWorker({ code: refCode, question, tests: [test], opts: { compareWith: false } });
+    t = { ...test, expected: ref.results[0]?.rawOutput };
+  }
+  const { runNative } = await import("../../runner/native/runNative.js");
+  const res = await runNative({ lang, code, question, tests: [t] });
+  return res.compileError ? { passed: false, error: res.compileError } : res.results[0];
+}
+
+export default function AnimateRun({ code, question, tests, lang = "js" }) {
+  const native = lang !== "js";
   const [scene, setScene] = useState(null);
   const [pick, setPick] = useState(0); // a visible test's index, or 'own'
   const [own, setOwn] = useState("");
@@ -111,14 +125,18 @@ export default function AnimateRun({ code, question, tests }) {
     const test = pick === "own" ? ownTest : tests[pick];
     if (!test || busy) return;
     setBusy("Recording…");
-    const run = await record(code, test);
+    // Java / C++: the steps are the JS reference's; your code runs on the same test for its answer
+    const [run, yours] = native
+      ? await Promise.all([record(refCode, test), runYours(lang, code, question, test, pick === "own", refCode)])
+      : [await record(code, test), null];
     setShown({
       code,
       test,
       own: pick === "own",
       label: pick === "own" ? "your input" : `Test ${pick + 1}`,
       view: "mine",
-      mine: { run, frames: framesOf(run, code) },
+      mine: { run, frames: framesOf(run, native ? refCode : code) },
+      yours,
     });
     setWatch("");
     setMeter(null);
@@ -293,7 +311,7 @@ export default function AnimateRun({ code, question, tests }) {
                   ))}
               </div>
             )}
-            {kit.has("compare") && refCode && !shown.ref && (
+            {!native && kit.has("compare") && refCode && !shown.ref && (
               <button
                 type="button"
                 className="btn btn--ghost btn--sm"
@@ -303,7 +321,7 @@ export default function AnimateRun({ code, question, tests }) {
                 <Icon name="eye" size={14} /> Compare with the reference
               </button>
             )}
-            {kit.has("break") && !shown.bug && (
+            {!native && kit.has("break") && !shown.bug && (
               <button
                 type="button"
                 className="btn btn--ghost btn--sm"
@@ -313,7 +331,7 @@ export default function AnimateRun({ code, question, tests }) {
                 <Icon name="alert" size={14} /> Break it
               </button>
             )}
-            {kit.has("meter") && !meter && (
+            {!native && kit.has("meter") && !meter && (
               <button
                 type="button"
                 className="btn btn--ghost btn--sm"
@@ -330,6 +348,23 @@ export default function AnimateRun({ code, question, tests }) {
           {shown.view !== "mine" && cur.info && (
             <p className="qp-faint">{cur.info}</p>
           )}
+          {shown.yours && (
+            <div className={`qp-verdict${shown.yours.passed ? " qp-verdict--ok" : ""}`} role="status">
+              <Icon name={shown.yours.passed ? "checkCircle" : "alert"} size={18} />
+              <div className="qp-stack">
+                <b>
+                  Your {lang === "java" ? "Java" : "C++"} on {shown.label}:{" "}
+                  {shown.yours.passed ? (shown.own ? "same answer as the reference" : "correct") : shown.yours.error ? "stopped with an error" : shown.own ? "differs from the reference" : "wrong answer"}
+                </b>
+                <span className="mono">
+                  {shown.yours.error || `yours ${shown.yours.output} · reference ${shown.mine.run.outputText ?? "—"}`}
+                </span>
+                <span className="qp-faint">
+                  The animation below is the JavaScript reference solving this test, step by step. Watching your own {lang === "java" ? "Java" : "C++"} line by line comes later.
+                </span>
+              </div>
+            </div>
+          )}
           {shown.bug?.none && (
             <p className="qp-faint">
               None of the classic bugs changes the answer on this input. Try
@@ -343,7 +378,7 @@ export default function AnimateRun({ code, question, tests }) {
               key={`${shown.view}-${shown.label}-${cur.frames.length}`}
               scenario={`run-${shown.view}`}
               frames={cur.frames}
-              title={`${VIEWS[shown.view]} · ${shown.label}: ${verdictOf(cur.run, shown.own)}`}
+              title={native ? `The reference (JavaScript) · ${shown.label}` : `${VIEWS[shown.view]} · ${shown.label}: ${verdictOf(cur.run, shown.own)}`}
               caption={`${cur.frames.length - 1} recorded steps${cur.run.truncated ? ` (every ${cur.run.stride}th shown)` : ""}. Changed cells light up; i, j, lo, hi… point at the array.`}
               eyebrow={scene?.metaphor || "your run"}
               autoPlay
@@ -374,7 +409,7 @@ export default function AnimateRun({ code, question, tests }) {
                 <ol
                   className="qp-anim-hist"
                   tabIndex={0}
-                  aria-label={`Values of ${watch} in your run`}
+                  aria-label={`Values of ${watch} in ${native ? "the reference run" : "your run"}`}
                 >
                   {history.slice(0, 40).map((h) => (
                     <li key={h.step}>

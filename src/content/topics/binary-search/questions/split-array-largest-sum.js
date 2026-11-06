@@ -40,6 +40,8 @@ Return that minimised largest sum.`,
 
   functionName: 'splitArray',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

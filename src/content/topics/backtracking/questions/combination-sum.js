@@ -40,6 +40,8 @@ Never going back below \`i\` keeps each combination in non-decreasing order — 
 
   functionName: 'combinationSum',
   paramNames: ['candidates', 'target'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number[]} candidates
  * @param {number} target

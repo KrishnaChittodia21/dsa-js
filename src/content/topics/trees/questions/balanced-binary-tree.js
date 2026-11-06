@@ -35,6 +35,8 @@ Given the \`root\` of a binary tree, return whether it is height-balanced. An em
 
   functionName: 'isBalanced',
   paramNames: ['root'],
+  paramTypes: ['TreeNode'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {TreeNode} root
  * @return {boolean}

@@ -38,6 +38,8 @@ Compare with Subarray Sum Equals K: there we **count** subarrays and store count
 
   functionName: 'findMaxLength',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

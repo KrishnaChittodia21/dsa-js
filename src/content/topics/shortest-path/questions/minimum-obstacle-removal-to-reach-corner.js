@@ -39,6 +39,8 @@ Return the **minimum number of obstacles** you must remove to travel from the to
 
   functionName: 'minimumObstacles',
   paramNames: ['grid'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} grid
  * @return {number}

@@ -37,6 +37,8 @@ For general alphabets/lengths, the same structure works with a polynomial rollin
 
   functionName: 'findRepeatedDnaSequences',
   paramNames: ['s'],
+  paramTypes: ['string'],
+  returnType: 'string[]',
   starterCode: `/**
  * @param {string} s
  * @return {string[]}

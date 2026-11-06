@@ -40,6 +40,8 @@ Return the index of the station where you can start and drive one full lap clock
 
   functionName: 'canCompleteCircuit',
   paramNames: ['gas', 'cost'],
+  paramTypes: ['int[]', 'int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} gas
  * @param {number[]} cost

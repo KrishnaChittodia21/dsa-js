@@ -38,6 +38,8 @@ Only yesterday matters, so two variables suffice. (Using the freshly updated \`c
 
   functionName: 'maxProfit',
   paramNames: ['prices', 'fee'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} prices
  * @param {number} fee

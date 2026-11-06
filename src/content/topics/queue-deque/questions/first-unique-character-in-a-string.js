@@ -34,6 +34,8 @@ export default {
 
   functionName: 'firstUniqChar',
   paramNames: ['s'],
+  paramTypes: ['string'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string} s
  * @return {number}

@@ -36,6 +36,8 @@ Return the **maximum** amount you can rob without robbing two neighbours.`,
 
   functionName: 'rob',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

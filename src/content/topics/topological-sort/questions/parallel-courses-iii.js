@@ -36,6 +36,8 @@ Longest path is NP-hard on general graphs; the DAG guarantee is what makes this 
 
   functionName: 'minimumTime',
   paramNames: ['n', 'relations', 'time'],
+  paramTypes: ['int', 'int[][]', 'int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} relations

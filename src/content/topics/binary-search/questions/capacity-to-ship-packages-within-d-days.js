@@ -38,6 +38,8 @@ Return the **smallest capacity** that ships everything within \`days\` days.`,
 
   functionName: 'shipWithinDays',
   paramNames: ['weights', 'days'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} weights
  * @param {number} days

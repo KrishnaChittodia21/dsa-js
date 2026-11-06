@@ -42,6 +42,8 @@ Exactly one solution exists, and you may not use the same element twice. Use onl
 
   functionName: 'twoSum',
   paramNames: ['numbers', 'target'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} numbers
  * @param {number} target

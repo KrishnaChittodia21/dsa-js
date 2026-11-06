@@ -41,6 +41,8 @@ Correct by the cut property applied to the cut (tree, rest). Because the input i
 
   functionName: 'mstPrim',
   paramNames: ['graph'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} graph  adjacency matrix, 0 = no edge
  * @return {number}

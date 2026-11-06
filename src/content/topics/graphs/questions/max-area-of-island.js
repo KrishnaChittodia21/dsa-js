@@ -31,6 +31,8 @@ Return the maximum area of any island, or \`0\` if there is no land.`,
 
   functionName: 'maxAreaOfIsland',
   paramNames: ['grid'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} grid
  * @return {number}

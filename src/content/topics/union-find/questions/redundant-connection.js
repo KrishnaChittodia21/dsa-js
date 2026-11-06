@@ -35,6 +35,8 @@ Why is it the *last* candidate? Only edges on the cycle can be removed. While sc
 
   functionName: 'findRedundantConnection',
   paramNames: ['edges'],
+  paramTypes: ['int[][]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[][]} edges
  * @return {number[]}

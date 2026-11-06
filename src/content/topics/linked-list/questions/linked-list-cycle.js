@@ -37,6 +37,8 @@ Follow-up: can you do it with O(1) extra memory?`,
 
   functionName: 'hasCycle',
   paramNames: ['values', 'pos'],
+  paramTypes: ['ListNode'],
+  returnType: 'boolean',
   harness: `(target, args, h) => {
     const [values, pos] = args;
     const head = h.arrayToList(values);

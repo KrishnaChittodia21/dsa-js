@@ -36,6 +36,8 @@ Return the modified image. This is the "paint bucket" tool in drawing programs.`
 
   functionName: 'floodFill',
   paramNames: ['image', 'sr', 'sc', 'color'],
+  paramTypes: ['int[][]', 'int', 'int', 'int'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number[][]} image
  * @param {number} sr

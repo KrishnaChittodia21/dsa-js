@@ -34,6 +34,8 @@ export default {
 
   functionName: 'rotateString',
   paramNames: ['s', 'goal'],
+  paramTypes: ['string', 'string'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {string} s
  * @param {string} goal

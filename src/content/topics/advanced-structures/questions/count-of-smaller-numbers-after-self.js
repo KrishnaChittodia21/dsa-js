@@ -47,6 +47,8 @@ Because values here are within ±10^4, you could also shift by 10^4 + 1 instead 
 
   functionName: 'countSmaller',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number[]}

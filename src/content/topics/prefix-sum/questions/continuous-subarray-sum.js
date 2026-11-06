@@ -38,6 +38,8 @@ Here \`nums[i] ≥ 0\`, so remainders are never negative; in general JavaScript 
 
   functionName: 'checkSubarraySum',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

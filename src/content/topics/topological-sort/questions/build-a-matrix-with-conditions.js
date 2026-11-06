@@ -39,6 +39,8 @@ Return any valid matrix, or an empty array \`[]\` if none exists.
 
   functionName: 'buildMatrix',
   paramNames: ['k', 'rowConditions', 'colConditions'],
+  paramTypes: ['int', 'int[][]', 'int[][]'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number} k
  * @param {number[][]} rowConditions

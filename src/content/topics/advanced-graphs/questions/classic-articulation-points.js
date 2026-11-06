@@ -42,6 +42,8 @@ Return all articulation points **sorted in increasing order**.`,
 
   functionName: 'articulationPoints',
   paramNames: ['n', 'edges'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} edges

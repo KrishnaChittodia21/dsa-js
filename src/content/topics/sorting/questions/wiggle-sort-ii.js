@@ -41,6 +41,8 @@ Reversing keeps copies of the median as far apart as possible: the median copies
 
   functionName: 'wiggleSort',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'void',
   io: { mutates: 0 },
   starterCode: `/**
  * @param {number[]} nums

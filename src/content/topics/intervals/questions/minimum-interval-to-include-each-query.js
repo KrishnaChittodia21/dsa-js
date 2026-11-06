@@ -46,6 +46,8 @@ Heaps are covered in detail in the Heaps topic; here we use the toolkit's \`MinH
 
   functionName: 'minInterval',
   paramNames: ['intervals', 'queries'],
+  paramTypes: ['int[][]', 'int[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[][]} intervals
  * @param {number[]} queries

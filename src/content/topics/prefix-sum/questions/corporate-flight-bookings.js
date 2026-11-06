@@ -41,6 +41,8 @@ Return an array \`answer\` of length \`n\` where \`answer[i]\` is the total numb
 
   functionName: 'corpFlightBookings',
   paramNames: ['bookings', 'n'],
+  paramTypes: ['int[][]', 'int'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[][]} bookings
  * @param {number} n

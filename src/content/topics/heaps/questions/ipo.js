@@ -39,6 +39,8 @@ Choose projects one after another to **maximise your final capital**, and return
 
   functionName: 'findMaximizedCapital',
   paramNames: ['k', 'w', 'profits', 'capital'],
+  paramTypes: ['int', 'int', 'int[]', 'int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} k
  * @param {number} w

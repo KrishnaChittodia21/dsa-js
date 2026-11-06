@@ -45,6 +45,8 @@ Indices only grow, and \`% n\` wraps them around the circle. Both directions of 
 
   functionName: 'decrypt',
   paramNames: ['code', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} code
  * @param {number} k

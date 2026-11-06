@@ -51,6 +51,8 @@ Alternative: 27 Sets (9 rows, 9 cols, 9 boxes), or 27 bitmasks. All are O(81) = 
 
   functionName: 'isValidSudoku',
   paramNames: ['board'],
+  paramTypes: ['char[][]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {character[][]} board
  * @return {boolean}

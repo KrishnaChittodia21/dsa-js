@@ -39,6 +39,8 @@ If the amount cannot be made, return 0. (Making amount 0 has exactly one combina
 
   functionName: 'change',
   paramNames: ['amount', 'coins'],
+  paramTypes: ['int', 'int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} amount
  * @param {number[]} coins

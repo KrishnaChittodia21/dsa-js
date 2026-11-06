@@ -21,6 +21,8 @@ const DEFAULT = {
   visitedTabs: {},
   /** command palette: most recently chosen items ({ id, title, to, group }), newest first */
   recentCommands: [],
+  /** the editor's language: 'js' | 'java' | 'cpp' (Java / C++ are write-only until M7 runs them) */
+  codeLang: 'js',
 };
 
 let cache = null;

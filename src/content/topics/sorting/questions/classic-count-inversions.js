@@ -44,6 +44,8 @@ The answer is at most n(n−1)/2 ≈ 5·10⁹ < 2⁵³, so a normal JS number is
 
   functionName: 'countInversions',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'long',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

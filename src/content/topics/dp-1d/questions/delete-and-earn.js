@@ -36,6 +36,8 @@ Return the **maximum points** you can earn.`,
 
   functionName: 'deleteAndEarn',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

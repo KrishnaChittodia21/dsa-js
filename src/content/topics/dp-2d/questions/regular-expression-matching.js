@@ -47,6 +47,8 @@ Why is "one more copy" enough to express "k copies"? Because \`dp[i−1][j]\` it
 
   functionName: 'isMatch',
   paramNames: ['s', 'p'],
+  paramTypes: ['string', 'string'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {string} s
  * @param {string} p

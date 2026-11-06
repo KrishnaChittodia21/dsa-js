@@ -30,6 +30,8 @@ export default {
 
   functionName: 'containsDuplicate',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[]} nums
  * @return {boolean}

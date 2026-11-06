@@ -39,6 +39,8 @@ If no such substring exists, return the empty string \`""\`. The answer is guara
 
   functionName: 'minWindow',
   paramNames: ['s', 't'],
+  paramTypes: ['string', 'string'],
+  returnType: 'string',
   starterCode: `/**
  * @param {string} s
  * @param {string} t

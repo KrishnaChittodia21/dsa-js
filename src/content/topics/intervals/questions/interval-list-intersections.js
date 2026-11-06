@@ -38,6 +38,8 @@ Each step discards one interval, so there are at most \`n + m\` steps. Results c
 
   functionName: 'intervalIntersection',
   paramNames: ['firstList', 'secondList'],
+  paramTypes: ['int[][]', 'int[][]'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number[][]} firstList
  * @param {number[][]} secondList

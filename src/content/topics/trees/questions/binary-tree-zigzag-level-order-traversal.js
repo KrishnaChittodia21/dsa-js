@@ -32,6 +32,8 @@ Reversing each odd level with \`level.reverse()\` also works — O(size) per lev
 
   functionName: 'zigzagLevelOrder',
   paramNames: ['root'],
+  paramTypes: ['TreeNode'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {TreeNode} root
  * @return {number[][]}

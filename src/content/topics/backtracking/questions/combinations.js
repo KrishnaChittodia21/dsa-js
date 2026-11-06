@@ -36,6 +36,8 @@ A combination is unordered: \`[1,2]\` and \`[2,1]\` are the same and must appear
 
   functionName: 'combine',
   paramNames: ['n', 'k'],
+  paramTypes: ['int', 'int'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number} n
  * @param {number} k

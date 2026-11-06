@@ -41,6 +41,8 @@ Return the **maximum probability** of successfully going from \`start\` to \`end
 
   functionName: 'maxProbability',
   paramNames: ['n', 'edges', 'succProb', 'start', 'end'],
+  paramTypes: ['int', 'int[][]', 'double[]', 'int', 'int'],
+  returnType: 'double',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} edges

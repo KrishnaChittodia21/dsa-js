@@ -40,6 +40,8 @@ These two sets of ways are disjoint (position i−1 is used or not), so we add. 
 
   functionName: 'numDistinct',
   paramNames: ['s', 't'],
+  paramTypes: ['string', 'string'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string} s
  * @param {string} t

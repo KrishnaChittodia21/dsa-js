@@ -34,6 +34,8 @@ export default {
 
   functionName: 'sortedArrayToBST',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'TreeNode',
   starterCode: `/**
  * @param {number[]} nums
  * @return {TreeNode}

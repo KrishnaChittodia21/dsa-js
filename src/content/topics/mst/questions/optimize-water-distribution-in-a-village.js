@@ -42,6 +42,8 @@ Why it is exact: in any spanning tree of the enlarged graph, every house has a p
 
   functionName: 'minCostToSupplyWater',
   paramNames: ['n', 'wells', 'pipes'],
+  paramTypes: ['int', 'int[]', 'int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number[]} wells

@@ -35,6 +35,8 @@ Given the corrupted array \`nums\` (in any order), return \`[duplicate, missing]
 
   functionName: 'findErrorNums',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number[]}

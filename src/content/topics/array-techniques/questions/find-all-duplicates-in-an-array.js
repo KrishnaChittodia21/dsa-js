@@ -34,6 +34,8 @@ Return all values that appear twice (any order). Use O(n) time and only constant
 
   functionName: 'findDuplicates',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number[]}

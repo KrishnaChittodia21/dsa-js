@@ -44,6 +44,8 @@ Storing before recursing is what breaks cycles: when the DFS comes back around t
 
   functionName: 'cloneGraph',
   paramNames: ['adjList'],
+  paramTypes: ['Node'],
+  returnType: 'Node',
   starterCode: `/**
  * // Provided:
  * // class Node { constructor(val = 0, neighbors = []) { this.val = val; this.neighbors = neighbors; } }

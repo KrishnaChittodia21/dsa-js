@@ -155,6 +155,8 @@
 .qp-file { display: inline-flex; align-items: center; gap: 8px; flex: none; font: 600 12.5px/1 var(--f-mono); color: #e9e3dd; white-space: nowrap; }
 .qp-file i { width: 7px; height: 7px; border-radius: 50%; background: var(--plasma); box-shadow: 0 0 8px var(--plasma); }
 .qp-ed .qp-ed-lang { flex: none; color: #a79f98; background: #221e28; box-shadow: inset 0 0 0 1px rgba(255, 236, 222, 0.1); }
+.qp-ed .qp-ed-langpick { flex: none; height: 30px; padding: 0 8px; border: 0; border-radius: 9px; font: 600 12px/1 var(--f-mono); color: #e9e3dd; background: #221e28; box-shadow: inset 0 0 0 1px rgba(255, 236, 222, 0.14); cursor: pointer; }
+.qp-ed .qp-ed-langpick:focus-visible { outline: 2px solid var(--plasma); outline-offset: 2px; }
 .qp-ed-hint { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; color: #8a827b; }
 .qp-ed-bar .btn { flex: none; }
 .qp-ed .qp-ed-reset { flex: none; width: 36px; height: 36px; border-radius: 12px; color: #c3bbb4; background: #221e28; box-shadow: inset 0 0 0 1px rgba(255, 236, 222, 0.1); }
@@ -165,7 +167,7 @@
 .qp .qp-ed .qp-ed-foot .kbd { margin-right: 4px; background: #25212c; color: #c3bbb4; box-shadow: inset 0 0 0 1px rgba(255, 236, 222, 0.1); }
 @container qped (max-width: 720px) { .qp-ed-hint { display: none; } }
 @container qped (max-width: 430px) {
-  .qp-ed .qp-ed-lang { display: none; }
+  .qp-ed .qp-ed-lang, .qp-ed .qp-file { display: none; }
   .qp-ed-bar { gap: 8px; padding: 10px 10px 10px 14px; }
   .qp-ed-bar .btn.btn--sm { padding: 0 12px; }
   .qp-ed-foot > span:first-child { display: none; }

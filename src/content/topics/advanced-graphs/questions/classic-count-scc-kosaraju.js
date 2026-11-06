@@ -41,6 +41,8 @@ Why it works: the node that finishes last is in a *source* SCC of the condensati
 
   functionName: 'countSCC',
   paramNames: ['n', 'edges'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} edges

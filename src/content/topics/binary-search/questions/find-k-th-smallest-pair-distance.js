@@ -37,6 +37,8 @@ export default {
 
   functionName: 'smallestDistancePair',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

@@ -32,6 +32,8 @@ export default {
 
   functionName: 'largestRectangleArea',
   paramNames: ['heights'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} heights
  * @return {number}

@@ -35,6 +35,8 @@ export default {
 
   functionName: 'rangeBitwiseAnd',
   paramNames: ['left', 'right'],
+  paramTypes: ['int', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} left
  * @param {number} right

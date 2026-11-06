@@ -32,6 +32,8 @@ export default {
 
   functionName: 'isPowerOfTwo',
   paramNames: ['n'],
+  paramTypes: ['int'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number} n
  * @return {boolean}

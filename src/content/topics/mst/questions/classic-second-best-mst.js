@@ -45,6 +45,8 @@ Why one swap suffices: take any second-best tree T₂ and an MST T; a classic ex
 
   functionName: 'secondBestMst',
   paramNames: ['n', 'edges'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} edges  [u, v, w]

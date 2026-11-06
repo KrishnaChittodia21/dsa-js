@@ -62,6 +62,8 @@ The toolkit \`SparseTable\` implements exactly this; the reference solution writ
 
   functionName: 'rangeMinQuery',
   paramNames: ['nums', 'queries'],
+  paramTypes: ['int[]', 'int[][]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number[][]} queries

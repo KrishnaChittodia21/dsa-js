@@ -33,6 +33,8 @@ Operators are \`+\`, \`-\`, \`*\`, \`/\`. Integer division rounds **toward zero*
 
   functionName: 'evalRPN',
   paramNames: ['tokens'],
+  paramTypes: ['string[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string[]} tokens
  * @return {number}

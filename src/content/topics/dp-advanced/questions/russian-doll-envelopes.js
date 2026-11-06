@@ -41,6 +41,8 @@ With ascending tie-break, [3,4] then [3,5] would form an "increasing" pair of he
 
   functionName: 'maxEnvelopes',
   paramNames: ['envelopes'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} envelopes
  * @return {number}

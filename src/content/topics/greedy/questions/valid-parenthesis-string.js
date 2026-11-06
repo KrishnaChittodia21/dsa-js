@@ -39,6 +39,8 @@ Return \`true\` if some choice for the stars makes \`s\` a valid bracket sequenc
 
   functionName: 'checkValidString',
   paramNames: ['s'],
+  paramTypes: ['string'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {string} s
  * @return {boolean}

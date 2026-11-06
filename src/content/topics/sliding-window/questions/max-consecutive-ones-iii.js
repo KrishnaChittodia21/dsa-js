@@ -39,6 +39,8 @@ Each index enters and leaves at most once → O(n), O(1) space.`,
 
   functionName: 'longestOnes',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

@@ -81,6 +81,11 @@ Both operations must run in **O(1)** average time.`,
 **put new key:** if full, evict \`freqMap.get(minFreq).values().next().value\`. Insert with freq 1 and set \`minFreq = 1\` — a brand-new key always has the lowest frequency.`,
 
   className: 'LFUCache',
+  methodTypes: {
+    constructor: { params: ['int'] },
+    put: { params: ['int', 'int'], returns: 'void' },
+    get: { params: ['int'], returns: 'int' },
+  },
   starterCode: `class LFUCache {
   /**
    * @param {number} capacity

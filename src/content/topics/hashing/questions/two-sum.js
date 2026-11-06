@@ -34,6 +34,8 @@ Exactly one valid pair exists, and you may not use the same element twice. Retur
 
   functionName: 'twoSum',
   paramNames: ['nums', 'target'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} target

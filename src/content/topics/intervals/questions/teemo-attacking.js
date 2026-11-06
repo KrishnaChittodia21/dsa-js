@@ -36,6 +36,8 @@ Given the attack times \`timeSeries\` in non-decreasing order and \`duration\`, 
 
   functionName: 'findPoisonedDuration',
   paramNames: ['timeSeries', 'duration'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} timeSeries
  * @param {number} duration

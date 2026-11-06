@@ -39,6 +39,8 @@ Given a string \`digits\` containing only the characters \`'2'\`–\`'9'\`, retu
 
   functionName: 'letterCombinations',
   paramNames: ['digits'],
+  paramTypes: ['string'],
+  returnType: 'string[]',
   starterCode: `/**
  * @param {string} digits
  * @return {string[]}

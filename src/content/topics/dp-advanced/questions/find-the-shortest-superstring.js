@@ -40,6 +40,8 @@ Many optimal strings may exist, so the tests use a checker: every word must be a
 
   functionName: 'shortestSuperstring',
   paramNames: ['words'],
+  paramTypes: ['string[]'],
+  returnType: 'string',
   starterCode: `/**
  * @param {string[]} words
  * @return {string}

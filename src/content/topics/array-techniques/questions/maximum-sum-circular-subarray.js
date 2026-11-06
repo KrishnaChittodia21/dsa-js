@@ -38,6 +38,8 @@ A subarray may wrap around the end, but it may use each element **at most once**
 
   functionName: 'maxSubarraySumCircular',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

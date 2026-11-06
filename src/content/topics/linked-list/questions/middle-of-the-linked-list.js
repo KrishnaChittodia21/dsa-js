@@ -34,6 +34,8 @@ export default {
 
   functionName: 'middleNode',
   paramNames: ['head'],
+  paramTypes: ['ListNode'],
+  returnType: 'ListNode',
   io: { params: ['list'], returns: 'list' },
   starterCode: `/**
  * @param {ListNode} head

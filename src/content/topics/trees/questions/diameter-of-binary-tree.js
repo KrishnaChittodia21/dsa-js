@@ -35,6 +35,8 @@ export default {
 
   functionName: 'diameterOfBinaryTree',
   paramNames: ['root'],
+  paramTypes: ['TreeNode'],
+  returnType: 'int',
   starterCode: `/**
  * @param {TreeNode} root
  * @return {number}

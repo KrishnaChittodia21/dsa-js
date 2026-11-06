@@ -33,6 +33,8 @@ Do it **in place**. Follow-up: can you use only O(1) extra space?`,
 
   functionName: 'setZeroes',
   paramNames: ['matrix'],
+  paramTypes: ['int[][]'],
+  returnType: 'void',
   starterCode: `/**
  * Do not return anything, modify matrix in place.
  * @param {number[][]} matrix

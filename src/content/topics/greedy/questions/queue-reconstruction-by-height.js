@@ -36,6 +36,8 @@ Ties: equal heights see each other ("≥"), so the one with smaller k must be pl
 
   functionName: 'reconstructQueue',
   paramNames: ['people'],
+  paramTypes: ['int[][]'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number[][]} people
  * @return {number[][]}

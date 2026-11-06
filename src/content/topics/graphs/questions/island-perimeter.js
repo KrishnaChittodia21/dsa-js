@@ -34,6 +34,8 @@ Return the **perimeter** of the island — the total length of its boundary.`,
 
   functionName: 'islandPerimeter',
   paramNames: ['grid'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} grid
  * @return {number}

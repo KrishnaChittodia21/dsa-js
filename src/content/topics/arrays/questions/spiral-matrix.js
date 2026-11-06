@@ -29,6 +29,8 @@ export default {
 
   functionName: 'spiralOrder',
   paramNames: ['matrix'],
+  paramTypes: ['int[][]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[][]} matrix
  * @return {number[]}

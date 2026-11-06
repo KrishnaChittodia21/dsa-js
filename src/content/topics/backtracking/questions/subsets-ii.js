@@ -34,6 +34,8 @@ The answer must not contain two equal subsets (two subsets are equal if they con
 
   functionName: 'subsetsWithDup',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number[][]}

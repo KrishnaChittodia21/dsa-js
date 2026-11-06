@@ -39,6 +39,8 @@ Why it is correct: negate every weight. A maximum spanning tree of the original 
 
   functionName: 'maxSpanningTree',
   paramNames: ['n', 'edges'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} edges  [u, v, w]

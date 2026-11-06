@@ -38,6 +38,8 @@ Starting at \`(0, 0)\`, return the **earliest time** at which you can reach \`(n
 
   functionName: 'swimInWater',
   paramNames: ['grid'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} grid
  * @return {number}

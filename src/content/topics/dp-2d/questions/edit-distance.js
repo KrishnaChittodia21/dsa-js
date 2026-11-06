@@ -47,6 +47,8 @@ Base cases: empty → length j needs j inserts; length i → empty needs i delet
 
   functionName: 'minDistance',
   paramNames: ['word1', 'word2'],
+  paramTypes: ['string', 'string'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string} word1
  * @param {string} word2

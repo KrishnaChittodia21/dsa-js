@@ -38,6 +38,8 @@ Without "#", a border could run across both halves and exceed n (e.g. s = "aa").
 
   functionName: 'shortestPalindrome',
   paramNames: ['s'],
+  paramTypes: ['string'],
+  returnType: 'string',
   starterCode: `/**
  * @param {string} s
  * @return {string}

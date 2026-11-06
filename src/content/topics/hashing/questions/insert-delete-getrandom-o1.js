@@ -58,6 +58,12 @@ export default {
 - **getRandom():** \`vals[Math.floor(Math.random() * vals.length)]\` — uniform because each element occupies exactly one slot.`,
 
   className: 'RandomizedSet',
+  methodTypes: {
+    constructor: { params: [] },
+    insert: { params: ['int'], returns: 'boolean' },
+    remove: { params: ['int'], returns: 'boolean' },
+    getRandom: { params: [], returns: 'int' },
+  },
   starterCode: `class RandomizedSet {
   constructor() {
     

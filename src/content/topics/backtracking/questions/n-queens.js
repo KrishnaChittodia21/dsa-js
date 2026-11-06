@@ -38,6 +38,8 @@ Return **all distinct solutions**, in any order. Each solution is a list of \`n\
 
   functionName: 'solveNQueens',
   paramNames: ['n'],
+  paramTypes: ['int'],
+  returnType: 'string[][]',
   starterCode: `/**
  * @param {number} n
  * @return {string[][]}

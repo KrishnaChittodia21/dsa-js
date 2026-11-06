@@ -40,6 +40,8 @@ Now add \`sum\` and \`carry\` the same way, until there is no carry.
 
   functionName: 'getSum',
   paramNames: ['a', 'b'],
+  paramTypes: ['int', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} a
  * @param {number} b

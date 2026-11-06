@@ -37,6 +37,8 @@ A subsequence keeps some elements in their original order and may skip any other
 
   functionName: 'lengthOfLIS',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

@@ -34,6 +34,8 @@ The result must not contain the same subset twice. You may return the subsets, a
 
   functionName: 'subsets',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number[][]}

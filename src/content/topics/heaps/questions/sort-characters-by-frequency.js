@@ -36,6 +36,8 @@ If several answers exist (ties in frequency), return any of them.`,
 
   functionName: 'frequencySort',
   paramNames: ['s'],
+  paramTypes: ['string'],
+  returnType: 'string',
   starterCode: `/**
  * @param {string} s
  * @return {string}

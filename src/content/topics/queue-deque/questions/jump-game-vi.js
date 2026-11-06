@@ -39,6 +39,8 @@ The answer is \`best[n − 1]\`. (Greedy choices do not work because a big value
 
   functionName: 'maxResult',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

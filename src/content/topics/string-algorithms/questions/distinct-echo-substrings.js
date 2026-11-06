@@ -39,6 +39,8 @@ Using one Set per length also lowers collision risk (only same-length echoes are
 
   functionName: 'distinctEchoSubstrings',
   paramNames: ['text'],
+  paramTypes: ['string'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string} text
  * @return {number}

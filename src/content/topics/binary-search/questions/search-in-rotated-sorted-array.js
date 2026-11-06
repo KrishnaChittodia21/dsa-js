@@ -40,6 +40,8 @@ Required: **O(log n)**.`,
 
   functionName: 'search',
   paramNames: ['nums', 'target'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} target

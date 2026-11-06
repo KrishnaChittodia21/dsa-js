@@ -40,6 +40,8 @@ Each of the 2ⁿ leaves is one subset and does O(1) work → O(2ⁿ).
 
   functionName: 'subsetXORSum',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

@@ -48,6 +48,8 @@ Every character is consumed exactly once → O(n). The recursion depth equals th
 
   functionName: 'parseBoolExpr',
   paramNames: ['expression'],
+  paramTypes: ['string'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {string} expression
  * @return {boolean}

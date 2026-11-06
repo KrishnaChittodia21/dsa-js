@@ -45,6 +45,8 @@ Each day you may turn one land cell into water. Return the minimum number of day
 
   functionName: 'minDays',
   paramNames: ['grid'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} grid
  * @return {number}

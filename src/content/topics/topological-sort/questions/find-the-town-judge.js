@@ -38,6 +38,8 @@ You get \`trust[i] = [a, b]\` meaning person \`a\` trusts person \`b\` (no dupli
 
   functionName: 'findJudge',
   paramNames: ['n', 'trust'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} trust

@@ -37,6 +37,8 @@ export default {
 
   functionName: 'longestSubarray',
   paramNames: ['nums', 'limit'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} limit

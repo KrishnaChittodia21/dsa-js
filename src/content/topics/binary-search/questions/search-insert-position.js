@@ -34,6 +34,8 @@ Your solution must be **O(log n)**.`,
 
   functionName: 'searchInsert',
   paramNames: ['nums', 'target'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} target

@@ -34,6 +34,8 @@ export default {
 
   functionName: 'uniquePathsWithObstacles',
   paramNames: ['obstacleGrid'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} obstacleGrid
  * @return {number}

@@ -39,6 +39,8 @@ Return \`-1\` if there is no clear path.`,
 
   functionName: 'shortestPathBinaryMatrix',
   paramNames: ['grid'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} grid
  * @return {number}

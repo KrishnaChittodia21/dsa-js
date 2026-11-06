@@ -32,6 +32,8 @@ Return the **highest altitude** reached at any point (including the start).`,
 
   functionName: 'largestAltitude',
   paramNames: ['gain'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} gain
  * @return {number}

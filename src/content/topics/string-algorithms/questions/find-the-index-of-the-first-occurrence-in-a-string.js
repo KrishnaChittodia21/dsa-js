@@ -38,6 +38,8 @@ The text index never moves back, and j's total decreases are bounded by its tota
 
   functionName: 'strStr',
   paramNames: ['haystack', 'needle'],
+  paramTypes: ['string', 'string'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string} haystack
  * @param {string} needle

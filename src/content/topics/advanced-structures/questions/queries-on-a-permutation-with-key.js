@@ -48,6 +48,8 @@ Return the array of answers.`,
 
   functionName: 'processQueries',
   paramNames: ['queries', 'm'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} queries
  * @param {number} m

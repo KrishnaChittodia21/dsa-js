@@ -35,6 +35,8 @@ A traversal list of values alone is not enough (\`[1,2]\` vs \`[1,null,2]\` both
 
   functionName: 'isSameTree',
   paramNames: ['p', 'q'],
+  paramTypes: ['TreeNode', 'TreeNode'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {TreeNode} p
  * @param {TreeNode} q

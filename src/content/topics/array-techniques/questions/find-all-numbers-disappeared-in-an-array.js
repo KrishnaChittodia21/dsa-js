@@ -37,6 +37,8 @@ Return every value in \`1..n\` that does **not** appear in \`nums\`, in increasi
 
   functionName: 'findDisappearedNumbers',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number[]}

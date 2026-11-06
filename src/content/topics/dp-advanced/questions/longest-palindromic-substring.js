@@ -36,6 +36,8 @@ If several have the maximum length, return any of them.`,
 
   functionName: 'longestPalindrome',
   paramNames: ['s'],
+  paramTypes: ['string'],
+  returnType: 'string',
   starterCode: `/**
  * @param {string} s
  * @return {string}

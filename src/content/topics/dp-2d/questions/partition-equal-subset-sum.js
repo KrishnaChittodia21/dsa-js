@@ -36,6 +36,8 @@ Largest target = 200 · 100 / 2 = 10,000 → at most 2 million cell updates.`,
 
   functionName: 'canPartition',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[]} nums
  * @return {boolean}

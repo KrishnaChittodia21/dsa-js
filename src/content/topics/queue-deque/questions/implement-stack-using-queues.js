@@ -34,6 +34,13 @@ export default {
 Unlike the two-stack queue, there is no amortized trick here: a queue cannot reverse order cheaply, so one of the operations is O(n).`,
 
   className: 'MyStack',
+  methodTypes: {
+    constructor: { params: [] },
+    push: { params: ['int'], returns: 'void' },
+    top: { params: [], returns: 'int' },
+    pop: { params: [], returns: 'int' },
+    empty: { params: [], returns: 'boolean' },
+  },
   starterCode: `class MyStack {
   constructor() {
     

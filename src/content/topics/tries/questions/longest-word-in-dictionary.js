@@ -36,6 +36,8 @@ If several words have the maximum length, return the lexicographically smallest.
 
   functionName: 'longestWord',
   paramNames: ['words'],
+  paramTypes: ['string[]'],
+  returnType: 'string',
   starterCode: `/**
  * @param {string[]} words
  * @return {string}

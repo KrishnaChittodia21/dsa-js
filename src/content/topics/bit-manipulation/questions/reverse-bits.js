@@ -34,6 +34,8 @@ export default {
 
   functionName: 'reverseBits',
   paramNames: ['n'],
+  paramTypes: ['long'],
+  returnType: 'long',
   starterCode: `/**
  * @param {number} n - an unsigned 32-bit integer
  * @return {number} - unsigned 32-bit result

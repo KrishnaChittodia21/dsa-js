@@ -38,6 +38,8 @@ This is a merge of two sorted sequences, done from the largest element down.`,
 
   functionName: 'sortedSquares',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number[]}

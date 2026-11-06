@@ -33,6 +33,8 @@ You are given the edges as a 2D array \`edges\` where \`edges[i] = [u, v]\`. Ret
 
   functionName: 'findCenter',
   paramNames: ['edges'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} edges
  * @return {number}

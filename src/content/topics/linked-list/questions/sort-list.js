@@ -40,6 +40,8 @@ Depth is log n, each level merges n nodes → O(n log n) time, O(log n) recursio
 
   functionName: 'sortList',
   paramNames: ['head'],
+  paramTypes: ['ListNode'],
+  returnType: 'ListNode',
   io: { params: ['list'], returns: 'list' },
   starterCode: `/**
  * @param {ListNode} head

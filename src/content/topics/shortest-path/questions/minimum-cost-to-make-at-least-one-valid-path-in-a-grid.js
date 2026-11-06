@@ -42,6 +42,8 @@ Starting at \`(0, 0)\` you follow the arrows. Some arrows may point outside the 
 
   functionName: 'minCost',
   paramNames: ['grid'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} grid
  * @return {number}

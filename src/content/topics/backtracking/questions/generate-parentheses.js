@@ -37,6 +37,8 @@ Every leaf reached has length 2n and is valid, so no final check is needed. The 
 
   functionName: 'generateParenthesis',
   paramNames: ['n'],
+  paramTypes: ['int'],
+  returnType: 'string[]',
   starterCode: `/**
  * @param {number} n
  * @return {string[]}

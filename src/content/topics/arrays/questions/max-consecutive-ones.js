@@ -30,6 +30,8 @@ Return the length of the **longest run of consecutive 1s** in the array.`,
 
   functionName: 'findMaxConsecutiveOnes',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

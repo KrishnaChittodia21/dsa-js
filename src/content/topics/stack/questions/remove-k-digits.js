@@ -35,6 +35,8 @@ The result must not have leading zeros (except the number "0" itself). If every 
 
   functionName: 'removeKdigits',
   paramNames: ['num', 'k'],
+  paramTypes: ['string', 'int'],
+  returnType: 'string',
   starterCode: `/**
  * @param {string} num
  * @param {number} k

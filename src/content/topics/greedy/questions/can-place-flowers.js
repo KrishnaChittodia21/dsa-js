@@ -36,6 +36,8 @@ Given \`flowerbed\` and an integer \`n\`, return \`true\` if you can plant \`n\`
 
   functionName: 'canPlaceFlowers',
   paramNames: ['flowerbed', 'n'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[]} flowerbed
  * @param {number} n

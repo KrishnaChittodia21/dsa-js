@@ -44,6 +44,8 @@ There must be **no two consecutive key points with the same height** — e.g. \`
 
   functionName: 'getSkyline',
   paramNames: ['buildings'],
+  paramTypes: ['int[][]'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number[][]} buildings
  * @return {number[][]}

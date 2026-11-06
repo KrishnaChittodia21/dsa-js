@@ -41,6 +41,8 @@ Each word is placed once and each output character written once → O(total outp
 
   functionName: 'fullJustify',
   paramNames: ['words', 'maxWidth'],
+  paramTypes: ['string[]', 'int'],
+  returnType: 'string[]',
   starterCode: `/**
  * @param {string[]} words
  * @param {number} maxWidth

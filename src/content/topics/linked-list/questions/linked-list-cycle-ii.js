@@ -39,6 +39,8 @@ Follow-up: can you use O(1) extra memory?`,
 
   functionName: 'detectCycle',
   paramNames: ['values', 'pos'],
+  paramTypes: ['ListNode'],
+  returnType: 'ListNode',
   harness: `(target, args, h) => {
     const [values, pos] = args;
     const head = h.arrayToList(values);

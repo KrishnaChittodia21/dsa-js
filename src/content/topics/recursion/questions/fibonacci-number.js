@@ -37,6 +37,8 @@ Given \`n\`, return \`F(n)\`.`,
 
   functionName: 'fib',
   paramNames: ['n'],
+  paramTypes: ['int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @return {number}

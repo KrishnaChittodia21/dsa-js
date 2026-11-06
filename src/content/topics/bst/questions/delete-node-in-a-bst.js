@@ -40,6 +40,8 @@ Total: one downward path plus one path to the successor → O(h).`,
 
   functionName: 'deleteNode',
   paramNames: ['root', 'key'],
+  paramTypes: ['TreeNode', 'int'],
+  returnType: 'TreeNode',
   starterCode: `/**
  * @param {TreeNode} root
  * @param {number} key

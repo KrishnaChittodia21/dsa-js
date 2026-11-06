@@ -41,6 +41,8 @@ Prefix sums reach about ±2^31 · 10^5 ≈ 2·10^14 — still exact as JS number
 
   functionName: 'countRangeSum',
   paramNames: ['nums', 'lower', 'upper'],
+  paramTypes: ['int[]', 'int', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} lower

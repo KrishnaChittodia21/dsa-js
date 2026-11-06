@@ -43,6 +43,8 @@ At least one valid itinerary is guaranteed.`,
 
   functionName: 'findItinerary',
   paramNames: ['tickets'],
+  paramTypes: ['string[][]'],
+  returnType: 'string[]',
   starterCode: `/**
  * @param {string[][]} tickets
  * @return {string[]}

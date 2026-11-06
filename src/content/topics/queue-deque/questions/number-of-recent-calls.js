@@ -48,6 +48,10 @@ Every call uses a strictly larger \`t\` than the previous call.`,
 **Queue (amortized O(1)):** because t only grows, an expired timestamp never becomes valid again. Push t, pop the front while it is older than \`t − 3000\`, return the size. Each timestamp is enqueued once and dequeued once. The queue never holds more than ~3001 items.`,
 
   className: 'RecentCounter',
+  methodTypes: {
+    constructor: { params: [] },
+    ping: { params: ['int'], returns: 'int' },
+  },
   starterCode: `class RecentCounter {
   constructor() {
     

@@ -39,6 +39,8 @@ Each word is inserted and walked once, with palindrome checks of O(L) at each of
 
   functionName: 'palindromePairs',
   paramNames: ['words'],
+  paramTypes: ['string[]'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {string[]} words
  * @return {number[][]}

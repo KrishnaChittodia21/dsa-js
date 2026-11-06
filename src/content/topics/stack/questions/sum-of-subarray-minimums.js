@@ -37,6 +37,8 @@ The asymmetric comparison makes each subarray with repeated minimums count towar
 
   functionName: 'sumSubarrayMins',
   paramNames: ['arr'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} arr
  * @return {number}

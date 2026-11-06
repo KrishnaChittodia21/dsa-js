@@ -41,6 +41,8 @@ Many strings are correct, so the tests use a checker: correct length and all k^n
 
   functionName: 'crackSafe',
   paramNames: ['n', 'k'],
+  paramTypes: ['int', 'int'],
+  returnType: 'string',
   starterCode: `/**
  * @param {number} n
  * @param {number} k

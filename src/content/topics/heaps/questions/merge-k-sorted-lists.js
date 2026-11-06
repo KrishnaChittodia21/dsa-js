@@ -37,6 +37,8 @@ export default {
 
   functionName: 'mergeKLists',
   paramNames: ['lists'],
+  paramTypes: ['ListNode[]'],
+  returnType: 'ListNode',
   starterCode: `/**
  * Definition for singly-linked list (available as the global ListNode):
  * function ListNode(val, next) { this.val = val; this.next = next; }

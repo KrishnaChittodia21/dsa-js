@@ -36,6 +36,8 @@ Efficiently: count values in a Map, sort the distinct keys. For each key v with 
 
   functionName: 'isNStraightHand',
   paramNames: ['hand', 'groupSize'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[]} hand
  * @param {number} groupSize

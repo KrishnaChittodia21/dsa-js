@@ -51,6 +51,8 @@ Since each call keeps its own \`expr\` string and numbers, there is no explicit 
 
   functionName: 'addOperators',
   paramNames: ['num', 'target'],
+  paramTypes: ['string', 'int'],
+  returnType: 'string[]',
   starterCode: `/**
  * @param {string} num
  * @param {number} target

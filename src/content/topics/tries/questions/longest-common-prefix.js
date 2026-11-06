@@ -32,6 +32,8 @@ export default {
 
   functionName: 'longestCommonPrefix',
   paramNames: ['strs'],
+  paramTypes: ['string[]'],
+  returnType: 'string',
   starterCode: `/**
  * @param {string[]} strs
  * @return {string}

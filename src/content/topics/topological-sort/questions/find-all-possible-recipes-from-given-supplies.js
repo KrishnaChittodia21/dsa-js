@@ -34,6 +34,8 @@ Return all recipes you can make, in any order.`,
 
   functionName: 'findAllRecipes',
   paramNames: ['recipes', 'ingredients', 'supplies'],
+  paramTypes: ['string[]', 'string[][]', 'string[]'],
+  returnType: 'string[]',
   compare: 'unordered',
   starterCode: `/**
  * @param {string[]} recipes

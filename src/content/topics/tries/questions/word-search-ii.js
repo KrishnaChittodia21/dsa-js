@@ -43,6 +43,8 @@ The trie makes the search cost depend on the grid and the shape of the dictionar
 
   functionName: 'findWords',
   paramNames: ['board', 'words'],
+  paramTypes: ['char[][]', 'string[]'],
+  returnType: 'string[]',
   starterCode: `/**
  * @param {character[][]} board
  * @param {string[]} words

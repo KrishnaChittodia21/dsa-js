@@ -40,6 +40,8 @@ Because ranges are recorded only when strictly smaller (width, then start), ties
 
   functionName: 'smallestRange',
   paramNames: ['nums'],
+  paramTypes: ['int[][]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[][]} nums
  * @return {number[]}

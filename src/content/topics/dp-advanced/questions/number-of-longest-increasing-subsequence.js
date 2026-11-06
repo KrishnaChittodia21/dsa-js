@@ -38,6 +38,8 @@ Two subsequences are different if they use different index sets (even if the val
 
   functionName: 'findNumberOfLIS',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

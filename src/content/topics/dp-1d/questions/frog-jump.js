@@ -41,6 +41,8 @@ The jump size at stone i is at most i + 1 (it grows by at most 1 per jump), so t
 
   functionName: 'canCross',
   paramNames: ['stones'],
+  paramTypes: ['int[]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[]} stones
  * @return {boolean}

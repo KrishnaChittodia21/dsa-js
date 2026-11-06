@@ -36,6 +36,8 @@ Aim for better than O(n log n).`,
 
   functionName: 'topKFrequent',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

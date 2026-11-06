@@ -34,6 +34,8 @@ Return the index of \`target\` in \`nums\`, or \`-1\` if it does not appear. You
 
   functionName: 'search',
   paramNames: ['nums', 'target'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} target

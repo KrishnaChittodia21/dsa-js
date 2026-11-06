@@ -33,6 +33,8 @@ Return the number of connected components (groups of nodes that can reach each o
 
   functionName: 'countComponents',
   paramNames: ['n', 'edges'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} edges

@@ -42,6 +42,8 @@ Many answers are valid (e.g. rotations of a cycle), so the tests use a checker: 
 
   functionName: 'validArrangement',
   paramNames: ['pairs'],
+  paramTypes: ['int[][]'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number[][]} pairs
  * @return {number[][]}

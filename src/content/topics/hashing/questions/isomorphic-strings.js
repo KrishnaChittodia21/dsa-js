@@ -37,6 +37,8 @@ Why two maps? With only s→t, \`"badc"\` → \`"baba"\` passes (b→b, a→a, d
 
   functionName: 'isIsomorphic',
   paramNames: ['s', 't'],
+  paramTypes: ['string', 'string'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {string} s
  * @param {string} t

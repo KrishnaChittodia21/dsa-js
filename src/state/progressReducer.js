@@ -128,8 +128,8 @@ export function progressReducer(state, action) {
       return updateQuestion(state, action.qid, { approachViewed: true });
     case 'Q_VIEW_SOLUTION':
       return updateQuestion(state, action.qid, (q) => ({ solutionViewed: true, solutionViewedBeforeSolve: q.status !== 'solved' ? true : q.solutionViewedBeforeSolve }));
-    case 'Q_SAVE_CODE':
-      return updateQuestion(state, action.qid, { code: action.code });
+    case 'Q_SAVE_CODE': // lang: 'java' | 'cpp' keeps that draft in codeByLang; JS stays in `code`
+      return updateQuestion(state, action.qid, (q) => (action.lang && action.lang !== 'js' ? { codeByLang: { ...q.codeByLang, [action.lang]: action.code } } : { code: action.code }));
     case 'Q_RUN':
       return updateQuestion(state, action.qid, (q) => ({
         runs: (q.runs || 0) + 1,

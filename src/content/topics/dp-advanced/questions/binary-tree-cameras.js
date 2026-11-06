@@ -41,6 +41,8 @@ A full DP alternative keeps three costs per node (camera here / covered by a chi
 
   functionName: 'minCameraCover',
   paramNames: ['root'],
+  paramTypes: ['TreeNode'],
+  returnType: 'int',
   io: { params: ['tree'] },
   starterCode: `/**
  * Definition: TreeNode { val, left, right }

@@ -36,6 +36,8 @@ Can you do it without fully sorting the array?`,
 
   functionName: 'findKthLargest',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

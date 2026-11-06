@@ -40,6 +40,8 @@ Total O(m² · n log n) with a balanced tree; the sorted-array version below is 
 
   functionName: 'maxSumSubmatrix',
   paramNames: ['matrix', 'k'],
+  paramTypes: ['int[][]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} matrix
  * @param {number} k

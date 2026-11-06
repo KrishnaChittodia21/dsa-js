@@ -38,6 +38,8 @@ Return the **maximum number of content children**.`,
 
   functionName: 'findContentChildren',
   paramNames: ['g', 's'],
+  paramTypes: ['int[]', 'int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} g
  * @param {number[]} s

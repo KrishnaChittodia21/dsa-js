@@ -34,6 +34,8 @@ Row 0 is \`[1]\`. Every following row starts and ends with \`1\`, and every inne
 
   functionName: 'generate',
   paramNames: ['numRows'],
+  paramTypes: ['int'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number} numRows
  * @return {number[][]}

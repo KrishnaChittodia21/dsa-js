@@ -39,6 +39,8 @@ Only the links may change — not the values. The function returns nothing; the 
 
   functionName: 'reorderList',
   paramNames: ['head'],
+  paramTypes: ['ListNode'],
+  returnType: 'void',
   io: { params: ['list'], mutates: 0 },
   starterCode: `/**
  * @param {ListNode} head

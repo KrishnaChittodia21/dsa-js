@@ -40,6 +40,8 @@ If there are more columns than rows, iterate over column pairs instead to get O(
 
   functionName: 'numSubmatrixSumTarget',
   paramNames: ['matrix', 'target'],
+  paramTypes: ['int[][]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} matrix
  * @param {number} target

@@ -38,6 +38,8 @@ Comparing with \`nums[lo]\` fails for an un-rotated array (\`nums[lo] < nums[mid
 
   functionName: 'findMin',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

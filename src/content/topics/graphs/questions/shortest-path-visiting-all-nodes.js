@@ -34,6 +34,8 @@ Return the length (number of edges) of the shortest walk that visits **every nod
 
   functionName: 'shortestPathLength',
   paramNames: ['graph'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} graph
  * @return {number}

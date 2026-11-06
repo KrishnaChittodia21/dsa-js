@@ -48,6 +48,8 @@ Return any valid ordering, or \`[]\` if none exists. Ungrouped items (\`-1\`) ha
 
   functionName: 'sortItems',
   paramNames: ['n', 'm', 'group', 'beforeItems'],
+  paramTypes: ['int', 'int', 'int[]', 'int[][]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number} n
  * @param {number} m

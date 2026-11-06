@@ -36,6 +36,8 @@ Greedy fails when a locally cheaper step leads into a costly region, e.g. \`[[1,
 
   functionName: 'minPathSum',
   paramNames: ['grid'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} grid
  * @return {number}

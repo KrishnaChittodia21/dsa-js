@@ -34,6 +34,8 @@ The answer fits in a 32-bit integer.`,
 
   functionName: 'maxProduct',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

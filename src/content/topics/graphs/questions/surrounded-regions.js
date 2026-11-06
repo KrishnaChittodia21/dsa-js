@@ -33,6 +33,8 @@ Capture every surrounded region by flipping all its \`'O'\`s to \`'X'\`. Modify 
 
   functionName: 'solve',
   paramNames: ['board'],
+  paramTypes: ['char[][]'],
+  returnType: 'void',
   io: { mutates: 0 },
   starterCode: `/**
  * @param {character[][]} board

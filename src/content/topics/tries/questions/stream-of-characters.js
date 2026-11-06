@@ -62,6 +62,10 @@ export default {
 A walk never goes deeper than the longest word, so each query is O(maxLen) and usually much less because the walk dies early. Trim the history so it never holds more than maxLen letters that matter.`,
 
   className: 'StreamChecker',
+  methodTypes: {
+    constructor: { params: ['string[]'] },
+    query: { params: ['string'], returns: 'boolean' },
+  },
   starterCode: `class StreamChecker {
   /** @param {string[]} words */
   constructor(words) {

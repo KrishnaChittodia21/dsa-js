@@ -37,6 +37,11 @@ export default {
 Both are O(L). The delta trick handles overwrites without subtracting separately.`,
 
   className: 'MapSum',
+  methodTypes: {
+    constructor: { params: [] },
+    insert: { params: ['string', 'int'], returns: 'void' },
+    sum: { params: ['string'], returns: 'int' },
+  },
   starterCode: `class MapSum {
   constructor() {
     

@@ -33,6 +33,8 @@ Use words like \`"One Hundred Twenty Three"\`, \`"Twelve Thousand Three Hundred 
 
   functionName: 'numberToWords',
   paramNames: ['num'],
+  paramTypes: ['int'],
+  returnType: 'string',
   starterCode: `/**
  * @param {number} num
  * @return {string}

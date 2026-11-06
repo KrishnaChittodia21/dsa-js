@@ -41,6 +41,8 @@ Return the **minimum number of stops** needed to reach \`target\`, or \`-1\` if 
 
   functionName: 'minRefuelStops',
   paramNames: ['target', 'startFuel', 'stations'],
+  paramTypes: ['int', 'int', 'int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} target
  * @param {number} startFuel

@@ -44,6 +44,8 @@ Stale elements are never read because tops are always pruned before use.`,
 
   functionName: 'medianSlidingWindow',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'double[]',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

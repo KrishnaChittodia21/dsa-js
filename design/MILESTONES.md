@@ -307,6 +307,69 @@ One unique, interactive scene per coding question (426), 100 a day, the QA harne
   produce JSON; the ~28 design-class questions (LRU cache, …) use an operation list (`["LRUCache","put","get"]` +
   args), as LeetCode does. This is what M7 will feed to each language.
 - **Tests:** signatures parse; every question has starter code and a reference in both languages.
+- **6a + 6b done 2026-11-06:**
+  - **Types:** all 426 coding questions are typed. `scripts/infer-types.mjs` read 415 from their tests (argsGen
+    included); 11 were set by hand: the 9 custom-harness questions, plus reverse-string and task-scheduler as `char[]`.
+  - **Starters:** generated, not stored. `src/languages/signature.js` builds the Java / C++ starter from the types,
+    and the names come from the JS starter. Design classes and the two Codecs use `methodTypes`.
+  - **Checks:** `validate-content` checks every signature.
+  - **Editor:** a JS · Java · C++ picker that is remembered (`codeLang`). Each language keeps its own draft
+    (`codeByLang`, carried by Export / Import). In Java / C++ the editor is write-only: Run / Submit / Custom /
+    Animate say so. Uses `@codemirror/lang-java` 6.0.2 + `lang-cpp` 6.0.3.
+  - **Tests:** 40.
+  - **Next (6c):** reference solutions in Java and C++, as real files next to each question.
+- **6c batch 1 done 2026-11-06:**
+  - **References:** 56 of 426 questions have Java and C++ references: 6 pilots by me plus 50 by 5 agents (~330K
+    tokens). They live in `src/content/topics/<topic>/solutions/<id>.{java,cpp}`.
+  - **Checking:** `scripts/check-refs.mjs` + `src/languages/harness.js` (generated drivers, number-token test
+    input, JSON output judged by `checkPass`) compile each file and run every test. 112/112 pass. Java uses a
+    portable Temurin JDK 21.0.13 in the session scratch folder (`DSA_JDK=…`; not installed, not in the project).
+    `npm run check` does not run it, because it needs a JDK.
+  - **Solution tab:** a JS · Java · C++ switch, starting on the editor's language. References are lazy `refs-<topic>`
+    chunks.
+  - **Fixes:** `infer-types` had treated −2³¹ as `long`, so 18 questions were re-typed to `int` (as LeetCode).
+    `<random>` and a few more headers were added to the C++ driver.
+  - **Next:** 355 questions (about 7 batches of 50), then the 9 custom-harness questions by hand.
+- **6c batch 2 done 2026-11-06:** 50 more (prefix-sum, array-techniques, stack, queue-deque; ~310K tokens). 106 of 426
+  questions have references; all 212 files pass every test. All first-run passes, no type changes.
+  - **Deliberate differences from the JS:** max-sum-of-rectangle-no-larger-than-k uses `TreeSet` / `set` where the JS
+    splices into a sorted array (same idea, faster insert); majority-element-ii uses count > 0 instead of a null candidate.
+- **6c batch 3 done 2026-11-06:** 50 more (end of queue-deque, binary-search, linked-list, recursion, sorting; ~320K
+  tokens). 156 of 426 questions have references; all 312 files pass every test, and all passed on the first run.
+  count-good-numbers uses `long` + `% MOD` where the JS uses BigInt. reverse-string recurses per pair, so a very long
+  input could overflow the Java stack; the tests pass.
+- **6c batch 4 done 2026-11-06:** 50 more (end of sorting, intervals, backtracking, trees, first BST). 206 of 426
+  questions have references; all 412 files pass every test, all on the first run. `-Infinity` starts and node
+  min/max sentinels use `long`; Java comparators use `Integer.compare` (no subtraction overflow); sorts work on a
+  copy where the JS uses `toSorted`. Tree recursion mirrors the JS (tests reach ~1000-deep chains).
+- **6c batch 5 done 2026-11-06:** 50 more (end of BST, heaps, tries, first graphs). 256 of 426 questions have
+  references; all 512 files pass every test. take-gifts-from-the-richest-pile retyped `int` → `long` (its sum
+  reaches 10^12; LeetCode returns `long long`). sliding-window-median keeps its heaps in fields, so it now clears
+  them at the start of each call. Trie children are 26-slot arrays (a–z, per the constraints); BST bounds and
+  pair/heap sums use `long`.
+- **6c batch 6 done 2026-11-06:** 50 more (end of graphs, topological sort, union-find, shortest paths, MST).
+  306 of 426 questions have references; all 612 files pass every test. evaluate-division keeps its maps in fields,
+  so it now clears them per call. Union-find is a small per-file helper (path halving; C++ `unite`, since `union`
+  is a keyword). Infinity that gets added to is `MAX/2`; number-of-ways distances are `long`. MST totals fit `int`
+  by the bounds (min-cost-to-connect-all-points: an MST of 1000 points in the box stays far below 2^31).
+- **6c batch 7 done 2026-11-06:** 50 more (end of MST, advanced graphs, greedy, dp-1d, first dp-2d). 356 of 426
+  questions have references; all 712 files pass every test, no fixes needed. combination-sum-iv and
+  distinct-subsequences use wrapping 64-bit sums (exact mod 2^64, so exact whenever the answer fits `int`);
+  decode-ways-ii keeps `long` + `% MOD`; patching-array and refueling-stops reach is `long`. Field state (Tarjan
+  disc/low, cracking-the-safe) is recreated inside the public method.
+- **6c batch 8 done 2026-11-06:** the last 61 (end of dp-2d, bit manipulation, dp-advanced, advanced structures,
+  string algorithms). 417 of 426 questions have references (all but the 9 custom-harness ones); all 834 files pass
+  every test, no fixes needed. Unsigned 32-bit values (`>>> 0` in the JS) use `long` / `uint32_t`; C++ avoids
+  signed-shift UB with `unsigned`. Rolling hashes keep the JS double modulus (products < 2^52). reverse-pairs uses
+  `2L *`, count-of-range-sum `long` prefixes; coin-change-ii wraps in 32 bits (exact when the answer fits).
+- **6c done 2026-11-06 (the 9 custom-harness questions, by hand):** all 426 questions have Java and C++ references;
+  all 852 files pass every test. `harness.js` has a `CUSTOM` table (per id: token types of the raw test args, a Java
+  and a C++ body that do what the JS `harness` does): Codec round trips, in-place prefix (`k` → first k items), LCA
+  (values → nodes), lists with a cycle (node index out), clone-graph (provides `Node`, same deep-copy checks as the
+  JS). Wrong solutions are caught (original node returned, wrong cycle entry, full length). `tests/harness.test.js`
+  covers encoding and wiring without a JDK (41 tests). Gap found: no encode-and-decode-strings test has a word
+  containing a separator-like `|`, so a plain-delimiter encoding passes (the JS tests have the same gap).
+  - **M6 left:** nothing in the plan; the browser check of the Solution-tab switch for a few questions is the user's.
 
 ### M7 · Running Java and C++ in the browser · 2-day spike, then 12–20 h
 - **Spike first** (decision 4): load time, first-run time and memory for CheerpJ and clang-on-WebAssembly in a
@@ -317,11 +380,57 @@ One unique, interactive scene per coding question (426), 100 a day, the QA harne
   loaded only when you first pick Java or C++, and cached.
 - **Tests:** harness round-trips for every type; every Java and C++ reference passes its question's tests; an
   infinite loop times out without freezing the page.
+- **Spike done 2026-11-06 → go for both** (details: `design/m7-spike.md`). Java: TeaVM javac (official playground
+  build, ~4 MB gzip, vendored) passes 402/426 references (~1.1 s compile); gaps: `Map.Entry`, `Integer::sum`, and
+  recursion deeper than ~1–5k frames. C++: `@yowasp/clang` from jsDelivr (~23 MB brotli) passes 426/426 with an
+  8 MB stack (~2.2 s compile); no exceptions (stubbed). Both: print per test and restart after a crash.
+- **Batch 1 done 2026-11-06 (runner core, not wired into the UI yet):**
+  - **Drivers:** `harness.js` prints one `\x01`-marked JSON line per test as soon as it is done (other stdout = the
+    learner's prints → that test's logs; `splitDriverOutput`, also used by `check-refs`). `{ browser: true }`: Java
+    reads `args[0]` and runs without a thread; C++ gets exception stubs; `CPP_BROWSER_FLAGS` (8 MB stack). TeaVM-safe
+    `append(String.valueOf(o))` and an append chain for the result line (TeaVM failed on `"…" + double + "…"`).
+  - **Runner** `src/runner/native/`: `runNative.js` (TeaVM worker from `public/teavm/`, clang worker
+    `cppCompiler.js` loading `@yowasp/clang` from jsDelivr, fresh `execWorker.js` per run with the time limit),
+    `results.js` (restart after a crash, time limit, compile errors mapped to the learner's lines + TeaVM hints,
+    crash wording), `wasi.js` (own ~60-line WASI, no dependency). Same result shape as `runInWorker`.
+  - **References:** 23 Java files rewritten without `Map.Entry` / `Integer::sum`; path-sum-ii Java is iterative.
+    Desktop `check-refs` 852/852.
+  - **Checked in Chrome:** references pass in both languages; a crash fails only its test and keeps its prints; an
+    infinite loop times out (page stays responsive); compile errors show the learner's line + hint. TeaVM emits an
+    invalid module for a method ending in `while (true) {}` → reported as a clear compile error.
+  - **Open:** in a worker C++ recursion is shallower than on the page (path-sum-ii's 5 000-deep chain overflows) →
+    batch 3 runs every reference through this runner and fixes what fails.
+  - **Tests:** 45 (`tests/native.test.js`: restart, time limit, error lines).
+- **Batch 2 done 2026-11-06 (workspace):** Run / Submit / Custom input work in Java and C++ (`CodeWorkspace` →
+  `runIn(lang)`: JS → `runInWorker`, Java / C++ → `runNative`, loaded on first use). The running line shows the
+  runner's status ("Loading the Java compiler…", "Downloading the C++ compiler… N%", "Compiling…", "Running…");
+  the empty Test results panel says what the first run downloads; custom input compares with the JS reference.
+  Animate stays JS-only (M8) with a note. `runClang` drops `fetchProgress`, so the clang worker prefetches with
+  `runLLVM(null, {}, { fetchProgress })`. Checked in Chrome: Java Submit → Accepted 12/12 (counts as solved);
+  C++ Run + custom input; empty cache: C++ 6.3 s (download ~3.3 s) and Java 1.5 s to the first result.
+- **Batch 3 done 2026-11-06 → M7 done:** `scripts/check-refs-browser.html` (dev server; `?lang=`, `?ids=`) runs every
+  reference through `runNative`, the same path as Run / Submit. First pass 845/852; fixed: 5 deep recursions made
+  iterative (cracking-the-safe Java + C++, maximum-sum-bst-in-binary-tree Java + C++, path-sum-ii C++), TeaVM's
+  `TreeMap` throws on `put` while iterating `keySet()` (hand-of-straights iterates a copy), a boxed `Character` hits
+  the ambiguous `append(Object)` (longest-common-prefix). Now **852/852 in the browser** and 852/852 on the desktop.
+  `design/refs-brief.md` lists the browser-safe rules; `check-refs` survives a program that exits early (EPIPE).
+  - **Known limits (shown to learners as clear errors):** recursion deeper than ~1–5k levels, Java `Map.Entry` /
+    `Integer::sum` (hint), Java null / index traps end the run on that test, C++ `throw` ends the run, TeaVM
+    rejects a method ending in `while (true) {}`. Java needs a WebAssembly-GC browser (Chrome 119+, Firefox 120+,
+    Safari 18.2+).
 
 ### M8 · Animate my run for Java and C++ · decided after M7
 Line-by-line tracing of Java/C++ inside the browser is the hardest part and may not be practical. **Default
 plan:** "animate the reference run and compare your output" for Java/C++, with full Animate my run kept for
 JavaScript. Revisit only if M7's runtime makes tracing cheap.
+- **Decided 2026-11-06 (options: `design/m8-options.md`): A now, B later.** M7 makes real tracing possible (the
+  editor already ships `@lezer/java` / `@lezer/cpp`; ~25–35 h), but it waits until after the M5 review items.
+- **Option A done 2026-11-06:** in Java / C++ the Animate tab runs your code on the chosen test (M7 runner) and
+  plays the JavaScript reference's animation of the same test, with a verdict box: "Your Java on Test 1: correct /
+  wrong answer / stopped with an error · yours … · reference …". Your own input: the JS reference decides the
+  expected answer, then the question's checker judges yours. Compare / Break it / Measure (JS-code tools) are
+  hidden in Java / C++. Checked in Chrome: correct, own input, and a wrong answer.
+- **Later (M8b, not scheduled):** option B — trace your own Java / C++ line by line.
 
 ### M9 · Shorts · 18–26 h, then ~20–30 min per Short
 - Two-minute animated stories that end in one question, built on the M2 scene kit.

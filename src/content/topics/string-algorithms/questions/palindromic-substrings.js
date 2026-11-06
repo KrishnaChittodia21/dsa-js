@@ -36,6 +36,8 @@ Why it is correct: every palindrome has exactly one center, and it is found at t
 
   functionName: 'countSubstrings',
   paramNames: ['s'],
+  paramTypes: ['string'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string} s
  * @return {number}

@@ -41,6 +41,8 @@ We pair starts with ends from different meetings — that is fine because we onl
 
   functionName: 'minMeetingRooms',
   paramNames: ['intervals'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} intervals
  * @return {number}

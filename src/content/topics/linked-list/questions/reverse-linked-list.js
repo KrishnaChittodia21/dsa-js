@@ -35,6 +35,8 @@ Try to do it by rewiring the existing nodes, using only O(1) extra memory.`,
 
   functionName: 'reverseList',
   paramNames: ['head'],
+  paramTypes: ['ListNode'],
+  returnType: 'ListNode',
   io: { params: ['list'], returns: 'list' },
   starterCode: `/**
  * Definition: ListNode { val, next } (ListNode is available globally)

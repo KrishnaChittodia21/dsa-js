@@ -36,6 +36,8 @@ Return \`true\` if it is possible to finish all courses, otherwise \`false\`.`,
 
   functionName: 'canFinish',
   paramNames: ['numCourses', 'prerequisites'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number} numCourses
  * @param {number[][]} prerequisites

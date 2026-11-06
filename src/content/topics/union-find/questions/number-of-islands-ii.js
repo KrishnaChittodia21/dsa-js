@@ -38,6 +38,8 @@ We cannot use \`uf.count\` because water cells are also "groups" inside the DSU 
 
   functionName: 'numIslands2',
   paramNames: ['m', 'n', 'positions'],
+  paramTypes: ['int', 'int', 'int[][]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number} m
  * @param {number} n
