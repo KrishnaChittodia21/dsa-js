@@ -172,7 +172,7 @@ export default {
   return reach.get(stones[stones.length - 1]).size > 0;
 }`,
       variations: [{ name: 'Memoized DFS', description: 'dfs(index, lastJump) with key `${index},${k}` in a Map/Set.' }],
-      mistakes: ['Allowing a jump of size 0', 'Not requiring the first jump to be exactly 1'],
+      mistakes: ['Allowing a jump of size 0', 'Not requiring the first jump to be exactly 1 (the template enforces it implicitly: the start gets last jump 0, so the candidates are −1, 0, 1 and step > 0 leaves only 1)'],
       evolution: {
         easy: '—',
         medium: 'Reachability with a small extra state.',
@@ -484,7 +484,9 @@ If you cannot say the state in one sentence, you are not ready to code.`,
             type: 'text',
             md: `Instead of asking "what do I need?" (top-down), compute **every** state from the smallest upward, in an order where each state's dependencies are already filled.
 
-\`dp[i]\` = best money from the **first i houses**: \`dp[0] = 0\`, \`dp[1] = nums[0]\`, \`dp[i] = max(dp[i − 1], dp[i − 2] + nums[i − 1])\`.`,
+\`dp[i]\` = best money from the **first i houses**: \`dp[0] = 0\`, \`dp[1] = nums[0]\`, \`dp[i] = max(dp[i − 1], dp[i − 2] + nums[i − 1])\`.
+
+(Index shift: the recursion's \`rob(i)\` covers houses \`0..i\`, while this \`dp[i]\` covers the first i houses \`0..i − 1\` — so \`dp[i] = rob(i − 1)\`, and house i − 1 is \`nums[i − 1]\`.)`,
           },
           {
             type: 'code',
@@ -825,7 +827,7 @@ If you swap the loops (numbers outside, amounts inside), each number is "introdu
             md: `- Climbing stairs / house robber: n states × O(1) → **O(n)** time, **O(1)** space with two variables.
 - Coin change: amount states × k coins → **O(amount · k)**, O(amount) space.
 - Perfect squares: n × √n → **O(n√n)**.
-- Word break: n states × n split points × O(L) slicing/hashing → **O(n² · L)** (or O(n · maxWordLen · L)).
+- Word break: n states × n split points × O(L) slicing/hashing → **O(n² · L)** (or O(n · maxWordLen · L)), where L is the length of the slice / word being compared.
 - Word break II: output-sensitive — there can be exponentially many sentences.`,
           },
         ],

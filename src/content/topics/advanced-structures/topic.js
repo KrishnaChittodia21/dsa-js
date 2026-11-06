@@ -78,7 +78,7 @@ export default {
       template: `function countSmallerBefore(nums) {
   const sorted = [...new Set(nums)].sort((a, b) => a - b);
   const rank = new Map(sorted.map((v, i) => [v, i + 1])); // 1-based ranks
-  const bit = new FenwickTree(sorted.length);            // toolkit: 0-based API
+  const bit = new FenwickTree(sorted.length);            // toolkit: 0-based API → index = r − 1
   const out = [];
   for (const x of nums) {
     const r = rank.get(x);
@@ -833,7 +833,7 @@ ranks  = [  3,  1,  4,  3,  2 ]    // same order relations, indices 1..4
             title: 'countSmaller — O(n log n)',
             code: `function countSmaller(nums) {
   const sorted = [...new Set(nums)].sort((a, b) => a - b);
-  const rank = new Map(sorted.map((v, i) => [v, i]));   // 0-based ranks
+  const rank = new Map(sorted.map((v, i) => [v, i]));   // 0-based ranks = BIT index directly (no shift)
   const bit = new FenwickTree(sorted.length);
   const res = new Array(nums.length);
   for (let i = nums.length - 1; i >= 0; i--) {
@@ -1218,7 +1218,7 @@ The overlap (indices 2..4) is counted twice — harmless because **min is idempo
 | Prefix sums | O(n) | O(n) | O(n) | O(1) (sum) | O(n) |
 | Fenwick tree | O(n log n), or O(n) | O(log n) | O(log n) with difference trick (point query) | O(log n) (invertible ops) | n + 1 |
 | Segment tree | O(n) | O(log n) | — | O(log n) (any associative op) | 2n / 4n |
-| Lazy segment tree | O(n) | O(log n) | O(log n) | O(log n) | 8n (sum + tag) |
+| Lazy segment tree | O(n) | O(log n) | O(log n) | O(log n) | 8n (two 4n arrays: sum + tag) |
 | Sparse table | O(n log n) | ✗ | ✗ | O(1) (idempotent ops) | n log n |
 | Index lists + binary search | O(n) | ✗ | ✗ | O(log n) (frequency of v) | O(n) |
 

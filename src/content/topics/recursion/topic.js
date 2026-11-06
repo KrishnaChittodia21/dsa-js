@@ -4,7 +4,7 @@ export default {
 
   jsTools: [
     { api: 'function f(n) { … f(n - 1) … }', use: 'A function that calls itself; each call gets its own local variables (its own stack frame)', complexity: 'O(1) overhead per call, O(depth) stack memory' },
-    { api: 'RangeError: Maximum call stack size exceeded', use: 'What JS throws when recursion is too deep (≈ 7k–10k frames in V8, depends on frame size)', complexity: '—' },
+    { api: 'RangeError: Maximum call stack size exceeded', use: 'What JS throws when recursion is too deep (about 7,000–10,000 frames in V8, depends on frame size)', complexity: '—' },
     { api: 'BigInt (10n, a * b % MOD)', use: 'Exact modular multiplication when a · b can exceed 2^53', complexity: 'slower than Number, but exact' },
     { api: 'Number.MAX_SAFE_INTEGER', use: '2^53 − 1: the largest integer a Number can represent exactly', complexity: '—' },
     { api: 'Map (memo)', use: 'Cache results of repeated sub-calls (preview of Dynamic Programming)', complexity: 'O(1) average per lookup' },
@@ -169,7 +169,7 @@ function diff(nums, i, j) {
       summary: 'When the input nests (expressions inside parentheses, balanced blocks inside blocks), write one function that handles one level and calls itself for each nested part.',
       whyItExists: 'Nesting depth is unknown in advance, so fixed loops cannot follow it. The call stack naturally remembers "where I was" in the outer level while an inner level is processed — the same job an explicit stack does in the Stack topic.',
       whenToUse: [
-        'The grammar is recursive: expr = "!(expr)" | "&(expr,expr,…)" | "t" | "f"',
+        'The grammar is recursive: expr = "!(expr)" | "&(expr,expr,…)" | "|(expr,expr,…)" | "t" | "f"',
         'The string decomposes into balanced blocks, each of which has the same structure inside',
       ],
       clues: ['"parse", "evaluate the expression"', 'nested parentheses of arbitrary depth', '"special / balanced / valid" strings defined recursively', '"a b-string is 1 + b-string + 0"'],
@@ -340,7 +340,7 @@ Every recursive function has exactly these two ingredients:
 | Game / choice | the state after one move | predict the winner |
 | Nesting | the inside of a pair of brackets | parsing expressions |
 
-**Prefer a loop** when the recursion would be very deep (JavaScript engines allow only about 10,000 nested calls) or when the recursion is just "reduce by one" and a loop is equally clear.`,
+**Prefer a loop** when the recursion would be very deep (JavaScript engines allow only about 7,000–10,000 nested calls) or when the recursion is just "reduce by one" and a loop is equally clear.`,
           },
           {
             type: 'callout',

@@ -601,7 +601,7 @@ Zero is handled automatically: both become 0 and the next element restarts.`,
 
 After the pass, scan once: any index j with \`nums[j] !== j + 1\` tells you that value \`j + 1\` is **missing**, and the value sitting there is a **duplicate** (or garbage).`,
           },
-          { type: 'visual', scenario: 'cyclic-sort', caption: "Each swap puts one value in its final slot, so there are at most n swaps." },
+          { type: 'visual', scenario: 'cyclic-sort', caption: "Each swap puts one value in its final slot for good, so there are at most n − 1 swaps." },
           {
             type: 'callout',
             variant: 'analogy',
@@ -614,7 +614,7 @@ After the pass, scan once: any index j with \`nums[j] !== j + 1\` tells you that
             title: 'Why is it O(n) even though i sometimes does not move?',
             md: `Count two kinds of steps over the whole run:
 - **Increments of i**: at most n.
-- **Swaps**: every swap puts one value into its home index, where it stays forever (a correctly placed value is never swapped again, because the check \`nums[h] !== nums[i]\` fails for it). There are only n homes, so there are **at most n swaps in total**.
+- **Swaps**: every swap puts one value into its home index, where it stays forever (a correctly placed value is never swapped again, because the check \`nums[h] !== nums[i]\` fails for it). There are only n homes, and once n − 1 are filled the last value has nowhere new to go, so there are **at most n − 1 swaps in total**.
 
 Total ≤ 2n steps → **O(n)**. This is the same amortized argument as the sliding window: bound the total, not the per-iteration cost.`,
           },
@@ -648,7 +648,7 @@ Total ≤ 2n steps → **O(n)**. This is the same amortized argument as the slid
             code: `function findDisappearedNumbers(nums) {
   let i = 0;
   while (i < nums.length) {
-    const h = nums[i] - 1;
+    const h = nums[i] - 1; // no range check: values are always 1..n here (the template’s check matters only when they can fall outside)
     if (nums[h] !== nums[i]) [nums[i], nums[h]] = [nums[h], nums[i]];
     else i++;
   }

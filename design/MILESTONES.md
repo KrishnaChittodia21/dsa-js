@@ -248,6 +248,9 @@ format gets a `language` field and a "variables per line" shape, so Java/C++ (M8
   no longer warns on lists (they wrap). Brief: node id order, tree half-done swaps. Content gap found: in
   sliding-window-median the classic "forgot to prune after moving a top" mistake passes every test (a test is
   missing). Spot-checked at 390 px: diameter-of-binary-tree (fit 1.11, node tag on the tree). Remaining: 178.
+  **Gap closed 2026-11-07:** test "Stale top after rebalancing" ([2,2,0,0,1,4,4], k = 3 → [2,0,0,1,4]) — found by a
+  random search; the reference passes 15/15, the missing-prune version fails exactly this test (it returns a removed
+  2). C++ reference 15/15; Java not re-run (no JDK on this machine now; same pruning code).
 - **Production batch 10 done 2026-11-05 (W5):** 25 scenes: the last 2 trees, all of bst (12) and 11 of tries;
   273/273 pass QA. Engine: a trie renderer. Trie nodes (children / next / kids… as a Map, an object or a 26-slot array)
   snapshot as `$trie` at any depth and draw as a letter tree with word ends lit, counters beside the letters and
@@ -504,6 +507,13 @@ JavaScript. Revisit only if M7's runtime makes tracing cheap.
     interval-DP template comment "LAST balloon burst … (for cutting a stick: the FIRST cut)"; bidirectional BFS
     "about the square root" → "about 2·b^(d/2) states instead of b^d". The remaining notes are style / consistency
     (duplicate templates, undefined helpers, mixed conventions) — left for a later lesson-polish milestone.
+  - **Lesson polish done 2026-11-07** (4 agents, ~40 notes, 25 topic files): one-sentence or code-comment fixes —
+    both forms named where two templates differ (first-middle loops, merge templates, partition loops, Kruskal copy,
+    DFS cycle return, Dijkstra / Bellman-Ford forms, deque expiry order, rank bases, z[0]), undefined helpers explained
+    (render, isValid, combine, fill, neighbours), consistent numbers (cyclic sort n − 1 swaps, JS stack 7,000–10,000,
+    binary-search "5 comparisons (here 3)", fib ≈ 1.618ⁿ), the weighted-DSU mistake reworded, Euler path "connected",
+    root rule `children > 1`, the partition loop rule, grammar `|`. Only computation change: the tries max-XOR loop
+    starts at `nums.slice(1)` (same result). Not looked at in the browser (some code comments are long lines).
 
 ### M10 · Achievements, round two · 4–6 h
 - New ones for the new features: first Animate my run passed, first divergence fixed, Polyglot (the same question
@@ -526,12 +536,32 @@ JavaScript. Revisit only if M7's runtime makes tracing cheap.
   switch, Animate my run; Shorts; Saved).
 - Coach tips the first time a run diverges.
 - **Tests:** every tour step's target exists on its page; "don't show again" is respected.
+- **Done 2026-11-07:**
+  - **Tour:** a new step 4 "What's new" (Java / C++ run here, Animate my run, Shorts, new badges) — 6 steps.
+  - **Page guides** (`components/guide/pageGuides.js` + `PageGuide.jsx`): `?` and the Guide keys open the guide of the
+    page you are on — question (language, Run / Submit, Custom input, Animate, Save), Shorts list, one Short (speed,
+    Save), Saved — and the tour elsewhere ("Open the full tour" from any guide). "Show me" scrolls to the control
+    (`data-guide="…"` attribute) and outlines it briefly (plain outline with reduced motion); it is offered only when
+    the control is on screen. `SaveButton` now forwards extra props.
+  - **Coach tip** `animate-divergence` the first time "Compare with the reference" finds a divergence: how to read the
+    step, fix the line, re-animate (→ Course Corrected). Uses the existing tip system (dismiss / Settings off);
+    `tipVisible(prefs, id)` moved to `lib/uiPrefs.js` so it is tested.
+  - **Tests:** 58 (`tests/guide.test.js`: every guide target exists in its file, `?` picks the page's guide, the tour
+    has a body per step incl. "What's new", a dismissed / disabled tip stays hidden).
+  - **Not checked in a browser** (the browser tool could not start): the guide card and the outline.
 
 ### M12 · Security check and deploy · 3–5 h
 No server means a much smaller audit: a Content-Security-Policy `<meta>` tag (Pages can't set headers), the
 worker time limits for user code, the WebAssembly downloads pinned and loaded from known URLs, `npm audit`, and no
 secrets in the repo or workflows. GitHub Actions on push: `npm test`, `validate`, build, then the existing Pages
 deploy. Launch check on the live Pages site: every page loads with no CSP errors, Export → Import round-trips.
+- **Done 2026-11-07 (all but the user's steps; details: `design/security-review.md`):** production-only CSP `<meta>`
+  (`build/cspPlugin.js`; inline theme script by sha256; `'unsafe-eval'` kept and justified — checkers and Big-O curves
+  use `new Function` on the page; jsDelivr only in `connect-src`); `deploy.yml` runs `npm run check` before publishing;
+  no secrets tracked; `npm audit`: 2 moderate in react-router 6 (open redirect via `<Link>` backslash, SSR hydration),
+  neither reachable here — upgrade to v7 suggested as its own task. Tests: 61 (`tests/csp.test.js`).
+  - **User's steps:** check the built site locally for CSP errors (the browser tool was blocked), commit, merge to
+    `main` and push (the workflow tests and deploys), then the launch check in `security-review.md`.
 
 ---
 

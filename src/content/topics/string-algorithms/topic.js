@@ -235,7 +235,7 @@ Four tools cover almost every interview question:
             type: 'callout',
             variant: 'analogy',
             title: 'Real-world analogy',
-            md: 'You are reading a long license plate list looking for "ABABC". You have matched "ABAB" and then see "A" instead of "C". A careless reader goes back to the next plate letter and starts again. A smart reader notices: *"the last two letters I read were AB — that is already the start of ABABC"* — and continues from there without re-reading anything. That smart reader is running KMP.',
+            md: 'You are reading a long license plate list looking for "ABABC". You have matched "ABAB" and then see "A" instead of "C". A careless reader goes back to the next plate letter and starts again. A smart reader notices: *"the last two letters I read were AB — that is already the start of ABABC"* — and continues from there without ever moving back in the plate list (a letter may be compared again after a fall-back, but the reading position never rewinds). That smart reader is running KMP.',
           },
           {
             type: 'checkpoint',
@@ -611,7 +611,7 @@ For \`s = "aabxaab"\`:
 | s[i] | a | a | b | x | a | a | b |
 | z[i] | 7 | 1 | 0 | 0 | 3 | 1 | 0 |
 
-(z[0] is the whole string by convention — some code leaves it as 0.)
+(z[0] is a convention, not computed: the pattern card sets z[0] = n (the whole string), while the lesson's zArray leaves z[0] = 0. Pick one and stay consistent.)
 
 **The z-box.** Keep \`[l, r)\` = the match window reaching furthest to the right found so far, i.e. \`s[l..r) === s[0..r−l)\`. For a new position i:
 1. If \`i < r\`, position i lies inside a copy of the prefix, mirroring position \`i − l\`. So at least \`min(r − i, z[i − l])\` characters already match — for free.

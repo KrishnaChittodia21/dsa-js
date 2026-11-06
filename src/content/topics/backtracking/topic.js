@@ -149,9 +149,10 @@ export default {
   const path = [];
   function backtrack(start) {
     if (start === s.length) { result.push([...path]); return; }
+    // end is exclusive here; end = start..n−1 with slice(start, end + 1) visits the same pieces
     for (let end = start + 1; end <= s.length; end++) {
       const piece = s.slice(start, end);
-      if (!isValid(piece)) continue;   // prune invalid cuts
+      if (!isValid(piece)) continue;   // prune invalid cuts (isValid = your rule, e.g. is a palindrome)
       path.push(piece);
       backtrack(end);
       path.pop();
@@ -184,7 +185,7 @@ export default {
   const queenCol = [];                        // queenCol[row] = column
   const result = [];
   function place(row) {
-    if (row === n) { result.push(render(queenCol)); return; }
+    if (row === n) { result.push(render(queenCol)); return; }  // render: turn columns into board rows, e.g. "..Q."
     for (let c = 0; c < n; c++) {
       if (cols.has(c) || diag.has(row - c) || anti.has(row + c)) continue;
       cols.add(c); diag.add(row - c); anti.add(row + c); queenCol.push(c);

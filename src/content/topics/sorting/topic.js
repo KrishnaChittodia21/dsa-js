@@ -684,7 +684,7 @@ partition →  [2, 3] 4 [9, 7]
 - **3-way partition** (< pivot, = pivot, > pivot) — with many duplicates, a 2-way partition keeps recursing on piles of equal values; 3-way removes them in one go.
 - Recurse on the **smaller** side first and loop on the larger to keep stack depth O(log n).
 
-**Quickselect:** to find the k-th smallest, partition once and look where the pivot landed. If it is at index k, done. Otherwise recurse into **only one** side. Average work n + n/2 + n/4 + … = 2n → **O(n) average** (still O(n²) worst case).`,
+**Quickselect:** to find the k-th smallest, partition once and look where the pivot landed. If it is at index k, done. Otherwise recurse into **only one** side. Average work n + n/2 + n/4 + … = 2n → **O(n) average** (still O(n²) worst case). Any partition works here — Lomuto or the 3-way one below; 3-way just copes better with many duplicates.`,
           },
           {
             type: 'checkpoint',

@@ -17,7 +17,7 @@ export default {
       id: 'dp-2d-grid',
       name: 'Grid DP',
       summary: 'dp[r][c] describes the best / number of ways to reach (or leave) cell (r, c); each cell is built from a few neighbouring cells that were computed earlier.',
-      whyItExists: 'Counting or optimising over all paths in a grid by brute force explores exponentially many paths (a 3×7 grid already has 28, a 16×16 grid has over 155 million). But every path that reaches (r, c) arrives from a neighbour, so the answer for (r, c) depends only on the answers of those neighbours. Each cell is computed once: O(rows·cols).',
+      whyItExists: 'Counting or optimising over all paths in a grid by brute force explores exponentially many paths (a 3×7 grid already has 28, a 16×16 grid has over 155 million paths, and the plain recursion makes even more calls). But every path that reaches (r, c) arrives from a neighbour, so the answer for (r, c) depends only on the answers of those neighbours. Each cell is computed once: O(rows·cols).',
       whenToUse: [
         'Moves are restricted to a fixed set of directions that never revisit a cell (right/down, down/diagonal) so the dependency graph has no cycles',
         'Count paths, minimum / maximum path cost, or "largest square/shape ending at this cell"',
@@ -260,7 +260,7 @@ That is all "2D DP" means: the **state** has two indices, so the memo is a **tab
             type: 'text',
             md: `The plain recursion for these problems branches at every step and revisits the same sub-problems **exponentially** often.
 
-Take "unique paths" in an \`m × n\` grid moving only right or down. \`paths(r, c) = paths(r+1, c) + paths(r, c+1)\`. The call tree has about 2^(m+n) nodes, but there are only \`m · n\` distinct \`(r, c)\` pairs. For a 16 × 16 grid: ~10^9 calls versus 256 cells.
+Take "unique paths" in an \`m × n\` grid moving only right or down. \`paths(r, c) = paths(r+1, c) + paths(r, c+1)\`. The call tree has about 2^(m+n) nodes, but there are only \`m · n\` distinct \`(r, c)\` pairs. For a 16 × 16 grid: ~10^9 recursive calls versus 256 cells. (That counts calls, including dead ends; the number of complete paths is smaller — over 155 million.)
 
 The same holds for two strings: every recursive call is some pair of prefixes \`(i, j)\` — at most \`(m+1)(n+1)\` of them.`,
           },

@@ -501,7 +501,7 @@ Run DFS. On entering \`u\` colour it gray; after all neighbours are done colour 
   for (let i = 0; i < n; i++) if (color[i] === WHITE && !dfs(i)) return null;
   return post.reverse();
 }`,
-            caption: 'Recursion depth can reach n; for n in the tens of thousands with long chains prefer Kahn in JavaScript.',
+            caption: 'Recursion depth can reach n; for n in the tens of thousands with long chains prefer Kahn in JavaScript. This version returns null on a cycle; the pattern template returns [] instead — both just signal “no order”, so pick one convention and stick to it.',
           },
         ],
       },

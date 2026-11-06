@@ -50,7 +50,7 @@ export default {
         low[u] = Math.min(low[u], disc[v]);     // back edge
       }
     }
-    if (parentEdge === -1 && children >= 2) cut.add(u);          // root rule
+    if (parentEdge === -1 && children > 1) cut.add(u);           // root rule
   }
   for (let s = 0; s < n; s++) if (disc[s] === -1) dfs(s, -1);
   return { bridges, cut: [...cut].sort((a, b) => a - b) };
@@ -869,7 +869,7 @@ So along every condensation edge X → Y, the max finish time goes down. The ove
             md: `Every time a walk passes **through** a node it uses one edge in and one edge out. So in a directed graph:
 
 - **Euler circuit** exists ⇔ every node has in-degree = out-degree (and all edges are in one connected piece).
-- **Euler path** exists ⇔ exactly one node has out − in = 1 (the **start**), exactly one has in − out = 1 (the **end**), all others are balanced — or everything is balanced (a circuit).
+- **Euler path** exists ⇔ exactly one node has out − in = 1 (the **start**), exactly one has in − out = 1 (the **end**), all others are balanced — or everything is balanced (a circuit); and, as for circuits, all edges are in one connected piece.
 
 Undirected version: 0 odd-degree nodes → circuit; exactly 2 → path between them.
 

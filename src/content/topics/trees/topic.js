@@ -103,7 +103,7 @@ export default {
   let count = 0;
   function dfs(node, maxSoFar) {           // info flows DOWN as a parameter
     if (!node) return;
-    if (node.val >= maxSoFar) count++;
+    if (node.val >= maxSoFar) count++;     // >= : ties count as good (equal is not larger)
     const next = Math.max(maxSoFar, node.val);
     dfs(node.left, next);
     dfs(node.right, next);
@@ -446,7 +446,7 @@ Step through each one below on the same tree.`,
             type: 'text',
             md: `Let us see the classic trap with **Diameter of a Binary Tree** — the number of edges on the longest path between *any* two nodes.
 
-The longest path "bends" at some node: it goes down that node's left side and down its right side. If \`height(x)\` counts the **nodes** on the longest downward path from \`x\` (with \`height(null) = 0\`), then the number of **edges** on the longest path bending at \`node\` is exactly \`height(node.left) + height(node.right)\`.
+The longest path "bends" at some node: it goes down that node's left side and down its right side. If \`height(x)\` counts the **nodes** on the longest downward path from \`x\` (with \`height(null) = 0\`, so a leaf counts 1 — one more than the edge-based height from the terminology section), then the number of **edges** on the longest path bending at \`node\` is exactly \`height(node.left) + height(node.right)\`.
 
 The obvious code computes \`height\` separately for every node:`,
           },

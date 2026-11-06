@@ -106,8 +106,8 @@ function walk(root, s) {          // node for prefix s, or null
     {
       id: 'trie-binary-xor',
       name: 'Trie — Binary Trie for Maximum XOR',
-      summary: 'Store numbers as 31/32-bit strings from the highest bit to the lowest. To maximise a XOR b, walk the trie choosing the OPPOSITE bit of a at each level whenever it exists.',
-      whyItExists: 'Checking all pairs is O(n²). A higher bit is worth more than all lower bits combined (2^b > 2^(b-1) + … + 1), so greedily winning the highest possible bit is always right. The binary trie answers "is there a number with this prefix of bits?" in O(1) per bit → O(32) per query.',
+      summary: 'Store numbers as 31-bit strings from the highest bit to the lowest (bits 30 down to 0: enough for values below 2³¹). To maximise a XOR b, walk the trie choosing the OPPOSITE bit of a at each level whenever it exists.',
+      whyItExists: 'Checking all pairs is O(n²). A higher bit is worth more than all lower bits combined (2^b > 2^(b-1) + … + 1), so greedily winning the highest possible bit is always right. The binary trie answers "is there a number with this prefix of bits?" in O(1) per bit → O(31) per query.',
       whenToUse: [
         'Maximum XOR of two numbers in an array',
         'Maximum XOR of a query value with any array element (optionally with limits — offline + sorting)',
@@ -123,7 +123,7 @@ function walk(root, s) {          // node for prefix s, or null
   const insert = (x) => { let n = root; for (let b = 30; b >= 0; b--) { const bit = (x >> b) & 1; n = n[bit] ??= [null, null]; } };
   let best = 0;
   insert(nums[0]);
-  for (const x of nums) {
+  for (const x of nums.slice(1)) {                  // nums[0] is already in the trie
     let n = root, cur = 0;
     for (let b = 30; b >= 0; b--) {
       const want = ((x >> b) & 1) ^ 1;             // the opposite bit

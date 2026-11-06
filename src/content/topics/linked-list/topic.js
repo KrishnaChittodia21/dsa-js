@@ -128,7 +128,7 @@ function hasCycle(head) {
 }`,
       variations: [
         { name: 'Middle (second of two)', description: '`while (fast && fast.next)` starting both at head.' },
-        { name: 'Middle (first of two)', description: '`while (fast.next && fast.next.next)` — useful to split a list for merge sort.' },
+        { name: 'Middle (first of two)', description: '`while (fast.next && fast.next.next)` — useful to split a list for merge sort. Same stop as the lesson’s `fast = head.next; while (fast && fast.next)`: both land on the first middle.' },
         { name: 'Cycle entry', description: 'After meeting, reset one pointer to head; move both one step at a time — they meet at the entry.' },
         { name: 'Gap pointers', description: 'Move `fast` n steps first, then both together: slow ends n nodes from the end.' },
         { name: 'Implicit list', description: 'Pointers are values: `slow = f(slow)`, `fast = f(f(fast))`.' },

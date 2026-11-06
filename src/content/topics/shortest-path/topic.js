@@ -124,7 +124,7 @@ export default {
         'A limit on the number of edges used ("at most k stops") → Bellman-Ford rounds or BFS over (node, stops)',
         'All weights equal → BFS is simpler and faster',
       ],
-      template: `function dijkstra(n, adj, src) {           // adj[u] = [[v, w]]
+      template: `function dijkstra(n, adj, src) {           // adj[u] = [[v, w]] (the lesson version takes an edge list and builds adj — same algorithm)
   const dist = new Array(n).fill(Infinity);
   dist[src] = 0;
   const heap = new MinHeap((e) => e[0]);     // entries: [distance, node]
@@ -180,7 +180,7 @@ export default {
   for (let round = 0; round < k; round++) {
     const next = dist.slice();               // read from the PREVIOUS round only
     for (const [u, v, w] of edges) {
-      if (dist[u] + w < next[v]) next[v] = dist[u] + w;
+      if (dist[u] + w < next[v]) next[v] = dist[u] + w;   // no dist[u] !== Infinity guard needed: Infinity + w stays Infinity (both forms work)
     }
     dist = next;
   }
@@ -644,7 +644,9 @@ The algorithms only differ in **which edge to relax next**:
 - edge of weight **0** → neighbour has the *same* distance → \`pushFront\` (it should be processed next),
 - edge of weight **1** → neighbour is one further → \`pushBack\`.
 
-The deque stays sorted, so popping the front always gives the smallest distance — Dijkstra's invariant — with O(1) operations instead of O(log V).`,
+The deque stays sorted, so popping the front always gives the smallest distance — Dijkstra's invariant — with O(1) operations instead of O(log V).
+
+A node can sit in the deque twice (pushed again after a 0-edge improved it). Popping it a second time is harmless: relaxation reads the current \`dist[u]\`, so nothing worse than a few wasted checks happens.`,
           },
           {
             type: 'code',

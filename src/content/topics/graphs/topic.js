@@ -238,7 +238,7 @@ function shortestVisitAll(adj) {
   for (let i = 0; i < n; i++) { queue.push([i, 1 << i, 0]); seen[i][1 << i] = 1; }
   for (let head = 0; head < queue.length; head++) {
     const [u, mask, d] = queue[head];
-    if (mask === full) return d;
+    if (mask === full) return d;   // checked on pop, not push: BFS pops in distance order, so d is still the shortest
     for (const v of adj[u]) {
       const m2 = mask | (1 << v);
       if (!seen[v][m2]) { seen[v][m2] = 1; queue.push([v, m2, d + 1]); }
@@ -259,6 +259,7 @@ function shortestVisitAll(adj) {
       clues: ['"change at most one 0 to 1"', '"largest after one operation"', '"size of the island containing"'],
       whenNotToUse: ['Edges are added repeatedly over time → union-find (next topics)'],
       template: `// label components: id starts at 2 so it never clashes with 0/1
+// fill(r, c, id) = the flood fill (BFS/DFS) that labels one component and returns its size; R × C = grid size
 let id = 2; const size = [0, 0];
 for (let r = 0; r < R; r++) for (let c = 0; c < C; c++)
   if (grid[r][c] === 1) size[id] = fill(r, c, id++);   // fill returns the size`,

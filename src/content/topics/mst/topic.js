@@ -30,7 +30,8 @@ export default {
         'The graph is directed — MST is defined for undirected graphs (the directed version is a different, harder problem: minimum arborescence)',
       ],
       template: `function kruskal(n, edges) {
-  edges.sort((a, b) => a[2] - b[2]);        // cheapest first
+  edges.sort((a, b) => a[2] - b[2]);        // cheapest first; sorts in place — use [...edges] if the caller still needs the original order
+  // with tied weights the chosen edges depend on the sort order; any MST it returns is valid (same total)
   const uf = new UnionFind(n);
   let total = 0, used = 0;
   for (const [u, v, w] of edges) {

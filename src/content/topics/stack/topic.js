@@ -205,6 +205,7 @@ export default {
   let best = 0;
   for (let i = 0; i <= heights.length; i++) {
     const h = i === heights.length ? 0 : heights[i]; // sentinel flushes the stack
+    // >= with equal heights is still correct: an earlier equal bar gets a short width, but the last equal bar is measured with the full width
     while (st.length && heights[st[st.length - 1]] >= h) {
       const height = heights[st.pop()];
       const left = st.length ? st[st.length - 1] : -1; // previous smaller
@@ -247,7 +248,7 @@ export default {
 // answer   = Σ nums[i] * left[i] * right[i]`,
       variations: [
         { name: 'Maximum instead of minimum', description: 'Use greater instead of smaller boundaries.' },
-        { name: 'Single-pass version', description: 'When index j is popped by i, its right boundary is i and its left boundary is the new top — add nums[j] × (j − top) × (i − j) right there (top = −1 if the stack is empty). Pop while nums[top] ≥ nums[i] so equal values count once, and finish with a −∞ sentinel so every index is popped.' },
+        { name: 'Single-pass version', description: 'When index j is popped by i, its right boundary is i and its left boundary is the new top — add nums[j] × (j − top) × (i − j) right there (top = −1 if the stack is empty). Pop while nums[top] ≥ nums[i] — this is the strict-left / non-strict-right rule, so equal values count once — and finish with a −∞ sentinel so every index is popped.' },
       ],
       mistakes: [
         'Duplicates counted twice: use strict on one side and non-strict on the other',

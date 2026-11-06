@@ -117,6 +117,7 @@ export default {
     while (!dq.isEmpty() && nums[dq.back()] <= nums[i]) dq.popBack(); // dominated
     dq.pushBack(i);
     if (dq.front() <= i - k) dq.popFront();                          // left the window
+    // expire AFTER pushing: window is [i−k+1, i], so i itself is in it; the DP template expires BEFORE reading (front < i − k) because i looks back at [i−k, i−1]
     if (i >= k - 1) res.push(nums[dq.front()]);                       // front = max
   }
   return res;
@@ -555,6 +556,7 @@ for (let i = 0; i < n; i++) {
             title: 'Variable window with two deques (max − min ≤ limit)',
             code: `let left = 0, best = 0;
 for (let right = 0; right < n; right++) {
+  // strict < / > keeps equal values (windowMax pops them with <=); both are correct — a duplicate only delays expiry, which a limit check does not mind
   while (!maxD.isEmpty() && nums[maxD.back()] < nums[right]) maxD.popBack();
   maxD.pushBack(right);
   while (!minD.isEmpty() && nums[minD.back()] > nums[right]) minD.popBack();

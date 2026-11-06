@@ -560,6 +560,7 @@ That is O(n) — you cannot do better because the output itself may be O(n) long
             type: 'code',
             title: 'Merge template',
             code: `function mergeIntervals(intervals) {
+  // Same result as starting from [] with a \`last &&\` guard; seeding with sorted[0] just moves the empty check up front.
   if (intervals.length === 0) return [];
   const sorted = intervals.toSorted((a, b) => a[0] - b[0]);
   const out = [[sorted[0][0], sorted[0][1]]];
