@@ -19,6 +19,13 @@ export const initialProgress = () => ({
   saved: {},
   // Shorts (M9) answered: { [patternId]: { at, correct } } — new fields need no version bump (migrate fills them)
   shorts: {},
+  // M10: step-lesson "Your turn" tasks solved per day { 'YYYY-MM-DD': count } (Step-lesson streak)
+  stepDays: {},
+  // M10: days with a Short answered { 'YYYY-MM-DD': count } (Daily Short streak; shorts[id].at keeps only the last)
+  shortDays: {},
+  // M10: Animate my run — { passed: runs of your code that passed, fixed: tests fixed after a divergence,
+  //      diverged: { '<qid>|<test>': true } tests where your run left the reference's path }
+  animate: {},
   // v2: when the last backup was exported (ms), for the "back up" nudge on the Progress page
   exportedAt: null,
 });
@@ -30,7 +37,7 @@ export const initialProgress = () => ({
 export function migrate(raw) {
   const s = raw && typeof raw === 'object' ? raw : {};
   const out = { ...initialProgress(), ...s };
-  for (const k of ['topics', 'checkpoints', 'reflections', 'questions', 'activity', 'achievements', 'saved', 'shorts'])
+  for (const k of ['topics', 'checkpoints', 'reflections', 'questions', 'activity', 'achievements', 'saved', 'shorts', 'stepDays', 'shortDays', 'animate'])
     if (!out[k] || typeof out[k] !== 'object' || Array.isArray(out[k])) out[k] = {};
   // v1 → v2 only added `saved` and `exportedAt`, both filled in above
   out.version = VERSION;
@@ -148,6 +155,8 @@ export function progressReducer(state, action) {
           status: q.status === 'solved' || solvedNow ? 'solved' : 'attempted',
           solvedAt: q.solvedAt || (solvedNow ? now() : undefined),
           solvedWithoutSolution: q.status === 'solved' ? q.solvedWithoutSolution : solvedNow ? !q.solutionViewed : undefined,
+          // M10 Polyglot: languages it was solved in (a solve from before languages were recorded was JS)
+          solvedLangs: solvedNow ? [...new Set([...(q.solvedLangs || (q.status === 'solved' ? ['js'] : [])), action.lang || 'js'])] : q.solvedLangs,
           lastResult: { passed: action.passed, total: action.total, at: now(), kind: 'submit' },
         })),
       );
@@ -187,7 +196,28 @@ export function progressReducer(state, action) {
       return migrate(action.state);
     case 'SHORT_DONE': { // a Short's question answered; once right stays right
       const prev = state.shorts[action.id];
-      return { ...touch(state), shorts: { ...state.shorts, [action.id]: { at: now(), correct: !!(prev?.correct || action.correct) } } };
+      const k = todayKey();
+      return {
+        ...touch(state),
+        shorts: { ...state.shorts, [action.id]: { at: now(), correct: !!(prev?.correct || action.correct) } },
+        shortDays: { ...state.shortDays, [k]: (state.shortDays[k] || 0) + 1 },
+      };
+    }
+    case 'STEP_TASK': { // a step lesson's "Your turn" task solved (M10 Step-lesson streak)
+      const k = todayKey();
+      return { ...touch(state), stepDays: { ...state.stepDays, [k]: (state.stepDays[k] || 0) + 1 } };
+    }
+    case 'ANIMATE_DIVERGED': { // "Compare with the reference" found where your run left the reference's path
+      const a = state.animate;
+      return { ...state, animate: { ...a, diverged: { ...a.diverged, [action.key]: true } } };
+    }
+    case 'ANIMATE_RUN': { // an Animate my run of your own code finished; a pass on a diverged test counts as fixed
+      if (!action.passed) return state;
+      const a = state.animate;
+      const wasDiverged = !!a.diverged?.[action.key];
+      const diverged = { ...a.diverged };
+      delete diverged[action.key];
+      return { ...touch(state), animate: { ...a, passed: (a.passed || 0) + 1, fixed: (a.fixed || 0) + (wasDiverged ? 1 : 0), diverged } };
     }
     case 'SAVE_TOGGLE': {
       const saved = { ...state.saved };

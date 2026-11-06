@@ -133,7 +133,7 @@ function lps(s) {
 for (let len = 2; len < m; len++) {          // interval size, small → large
   for (let i = 0; i + len < m; i++) {
     const j = i + len;
-    for (let k = i + 1; k < j; k++) {        // k = the LAST thing done inside (i, j)
+    for (let k = i + 1; k < j; k++) {        // k = the LAST balloon burst inside (i, j) (for cutting a stick: the FIRST cut)
       dp[i][j] = best(dp[i][j], dp[i][k] + dp[k][j] + cost(i, k, j));
     }
   }

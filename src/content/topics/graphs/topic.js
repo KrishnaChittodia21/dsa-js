@@ -1181,7 +1181,7 @@ function gridBfs(grid, sources) {
 
 **Adjacency list:** O(V + E) memory. **Matrix:** O(V²) memory and O(V²) traversal time (scanning a full row per vertex).
 
-**Special cases:** state-space BFS is O(states × moves per state), e.g. O(2^n · n²) for shortest path visiting all nodes. Bidirectional BFS keeps the same worst case but in practice explores about the square root of the states.`,
+**Special cases:** state-space BFS is O(states × moves per state), e.g. O(2^n · n²) for shortest path visiting all nodes. Bidirectional BFS keeps the same worst case but in practice explores about 2·b^(d/2) states instead of b^d (roughly twice the square root).`,
           },
         ],
       },

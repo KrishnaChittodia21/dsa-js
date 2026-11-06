@@ -140,7 +140,7 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
           </button>
         </div>,
       );
-    if (stepsOn) out.push(<StepLesson key={`steps-${modeKey}`} steps={section.steps} />);
+    if (stepsOn) out.push(<StepLesson key={`steps-${modeKey}`} steps={section.steps} onSolve={() => dispatch({ type: 'STEP_TASK' })} />);
     for (let i = 0; i < section.blocks.length; i++) {
       const b = section.blocks[i];
       if (stepsOn && b.type !== 'checkpoint') continue;

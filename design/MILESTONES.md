@@ -483,11 +483,43 @@ JavaScript. Revisit only if M7's runtime makes tracing cheap.
   weighted-DSU "update parent first" mistake doesn't match its template (which saves `p` first); trie max-XOR inserts
   `nums[0]` twice and mixes "31/32 bits"; state-space BFS returns on pop, not push; bidirectional BFS "about √" is
   loose (2·b^(d/2)); several templates use undefined helpers (`fill`, `neighbours`).
+- **Batch 9g done 2026-11-07:** 22 more (Shortest Path 7, MST 5, Advanced Graphs 5, Greedy 5) by 4 agents: 139 of 172.
+  Advanced Graphs checks every result against a brute force at load (bridges/cut vertices by removal, SCCs by mutual
+  reach, Euler path over all ticket orders). Lesson-pass notes: low-link "a visited neighbour is an ancestor" is not
+  exact in undirected DFS (it can be a descendant seen again — harmless in the code); 0-1 BFS pops duplicates without
+  saying so; Dijkstra / Bellman-Ford / Kruskal each have two slightly different templates; Euler path conditions omit
+  "connected" for paths.
+- **Batch 9h done 2026-11-07 → M9 content complete: 172 of 172 Shorts** (DP 1D 5, DP 2D 4, Bit Manipulation 6,
+  DP Advanced 7, Advanced Structures 7, String Algorithms 4; 6 agents). Every file checks its results against a brute
+  force at load; self-loop edges in state diagrams render (the nodes panel draws them as arcs). Lesson-pass notes:
+  the booking-calendar "O(k) per booking after sorting" is wrong for a template that re-sorts every booking
+  (O(k log k)); Advanced Structures mixes 1-based and 0-based ranks while listing that as a mistake; frog jump's
+  "first jump must be 1" is enforced only implicitly; mixed `>>` / `>>>` in Bit Manipulation; "cut a stick" template
+  comment says LAST cut where that variant splits on the FIRST.
+  - **Open for M9:** a visual pass in the browser over Shorts from batches 9d–9h (the browser tool could not start
+    in those batches), and a lesson pass for the clarity notes logged above (no factual errors found that change an
+    answer, except the calendar complexity line).
+  - **Lesson fixes 2026-11-07 (the inaccurate ones):** booking calendar O(k) → O(k log k) per booking (keys re-sorted);
+    low-link "a visited neighbour is an ancestor" now also names the same back edge seen from the ancestor’s side;
+    interval-DP template comment "LAST balloon burst … (for cutting a stick: the FIRST cut)"; bidirectional BFS
+    "about the square root" → "about 2·b^(d/2) states instead of b^d". The remaining notes are style / consistency
+    (duplicate templates, undefined helpers, mixed conventions) — left for a later lesson-polish milestone.
 
 ### M10 · Achievements, round two · 4–6 h
 - New ones for the new features: first Animate my run passed, first divergence fixed, Polyglot (the same question
   in JS, Java and C++, if M7 is a go), Shorts streaks, Step-lesson streaks, Saved collector. Stored locally.
 - **Tests:** each rule fires once at its threshold, and not one below.
+- **Done 2026-11-07:** 6 new achievements (28 in all), shown by the existing badges page and unlock dialog:
+  **Lights, Camera, Pass** (an Animate run of your code passed), **Polyglot** (same question solved in JS, Java and
+  C++; 1 / 10 / 25), **Course Corrected** (a test passed after "Compare with the reference" showed a divergence),
+  **Daily Short** and **Hands-on Streak** (3 / 7 / 30 days in a row with a Short / a step-lesson task),
+  **Collector** (5 / 25 / 100 saved items).
+  - **Progress (no version bump; migrate fills the new fields):** `questions[id].solvedLangs` (set on a fully passing
+    Submit with its language; an older solve counts as JS), `stepDays` and `shortDays` (`{ 'YYYY-MM-DD': count }`),
+    `animate { passed, fixed, diverged }`; actions `STEP_TASK` (LessonPlayer → StepLesson `onSolve`), `ANIMATE_RUN`,
+    `ANIMATE_DIVERGED` (AnimateRun, JS runs only; a test = question id + test number or your own input).
+  - **Tests:** 54 (6 new: each rule at its threshold and one below; languages accumulate; a fix needs a divergence
+    on the same test first, and counts once).
 
 ### M11 · Guide me, round two · 5–8 h
 - The existing `WelcomeTour` gains steps for the new features, plus a per-page guide on `?` (workspace: language

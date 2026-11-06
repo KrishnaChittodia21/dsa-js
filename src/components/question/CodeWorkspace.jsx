@@ -162,7 +162,7 @@ export default function CodeWorkspace({ question }) {
       setRun({ mode, res, tests: subset, at: new Date() });
       const passed = res.results.filter((r) => r.passed).length;
       const total = subset.length;
-      if (mode === 'submit') dispatch({ type: 'Q_SUBMIT', qid: question.id, passed, total, allPassed: !res.compileError && passed === total });
+      if (mode === 'submit') dispatch({ type: 'Q_SUBMIT', qid: question.id, passed, total, allPassed: !res.compileError && passed === total, lang });
       else dispatch({ type: 'Q_RUN', qid: question.id, passed, total });
       setRunning(false);
     },

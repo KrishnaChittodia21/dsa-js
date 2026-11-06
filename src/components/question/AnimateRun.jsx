@@ -5,6 +5,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import Icon from "../ui/Icon.jsx";
 import { recordInWorker, runInWorker } from "../../runner/runInWorker.js";
+import { useProgress } from "../../state/ProgressContext.jsx";
 import { describeTest, resolveArgs, resolveDesign } from "../../runner/core.js";
 import { mutants } from "../../runner/bugs.js";
 import {
@@ -85,6 +86,7 @@ async function runYours(lang, code, question, test, own, refCode) {
 
 export default function AnimateRun({ code, question, tests, lang = "js" }) {
   const native = lang !== "js";
+  const { dispatch } = useProgress();
   const [scene, setScene] = useState(null);
   const [pick, setPick] = useState(0); // a visible test's index, or 'own'
   const [own, setOwn] = useState("");
@@ -125,6 +127,7 @@ export default function AnimateRun({ code, question, tests, lang = "js" }) {
     const test = pick === "own" ? ownTest : tests[pick];
     if (!test || busy) return;
     setBusy("Recording…");
+    const key = `${question.id}|${pick === "own" ? own : pick}`; // which test (for "first divergence fixed")
     // Java / C++: the steps are the JS reference's; your code runs on the same test for its answer
     const [run, yours] = native
       ? await Promise.all([record(refCode, test), runYours(lang, code, question, test, pick === "own", refCode)])
@@ -137,7 +140,10 @@ export default function AnimateRun({ code, question, tests, lang = "js" }) {
       view: "mine",
       mine: { run, frames: framesOf(run, native ? refCode : code) },
       yours,
+      key,
     });
+    // M10 achievements: a pass of your own (JS) run; on a test that diverged before, it counts as fixed
+    if (!native) dispatch({ type: "ANIMATE_RUN", key, passed: !!run.passed });
     setWatch("");
     setMeter(null);
     setBusy("");
@@ -153,6 +159,7 @@ export default function AnimateRun({ code, question, tests, lang = "js" }) {
       name && has(shown.mine.run) && has(run)
         ? firstDivergence(shown.mine.run.steps, run.steps, name)
         : -1;
+    if (at >= 0) dispatch({ type: "ANIMATE_DIVERGED", key: shown.key });
     const info = `Your run: ${(shown.mine.run.calls ?? 0).toLocaleString("en")} steps · reference: ${(run.calls ?? 0).toLocaleString("en")} steps.${at >= 0 ? ` Your ${name} first takes a different value at step ${at + 1} of your run.` : ""}`;
     setShown((s) => ({
       ...s,

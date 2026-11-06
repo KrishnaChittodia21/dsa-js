@@ -1164,7 +1164,7 @@ The overlap (indices 2..4) is counted twice — harmless because **min is idempo
             type: 'text',
             md: `Some problems talk about positions up to **10^9** (calendars, falling squares, range modules) but perform only ~10^3–10^4 operations. Only the **endpoints that actually appear** matter — nothing changes between two consecutive endpoints. Three acceptable strategies:
 
-1. **Sorted boundary map (sweep).** My Calendar III: store \`+1\` at each start and \`−1\` at each end; after every booking, walk the sorted keys with a running sum — the max running sum is the answer. O(k) per booking after sorting, fine for ≤ 400 calls.
+1. **Sorted boundary map (sweep).** My Calendar III: store \`+1\` at each start and \`−1\` at each end; after every booking, walk the sorted keys with a running sum — the max running sum is the answer. O(k log k) per booking (the keys are re-sorted each time), fine for ≤ 400 calls.
 2. **Sorted list of disjoint intervals.** Range Module: keep \`[[l1, r1], [l2, r2], …]\` sorted and non-overlapping; binary-search where a new range lands, then merge (add), cut (remove) or check containment (query).
 3. **Coordinate compression + segment tree.** Falling Squares: collect every left and right edge, sort + dedupe, map to indices, and run a segment tree over those indices supporting "max on a range" and "raise a range to h".`,
           },

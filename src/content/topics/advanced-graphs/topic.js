@@ -528,7 +528,7 @@ In the drawing: \`low[3] = 3 > disc[1] = 1\` → 1–3 is a bridge and 1 is a cu
             steps: [
               'Build an adjacency list storing `[neighbour, edgeId]` so parallel edges can be told apart.',
               'DFS(u, parentEdge): set `disc[u] = low[u] = time++`.',
-              'For each `[v, id]`: skip `id === parentEdge`. If v is unvisited → recurse, then `low[u] = min(low[u], low[v])` and apply the bridge / cut tests. If v is visited → it is an ancestor (back edge): `low[u] = min(low[u], disc[v])`.',
+              'For each `[v, id]`: skip `id === parentEdge`. If v is unvisited → recurse, then `low[u] = min(low[u], low[v])` and apply the bridge / cut tests. If v is visited → it is a back edge to an ancestor (or the same back edge seen again from the ancestor’s side, where `disc[v] > disc[u]` changes nothing): `low[u] = min(low[u], disc[v])`.',
               'Root rule: the DFS root is a cut vertex iff it has ≥ 2 tree children.',
               'Repeat from every unvisited node (the graph may be disconnected).',
             ],
