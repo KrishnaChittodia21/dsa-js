@@ -37,8 +37,11 @@ export function text(v) {
   if ('$map' in v) return `{${v.$map.map(([k, x]) => `${text(k)}: ${text(x)}`).join(', ')}${v.$size > v.$map.length ? ', …' : ''}}`;
   if ('$set' in v) return `{${v.$set.map(text).join(', ')}${v.$size > v.$set.length ? ', …' : ''}}`;
   if ('$tree' in v) return `tree [${v.$tree.map(text).join(',')}]`;
+  if ('$graph' in v) return `node ${text(v.$graph.nodes[0]?.val)}`;
   if ('$trie' in v) return `trie of ${v.$trie.nodes.length}${v.$trie.more ? '+' : ''} nodes`;
   if ('$list' in v) return `${v.$list.values.map(text).join(' → ')}${v.$list.cycleTo !== undefined ? ' ↺' : ' → ∅'}`;
+  const tk = '$obj' in v && unwrap(v); // a toolkit Deque / Queue / Stack / heap reads as its items, not its ring buffer
+  if (tk && tk[0] !== 'adj') return `${tk[0]} [${tk[1].map(text).join(',')}]`;
   if ('$obj' in v) return `{${Object.entries(v.$obj).map(([k, x]) => `${k}: ${text(x)}`).join(', ')}}`;
   return JSON.stringify(v);
 }
@@ -55,17 +58,31 @@ function changedCells(cur, prev) {
 
 // ---------- shape tests ----------
 /** adjacency list as an array: adj[u] = [v, …] with every v a vertex index */
+/** one adjacency entry: v, or [v, weight] (weighted graphs) */
+const entry = (x) => (isInt(x) ? [x, undefined] : Array.isArray(x) && x.length === 2 && isInt(x[0]) && typeof x[1] === 'number' ? x : null);
+
+/** adjacency list as an array: adj[u] = [v, …] with every v a vertex index; adj.w['u,v'] = weight when weighted */
 function asAdj(v) {
+  let rows;
   if (isObj(v, '$map')) {
-    if (v.$size > v.$map.length || !v.$map.every(([k, x]) => isInt(k) && k >= 0 && isRow(x) && x.every(isInt))) return null;
-    const n = Math.max(-1, ...v.$map.flatMap(([k, x]) => [k, ...x])) + 1;
+    if (v.$size > v.$map.length || !v.$map.every(([k, x]) => isInt(k) && k >= 0 && Array.isArray(x) && x.every(entry))) return null;
+    const n = Math.max(-1, ...v.$map.flatMap(([k, x]) => [k, ...x.map((e) => entry(e)[0])])) + 1;
     if (n < 1 || n > MAX_NODES) return null;
-    const adj = Array.from({ length: n }, () => []);
-    for (const [k, x] of v.$map) adj[k] = x;
-    return adj;
+    rows = Array.from({ length: n }, () => []);
+    for (const [k, x] of v.$map) rows[k] = x;
+  } else if (Array.isArray(v) && v.length > 1 && v.length <= MAX_NODES && v.every((r) => Array.isArray(r) && r.length === v.length && r.every((x) => typeof x === 'number'))) {
+    // an n×n adjacency matrix (Prim's graph[i][j]): every non-zero, finite cell is an edge with that weight
+    const weighted = v.some((r) => r.some((x) => x !== 0 && x !== 1));
+    rows = v.map((r, u) => r.flatMap((x, j) => (j !== u && x !== 0 && Number.isFinite(x) ? [weighted ? [j, x] : j] : [])));
+  } else {
+    if (!Array.isArray(v) || !v.length || v.length > MAX_NODES) return null;
+    if (!v.every((r) => Array.isArray(r) && r.every((x) => entry(x) && entry(x)[0] >= 0 && entry(x)[0] < v.length))) return null;
+    rows = v;
   }
-  if (!Array.isArray(v) || !v.length || v.length > MAX_NODES) return null;
-  return v.every((r) => isRow(r) && r.every((x) => isInt(x) && x >= 0 && x < v.length)) ? v : null;
+  const adj = rows.map((r) => r.map((x) => entry(x)[0]));
+  adj.w = {};
+  rows.forEach((r, u) => r.forEach((x) => entry(x)[1] !== undefined && (adj.w[`${u},${entry(x)[0]}`] = entry(x)[1])));
+  return adj;
 }
 const isParentRow = (v) => isRow(v) && v.length > 0 && v.length <= MAX_NODES && v.every((x) => isInt(x) && x >= 0 && x < v.length) && v.some((x, i) => x === i);
 
@@ -93,14 +110,53 @@ function forestPanel(name, parent) {
   };
   const top = { id: -1, label: '', children: roots.map(build) };
   if (seen.size !== parent.length) return null;
-  const { nodes, edges } = layoutNary(top);
-  return {
-    kind: 'nodes',
-    label: `${name} (each root is one group)`,
-    nodes: nodes.filter((n) => n.id !== -1).map((n) => ({ id: n.id, label: String(n.id), x: n.x, y: n.y - 1, state: parent[n.id] === n.id ? 'done' : '' })),
-    edges: edges.filter(([f]) => f !== -1).map(([from, to]) => ({ from: to, to: from })),
-    directed: true,
-  };
+  // nodes still on their own go in one wrapping row, so 16 singletons do not make a 16-wide forest
+  const lone = roots.filter((r) => !kids[r].length);
+  const out = [];
+  if (lone.length < roots.length) {
+    // each group laid out on its own, groups placed left to right and wrapped onto a new band past ~7 nodes wide
+    const wide = [];
+    const nodes = [];
+    const edges = [];
+    let x0 = 0;
+    let y0 = 0;
+    let band = 0;
+    for (const g of top.children.filter((c) => c.children.length)) {
+      const lay = layoutNary(g);
+      const w = Math.max(...lay.nodes.map((n) => n.x)) + 1;
+      const h = Math.max(...lay.nodes.map((n) => n.y)) + 1;
+      if (w > 7) {
+        wide.push(g); // too wide to draw on a phone: listed as leader → members instead
+        continue;
+      }
+      if (x0 > 0 && x0 + w > 7) (x0 = 0), (y0 += band + 0.6), (band = 0);
+      for (const n of lay.nodes) nodes.push({ id: n.id, label: String(n.id), x: x0 + n.x, y: y0 + n.y, state: parent[n.id] === n.id ? 'done' : '' });
+      for (const [f, t] of lay.edges) edges.push({ from: t, to: f });
+      x0 += w + 0.5;
+      band = Math.max(band, h);
+    }
+    if (nodes.length) out.push({ kind: 'nodes', label: `${name} (each root is one group)`, nodes, edges, directed: true });
+    if (wide.length) {
+      const members = (g) => [g.id, ...g.children.flatMap(members)];
+      const rows = wide.flatMap((g) => {
+        const m = members(g).slice(1);
+        return Array.from({ length: Math.ceil(m.length / 6) }, (_, k) => [k ? '' : String(g.id), m.slice(k * 6, k * 6 + 6).join(', ')]);
+      });
+      out.push({ kind: 'table', label: `${name}: groups (leader → members)`, rowLabels: rows.map((r) => r[0]), colLabels: ['members'], cells: rows.map((r) => [r[1]]), states: rows.map(() => ['']) });
+    }
+  }
+  if (lone.length) out.push(...wrapRow({ kind: 'array', label: lone.length === roots.length ? `${name}: every node is its own group` : 'on their own', values: lone, highlights: {}, showIndices: false }));
+  return out;
+}
+
+/** nodes on a circle about one node apart (layoutCircle's wider circle is for the lessons' small graphs) */
+function runCircle(n) {
+  if (n <= 6) return layoutCircle(n);
+  const R = Math.max(1.6, (n * 1.15) / (2 * Math.PI));
+  return Array.from({ length: n }, (_, i) => {
+    const a = -Math.PI / 2 + (2 * Math.PI * i) / n;
+    return { id: i, val: i, x: R + R * Math.cos(a), y: R + R * Math.sin(a) };
+  });
 }
 
 function graphPanel(name, adj, vars) {
@@ -120,13 +176,14 @@ function graphPanel(name, adj, vars) {
     row.forEach((v) => {
       if (!directed && u > v) return;
       const hot = (u === at && v === nxt) || (!directed && v === at && u === nxt);
-      edges.push({ from: u, to: v, state: hot ? 'active' : '' });
+      const w = adj.w?.[`${u},${v}`];
+      edges.push({ from: u, to: v, state: hot ? 'active' : '', ...(w !== undefined ? { label: String(w) } : {}) });
     }),
   );
   return {
     kind: 'nodes',
     label: `${name} (graph)`,
-    nodes: layoutCircle(n).map((p) => ({ id: p.id, label: String(p.id), x: p.x, y: p.y, state: p.id === at ? 'active' : p.id === nxt ? 'done' : visited.has(p.id) ? 'visited' : '' })),
+    nodes: runCircle(n).map((p) => ({ id: p.id, label: String(p.id), x: p.x, y: p.y, state: p.id === at ? 'active' : p.id === nxt ? 'done' : visited.has(p.id) ? 'visited' : '' })),
     edges,
     directed,
     freeLayout: true,
@@ -163,6 +220,38 @@ function triePanel(name, snap, tags) {
       return { id: n.id, label: String(n.val), x: n.x, y: n.y, state: tag ? 'active' : nodes[n.id].end ? 'done' : '', ...(tag ? { tag: tag.join(',') } : {}) };
     }),
     edges: laid.edges.map(([from, to]) => ({ from, to })),
+  };
+}
+
+/** nodes linked by neighbour lists (Clone Graph), on a circle; variables pointing into it as tags */
+function nodeGraphPanel(name, snap, tags) {
+  const { nodes, more } = snap.$graph;
+  const seen = new Set();
+  const edges = [];
+  nodes.forEach((n, i) =>
+    n.nb.forEach((j) => {
+      const k = i < j ? `${i},${j}` : `${j},${i}`;
+      if (j >= 0 && !seen.has(k)) seen.add(k), edges.push({ from: i, to: j });
+    }),
+  );
+  return {
+    kind: 'nodes',
+    label: `${name} (graph${more ? ', first 16 nodes' : ''})`,
+    // seats by node id, not by search order from the current node, so nodes stay put from step to step
+    nodes: (() => {
+      // by value when the values are distinct numbers (Clone Graph's 1…n go round the ring in order), else by node id
+      const byVal = nodes.every((n) => typeof n.val === 'number') && new Set(nodes.map((n) => n.val)).size === nodes.length;
+      const key = (i) => (byVal ? nodes[i].val : nodes[i].id ?? i);
+      const seat = new Map([...nodes.keys()].sort((a, b) => key(a) - key(b)).map((i, k) => [i, k]));
+      const circle = runCircle(nodes.length);
+      return nodes.map((n, i) => {
+        const tag = i === 0 ? [name, ...(tags.get(n.id) || [])] : tags.get(n.id); // nodes[0] is the drawn variable's own node
+        const p = circle[seat.get(i)];
+        return { id: i, label: label(n.val), x: p.x, y: p.y, state: tag ? 'active' : '', ...(tag ? { tag: tag.join(',') } : {}) };
+      });
+    })(),
+    edges,
+    freeLayout: true,
   };
 }
 
@@ -215,9 +304,17 @@ function flatten(vars) {
 /** [[index, value]…] of the non-zero cells of a long counting array (≥ 27 cells, numbers / booleans), else null */
 function sparseOf(v) {
   if (isObj(v, '$array')) return v.$sparse || null;
-  if (!isRow(v) || v.length < 27 || !v.every((x) => typeof x === 'number' || typeof x === 'boolean')) return null;
-  const cells = v.map((x, i) => [i, x]).filter(([, x]) => x);
-  return cells.length * 3 <= v.length ? cells : null; // mostly zeros: the table is easier to read than the row
+  if (!isRow(v) || v.length < 27 || !v.every((x) => x === null || typeof x === 'number' || typeof x === 'boolean')) return null;
+  const f = fillOf(v);
+  const cells = v.map((x, i) => [i, x]).filter(([, x]) => !Object.is(x, f));
+  return cells.length * 3 <= v.length ? cells : null; // mostly one value: the table is easier to read than the row
+}
+/** the value most cells of a long row hold (0, -1, null, Infinity…): the cells shown are the ones that differ */
+function fillOf(v) {
+  if (isObj(v, '$array')) return v.$fill ?? 0;
+  const counts = new Map();
+  for (const x of v) counts.set(x, (counts.get(x) || 0) + 1);
+  return [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 0;
 }
 
 const ROW = 13; // cells per line: a longer array wraps onto more lines so it stays readable on a phone
@@ -287,6 +384,8 @@ export function panelsFor(rawVars, rawPrev = {}, opts = {}) {
   const tries = names.filter((n) => isObj(vars[n], '$trie')).sort((a, b) => vars[b].$trie.nodes.length - vars[a].$trie.nodes.length);
   place(trees, (v) => v.$ids || []);
   place(tries, (v) => v.$trie.nodes.map((x) => x.id));
+  const graphs = names.filter((n) => isObj(vars[n], '$graph')).sort((a, b) => vars[b].$graph.nodes.length - vars[a].$graph.nodes.length);
+  place(graphs, (v) => v.$graph.nodes.map((x) => x.id));
   place(lists, (v) => v.$list.ids || []);
 
   for (const name of names) {
@@ -301,7 +400,7 @@ export function panelsFor(rawVars, rawPrev = {}, opts = {}) {
     const forest = (kind === 'parent' || (!kind && PARENT_NAME.test(name))) && isParentRow(val) ? forestPanel(shown, val) : null;
     if ((kind === 'heap' || (!kind && HEAP_NAME.test(name))) && isRow(val) && val.length <= 31) panels.push(heapPanel(shown, val, pv));
     else if ((kind === 'adj' || (!kind && ADJ_NAME.test(name))) && asAdj(val)) panels.push(graphPanel(shown, asAdj(val), vars));
-    else if (forest) panels.push(forest);
+    else if (forest) panels.push(...forest);
     else if (kind === 'stack' || kind === 'queue') panels.push({ kind, label: shown, values: val.map((x) => (x === undefined ? '·' : x)) });
     else if (Array.isArray(v) && v.length && v.length <= 16 && v.every((x) => isObj(x, '$tree') || isObj(x, '$list'))) {
       // a queue / stack of tree or list nodes (BFS over a tree): each node shown by its value
@@ -313,7 +412,7 @@ export function panelsFor(rawVars, rawPrev = {}, opts = {}) {
       // a long, mostly empty counting array: only its non-zero cells, as index → value
       const cells = sparseOf(v);
       const before = new Map(sparseOf(p) || []);
-      panels.push({ kind: 'table', label: `${shown} (non-zero cells of ${v.$length ?? v.length})`, rowLabels: cells.map(([i]) => String(i)), colLabels: ['value'], cells: cells.map(([, x]) => [label(x)]), states: cells.map(([i, x]) => [before.get(i) === x ? '' : 'active']) });
+      panels.push({ kind: 'table', label: `${shown} (cells other than ${label(fillOf(v))}, of ${v.$length ?? v.length})`, rowLabels: cells.map(([i]) => String(i)), colLabels: ['value'], cells: cells.map(([, x]) => [label(x)]), states: cells.map(([i, x]) => [before.get(i) === x ? '' : 'active']) });
     }
     else if (isRow(v)) {
       const k = STACK_NAME.test(name) ? 'stack' : QUEUE_NAME.test(name) ? 'queue' : 'array';
@@ -337,9 +436,11 @@ export function panelsFor(rawVars, rawPrev = {}, opts = {}) {
       const states = v.map((row, r) => row.map((x, c) => (Array.isArray(p) && Array.isArray(p[r]) && !same(x, p[r][c]) ? 'active' : '')));
       panels.push({ kind: 'grid', label: shown, cells: v.map((row) => row.map((x) => (x === null || x === undefined ? '·' : x))), states });
     } else if (isObj(v, '$array') && v.$array.every(isPrim)) {
-      panels.push({ kind: 'array', label: `${shown} (first ${v.$array.length} of ${v.$length})`, values: v.$array, highlights: {} });
+      panels.push(...wrapRow({ kind: 'array', label: `${shown} (first ${v.$array.length} of ${v.$length})`, values: v.$array.map((x) => (x === Infinity ? '∞' : x === undefined ? '·' : x)), highlights: {} }));
     } else if (isObj(v, '$trie') && drawn.has(name)) {
       panels.push(triePanel(shown, v, drawn.get(name)));
+    } else if (isObj(v, '$graph') && drawn.has(name)) {
+      panels.push(nodeGraphPanel(shown, v, drawn.get(name)));
     } else if (isObj(v, '$tree') && drawn.has(name)) {
       panels.push(treePanel(shown, v, drawn.get(name)));
     } else if (isObj(v, '$list') && drawn.has(name)) {
@@ -487,20 +588,22 @@ export function buildRunFrames(run, code, scene = {}, questionParams = []) {
   const keep = (vars) => (watch ? Object.fromEntries(Object.entries(vars).filter(([k]) => watch.has(k))) : vars);
   const opts = { labels: scene.labels, pointers: scene.pointers, range: scene.range };
   const steps = run.steps.map((s) => ({ ...s, vars: keep(s.vars) }));
-  const predicts = scene.predict ? new Map() : autoPredicts(steps, code);
+  // a sampled run (stride > 1) keeps every stride-th step: the next step shown is not the next one run, so no predictions
+  const isSampled = (run.stride || 1) > 1;
+  const predicts = scene.predict || isSampled ? new Map() : autoPredicts(steps, code);
   const frames = [];
   let prev = {};
   steps.forEach((s, i) => {
     const src = (lines[s.line - 1] || '').trim();
     const what = changes(flatten(s.vars), flatten(prev));
-    const ctx = { vars: s.vars, prev, line: s.line, src, lines, changes: what, index: i, next: steps[i + 1], params, op: s.op, ops, result: run.output, ret: !!s.ret, value: s.value, input: run.input };
+    const ctx = { vars: s.vars, prev, line: s.line, src, lines, changes: what, index: i, next: steps[i + 1], params, op: s.op, ops, result: run.output, ret: !!s.ret, value: s.value, input: run.input, stride: run.stride || 1 };
     const told = scene.narrate?.(ctx);
     const at = s.op !== undefined && ops[s.op] ? `op ${s.op + 1} · ${opText(ops[s.op])} · ` : '';
     const panels = panelsFor(s.vars, prev, opts);
     if (ops.length && s.op !== undefined) panels.unshift(opsPanel(ops, s.op));
     const frame = { line: s.line, note: `${at}Line ${s.line}: ${told || `\`${clip(src, 48)}\`${what.length ? ` → ${what.join(', ')}` : ''}`}`, panels };
     if (predicts.has(i)) frame.predict = predicts.get(i);
-    if (scene.predict && ctx.next && predicts.size < (scene.maxPredicts ?? 3)) {
+    if (scene.predict && !isSampled && ctx.next && predicts.size < (scene.maxPredicts ?? 3)) {
       const asked = scene.predict(ctx);
       if (asked) predicts.set(i + 1, asked);
     }

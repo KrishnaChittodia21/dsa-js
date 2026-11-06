@@ -239,3 +239,18 @@ test('gold scenes: narration, predictions and their bugs on the reference soluti
     assert.ok(failing.length > 0, `${q.id}: at least one injected bug fails a test`);
   }
 });
+
+test('node-and-neighbours graphs (Clone Graph) are drawn as one graph, steady from step to step', async () => {
+  const q = (await import(pathToFileURL(path.resolve('src/content/topics/graphs/questions/clone-graph.js')).href)).default;
+  const run = recordRun(q.solution.code, q, q.tests[0]);
+  assert.equal(run.passed, true);
+  const g = run.steps[0].vars.node.$graph;
+  assert.deepEqual(g.nodes.map((n) => n.val), [1, 2, 4, 3]); // breadth first from node 1
+  assert.deepEqual(g.nodes[0].nb, [1, 2]);
+  const seats = (k) => {
+    const p = panelsFor(run.steps[k].vars).find((x) => x.kind === 'nodes' && x.edges.length === 4);
+    return Object.fromEntries(p.nodes.map((n) => [n.label, `${n.x.toFixed(2)},${n.y.toFixed(2)}`]));
+  };
+  const last = run.steps.length - 1;
+  assert.deepEqual(seats(5), seats(last - 2)); // the original graph keeps its layout while the search moves around it
+});

@@ -80,16 +80,16 @@ Every question gets its own **scene file** (`src/visualizations/scenes/<question
 - [ ] W0.3 Create branch `feat/animate-run` from `main`.
 
 ## Week 1 — Wed Oct 28 → Tue Nov 3 · Recorder (inputs + your own variables)
-- [ ] W1.1 (Build) Proxy recorder for args in `src/runner/worker.js` / `src/runner/core.js`; events `{op, path, value}`; ~2,000-event cap with sampling.
-- [ ] W1.2 (Build) Code-rewrite pass (parser, e.g. acorn) so locals — `dp`, `stack`, `seen`, loop vars — are recorded too. Check bundle size + slowdown; lazy-load it only for the Animate tab.
-- [ ] W1.3 (Finish) Frame builder → frames in the `Visualizer` panel format (`src/visualizations/panels.jsx`).
-- [ ] W1.4 (Finish) Verdict: pass/fail from final state; `algorithm` field enables step comparison.
-- [ ] W1.5 (Fix) Node tests: reference + buggy bubble sort through the recorder. Commit.
+- [x] W1.1 (Build) Proxy recorder for args in `src/runner/worker.js` / `src/runner/core.js`; events `{op, path, value}`; ~2,000-event cap with sampling.
+- [x] W1.2 (Build) Code-rewrite pass (parser, e.g. acorn) so locals — `dp`, `stack`, `seen`, loop vars — are recorded too. Check bundle size + slowdown; lazy-load it only for the Animate tab.
+- [x] W1.3 (Finish) Frame builder → frames in the `Visualizer` panel format (`src/visualizations/panels.jsx`).
+- [x] W1.4 (Finish) Verdict: pass/fail from final state; `algorithm` field enables step comparison.
+- [x] W1.5 (Fix) Node tests: reference + buggy bubble sort through the recorder. Commit.
 
 ## Week 2 — Wed Nov 4 → Tue Nov 10 · Tab + first renderers → **M1**
-- [ ] W2.1 (Build) "Animate my run" tab in `src/components/question/CodeWorkspace.jsx`: Run → running → auto-play → verdict; scrub after.
-- [ ] W2.2 (Build) Renderers: bars, cells (strings), grid, linked list, tree.
-- [ ] W2.3 (Finish) Bubble Sort question wired end to end.
+- [x] W2.1 (Build) "Animate my run" tab in `src/components/question/CodeWorkspace.jsx`: Run → running → auto-play → verdict; scrub after.
+- [x] W2.2 (Build) Renderers: bars, cells (strings), grid, linked list, tree.
+- [x] W2.3 (Finish) Bubble Sort question wired end to end.
 - [ ] W2.4 (Review/Fix) Browser test incl. reduced motion + phone. Merge, deploy. **M1.**
 
 ## Week 3 — Wed Nov 11 → Tue Nov 17 · Remaining renderers + interaction kit → **M2**
@@ -103,7 +103,7 @@ Every question gets its own **scene file** (`src/visualizations/scenes/<question
 - [x] W4.2 (Build) QA harness, run on every scene: reference solution must PASS, an auto-injected bug must FAIL at a sensible step, no crash, no empty frames, renders at phone width.
 - [x] W4.3 (Finish) **Pilot: 20 questions** across all families. Measure `/usage` % per 25-question batch → project whether 426 questions (≈17 batches) fit in one weekly limit or spill into the next week.
 - [ ] W4.4 (Review) Watch all 20; tighten the brief where scenes feel samey or confusing.
-- [ ] W4.5 (Fix) Merge pilot scenes. **M3.**
+- [x] W4.5 (Fix) Merge pilot scenes. **M3.**
 
 ## Week 5 — Wed Nov 25 → Tue Dec 1 · Production, 100/day → **M4**
 Grouped so each day reuses the same renderers:
@@ -116,15 +116,15 @@ Grouped so each day reuses the same renderers:
 | Sat Nov 28 | 4 | tries, graphs, shortest-path, topological-sort, mst, union-find, advanced-graphs |
 | Sun Nov 29 | 2 | dp-1d, dp-2d, dp-advanced, recursion, backtracking, advanced-structures, 28 design classes (remaining ~26 + design) |
 
-- [ ] W5.1–W5.5 one checkbox per day above: batches run, harness report reviewed, ~10 spot-checked.
-- [ ] W5.6 (Mon) Fix the harness failures from the week.
-- [ ] W5.7 (Tue) Buffer — no generation. **M4: all 426 generated.**
+- [x] W5.1–W5.5 one checkbox per day above: batches run, harness report reviewed, ~10 spot-checked.
+- [x] W5.6 (Mon) Fix the harness failures from the week.
+- [x] W5.7 (Tue) Buffer — no generation. **M4: all 426 generated.**
 
 ## Week 6 — Wed Dec 2 → Tue Dec 8 · QA backlog + ship → **M5**
 - [ ] W6.1 (Build) Re-generate scenes you flagged as weak (expect 10–15%).
-- [ ] W6.2 (Finish) Performance on large inputs; accessibility pass (keyboard for every interaction).
+- [x] W6.2 (Finish) Performance on large inputs; accessibility pass (keyboard for every interaction). Slowest visible run 0.45 s record + build (expression-add-operators, 1,394 steps); no change needed. Keyboard: focus kept on busy buttons (aria-disabled), moved to the new player / prediction options / meter, status announced.
 - [ ] W6.3 (Review) Final walk-through, one scene per topic.
-- [ ] W6.4 (Fix) Docs in `CONTENT_GUIDE.md` (how to add a scene for a new question). Merge, deploy. **M5.**
+- [x] W6.4 (Fix) Docs in `CONTENT_GUIDE.md` (how to add a scene for a new question) — section 7 done. Merge, deploy: yours. **M5.**
 
 ---
 
@@ -142,3 +142,11 @@ Grouped so each day reuses the same renderers:
 2026-11-05 · W5 batch 8 · 25 scenes (stack end, queue-deque, heaps part), 223/223 pass QA; ~0.75M tokens
 2026-11-05 · W5 batch 9 · 25 scenes (heaps end, trees part), 248/248 pass QA; ~0.81M tokens
 2026-11-05 · W5 batch 10 · 25 scenes (trees end, bst, tries part), 273/273 pass QA; ~0.89M tokens incl. a fix-up
+2026-11-05 · W5 batch 11 · 25 scenes (word-search-ii, graphs, shortest-path part), 298/298 pass QA; ~0.97M tokens
+2026-11-05 · W5 batch 12 · 25 scenes (shortest-path end, topological-sort, mst), 323/323 pass QA; ~0.95M tokens
+2026-11-06 · W5 batch 13 · 25 scenes (union-find, advanced-graphs, dp-1d part), 348/348 pass QA; ~0.97M tokens
+2026-11-06 · W5 batch 14 · 25 scenes (dp-1d end, dp-2d), 373/373 pass QA; ~0.78M tokens
+2026-11-06 · W5 batch 15 · 26 scenes (dp-advanced, recursion), 399/399 pass QA; ~0.87M tokens
+2026-11-06 · W5 batch 16 · last 27 scenes (backtracking, advanced-structures): 426/426 questions have a scene, all pass QA; ~0.9M tokens. W1.1 done as a code-rewrite recorder (instrument.js), not a Proxy. Open: W2.4 / W4.5 merge + deploy (you), W3.4 / W4.4 / W6.3 reviews (you), W6.1, W6.2, W6.4.
+2026-11-06 · W6.2 + W6.4 · perf measured on all 1,278 visible runs (max 0.45 s, no change); keyboard / screen-reader pass on the Animate tab + player; CONTENT_GUIDE section 7 (adding a scene). Open: W6.1 (your flags), W6.3 review, merge + deploy.
+2026-11-06 · M5 cleanup · parentOf (union-find parent row) moved to scenes/util.js (17 scenes) + util itemsOf / options in 3 more: frames identical on every fixed test. Clone Graph nodes recorded as $graph and drawn as a graph (seated by value). Toolkit Deque / Queue / Stack / heap read as their items in generic notes. 37 tests.

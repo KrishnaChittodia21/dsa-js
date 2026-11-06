@@ -329,3 +329,40 @@ Use `{ type: 'visual', scenario: '<id>', input: {…} }`. Input is optional (def
 (shown in the topic's Visualize tab, on the Patterns page, on question pages and in the Visualizer gallery).
 A pattern can override it with `visual: { scenario, input }`. New scenarios: see `scripts/VIZ_BRIEF.md`
 (frames, panels and `predict` questions) and run `node scripts/validate-visuals.mjs`.
+
+## 7. "Animate my run" scenes
+
+Every coding question can be replayed step by step in its **Animate** tab: the learner's own code is recorded
+(`src/runner/recorder.js`) and drawn by the generic renderers (`src/visualizations/runFrames.js`). A **scene file**
+adds the question's own story on top: `src/visualizations/scenes/<question-id>.js` (the file name is the id;
+`scenes/index.js` finds it automatically). Without one the run still animates, with generic notes.
+
+A scene is plain data plus pure functions (imports only from `./util.js`):
+
+```js
+export default {
+  id: 'daily-temperatures',
+  metaphor: 'A waiting line of cold days',             // 3–7 words, required
+  caption: 'Days wait on the stack until a warmer day arrives.', // required
+  narrate(ctx) { /* string for this step, or null for the generic note */ },
+  predict(ctx) { /* { question, options, answer, explain } asked before ctx.next, or null */ },
+  bugs: [{ label, find, replace, explain }],          // classic mistakes for "Break it"
+};
+```
+
+**Adding a scene for a new question:**
+
+1. Make sure the question passes `npm run validate` (its reference solution and tests are the input).
+2. Look at real recorded steps: `node scripts/dump-run.mjs <id> 1 80` (test 1, first 80 steps).
+3. Write the scene following **`design/scene-brief.md`**: the full format, what `ctx` holds, how steps are
+   recorded (ifs, returns, recursion, sampled long runs), and the rules (never assume the learner's variable
+   names beyond the parameters; ask predictions from `ctx.next`, never from the reference; every bug must fail a
+   test). The gold scenes are `sort-an-array.js`, `binary-search.js` and `find-if-path-exists-in-graph.js`.
+4. Check it: `node scripts/qa-scenes.mjs <id>` must print ✔ (reference passes, frames are well-formed, it narrates
+   and predicts, a bug fails a test, panels fit a phone), and `node scripts/dump-run.mjs <id> 1 80 --frames` should
+   read well. Also try a learner-style solution with other names:
+   `node scripts/dump-run.mjs <id> 1 80 --frames --code <file>`.
+5. `npm run check` runs the QA for every scene.
+
+If the generic renderers draw a structure badly (not a scene problem), the fix belongs in `runFrames.js` /
+`recorder.js`, with a test in `tests/recorder.test.js`.

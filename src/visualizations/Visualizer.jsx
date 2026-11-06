@@ -37,6 +37,12 @@ const SPEEDS = [
 function PredictCard({ predict, answer, onChoose, onReveal }) {
   const answeredNow = answer !== null;
   const correct = answeredNow && answer === predict.answer;
+  const first = useRef(null);
+  useEffect(() => {
+    // the card disables Next: move a keyboard user to the options, unless they are working elsewhere on the page
+    const at = document.activeElement;
+    if (!at || at === document.body || first.current?.closest('figure')?.contains(at)) first.current?.focus({ preventScroll: true });
+  }, []);
   return (
     <div className={`viz-predict ${answeredNow ? (correct ? 'is-correct' : 'is-wrong') : ''}`} role="group" aria-label="Predict the next step">
       <div className="viz-predict-main">
@@ -52,7 +58,7 @@ function PredictCard({ predict, answer, onChoose, onReveal }) {
             if (answeredNow && i === predict.answer) state = 'correct';
             else if (answeredNow && i === answer) state = 'wrong';
             return (
-              <button key={i} type="button" className={`option option-compact ${state}`} disabled={answeredNow} onClick={() => onChoose(i)}>
+              <button key={i} ref={i === 0 ? first : undefined} type="button" className={`option option-compact ${state}`} disabled={answeredNow} onClick={() => onChoose(i)}>
                 <span className="option-letter">{LETTERS[i]}</span>
                 <span className="option-text">{o}</span>
               </button>
@@ -129,7 +135,7 @@ const parse = (field, text) => {
  * replaces the default "step-through" label.
  */
 /** A scene by id, or ready-made `frames` (with `title`): "Animate my run" plays a recorded run in the same player. */
-export default function Visualizer({ scenario, input, caption, compact = false, wide = false, eyebrow, frames: given, title, autoPlay = false, bars: barsProp }) {
+export default function Visualizer({ scenario, input, caption, compact = false, wide = false, eyebrow, frames: given, title, autoPlay = false, autoFocus = false, bars: barsProp }) {
   const def = useMemo(() => (given ? { title, description: caption } : SCENARIOS[scenario]), [given, title, caption, scenario]);
   const initial = useMemo(() => ({ ...(def?.defaultInput || {}), ...(input || {}) }), [def, input]);
   const [data, setData] = useState(initial);
@@ -145,6 +151,12 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
   const [verdicts, setVerdicts] = useState({}); // frame index → answered correctly (scrubber ticks)
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const timer = useRef(null);
+  const fig = useRef(null);
+  useEffect(() => {
+    // a new player replaced the button that was pressed: keep a keyboard user's place instead of dropping focus to the page
+    if (autoFocus && (!document.activeElement || document.activeElement === document.body)) fig.current?.focus({ preventScroll: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const frames = useMemo(() => {
     if (given) return given;
@@ -198,6 +210,7 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
     setScore((sc) => ({ correct: sc.correct + (correct ? 1 : 0), total: sc.total + 1 }));
   };
   const reveal = () => {
+    fig.current?.focus({ preventScroll: true }); // the card (and its focused button) goes away
     setAnswered((a) => new Set(a).add(pending));
     setStep(pending);
     setPending(null);
@@ -256,7 +269,7 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
   };
 
   return (
-    <figure className={`viz ${compact ? 'viz--compact' : ''} ${wide ? 'viz--wide' : ''}`} tabIndex={0} onKeyDown={onKey} aria-label={`Visualization: ${def.title}`}>
+    <figure ref={fig} className={`viz ${compact ? 'viz--compact' : ''} ${wide ? 'viz--wide' : ''}`} tabIndex={0} onKeyDown={onKey} aria-label={`Visualization: ${def.title}`}>
       <div className="viz-head">
         <div className="viz-head-txt">
           <span className="eyebrow">

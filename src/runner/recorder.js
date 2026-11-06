@@ -34,14 +34,22 @@ export function snapshot(v, depth = 0) {
     const out = Array.from(v.slice(0, MAX_ITEMS), (x) => (typed ? (typeof x === 'bigint' ? { $text: `${x}n` } : x) : snapshot(x, depth + 1)));
     if (v.length <= MAX_ITEMS) return out;
     // a long counting array (count[1001], seen[26]…): also keep its non-zero cells, wherever they are
+    // the cells that differ from the array's fill value (its most common one: 0, -1, null, Infinity, false…)
+    const prim = (x) => x === null || ['number', 'boolean', 'string'].includes(typeof x);
+    const counts = new Map();
+    for (let i = 0; i < v.length; i++) if (prim(v[i])) counts.set(v[i], (counts.get(v[i]) || 0) + 1);
+    let fill = 0;
+    let most = -1;
+    for (const [x, c] of counts) if (c > most) (fill = x), (most = c);
     const sparse = [];
-    for (let i = 0; i < v.length && sparse.length <= MAX_ITEMS; i++) if (v[i] && (typeof v[i] === 'number' || typeof v[i] === 'boolean')) sparse.push([i, v[i]]);
-    return sparse.length <= MAX_ITEMS ? { $array: out, $length: v.length, $sparse: sparse } : { $array: out, $length: v.length };
+    for (let i = 0; i < v.length && sparse.length <= MAX_ITEMS; i++) if (!Object.is(v[i], fill) && prim(v[i])) sparse.push([i, v[i]]);
+    return sparse.length <= MAX_ITEMS ? { $array: out, $length: v.length, $sparse: sparse, $fill: fill } : { $array: out, $length: v.length };
   }
   if (v instanceof Map) return { $map: [...v].slice(0, MAX_ITEMS).map(([k, x]) => [snapshot(k, depth + 1), snapshot(x, depth + 1)]), $size: v.size };
   if (v instanceof Set) return { $set: [...v].slice(0, MAX_ITEMS).map((x) => snapshot(x, depth + 1)), $size: v.size };
   if (isNode(v, 'left', 'right')) return treeLevels(v);
   if (isTrieNode(v)) return trieNodes(v);
+  if (isNode(v, 'neighbors') && Array.isArray(v.neighbors)) return graphNodes(v);
   if (isNode(v, 'next')) return { $list: listValues(v) };
   const obj = {};
   for (const k of Object.keys(v).slice(0, 12)) {
@@ -95,6 +103,30 @@ function trieNodes(root) {
     }
   }
   return { $trie: { nodes, edges, more } };
+}
+
+const MAX_GRAPH = 16;
+/**
+ * a node-and-neighbours graph (Clone Graph's Node { val, neighbors }), breadth first from `start`:
+ * { $graph: { nodes: [{ id, val, nb: neighbour indexes in push order, -1 = beyond the first 16 }], more } }
+ */
+function graphNodes(start) {
+  const at = new Map([[start, 0]]);
+  const order = [start];
+  let more = false;
+  for (let h = 0; h < order.length; h++) {
+    for (const c of Array.isArray(order[h].neighbors) ? order[h].neighbors : []) {
+      if (!c || typeof c !== 'object' || at.has(c)) continue;
+      if (order.length >= MAX_GRAPH) {
+        more = true;
+        continue;
+      }
+      at.set(c, order.length);
+      order.push(c);
+    }
+  }
+  const nodes = order.map((n) => ({ id: idOf(n), val: snapshot(n.val, MAX_DEPTH - 1), nb: (Array.isArray(n.neighbors) ? n.neighbors : []).map((c) => at.get(c) ?? -1) }));
+  return { $graph: { nodes, more } };
 }
 
 /** list values from the head, stopping at a cycle (cycleTo = the index it returns to) */
@@ -215,7 +247,7 @@ export function recordRun(code, question, test, { maxSteps = MAX_STEPS, refCode 
       }
       if (typeof v !== 'function') vars[name] = snapshot(v);
       if (v && typeof v === 'object') seen.add(v);
-      if (name !== 'this' && (isNode(v, 'left', 'right') || isNode(v, 'next'))) nodeVars.push([name, v]);
+      if (name !== 'this' && (isNode(v, 'left', 'right') || isNode(v, 'next') || isNode(v, 'neighbors'))) nodeVars.push([name, v]);
     }
     for (const [name, v] of nodeVars) {
       const held = roots.get(name);

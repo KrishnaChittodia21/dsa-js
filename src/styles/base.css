@@ -234,7 +234,7 @@ samp,
 }
 .btn:hover:not(:disabled) { color: var(--text); background: var(--surface-3); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 0 1px var(--line-3), 0 8px 20px -10px rgba(0, 0, 0, 0.6); }
 .btn:active:not(:disabled) { transform: translateY(1px) scale(0.98); }
-.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn:disabled, .btn[aria-disabled='true'] { opacity: 0.45; cursor: not-allowed; }
 /* primary: the accent's fill; --primary-text is AA on every stop */
 .btn-primary {
   background: var(--primary-fill);

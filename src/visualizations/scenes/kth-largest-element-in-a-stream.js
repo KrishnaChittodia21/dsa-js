@@ -1,7 +1,7 @@
+import { itemsOf } from './util.js';
 // Scene: Kth Largest Element in a Stream. A podium with only k places: every new value climbs on, and when one
 // too many stand there the weakest is bumped off. The weakest of the k strongest (the min-heap's top) is the
 // answer. Reads `this`'s k-like field and its heap (toolkit MinHeap / PriorityQueue or a plain array).
-const itemsOf = (v) => (Array.isArray(v) ? v : Array.isArray(v?.$obj?.heap) ? v.$obj.heap : null);
 const nums = (a) => a && a.every((x) => typeof x === 'number');
 
 /** { name, items, k } from this's fields: the one number array (or heap) field, and k / cap / size / limit */

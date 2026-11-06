@@ -1,19 +1,10 @@
 // Graph Valid Tree (union-find). Every node starts as its own island; each edge must join two different islands.
 // An edge inside one island is a cycle; islands left over mean the graph is disconnected. Reads the parent array
 // from a variable (parent / par / root / uf…) or a union-find object's parent field; DFS versions get generic notes.
-import { changedIdx, row } from './util.js';
+import { changedIdx, row, parentOf } from './util.js';
 
-const PARENT = /^(parent|parents|par|p|root|roots|fa|leader|uf|dsu)$/i;
 
 /** the union-find parent row, plain or inside a class instance */
-function parentOf(vars) {
-  for (const [k, v] of Object.entries(vars || {})) {
-    if (PARENT.test(k) && row(v) && v.every(Number.isInteger)) return v;
-    const o = v && v.$obj;
-    if (o) for (const f of ['parent', 'parents', 'par', 'root', 'p']) if (row(o[f]) && o[f].every(Number.isInteger)) return o[f];
-  }
-  return null;
-}
 const islands = (p) => p.filter((x, i) => x === i).length;
 
 export default {
@@ -25,8 +16,8 @@ export default {
     const n = ctx.vars[nName];
     const edges = ctx.vars[eName];
     const m = Array.isArray(edges) ? edges.length : undefined;
-    const p = parentOf(ctx.vars);
-    const pp = parentOf(ctx.prev);
+    const p = parentOf(ctx.vars, [], true);
+    const pp = parentOf(ctx.prev, [], true);
     if (Number.isInteger(n) && Number.isInteger(m) && m !== n - 1 && /length/.test(ctx.src) && /return\s+false/.test(ctx.src) && !ctx.next) {
       return `${m} bridge${m === 1 ? '' : 's'} for ${n} island${n === 1 ? '' : 's'}: a tree needs exactly ${n - 1}, so ${m > n - 1 ? 'some bridge closes a loop' : 'some island stays cut off'}`;
     }
@@ -50,7 +41,7 @@ export default {
   predict(ctx) {
     if (!ctx.next) return null;
     const m = (ctx.lines[ctx.next.line - 1] || '').match(/^\s*return\s+(true|false)\s*;?\s*(\/\/.*)?$/); // a bare return line: reaching it is the verdict
-    const p = parentOf(ctx.vars);
+    const p = parentOf(ctx.vars, [], true);
     if (!m || !p) return null;
     const [nName, eName] = ctx.params;
     const e = ctx.vars[eName];

@@ -1,10 +1,10 @@
+import { itemsOf } from './util.js';
 // Scene: Find Median from Data Stream. Two piles that meet in the middle: the small half (a max-heap, its top the
 // largest small number) and the large half (a min-heap, its top the smallest large number). The median sits on
 // the tops. Reads two heap fields of `this` (toolkit heaps or plain arrays), small half by name (low / small /
 // left / max…), else the first one.
 const LOW = /low|small|left|max|lo$|^lh|first/i;
 
-const itemsOf = (v) => (Array.isArray(v) ? v : Array.isArray(v?.$obj?.heap) ? v.$obj.heap : null);
 const nums = (a) => a && a.every((x) => typeof x === 'number');
 
 /** { lowName, low, highName, high } from this's fields, or null */

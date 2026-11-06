@@ -2,7 +2,7 @@
 // replays every step in the Visualizer's player. The question's scene file (src/visualizations/scenes/), when it
 // has one, adds its own story; the interaction kit adds: your own input, the reference run side by side,
 // "break it" (a classic bug injected), a variable's history and a complexity meter. Loaded only when the tab opens.
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import Icon from "../ui/Icon.jsx";
 import { recordInWorker } from "../../runner/runInWorker.js";
 import { describeTest, resolveArgs, resolveDesign } from "../../runner/core.js";
@@ -78,6 +78,12 @@ export default function AnimateRun({ code, question, tests }) {
   const [shown, setShown] = useState(null); // { code, test, own, label, view, mine, ref, bug }
   const [watch, setWatch] = useState("");
   const [meter, setMeter] = useState(null);
+  const meterRef = useRef(null);
+
+  // the Measure button goes away when the table appears: keep a keyboard user's place
+  useEffect(() => {
+    if (meter && (!document.activeElement || document.activeElement === document.body)) meterRef.current?.focus({ preventScroll: true });
+  }, [meter]);
 
   useEffect(() => {
     let live = true;
@@ -103,7 +109,7 @@ export default function AnimateRun({ code, question, tests }) {
 
   const animate = async () => {
     const test = pick === "own" ? ownTest : tests[pick];
-    if (!test) return;
+    if (!test || busy) return;
     setBusy("Recording…");
     const run = await record(code, test);
     setShown({
@@ -120,6 +126,7 @@ export default function AnimateRun({ code, question, tests }) {
   };
 
   const showRef = async () => {
+    if (busy) return;
     setBusy("Recording the reference…");
     const run = await record(refCode, shown.test);
     const name = scene?.compare;
@@ -138,6 +145,7 @@ export default function AnimateRun({ code, question, tests }) {
   };
 
   const breakIt = async () => {
+    if (busy) return;
     const base = shown.mine.run.passed ? shown.code : refCode;
     setBusy("Trying classic bugs…");
     let bug = null;
@@ -161,6 +169,7 @@ export default function AnimateRun({ code, question, tests }) {
   };
 
   const measure = async () => {
+    if (busy) return;
     setBusy("Measuring…");
     const f = bigO(question.complexity?.time);
     const rows = [];
@@ -190,6 +199,9 @@ export default function AnimateRun({ code, question, tests }) {
 
   return (
     <div className="qp-stack">
+      <span className="sr-only" role="status">
+        {busy}
+      </span>
       <p className="qp-faint">
         {scene ? (
           <>
@@ -245,7 +257,7 @@ export default function AnimateRun({ code, question, tests }) {
           type="button"
           className="btn btn--plasma btn--sm"
           onClick={animate}
-          disabled={!!busy || (pick === "own" && !ownTest)}
+          aria-disabled={!!busy || (pick === "own" && !ownTest) || undefined}
         >
           <Icon name="play" size={14} />{" "}
           {busy === "Recording…"
@@ -286,7 +298,7 @@ export default function AnimateRun({ code, question, tests }) {
                 type="button"
                 className="btn btn--ghost btn--sm"
                 onClick={showRef}
-                disabled={!!busy}
+                aria-disabled={!!busy || undefined}
               >
                 <Icon name="eye" size={14} /> Compare with the reference
               </button>
@@ -296,7 +308,7 @@ export default function AnimateRun({ code, question, tests }) {
                 type="button"
                 className="btn btn--ghost btn--sm"
                 onClick={breakIt}
-                disabled={!!busy}
+                aria-disabled={!!busy || undefined}
               >
                 <Icon name="alert" size={14} /> Break it
               </button>
@@ -306,7 +318,7 @@ export default function AnimateRun({ code, question, tests }) {
                 type="button"
                 className="btn btn--ghost btn--sm"
                 onClick={measure}
-                disabled={!!busy}
+                aria-disabled={!!busy || undefined}
               >
                 <Icon name="chart" size={14} /> Measure the work
               </button>
@@ -335,6 +347,7 @@ export default function AnimateRun({ code, question, tests }) {
               caption={`${cur.frames.length - 1} recorded steps${cur.run.truncated ? ` (every ${cur.run.stride}th shown)` : ""}. Changed cells light up; i, j, lo, hi… point at the array.`}
               eyebrow={scene?.metaphor || "your run"}
               autoPlay
+              autoFocus
               bars={scene?.bars ?? true}
               wide
             />
@@ -360,6 +373,7 @@ export default function AnimateRun({ code, question, tests }) {
               {watch && (
                 <ol
                   className="qp-anim-hist"
+                  tabIndex={0}
                   aria-label={`Values of ${watch} in your run`}
                 >
                   {history.slice(0, 40).map((h) => (
@@ -387,7 +401,13 @@ export default function AnimateRun({ code, question, tests }) {
                   : ""}
                 .
               </p>
-              <div className="qp-anim-meter-wrap">
+              <div
+                className="qp-anim-meter-wrap"
+                ref={meterRef}
+                tabIndex={0}
+                role="region"
+                aria-label="Steps your code ran on each input"
+              >
                 <table className="qp-anim-meter">
                   <thead>
                     <tr>

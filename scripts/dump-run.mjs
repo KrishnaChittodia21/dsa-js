@@ -51,7 +51,7 @@ if (showFrames) {
     });
 } else {
   run.steps.slice(0, Number(max)).forEach((s, i) => {
-    console.log(`#${i} line ${s.line}${s.op !== undefined ? ` op ${s.op}` : ''}${s.ret ? ' RETURN' : ''}: ${(lines[s.line - 1] || '').trim().slice(0, 70)}`);
+    console.log(`#${i} line ${s.line}${s.op !== undefined ? ` op ${s.op}` : ''}${s.ret ? ` RETURN${s.value !== undefined ? ` ${JSON.stringify(s.value).slice(0, 60)}` : ''}` : ''}: ${(lines[s.line - 1] || '').trim().slice(0, 70)}`);
     console.log(`    ${JSON.stringify(s.vars).slice(0, 400)}`);
   });
 }

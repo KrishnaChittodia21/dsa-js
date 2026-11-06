@@ -253,6 +253,45 @@ format gets a `language` field and a "variables per line" shape, so Java/C++ (M8
   snapshot as `$trie` at any depth and draw as a letter tree with word ends lit, counters beside the letters and
   `node` / `cur` as tags. implement-trie-prefix-tree and longest-word-in-dictionary were updated for the new
   snapshot. Spot-checked at 390 px: replace-words (fit 0.99, trie drawn). Remaining: 153.
+- **Production batch 11 done 2026-11-05 (W5):** 25 scenes: word-search-ii, all of graphs (16) and 8 of shortest-path;
+  298/298 pass QA. Engine: weighted adjacency lists (rows of [v, w]) draw as graphs with edge weights; util `diffItems`
+  (what a heap / queue popped and pushed). Spot-checked at 390 px: rotting-oranges (fit 1.13, grid drawn). Gaps:
+  clone-graph's Node objects are not drawn as a graph; word-ladder (694 frames) and the grid-BFS neighbour loops show
+  mostly generic notes between the narrated moments. Remaining: 128.
+- **Production batch 12 done 2026-11-05 (W5):** 25 scenes: the last 3 shortest-path, all of topological-sort (12) and
+  all of mst (10); 323/323 pass QA. Engine: a square matrix named like a graph is read as an adjacency matrix (Prim's
+  graph[i][j]), util `leaderOf` / `groupsOf` (union-find). Spot-checked at 390 px: classic-mst-kruskal (fit 1.13,
+  UnionFind drawn as a forest). Cleanup later: the four Kruskal scenes repeat ~80 lines of union-find / edge helpers
+  (now in util for new scenes). Remaining: 103.
+- **Production batch 13 done 2026-11-06 (W5):** 25 scenes: all of union-find (12), all of advanced-graphs (10) and 3
+  of dp-1d; 348/348 pass QA with no width warnings. Engine: union-find forests stay phone-sized (lone nodes in one
+  wrapping row, groups laid out side by side and wrapped onto bands, groups wider than 7 nodes listed as
+  leader → members); run graphs use a tighter circle (lessons keep theirs); util `functionAt` (which function a
+  line is in). Spot-checked at 390 px: regions-cut-by-slashes (fit 0.99, every forest view). Remaining: 78.
+- **Production batch 14 done 2026-11-06 (W5):** 25 scenes: the rest of dp-1d (11) and all of dp-2d (14); 373/373 pass
+  QA. Util: `isHandover` (a `prev = cur` line is not a new cell), `writtenCell` (the cell a line writes, for tables
+  where a write can leave the value unchanged). Spot-checked at 390 px: longest-common-subsequence (fit 1.00, rolling
+  rows, every cell explained). Remaining: 53.
+- **Production batch 15 done 2026-11-06 (W5):** 26 scenes: all of dp-advanced (15) and all of recursion (11);
+  399/399 pass QA. Engine: long arrays keep the cells that differ from their fill value (0, -1, null, ∞…, `$fill`),
+  cut-down long rows wrap; util `callArgs` (the call a step is in, with its arguments); dump-run prints return values.
+  Spot-checked at 390 px: partition-to-k-equal-sum-subsets (fit 0.76, was ~3300 px). Remaining: 27.
+- **Production batch 16 done 2026-11-06 (W5) — all 426 questions have a scene:** the last 27 (backtracking 14,
+  advanced-structures 13); 426/426 pass QA. Engine: no predictions on sampled runs (`ctx.stride`), numeric option
+  order. Spot-checked at 390 px: n-queens (fit 1.13). Production total ≈ 13.4M tokens over 16 batches (+ 0.5M pilot).
+  Left for M5: W6.1 rework of scenes you flag, W6.2 large inputs + keyboard pass, W6.4 CONTENT_GUIDE section, your
+  browser review, merge and deploy. Cleanup candidates: helper blocks copied across KMP / linked-list / Kruskal /
+  Dijkstra scenes (util now has shared versions); clone-graph not drawn as a graph; first Deque note shows raw text.
+- **W6.2 + W6.4 done 2026-11-06:** speed measured on all 1,278 visible runs (slowest 0.45 s to record + build, so no
+  change). Keyboard pass: the Animate tab's busy buttons keep focus (`aria-disabled`); focus moves to a new player,
+  to the prediction options, back to the player after "Show the step", and to the meter. Busy status is announced, and
+  the scroll areas can be focused. CONTENT_GUIDE §7 explains how to add a scene. Left: W6.1 (your flags), W6.3
+  review, merge and deploy.
+- **Cleanup done 2026-11-06:** `parentOf` (finds the union-find parent row) now lives in `scenes/util.js`, replacing
+  17 copies; 3 more scenes use util's `itemsOf` / `options`. Their frames are identical on every fixed test. Clone
+  Graph's nodes are recorded as `$graph` (nodes + neighbour order) and drawn as a graph, seated by value, with tags.
+  Toolkit Deque / Queue / Stack / heap values read as their items in the generic notes (`dq = queue []`, not
+  `{buf: …}`). 37 tests.
 
 ### M5 · Animate my run for every question · = `animate-my-run-plan.md` W5–W6
 One unique, interactive scene per coding question (426), 100 a day, the QA harness on each, just like

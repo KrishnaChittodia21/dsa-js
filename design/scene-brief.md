@@ -10,7 +10,17 @@ mechanism with real values, 1–3 "predict the next step" questions, and the que
 3. `src/visualizations/scenes/util.js`: helpers you may import (`row`, `changedIdx`, `swapped`, `sorted`,
    `firstInt`, `visitedSet`, `options`, `entriesOf`: a Map or a plain-object counter as [[key, value]…]; learners
    use both, so read counters with it; `cellAt(v, i)`: a cell of a plain or a long `{ $array, $length, $sparse }` array; `itemsOf(v)`: a stack / queue /
-   deque / heap front first, plain or toolkit object).
+   deque / heap front first, plain or toolkit object; `diffItems(before, after)`: what was popped / pushed between two
+   steps, e.g. `diffItems(itemsOf(ctx.prev.pq), itemsOf(ctx.vars.pq))`; `leaderOf(parent, x)` / `groupsOf(parent)`:
+   union-find group leader and groups from a parent row; `parentOf(vars, skip, empty)`: the parent row itself (a
+   parent-like name or a DSU object's field); `functionAt(ctx.lines, line)`: the name of the
+   function a line belongs to, to tell a helper's steps and returns from the main function's; `isHandover(ctx.src)`: a plain
+   `prev = cur` / `row = rows[i - 1]` line, which moves a name and is not a new cell (skip it in rolling-row DP); `callArgs(ctx)`: the function the step is in and
+   its parameters' current values (in recursion: the call we are in, e.g. { name: 'dfs', args: { i: 2 } });
+   `writtenCell(ctx.src, ctx.vars)`: the cell a line
+   writes (`dp[i][j - 1] = …` → { name, at: [i, j - 1] }), for tables where a write can leave the value unchanged; edges are often written `[cost, a, b]` as well as `[a, b, w]`).
+   For Dijkstra-style relaxing with a candidate variable (`nd = d + w`), ask at the step that computes the candidate,
+   before the write; the push after a write looks the same as a fresh push.
 4. The question file: `src/content/topics/<topic>/questions/<id>.js` (statement, `paramNames`, `solution.code`,
    `hints`, `mistakes`, tests).
 5. Real recorded steps: `node scripts/dump-run.mjs <id> 1 80` (and test 2, 3). **Design narration and predictions
@@ -18,7 +28,8 @@ mechanism with real values, 1–3 "predict the next step" questions, and the que
    $size }`, `{ $set: […], $size }`, `{ $tree: [level order], $ids }`, `{ $list: { values, ids, cycleTo } }`, `{ $trie: { nodes: [{ id, ch, end, num }], edges:
    [[from, to]], more } }` (any node with `children` / `next` / `kids`… as a Map, object or 26-slot array; `num` is its
    counter such as `count` / `sum` when it has one; breadth first; `nodes[0]` is the node itself),
-   `{ $obj: { field: … } }` (class instances; `this` in design classes is `ctx.vars.this.$obj`), `{ $text }`,
+   `{ $graph: { nodes: [{ id, val, nb }], more } }` (a node with `val` + `neighbors`, breadth first, first 16;
+   `nodes[0]` is the node itself, `nb` its neighbours' indexes in push order), `{ $obj: { field: … } }` (class instances; `this` in design classes is `ctx.vars.this.$obj`), `{ $text }`,
    `{ $array: [first 64], $length }`.
 
 ## How a run is recorded (what your functions see)
@@ -55,11 +66,17 @@ mechanism with real values, 1–3 "predict the next step" questions, and the que
   Use that to tell input nodes from new ones (`ctx.input` holds plain values, without ids).
 - Long Maps / Sets / arrays are cut to their first 64 entries: count them with `$size` / `$length`, not the
   length of the kept list.
+- Graphs draw automatically from an adjacency list named adj / graph / g / neighbours (an array of rows, or a Map of
+  rows, up to 16 nodes; rows of `v` or of `[v, weight]`, weights shown on the edges): visited / seen colour the
+  nodes, `u` / `node` / `cur` is the current node, `v` / `nei` the neighbour. Grids up to 12×12 draw as tile grids
+  with changed tiles lit; `dist` / `dp` / `cost` tables up to 16×16 as numbered tables.
 - Snapshots stop 3 levels deep (deeper values are `{ $text }`, e.g. nested trie nodes). `Infinity` stays
   `Infinity` (the dump prints it as `null`). Long arrays wrap onto rows of 13 cells automatically.
 - `predict` is called at every step, in order, until `maxPredicts` (default 3) questions exist: it must pick the
   interesting moments itself (skip set-up steps, skip a decision that is only half done across two steps). It sees
   only one step ahead (`ctx.next`); when the deciding step is further away, do not ask.
+- A long run is sampled (`ctx.stride` > 1: only every stride-th step is kept): `ctx.prev` / `ctx.next` may be far
+  apart. The engine asks no predictions then; notes must describe the current step on its own.
 - The note of the step *before* a prediction must not give its answer away (e.g. "guess the middle: 3, target 9",
   not "… too small, go right" when the next question is "which half is dropped?").
 - Two statements on one line (`{ c1 = x; n1 = 1; }`, `n1--; n2--;`) and a swap through a temp variable are
