@@ -439,6 +439,50 @@ JavaScript. Revisit only if M7's runtime makes tracing cheap.
 - Rules carried over: facts only from the lessons; illustrative numbers marked "e.g."; no characters, avatars,
   emoji or copyrighted characters.
 - **Tests:** schema validation of every Short; the unlock order.
+- **Batch 9a done 2026-11-06 (engine + 10 pilots):**
+  - **Format:** `src/content/shortSchema.js` — a Short is `{ id: <pattern id>, title, steps }`, M2 steps (1–4 watch,
+    then one `choose` turn), ≤ 14 frames, no picture emoji (text arrows allowed). `src/content/shorts/<topic>.js`, in
+    pattern order; `validate-content` checks every file. Brief for writers: `design/shorts-brief.md`.
+  - **Unlock:** `src/lib/shortsOrder.js` (pure, tested) — Shorts in course order; one opens per study day (days in
+    `progress.activity`), so Short N is "Day N"; Short of the day = first open one not answered. Answers:
+    `SHORT_DONE` → `progress.shorts[id] = { at, correct }` (right first time; carried by Export/Import).
+  - **UI:** `/shorts` (All / Open / Not done / Saved + topic filter, locked rows say when they open, Save) and
+    `/shorts/:id` (the StepLesson player with Slow / Normal / Fast reading speed — new optional `frameMs` and
+    `onSolve` props — prev / next Short). Dock entry, search entry, top-bar crumb, Saved page "Shorts" filter,
+    "Short of the day" card on the dashboard, "Short · <pattern>" chips in Go deeper.
+  - **Content:** 10 pilots (Arrays 5, Hashing 5) written by one agent from the lessons; 7–12 frames each.
+  - **Checked in Chrome:** list, a Short playing, answering records it (wrong tries → `correct: false`), phone width.
+  - **Tests:** 48 (`tests/shorts.test.js`: order, unlock, Short of the day, format, SHORT_DONE).
+  - **Next:** 157 Shorts in course order, ~20 per batch (about 8 batches).
+- **Batch 9b done 2026-11-06:** 20 more (Complexity 6, Two Pointers 7, Sliding Window 2, Prefix Sum 5) by 3 agents:
+  30 of 167. Complexity is the course's first topic, so its Shorts are Days 1–6 and the pilots moved to Days 7–16
+  (days follow course order, computed at load). Every frame's values come from running the template on an "e.g."
+  input, not copied from step lessons. Lesson notes checked: the binary-search "about 4 steps" caption (16 items)
+  and fib's "about 2ⁿ" calls are loose but not wrong; no lesson changes. Short titles use a smaller display size.
+  Checked in Chrome: the recursion-tree (nodes panel) and 2D prefix-sum (grid) Shorts.
+- **Batch 9c done 2026-11-06:** 22 more (Array Techniques 5, Stack 6, Queue & Deque 5, Binary Search 6) by 4 agents:
+  52 of 167. The newer files compute their frames by running the pattern's template on the "e.g." input at load
+  (no imports; all Shorts files load in ~20 ms). No lesson errors found; noted for a later lesson pass (clarity
+  only): cyclic sort "n − 1" vs "n" swaps (both true), the partition pattern gives the validity check but not the
+  loop, the deque templates expire / compare differently without saying why, the contribution pattern's
+  single-pass variant is not tied back to its strict / non-strict rule.
+- **Batch 9d done 2026-11-06:** 20 more (Linked List 5, Recursion 5, Sorting 5, Intervals 5) by 4 agents: 72 of 167.
+  Some files assert their computed results at load (e.g. Josephus formula vs a real circle). No lesson errors;
+  clarity notes for a later pass: two "first middle" loops in Linked List, quickselect via `partition3` in the
+  lesson vs Lomuto in the pattern, two merge templates in Intervals, the descent-parsing grammar omits `|` though the
+  examples use it, JS stack depth "about 10,000" vs "7k–10k". Not checked in a browser this batch (the browser tool
+  could not start); zero-length intervals render (bars have a 1.5% minimum width).
+- **Batch 9e done 2026-11-07:** 23 more (Backtracking 6, Trees 8, BST 5, Heaps 4) by 4 agents: 95 of 167. Trees
+  ≤ 13 nodes; files assert their results at load. No lesson errors (the backtracking `"\\\\"` diagonal renders as `\`
+  through Markdown). Clarity notes for the lesson pass: Trees defines height in edges but the diameter code counts
+  nodes; ties count as "good" nodes without saying so; templates call undefined `render` / `isValid` / `combine`;
+  two partition loop styles in Backtracking; two different "naive" k-way-merge costs in Heaps.
+- **Batch 9f done 2026-11-07:** 22 more (Tries 4, Graphs 9, Topological Sort 5, Union-Find 4) by 4 agents: 117 Shorts.
+  **The total is 172, not 167** (the first count missed Intervals' patterns, kept in a `PATTERNS` constant). No lesson
+  errors (a "reflect above" in Topological Sort does point at the earlier section's reflect). Clarity notes: the
+  weighted-DSU "update parent first" mistake doesn't match its template (which saves `p` first); trie max-XOR inserts
+  `nums[0]` twice and mixes "31/32 bits"; state-space BFS returns on pop, not push; bidirectional BFS "about √" is
+  loose (2·b^(d/2)); several templates use undefined helpers (`fill`, `neighbours`).
 
 ### M10 · Achievements, round two · 4–6 h
 - New ones for the new features: first Animate my run passed, first divergence fixed, Polyglot (the same question

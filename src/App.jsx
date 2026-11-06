@@ -20,6 +20,8 @@ const JsReferencePage = lazy(() => import('./pages/JsReferencePage.jsx'));
 const ProgressPage = lazy(() => import('./pages/ProgressPage.jsx'));
 const RevisionPage = lazy(() => import('./pages/RevisionPage.jsx'));
 const SavedPage = lazy(() => import('./pages/SavedPage.jsx'));
+const ShortsPage = lazy(() => import('./pages/ShortsPage.jsx'));
+const ShortPage = lazy(() => import('./pages/ShortPage.jsx'));
 const CheatSheetPage = lazy(() => import('./pages/CheatSheetPage.jsx'));
 const VisualizePage = lazy(() => import('./pages/VisualizePage.jsx'));
 const PatternFinderPage = lazy(() => import('./pages/PatternFinderPage.jsx'));
@@ -59,6 +61,8 @@ export default function App() {
                   <Route path="achievements" element={<AchievementsPage />} />
                   <Route path="revision" element={<RevisionPage />} />
                   <Route path="saved" element={<SavedPage />} />
+                  <Route path="shorts" element={<ShortsPage />} />
+                  <Route path="shorts/:id" element={<ShortPage />} />
                   <Route path="cheatsheet" element={<CheatSheetPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>

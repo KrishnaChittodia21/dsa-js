@@ -1,7 +1,7 @@
 // The "Steps" view of a lesson section (M2): Watch steps play hand-written frames drawn with the Visualizer's own
 // panels (array, stack, nodes, table…), and Your-turn steps ask one small task about the picture. Format and rules:
 // content/stepSchema.js. Every task is plain buttons, so it works by keyboard, screen reader and on a phone.
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Pause, Play, Check } from 'lucide-react';
 import { Panel } from '../../visualizations/panels.jsx';
 import { useFitZoom } from '../../visualizations/useFitZoom.js';
@@ -56,14 +56,14 @@ function Stage({ panels, note }) {
 }
 
 /** plays frames (looping) with prev / play-pause / next; reduced motion starts paused */
-function Player({ frames, onSay }) {
+function Player({ frames, onSay, frameMs = FRAME_MS }) {
   const [i, setI] = useState(0);
   const [playing, setPlaying] = useState(() => !reducedMotion() && frames.length > 1);
   useEffect(() => {
     if (!playing) return undefined;
-    const t = setTimeout(() => setI((x) => (x + 1) % frames.length), i === frames.length - 1 ? FRAME_MS * 1.6 : FRAME_MS);
+    const t = setTimeout(() => setI((x) => (x + 1) % frames.length), i === frames.length - 1 ? frameMs * 1.6 : frameMs);
     return () => clearTimeout(t);
-  }, [playing, i, frames.length]);
+  }, [playing, i, frames.length, frameMs]);
   const f = frames[Math.min(i, frames.length - 1)];
   useEffect(() => onSay?.(f.say), [f, onSay]);
   return (
@@ -92,14 +92,19 @@ function Player({ frames, onSay }) {
 function Task({ task, panels, onSolved }) {
   const [msg, setMsg] = useState(null);
   const [picked, setPicked] = useState([]);
+  const missed = useRef(false); // any wrong answer before the right one (Shorts record first-try answers)
+  const solve = () => onSolved(!missed.current);
   const pool = useMemo(() => (task.type === 'order' ? shuffled(task.items) : []), [task]);
-  const wrong = (text) => setMsg({ ok: false, text });
+  const wrong = (text) => {
+    missed.current = true;
+    setMsg({ ok: false, text });
+  };
 
   if (task.type === 'choose')
     return (
       <TaskBox q={task.question} msg={msg}>
         {rotated(task.options.map((o, i) => [o, i]), task.question).map(([o, i]) => (
-          <button key={i} type="button" className="st-opt" onClick={() => (i === task.answer ? onSolved() : wrong(o.why))}>
+          <button key={i} type="button" className="st-opt" onClick={() => (i === task.answer ? solve() : wrong(o.why))}>
             {/* one span, so text and `code` stay one wrapping line inside the flex button */}
             <span>{rich(o.text)}</span>
           </button>
@@ -110,7 +115,7 @@ function Task({ task, panels, onSolved }) {
     return (
       <TaskBox q={task.question} msg={msg}>
         {task.options.map((n) => (
-          <button key={n} type="button" className="st-opt st-opt--n mono" onClick={() => (n === task.answer ? onSolved() : wrong(task.hint))}>
+          <button key={n} type="button" className="st-opt st-opt--n mono" onClick={() => (n === task.answer ? solve() : wrong(task.hint))}>
             {n}
           </button>
         ))}
@@ -121,7 +126,7 @@ function Task({ task, panels, onSolved }) {
     return (
       <TaskBox q={task.question} msg={msg}>
         {values.map((v, i) => (
-          <button key={i} type="button" className="st-opt st-opt--n mono" aria-label={`index ${i + indexBase}, value ${v}`} onClick={() => (i === task.answer ? onSolved() : wrong(task.hints?.[i] || 'Not that one. Look at the picture again.'))}>
+          <button key={i} type="button" className="st-opt st-opt--n mono" aria-label={`index ${i + indexBase}, value ${v}`} onClick={() => (i === task.answer ? solve() : wrong(task.hints?.[i] || 'Not that one. Look at the picture again.'))}>
             <small>[{i + indexBase}]</small> {String(v)}
           </button>
         ))}
@@ -134,7 +139,7 @@ function Task({ task, panels, onSolved }) {
     const next = [...picked, t];
     setPicked(next);
     setMsg(null);
-    if (next.length === task.items.length) onSolved();
+    if (next.length === task.items.length) solve();
   };
   return (
     <TaskBox q={task.question} msg={msg}>
@@ -165,7 +170,8 @@ function TaskBox({ q, msg, children }) {
   );
 }
 
-export default function StepLesson({ steps }) {
+/** `frameMs`: reading speed (ms per frame); `onSolve(stepIndex, firstTry)`: a task was answered (Shorts record it) */
+export default function StepLesson({ steps, frameMs, onSolve }) {
   const [at, setAt] = useState(0);
   const [say, setSay] = useState(undefined);
   const [solved, setSolved] = useState({});
@@ -206,14 +212,17 @@ export default function StepLesson({ steps }) {
                 <Check size={14} aria-hidden="true" /> {rich(s.solved)}
               </p>
             ) : (
-              <Task key={at} task={s.task} panels={s.panels} onSolved={() => setSolved((m) => ({ ...m, [at]: true }))} />
+              <Task key={at} task={s.task} panels={s.panels} onSolved={(firstTry) => {
+                setSolved((m) => ({ ...m, [at]: true }));
+                onSolve?.(at, firstTry);
+              }} />
             ))}
         </div>
         <div className="st-pic">
           {s.kind === 'watch' ? (
-            <Player key={at} frames={s.frames} onSay={setSay} />
+            <Player key={at} frames={s.frames} onSay={setSay} frameMs={frameMs} />
           ) : isSolved && s.then ? (
-            <Player key={`${at}-then`} frames={s.then} onSay={setSay} />
+            <Player key={`${at}-then`} frames={s.then} onSay={setSay} frameMs={frameMs} />
           ) : (
             <Stage panels={s.panels} />
           )}

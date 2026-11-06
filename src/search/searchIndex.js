@@ -11,6 +11,7 @@ export const PAGES = [
   { to: '/patterns', title: 'Patterns', sub: 'Every pattern with clues and templates', words: 'algorithms templates' },
   { to: '/finder', title: 'Pattern Finder', sub: 'Which pattern fits this problem?', words: 'recognise keywords clues' },
   { to: '/visualize', title: 'Visualizer', sub: 'Step-through animations', words: 'animation visualisation' },
+  { to: '/shorts', title: 'Shorts', sub: 'Two-minute animated stories, one per pattern', words: 'videos stories daily review short' },
   { to: '/questions', title: 'Questions', sub: 'All practice questions with filters', words: 'problems practice' },
   { to: '/companies', title: 'Companies', sub: 'Sourced company questions', words: 'interview' },
   { to: '/toolkit', title: 'JS DSA Toolkit', sub: 'Stack, Queue, Heap, Trie, Union-Find…', words: 'data structures classes' },

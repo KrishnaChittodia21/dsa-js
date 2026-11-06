@@ -10,6 +10,7 @@ import {
   ChevronDown,
   Code2,
   Bookmark,
+  Clapperboard,
   Compass,
   FileText,
   Flame,
@@ -63,6 +64,7 @@ const DOCK = [
   { k: 'practice', to: '/questions', label: 'Practice · questions', icon: Code2, match: (p) => p.startsWith('/questions') || /^\/topic\/[^/]+\/q\//.test(p) },
   { k: 'visualize', to: '/visualize', label: 'Visualizer', icon: Activity, match: (p) => p.startsWith('/visualize') },
   { k: 'revision', to: '/revision', label: 'Revision', icon: RotateCcw, match: (p) => p.startsWith('/revision') },
+  { k: 'shorts', to: '/shorts', label: 'Shorts', icon: Clapperboard, match: (p) => p.startsWith('/shorts') },
   { k: 'companies', to: '/companies', label: 'Companies', icon: Building2, match: (p) => p.startsWith('/companies') },
   { k: 'toolkit', to: '/toolkit', label: 'JS DSA toolkit', icon: Wrench, match: (p) => p.startsWith('/toolkit') },
   { k: 'achievements', to: '/achievements', label: 'Achievements', icon: Award, match: (p) => p.startsWith('/achievements') },
@@ -109,6 +111,7 @@ function describeRoute(pathname, stats) {
   }
   if (matchPath('/companies/:companyId', pathname)) return { crumb: pathname.slice(1), ctx: 'company question list' };
   if (matchPath('/toolkit/:toolId', pathname)) return { crumb: pathname.slice(1), ctx: 'toolkit structure' };
+  if (matchPath('/shorts/:id', pathname)) return { crumb: pathname.slice(1), ctx: 'Short' };
   const seg = pathname.split('/')[1] || '';
   const map = {
     '': ['dashboard', `${stats.topicsCompleted} / ${stats.topicsTotal} topics complete`],
@@ -120,6 +123,7 @@ function describeRoute(pathname, stats) {
     visualize: ['visualize', 'step-through animations'],
     revision: ['revision', 'weak areas · mistakes'],
     saved: ['saved', 'bookmarked for later'],
+    shorts: ['shorts', 'two-minute pattern stories'],
     progress: ['progress', `${stats.overall}% overall mastery`],
     companies: ['companies', 'interview questions by company'],
     toolkit: ['toolkit', 'JS data structures'],

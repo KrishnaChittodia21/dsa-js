@@ -10,11 +10,12 @@ const KINDS = [
   { id: 'question', label: 'Questions' },
   { id: 'section', label: 'Sections' },
   { id: 'scene', label: 'Scenes' },
+  { id: 'short', label: 'Shorts' },
 ];
-const KIND_LABEL = { question: 'question', section: 'lesson section', scene: 'Visualizer scene' };
+const KIND_LABEL = { question: 'question', section: 'lesson section', scene: 'Visualizer scene', short: 'Short' };
 
 const linkFor = (it) =>
-  it.kind === 'question' ? `/topic/${it.topicId}/q/${it.id}` : it.kind === 'section' ? `/topic/${it.topicId}?s=${it.index}` : `/visualize?s=${it.scenario}&t=${it.topicId}`;
+  it.kind === 'short' ? `/shorts/${it.id}` : it.kind === 'question' ? `/topic/${it.topicId}/q/${it.id}` : it.kind === 'section' ? `/topic/${it.topicId}?s=${it.index}` : `/visualize?s=${it.scenario}&t=${it.topicId}`;
 
 export default function SavedPage() {
   const { progress, dispatch } = useProgress();

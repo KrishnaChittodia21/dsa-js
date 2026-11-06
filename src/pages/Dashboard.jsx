@@ -5,6 +5,7 @@ import NextStepCard from '../components/guide/NextStepCard.jsx';
 import JourneyMap from '../components/guide/JourneyMap.jsx';
 import StreakCard from '../components/guide/StreakCard.jsx';
 import CoachTip from '../components/guide/CoachTip.jsx';
+import ShortOfTheDay from '../components/guide/ShortOfTheDay.jsx';
 import { TAB_META } from '../components/guide/studyLoop.js';
 import VoxSort from '../components/charts/VoxSort.jsx';
 import VoxCity from '../components/charts/VoxCity.jsx';
@@ -332,6 +333,8 @@ export default function Dashboard() {
           Worked out from your answers: open lesson → missed pattern challenge → unsolved questions → revision. Press <span className="kbd">?</span> for the tour.
         </CoachTip>
       </div>
+
+      <ShortOfTheDay />
 
       {/* ================= HERO ================= */}
       <section className="tile tile--glow dash-hero rise" style={{ '--i': 1 }} aria-labelledby="dash-hero-title">

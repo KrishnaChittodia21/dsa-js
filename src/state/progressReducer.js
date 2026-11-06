@@ -17,6 +17,8 @@ export const initialProgress = () => ({
   achievements: {},
   // v2: saved for later { ['q:id' | 'sec:topic/index' | 'viz:topic/scenario']: { kind, title, at, …ids } }
   saved: {},
+  // Shorts (M9) answered: { [patternId]: { at, correct } } — new fields need no version bump (migrate fills them)
+  shorts: {},
   // v2: when the last backup was exported (ms), for the "back up" nudge on the Progress page
   exportedAt: null,
 });
@@ -28,7 +30,7 @@ export const initialProgress = () => ({
 export function migrate(raw) {
   const s = raw && typeof raw === 'object' ? raw : {};
   const out = { ...initialProgress(), ...s };
-  for (const k of ['topics', 'checkpoints', 'reflections', 'questions', 'activity', 'achievements', 'saved'])
+  for (const k of ['topics', 'checkpoints', 'reflections', 'questions', 'activity', 'achievements', 'saved', 'shorts'])
     if (!out[k] || typeof out[k] !== 'object' || Array.isArray(out[k])) out[k] = {};
   // v1 → v2 only added `saved` and `exportedAt`, both filled in above
   out.version = VERSION;
@@ -183,6 +185,10 @@ export function progressReducer(state, action) {
     }
     case 'IMPORT':
       return migrate(action.state);
+    case 'SHORT_DONE': { // a Short's question answered; once right stays right
+      const prev = state.shorts[action.id];
+      return { ...touch(state), shorts: { ...state.shorts, [action.id]: { at: now(), correct: !!(prev?.correct || action.correct) } } };
+    }
     case 'SAVE_TOGGLE': {
       const saved = { ...state.saved };
       if (saved[action.key]) delete saved[action.key];
