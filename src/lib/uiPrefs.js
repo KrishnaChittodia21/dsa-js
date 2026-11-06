@@ -25,6 +25,8 @@ const DEFAULT = {
   codeLang: 'js',
   /** Shorts (M9) reading speed: 'slow' | 'normal' | 'fast' */
   shortSpeed: 'normal',
+  /** Plan your journey (src/lib/pace.js): { dailyMinutes, daysPerWeek, goal, startedAt, baselineAt, baselineCovered, catchUp?, warningsOff? } or null */
+  studyPlan: null,
 };
 
 let cache = null;
@@ -69,3 +71,6 @@ export function markTabVisited(topicId, tab) {
   if (list.includes(tab)) return;
   saveUiPrefs({ visitedTabs: { ...prefs.visitedTabs, [topicId]: [...list, tab] } });
 }
+
+/** a coach tip shows unless tips are off (Settings) or this one was dismissed ("don't show again") */
+export const tipVisible = (prefs, id) => !!prefs.showCoachTips && !prefs.coachDismissed?.[id];

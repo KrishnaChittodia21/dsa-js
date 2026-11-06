@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 const KEY = 'dsa-journey:theme';
 const ACCENT_KEY = 'dsa-journey:accent';
 
-// Kinetic Voxel accents (tokens.css § 4). The default, plasma, is the design's primary-action colour.
+// Kinetic Voxel accents (tokens.css section 4). The default, plasma, is the design's primary-action colour.
 export const ACCENTS = [
   { id: 'plasma', label: 'Plasma' },
   { id: 'volt', label: 'Volt' },

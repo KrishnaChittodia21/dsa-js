@@ -227,7 +227,7 @@ export default function CodeWorkspace({ question }) {
             <i aria-hidden="true" />
             {LANG_FILE[lang]}
           </span>
-          <select className="qp-ed-langpick" value={lang} onChange={(e) => switchLang(e.target.value)} aria-label="Language">
+          <select className="qp-ed-langpick" data-guide="lang" value={lang} onChange={(e) => switchLang(e.target.value)} aria-label="Language">
             {LANGUAGES.filter((l) => l.id === 'js' || starterFor(l.id, question)).map((l) => (
               <option key={l.id} value={l.id} aria-label={l.label}>
                 {l.short}
@@ -239,7 +239,7 @@ export default function CodeWorkspace({ question }) {
           <button type="button" className="iconbtn qp-ed-reset" onClick={reset} title="Reset to starter code" aria-label="Reset to starter code">
             <Icon name="rotate" size={16} />
           </button>
-          <button type="button" className="btn btn--chrome btn--sm" onClick={() => execute('run')} disabled={running} title={`Run the visible tests (${MOD}+Enter)`}>
+          <button type="button" className="btn btn--chrome btn--sm" data-guide="run" onClick={() => execute('run')} disabled={running} title={`Run the visible tests (${MOD}+Enter)`}>
             <Icon name="play" size={14} /> Run
           </button>
           <button type="button" className="btn btn--plasma btn--sm" onClick={() => execute('submit')} disabled={running} title={`Run all tests (${MOD}+Shift+Enter)`}>
@@ -271,13 +271,13 @@ export default function CodeWorkspace({ question }) {
           <button type="button" role="tab" aria-selected={tab === 'cases'} onClick={() => setTab('cases')}>
             Test cases
           </button>
-          <button type="button" role="tab" aria-selected={tab === 'custom'} onClick={() => setTab('custom')}>
+          <button type="button" role="tab" data-guide="custom" aria-selected={tab === 'custom'} onClick={() => setTab('custom')}>
             Custom input
           </button>
           <button type="button" role="tab" aria-selected={tab === 'complexity'} onClick={() => setTab('complexity')}>
             Complexity
           </button>
-          <button type="button" role="tab" aria-selected={tab === 'animate'} onClick={() => setTab('animate')}>
+          <button type="button" role="tab" data-guide="animate" aria-selected={tab === 'animate'} onClick={() => setTab('animate')}>
             <Icon name="play" size={14} /> Animate
           </button>
           <span className="qp-sp" />

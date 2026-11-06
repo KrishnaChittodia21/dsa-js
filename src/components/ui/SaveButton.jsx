@@ -3,7 +3,7 @@ import { Bookmark, BookmarkCheck } from 'lucide-react';
 import { useProgress } from '../../state/ProgressContext.jsx';
 
 /** `saveKey` is unique per item ('q:id', 'sec:topic/index', 'viz:topic/scenario'); `item` is what the Saved page shows. */
-export default function SaveButton({ saveKey, item, className = '' }) {
+export default function SaveButton({ saveKey, item, className = '', ...rest }) {
   const { progress, dispatch } = useProgress();
   const on = !!progress.saved?.[saveKey];
   const Ico = on ? BookmarkCheck : Bookmark;
@@ -14,6 +14,7 @@ export default function SaveButton({ saveKey, item, className = '' }) {
       aria-pressed={on}
       title={on ? 'Saved: click to remove from Saved' : 'Save for later'}
       onClick={() => dispatch({ type: 'SAVE_TOGGLE', key: saveKey, item })}
+      {...rest}
     >
       <Ico size={15} aria-hidden="true" />
       {on ? 'Saved' : 'Save'}

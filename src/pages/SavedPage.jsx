@@ -28,7 +28,7 @@ export default function SavedPage() {
 
   return (
     <div className="page page-narrow sv-page">
-      <header className="set-hero rise">
+      <header data-guide="saved-head" className="set-hero rise">
         <span className="eyebrow">
           <i className="pip" aria-hidden="true" />
           ~/journey/saved
@@ -37,7 +37,7 @@ export default function SavedPage() {
         <p className="lead">Questions, lesson sections and Visualizer scenes you saved. Kept in this browser and included in Export.</p>
       </header>
 
-      <div className="seg sv-seg" role="group" aria-label="Show saved">
+      <div className="seg sv-seg" data-guide="saved-filters" role="group" aria-label="Show saved">
         {KINDS.map((k) => (
           <button key={k.id} type="button" aria-pressed={kind === k.id} onClick={() => setKind(k.id)}>
             {k.label} <span className="mono">{count(k.id)}</span>
@@ -48,14 +48,14 @@ export default function SavedPage() {
       {shown.length === 0 ? (
         <p className="empty">{all.length ? 'Nothing saved of this kind yet.' : 'Nothing saved yet. Press Save on a question, a lesson section or a Visualizer scene.'}</p>
       ) : (
-        <ol className="sv-list">
+        <ol data-guide="saved-list" className="sv-list">
           {shown.map((it) => (
             <li key={it.key} className="sv-row">
               <Link to={linkFor(it)} className="sv-link">
                 <b>{it.title}</b>
                 <small>
                   {KIND_LABEL[it.kind]} · {topicById[it.topicId]?.title || it.topicId}
-                  {it.kind === 'section' ? ` · §${it.index + 1}` : ''}
+                  {it.kind === 'section' ? ` · step ${it.index + 1}` : ''}
                 </small>
               </Link>
               <button type="button" className="btn btn--ghost btn--sm" aria-label={`Remove ${it.title} from Saved`} onClick={() => dispatch({ type: 'SAVE_TOGGLE', key: it.key })}>

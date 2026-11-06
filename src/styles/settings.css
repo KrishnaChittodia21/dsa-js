@@ -9,6 +9,7 @@
 .set-hero { margin: 4px 4px 28px; }
 .set-hero .display { margin: 14px 0 14px -2px; }
 .set-hero .lead { margin: 0; }
+.set-tabs { margin: 0 4px var(--gap); }
 .set-panel { padding: 22px 26px; margin-bottom: var(--gap); border-radius: var(--r-xl); }
 .set-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .set-panel-head .eyebrow { margin: 0; }

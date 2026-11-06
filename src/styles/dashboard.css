@@ -266,34 +266,6 @@
 .dash-acc-n { grid-column: 1 / -1; font: 500 11px/1 var(--f-mono); color: var(--muted); }
 .dash-acc-empty { margin-top: 14px; }
 
-/* ---------- revision queue ---------- */
-.dash-rev-meta { gap: 14px; }
-.dash .queue { position: relative; display: grid; grid-template-columns: 64px minmax(0, 1fr) 64px; gap: 14px; align-items: stretch; }
-.dash .q-items { display: grid; grid-template-columns: repeat(var(--qn, 5), minmax(0, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; }
-.dash .q-items > li { display: flex; min-width: 0; }
-.dash .q-end { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font: 600 10.5px/1 var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-radius: 18px; box-shadow: inset 0 0 0 1px var(--line); }
-.dash .q-end svg { color: var(--ice-t); }
-.dash .q-end .q-v { writing-mode: vertical-rl; transform: rotate(180deg); }
-.dash .q-end--front { color: var(--ice-t); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ice) 40%, transparent); background: color-mix(in srgb, var(--ice) 6%, transparent); }
-.dash .qcard { position: relative; flex: 1; min-width: 0; padding: 18px; border-radius: 20px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line-2), inset 0 1px 0 rgba(255, 255, 255, 0.04); display: flex; flex-direction: column; gap: 12px; color: inherit; text-decoration: none; transition: transform 0.3s var(--ease-out), box-shadow 0.3s; }
-:root[data-theme='light'] .dash .qcard { background: #fff; }
-.dash .qcard:hover { text-decoration: none; transform: translateY(-4px); box-shadow: inset 0 0 0 1px var(--line-3), 0 20px 30px -20px rgba(0, 0, 0, 0.6); }
-.dash .qcard--front { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ice) 55%, transparent), 0 0 0 4px color-mix(in srgb, var(--ice) 8%, transparent), 0 24px 40px -24px rgba(142, 230, 255, 0.45); }
-.dash .qcard .qi { display: flex; justify-content: space-between; font: 500 11px/1 var(--f-mono); color: var(--faint); }
-.dash .qcard .due { color: var(--ice-t); }
-.dash .qcard .due--later { color: var(--muted); }
-.dash .qcard-t { font: 650 15px/1.3 var(--f-ui); letter-spacing: -0.01em; margin: 0; color: var(--text); }
-.dash .qcard .why { font-size: 12.5px; color: var(--muted); line-height: 1.45; margin: 0; }
-.dash .qcard .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
-.dash .q-arrows { position: absolute; left: 64px; right: 64px; top: -16px; display: flex; justify-content: space-between; font: 500 10.5px/1 var(--f-mono); color: var(--faint); padding: 0 14px; }
-.dash-q-empty p { margin: 0; color: var(--text-2); font-size: 14px; }
-.dash-q-empty b { color: var(--text); }
-.dash-howto { margin-top: 16px; font-size: 13.5px; color: var(--text-2); }
-.dash-howto summary { cursor: pointer; width: fit-content; font: 500 12px/1 var(--f-mono); color: var(--muted); padding: 6px 0; }
-.dash-howto summary:hover { color: var(--text); }
-.dash-howto ol { margin: 10px 0 0; padding-left: 20px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 32px; }
-.dash-howto b { color: var(--text); font-weight: 600; }
-
 /* ---------- difficulty / streak / achievements ---------- */
 .dash-cell { display: flex; min-width: 0; }
 .dash-cell > .tile { flex: 1; min-width: 0; }
@@ -403,13 +375,6 @@
 .dash .ll .last::after { display: none; }
 .dash .you { position: absolute; z-index: 1; top: -11px; left: 18px; display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 7px; background: var(--uv); color: #fff; font: 600 10.5px/1 var(--f-mono); letter-spacing: 0.06em; box-shadow: 0 6px 16px -4px rgba(123, 92, 255, 0.7); }
 
-/* ---------- practice links ---------- */
-.dash-practice { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); }
-.dash-practice .eyebrow { margin-right: 6px; }
-.dash-practice .chip { gap: 7px; text-decoration: none; }
-.dash-practice .chip:hover { color: var(--text); text-decoration: none; }
-.dash-practice .mono { font-size: 11px; color: var(--muted); }
-
 /* ---------- motion safety ---------- */
 @media (prefers-reduced-motion: reduce) {
   .dash .frame--popped { animation: none; }
@@ -426,8 +391,6 @@
   .dash-hm { padding-left: 30px; }
   .dash .bigo-strip { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .dash .bigo-strip > :nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
-  .dash .queue { grid-template-columns: minmax(0, 1fr); }
-  .dash .q-end, .dash .q-arrows { display: none; }
   .dash .ll { column-gap: 30px; }
   .dash .lln::after { width: 30px; }
   .dash-row1 > .c-7, .dash-row1 > .c-5, .dash-row4 > .c-7, .dash-row4 > .c-5 { grid-column: span 12; }
@@ -533,5 +496,14 @@
   .dash-medals { gap: 8px; }
   .dash .co-row { grid-template-columns: 34px minmax(0, 1fr) 70px 16px; gap: 12px; }
   .dash .co-row .meter { display: none; }
-  .dash-practice { margin-top: 32px; }
+}
+
+/* ---------- Dashboard / Progress split ----------
+   Dashboard hero no longer carries the mastery strip + KPIs (they moved to /progress), so it needs its own
+   bottom padding; Progress reuses the hero tile for that strip without the next-step copy above it. */
+.dash-hero--solo { padding-bottom: 34px; }
+.dash-track-hero > .dash-stage { margin-top: 0; border-top: 0; }
+.dash-track-goal { max-width: 420px; margin-top: 18px; }
+@media (max-width: 640px) {
+  .dash-hero--solo { padding-bottom: 16px; }
 }

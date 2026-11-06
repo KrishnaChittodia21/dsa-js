@@ -6,6 +6,7 @@ import BigOChip, { firstBigO, useQuestionComplexities } from '../components/BigO
 import { useProgress } from '../state/ProgressContext.jsx';
 import { companyById, companies, companyQuestions, companySources, EVIDENCE_LEVELS, topicById, topics } from '../content/index.js';
 import NotFound from './NotFound.jsx';
+import { sortCompanies } from '../lib/companySort.js';
 
 const LEVELS = ['verified', 'community', 'associated'];
 const LEVEL_PIP = { verified: 'pip--acid', community: 'pip--ice', associated: 'pip--uv' };
@@ -150,7 +151,7 @@ function Detail({ s }) {
   return (
     <section className="section cmp-detail" id="cmp-detail" aria-labelledby="cmp-d-t">
       <div className="cmp-dt-grid">
-        <aside className="tile cmp-side rise" style={{ '--i': 2 }}>
+        <aside data-guide="cmp-side" className="tile cmp-side rise" style={{ '--i': 2 }}>
           <div className="cmp-side-a">
             <div className="cmp-side-top">
               <span className="mono-badge">{monogram(company.name)}</span>
@@ -226,7 +227,7 @@ function Detail({ s }) {
           </div>
         </aside>
 
-        <div className="tile cmp-qpanel rise" style={{ '--i': 3 }}>
+        <div data-guide="cmp-questions" className="tile cmp-qpanel rise" style={{ '--i': 3 }}>
           <div className="cmp-qfilters">
             <div className="seg cmp-seg" role="group" aria-label="Evidence">
               {['all', ...LEVELS].map((e) => (
@@ -351,9 +352,7 @@ function CompaniesView({ selectedId }) {
   const { progress } = useProgress();
   const [sort, setSort] = useState('readiness');
   const summaries = useMemo(() => companies.map((c) => companySummary(c, progress)).filter((s) => s.entries.length), [progress]);
-  const sorted = [...summaries].sort((a, b) =>
-    sort === 'az' ? a.company.name.localeCompare(b.company.name) : sort === 'size' ? b.entries.length - a.entries.length : b.readiness - a.readiness || b.entries.length - a.entries.length,
-  );
+  const sorted = sortCompanies(summaries, sort);
   const selected = summaries.find((s) => s.company.id === selectedId);
   const ev = { verified: 0, community: 0, associated: 0 };
   for (const e of companyQuestions) ev[e.evidence] = (ev[e.evidence] || 0) + 1;
@@ -368,7 +367,7 @@ function CompaniesView({ selectedId }) {
 
   return (
     <div className="page cmp-page">
-      <section className="tile tile--glow cmp-hero rise" aria-labelledby="cmp-t">
+      <section data-guide="cmp-hero" className="tile tile--glow cmp-hero rise" aria-labelledby="cmp-t">
         <div>
           <div className="row row--wrap" style={{ gap: 10 }}>
             <span className="chip cmp-chip-uv">
@@ -404,7 +403,7 @@ function CompaniesView({ selectedId }) {
             </div>
           </div>
         </div>
-        <aside className="tile tile--raised cmp-evx" aria-label="Evidence levels">
+        <aside data-guide="cmp-evidence" className="tile tile--raised cmp-evx" aria-label="Evidence levels">
           <span className="eyebrow">Evidence levels — nothing here is invented</span>
           {LEVELS.map((l) => (
             <div key={l} className="cmp-evx-row">
@@ -420,7 +419,7 @@ function CompaniesView({ selectedId }) {
         </aside>
       </section>
 
-      <section className="section" aria-labelledby="cmp-all-t">
+      <section data-guide="cmp-all" className="section" aria-labelledby="cmp-all-t">
         <div className="section-head cmp-head">
           <div>
             <span className="eyebrow">{summaries.length} companies · cube = one sourced question, coloured by difficulty</span>

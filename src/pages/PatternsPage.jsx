@@ -169,7 +169,7 @@ function PatternDetail({ summary, progress, featured = false }) {
               <Icon name={play ? 'pause' : 'play'} size={15} /> {play ? 'Hide animation' : 'See it move'}
             </button>
           )}
-          <Link to={`/topic/${full.topicId}?tab=practice`} className="btn btn--ghost btn--sm">
+          <Link to={`/topic/${full.topicId}#questions`} className="btn btn--ghost btn--sm">
             Practice set
           </Link>
         </div>
@@ -273,7 +273,7 @@ function PatternCard({ pattern, progress, heat, open, onToggle, index }) {
 function Skyline({ heatOf, statusOf, currentTopicId, counts }) {
   const groups = stages.map((s, i) => ({ ...s, n: i + 1, topics: s.topics.filter((t) => t.patterns.length) })).filter((s) => s.topics.length);
   return (
-    <section className="tile tile--glow pt-sky rise" style={{ '--i': 1 }} aria-labelledby="pt-sky-t">
+    <section data-guide="pt-sky" className="tile tile--glow pt-sky rise" style={{ '--i': 1 }} aria-labelledby="pt-sky-t">
       <div className="pt-sky-head">
         <div>
           <span className="eyebrow">
@@ -340,7 +340,6 @@ function Skyline({ heatOf, statusOf, currentTopicId, counts }) {
                   </a>
                 ))}
               </div>
-              <span className="pt-sk-s">S{String(s.n).padStart(2, '0')}</span>
             </div>
           ))}
         </div>
@@ -430,7 +429,7 @@ export default function PatternsPage() {
 
   return (
     <div className="page pt-page">
-      <section className="pt-hero rise">
+      <section data-guide="pt-hero" className="pt-hero rise">
         <div>
           <span className="eyebrow">
             <i className="pip" />
@@ -482,7 +481,7 @@ export default function PatternsPage() {
 
       <Skyline heatOf={heatOf} statusOf={statusOf} currentTopicId={currentPattern?.topicId} counts={counts} />
 
-      <div className="pt-toolbar rise" style={{ '--i': 2 }} id="pt-lib">
+      <div data-guide="pt-filter" className="pt-toolbar rise" style={{ '--i': 2 }} id="pt-lib">
         <label className="search-in">
           <Icon name="search" size={17} />
           <input className="input" type="search" placeholder="Filter by name or clue — e.g. “at most k”, “sorted”, “top k”" value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Filter patterns" />
@@ -504,7 +503,7 @@ export default function PatternsPage() {
         </p>
       )}
 
-      <div className="pt-grid">
+      <div data-guide="pt-grid" className="pt-grid">
         {featured && <FeaturedCard pattern={featured} progress={progress} heat={heatOf[featured.id]} />}
         {rest.map((p, i) => (
           <PatternCard key={p.id} pattern={p} progress={progress} heat={heatOf[p.id]} open={open.has(p.id)} onToggle={() => toggle(p.id)} index={i} />

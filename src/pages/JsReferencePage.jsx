@@ -7,7 +7,7 @@ import BigOChip, { firstBigO } from '../components/BigOChip.jsx';
 import { jsSections, jsComplexityTable, jsGotchas } from '../content/index.js';
 import { WorkbenchHeader } from './ToolkitPage.jsx';
 
-export default function JsReferencePage() {
+export default function JsReferencePage({ embedded }) {
   const location = useLocation();
   const [filter, setFilter] = useState('');
   const [section, setSection] = useState('all');
@@ -28,7 +28,7 @@ export default function JsReferencePage() {
 
   return (
     <div className="page wb-page jr-page">
-      <WorkbenchHeader title="JavaScript for DSA" lead="Only the JavaScript you need for interviews — with the time complexity of each operation and the traps that cost accepted answers." />
+      <WorkbenchHeader embedded={embedded} title="JavaScript for DSA" lead="Only the JavaScript you need for interviews — with the time complexity of each operation and the traps that cost accepted answers." />
 
       <div className="jr-top rise" style={{ '--i': 1 }}>
         <label className="search-in">

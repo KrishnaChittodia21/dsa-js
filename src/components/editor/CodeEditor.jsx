@@ -7,7 +7,7 @@ import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import { tags as t } from '@lezer/highlight';
 import { useMemo, useRef } from 'react';
 
-// Theme built from CSS variables. Code is a dark island in both themes (tokens.css § 3 re-points the theme
+// Theme built from CSS variables. Code is a dark island in both themes (tokens.css section 3 re-points the theme
 // tokens inside .cm-editor), so tooltips / autocomplete / fold markers use the Graphite values everywhere.
 const varTheme = EditorView.theme(
   {

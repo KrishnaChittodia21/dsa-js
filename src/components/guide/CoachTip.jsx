@@ -1,6 +1,6 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Lightbulb, X } from 'lucide-react';
-import { saveUiPrefs, useUiPrefs } from '../../lib/uiPrefs.js';
+import { saveUiPrefs, tipVisible, useUiPrefs } from '../../lib/uiPrefs.js';
 
 /**
  * A small dismissible tip shown until the learner closes it (remembered in UI prefs; Settings can turn tips off).
@@ -9,7 +9,7 @@ import { saveUiPrefs, useUiPrefs } from '../../lib/uiPrefs.js';
 export default function CoachTip({ id, title, tag, children }) {
   const prefs = useUiPrefs();
   const reduce = useReducedMotion();
-  const visible = prefs.showCoachTips && !prefs.coachDismissed[id];
+  const visible = tipVisible(prefs, id);
   const label = tag || `tip · ${String(id).split(':').pop()}`;
   return (
     <AnimatePresence initial={false}>

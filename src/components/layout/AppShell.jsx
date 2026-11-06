@@ -1,18 +1,17 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, NavLink, Outlet, matchPath, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Outlet, matchPath, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import {
   Activity,
+  ArrowLeft,
   Award,
-  BarChart3,
-  BookOpen,
+  CalendarClock,
+  ChartNoAxesColumn,
   Building2,
-  ChevronDown,
   Code2,
   Bookmark,
   Clapperboard,
   Compass,
-  FileText,
   Flame,
   House,
   Layers,
@@ -20,14 +19,11 @@ import {
   ListTree,
   Moon,
   RotateCcw,
-  Route,
   Search,
   Settings,
   Sun,
   Target,
-  Terminal,
   Wrench,
-  X,
 } from 'lucide-react';
 import SiteFooter from './SiteFooter.jsx';
 import Toaster from './Toaster.jsx';
@@ -36,57 +32,62 @@ import { useAchievementDetection } from '../../state/useAchievements.js';
 import { achievementById, TIER_LABEL } from '../../content/achievements.js';
 import { useTheme } from '../../state/ThemeContext.jsx';
 import { useProgress } from '../../state/ProgressContext.jsx';
-import { mistakeQuestions, overallStats, streak, topicStats, topicStatus } from '../../state/selectors.js';
+import { mistakeQuestions, overallStats, streak } from '../../state/selectors.js';
 import { questionById, stages, topicById } from '../../content/index.js';
-import { ProgressBar } from '../ui/primitives.jsx';
 import LogoMark from '../ui/LogoMark.jsx';
 import { on } from '../../lib/appEvents.js';
 import { getUiPrefs, saveUiPrefs } from '../../lib/uiPrefs.js';
+import { guideFor } from '../guide/pageGuides.js';
 
 // overlays are lazy so cmdk and the tour stay out of the main bundle until first use
 const CommandPalette = lazy(() => import('./CommandPalette.jsx'));
 const WelcomeTour = lazy(() => import('../guide/WelcomeTour.jsx'));
+const PageGuide = lazy(() => import('../guide/PageGuide.jsx'));
 const AchievementCelebration = lazy(() => import('../achievements/AchievementCelebration.jsx'));
 
 /*
  * Kinetic Voxel shell: a slim mono STATUS LINE on top, a floating bottom DOCK (desktop) / touch TAB DOCK
- * (≤900px), a "More" popover/sheet with every other route, and a SYLLABUS drawer (the old sidebar's
- * stage → topic tree). <main> is the scroll container (TopicPage scrolls `.main`).
+ * (≤900px), a "More" popover/sheet with every other route, a Back button in the status line and a floating
+ * "Guide me" button. <main> is the scroll container (TopicPage scrolls `.main`).
  * Layout vars live in tokens.css: --status-h, --dock-h, --dock-gap, --dock-space (see shell.css).
  */
 
 /** primary routes in the desktop dock (order follows the mockup). `match` decides the active key. */
 const DOCK = [
   { k: 'home', to: '/', label: 'Dashboard', icon: House, match: (p) => p === '/' },
-  { k: 'path', to: '/path', label: 'Learning path', icon: Route, match: (p) => p.startsWith('/path') },
+  { k: 'progress', to: '/progress', label: 'Progress', icon: ChartNoAxesColumn, match: (p) => p.startsWith('/progress') },
+  { k: 'plan', to: '/plan', label: 'Plan your journey', icon: CalendarClock, match: (p) => p.startsWith('/plan') },
   { k: 'topics', to: '/contents', label: 'Topics & contents', icon: ListTree, match: (p) => p.startsWith('/contents') || (p.startsWith('/topic/') && !p.includes('/q/')) },
   { k: 'patterns', to: '/patterns', label: 'Patterns', icon: Layers, match: (p) => p.startsWith('/patterns') },
-  { k: 'practice', to: '/questions', label: 'Practice · questions', icon: Code2, match: (p) => p.startsWith('/questions') || /^\/topic\/[^/]+\/q\//.test(p) },
   { k: 'visualize', to: '/visualize', label: 'Visualizer', icon: Activity, match: (p) => p.startsWith('/visualize') },
   { k: 'revision', to: '/revision', label: 'Revision', icon: RotateCcw, match: (p) => p.startsWith('/revision') },
   { k: 'shorts', to: '/shorts', label: 'Shorts', icon: Clapperboard, match: (p) => p.startsWith('/shorts') },
   { k: 'companies', to: '/companies', label: 'Companies', icon: Building2, match: (p) => p.startsWith('/companies') },
-  { k: 'toolkit', to: '/toolkit', label: 'JS DSA toolkit', icon: Wrench, match: (p) => p.startsWith('/toolkit') },
   { k: 'achievements', to: '/achievements', label: 'Achievements', icon: Award, match: (p) => p.startsWith('/achievements') },
 ];
-/** touch tab dock: Home / Path / Practice / Revise / More */
-const TABS = ['home', 'path', 'practice', 'revision'];
-const TAB_LABEL = { home: 'Home', path: 'Path', practice: 'Practice', revision: 'Revise' };
+/** touch tab dock: Home / Plan / Progress / Revise / More */
+const TABS = ['home', 'plan', 'progress', 'revision'];
+const TAB_LABEL = { home: 'Home', plan: 'Plan', progress: 'Progress', revision: 'Revise' };
 /** routes only reachable from "More" on desktop (the sheet on touch also lists the dock routes that aren't tabs) */
 const MORE = [
+  { to: '/questions', label: 'Practice', icon: Code2, sub: 'all questions' },
+  { to: '/tools', label: 'Tools', icon: Wrench, sub: 'cheat sheet · JS · playground' },
   { to: '/finder', label: 'Pattern Finder', icon: Target, sub: 'which pattern?' },
   { to: '/saved', label: 'Saved', icon: Bookmark, sub: 'for later' },
-  { to: '/progress', label: 'Progress', icon: BarChart3, sub: 'stats' },
-  { to: '/cheatsheet', label: 'Cheat Sheet', icon: FileText, sub: 'all patterns' },
-  { to: '/js', label: 'JavaScript for DSA', icon: Code2, sub: 'reference' },
-  { to: '/playground', label: 'Playground', icon: Terminal, sub: 'scratch pad' },
   { to: '/settings', label: 'Settings', icon: Settings, sub: 'theme · data' },
 ];
-const MORE_MATCH = (p) => MORE.some((m) => p.startsWith(m.to));
+const MORE_MATCH = (p) => p.startsWith('/toolkit/') || MORE.some((m) => p.startsWith(m.to));
+/** the status-line page chip: name + icon of the dock / More entry the route belongs to */
+function pageOf(p) {
+  const hit = DOCK.find((d) => d.match(p)) || MORE.find((m) => p.startsWith(m.to));
+  if (hit) return hit;
+  if (p.startsWith('/topic/')) return { label: 'Practice', icon: Code2 }; // question pages
+  if (p.startsWith('/toolkit/')) return MORE.find((m) => m.to === '/tools');
+  return { label: 'Not found', icon: Compass };
+}
 
-const STATUS_TEXT = { locked: 'locked', available: 'not started', 'in-progress': 'in progress', completed: 'completed' };
 /** pages worth offering under "Continue where you left off" */
-const STUDY_PAGE = /^\/(topic|visualize|playground|finder|patterns|toolkit|js)(\/|$)/;
+const STUDY_PAGE = /^\/(topic|visualize|tools|finder|patterns|toolkit)(\/|$)/;
 const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
 const SEARCH_KEY = IS_MAC ? '⌘K' : 'Ctrl K';
 
@@ -115,7 +116,7 @@ function describeRoute(pathname, stats) {
   const seg = pathname.split('/')[1] || '';
   const map = {
     '': ['dashboard', `${stats.topicsCompleted} / ${stats.topicsTotal} topics complete`],
-    path: ['path', `${stages.length} stages · ${stats.topicsTotal} topics`],
+    plan: ['plan', `${stages.length} stages · your pace and dates`],
     contents: ['contents', `${stats.topicsTotal} topics · ${stats.total} problems`],
     patterns: ['patterns', `${stats.totalPatterns} patterns`],
     finder: ['patterns/finder', 'which pattern fits?'],
@@ -126,11 +127,8 @@ function describeRoute(pathname, stats) {
     shorts: ['shorts', 'two-minute pattern stories'],
     progress: ['progress', `${stats.overall}% overall mastery`],
     companies: ['companies', 'interview questions by company'],
-    toolkit: ['toolkit', 'JS data structures'],
-    js: ['js-reference', 'JavaScript for DSA'],
-    playground: ['playground', 'scratch pad'],
+    tools: ['tools', 'cheat sheet · toolkit · JS · playground'],
     achievements: ['achievements', 'badges'],
-    cheatsheet: ['cheatsheet', 'every pattern on one page'],
     settings: ['settings', 'appearance · guide · data'],
   };
   const [crumb, ctx] = map[seg] || ['404', 'page not found'];
@@ -162,20 +160,26 @@ function StageBackground() {
 }
 
 function ThemeSwitch({ theme, setTheme, className = 'sl-theme' }) {
+  const opts = [
+    ['dark', 'Dark', Moon],
+    ['light', 'Light', Sun],
+  ];
   return (
-    <div className={className} role="group" aria-label="Theme">
-      <button type="button" aria-pressed={theme === 'dark'} onClick={() => setTheme('dark')} title="Graphite (dark)" aria-label="Graphite (dark theme)">
-        <Moon aria-hidden="true" />
-      </button>
-      <button type="button" aria-pressed={theme === 'light'} onClick={() => setTheme('light')} title="Porcelain (light)" aria-label="Porcelain (light theme)">
-        <Sun aria-hidden="true" />
-      </button>
+    <div className={className} role="group" aria-label={`Theme: ${theme === 'light' ? 'Light' : 'Dark'}`}>
+      {opts.map(([id, name, Icon]) => {
+        const tip = theme === id ? `Theme: ${name} (current)` : `Theme: ${theme === 'light' ? 'Light' : 'Dark'} — switch to ${name.toLowerCase()}`;
+        return (
+          <button key={id} type="button" aria-pressed={theme === id} onClick={() => setTheme(id)} aria-label={tip} data-tip={tip}>
+            <Icon aria-hidden="true" />
+          </button>
+        );
+      })}
     </div>
   );
 }
 
 /** "More": a popover above the dock (desktop) / a bottom sheet (≤900px). */
-function MorePanel({ open, onClose, triggerRef, onSearch, onGuide, onSyllabus, theme, setTheme, pathname }) {
+function MorePanel({ open, onClose, triggerRef, onSearch, onGuide, theme, setTheme, pathname }) {
   const ref = useRef(null);
   useEffect(() => {
     if (!open) return undefined;
@@ -238,11 +242,6 @@ function MorePanel({ open, onClose, triggerRef, onSearch, onGuide, onSyllabus, t
               </Link>
             );
           })}
-          <button type="button" className="more-item" onClick={onSyllabus}>
-            <BookOpen aria-hidden="true" />
-            <span>Syllabus</span>
-            <small>all topics</small>
-          </button>
         </div>
         <button type="button" className="more-guide" onClick={onGuide}>
           <span className="more-guide-q" aria-hidden="true">
@@ -265,88 +264,19 @@ function MorePanel({ open, onClose, triggerRef, onSearch, onGuide, onSyllabus, t
   );
 }
 
-/** the old sidebar's syllabus: stage → topic tree with status dots and mastery bars, as a drawer */
-function SyllabusDrawer({ open, onClose, progress, collapsedStages, setCollapsedStages }) {
-  const closeRef = useRef(null);
-  useEffect(() => {
-    if (!open) return undefined;
-    const raf = requestAnimationFrame(() => closeRef.current?.focus());
-    const onKey = (e) => {
-      if (e.key === 'Escape') {
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    document.addEventListener('keydown', onKey, true);
-    return () => {
-      cancelAnimationFrame(raf);
-      document.removeEventListener('keydown', onKey, true);
-    };
-  }, [open, onClose]);
-  return (
-    <AnimatePresence>
-      {open && (
-        <>
-          <motion.div key="scrim" className="drawer-scrim" aria-hidden="true" onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
-          <motion.nav
-            key="drawer"
-            className="syllabus"
-            aria-label="Syllabus"
-            initial={{ x: '-104%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '-104%' }}
-            transition={{ type: 'spring', stiffness: 420, damping: 40 }}
-          >
-            <div className="syllabus-head">
-              <span className="eyebrow">
-                <span className="pip" /> Syllabus
-              </span>
-              <button ref={closeRef} type="button" className="iconbtn" onClick={onClose} aria-label="Close the syllabus">
-                <X aria-hidden="true" />
-              </button>
-            </div>
-            {stages.map((stage, si) => {
-              const closed = !!collapsedStages[stage.id];
-              const done = stage.topics.filter((t) => topicStatus(t, progress) === 'completed').length;
-              return (
-                <div key={stage.id} className="side-stage">
-                  <button type="button" className="side-stage-title" aria-expanded={!closed} onClick={() => setCollapsedStages((c) => ({ ...c, [stage.id]: !closed }))}>
-                    <span className="side-stage-name">
-                      <span className="side-stage-num">{String(si + 1).padStart(2, '0')}</span>
-                      {stage.title}
-                    </span>
-                    <span className="side-stage-meta">
-                      {done}/{stage.topics.length}
-                      <ChevronDown size={14} aria-hidden="true" className={`chev-icon ${closed ? 'closed' : ''}`} />
-                    </span>
-                  </button>
-                  {!closed && (
-                    <div className="side-stage-list">
-                      {stage.topics.map((t) => {
-                        const s = topicStatus(t, progress);
-                        const mastery = topicStats(t, progress).mastery;
-                        return (
-                          <NavLink key={t.id} to={`/topic/${t.id}`} className={({ isActive }) => `nav-link side-topic ${isActive ? 'active' : ''}`}>
-                            <span className={`dot dot-${s}`} aria-hidden="true" />
-                            <span className="side-topic-title">{t.title}</span>
-                            <span className="side-topic-bar" title={`${mastery}% mastered`}>
-                              <ProgressBar value={mastery} size="sm" variant={s === 'completed' ? 'success' : ''} label={`${t.title}: ${mastery}% mastered`} />
-                            </span>
-                            <span className="sr-only">, {STATUS_TEXT[s]}</span>
-                          </NavLink>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </motion.nav>
-        </>
-      )}
-    </AnimatePresence>
-  );
+/** where the Back button goes when there is no in-app history (deep link / fresh tab): the route's logical parent */
+export function parentOf(pathname) {
+  let m = matchPath('/topic/:topicId/q/:questionId', pathname);
+  if (m) return { to: `/topic/${m.params.topicId}#questions`, label: topicById[m.params.topicId]?.title || 'topic' };
+  if (matchPath('/topic/:topicId', pathname)) return { to: '/contents', label: 'Topics & contents' };
+  if (matchPath('/shorts/:id', pathname)) return { to: '/shorts', label: 'Shorts' };
+  if (matchPath('/toolkit/:toolId', pathname)) return { to: '/tools?tab=toolkit', label: 'JS DSA toolkit' };
+  if (matchPath('/companies/:companyId', pathname)) return { to: '/companies', label: 'Companies' };
+  if (pathname === '/finder') return { to: '/patterns', label: 'Patterns' };
+  return { to: '/', label: 'Dashboard' };
 }
+/** pages without a Back button: the dashboard and the touch tab roots (always one tap away in the tab dock) */
+const NO_BACK = new Set(['/', '/plan', '/progress', '/revision']);
 
 export default function AppShell() {
   const { theme, setTheme } = useTheme();
@@ -360,6 +290,8 @@ export default function AppShell() {
   // questions to redo (mistakes not yet solved) — the badge on the Revise key
   const reviseCount = useMemo(() => mistakeQuestions(progress).filter((q) => progress.questions[q.id]?.status !== 'solved').length, [progress]);
   const { crumb, ctx } = describeRoute(pathname, stats);
+  const page = pageOf(pathname);
+  const PageIcon = page.icon;
   const clock = useClock();
   const fill = !!matchPath('/topic/:topicId/q/:questionId', pathname);
   useCelebrations(progress);
@@ -369,14 +301,11 @@ export default function AppShell() {
     navigate('/achievements');
   }, [dismissUnlocked, navigate]);
 
-  // ---- More popover/sheet + syllabus drawer ----
+  // ---- More popover/sheet ----
   const [moreOpen, setMoreOpen] = useState(false);
-  const [syllabusOpen, setSyllabusOpen] = useState(false);
-  const [collapsedStages, setCollapsedStages] = useState(() => getUiPrefs().collapsedStages);
   const moreBtnRef = useRef(null);
   const moreTabRef = useRef(null);
   const moreTrigger = useRef(null);
-  const syllabusReturn = useRef(null);
   const closeMore = useCallback((restoreFocus) => {
     setMoreOpen(false);
     if (restoreFocus) moreTrigger.current?.focus();
@@ -385,20 +314,9 @@ export default function AppShell() {
     moreTrigger.current = ref.current;
     setMoreOpen((o) => !o);
   };
-  const openSyllabus = () => {
-    syllabusReturn.current = moreTrigger.current;
-    setMoreOpen(false);
-    setSyllabusOpen(true);
-  };
-  const closeSyllabus = useCallback(() => {
-    setSyllabusOpen(false);
-    syllabusReturn.current?.focus?.();
-  }, []);
   useEffect(() => {
     setMoreOpen(false);
-    setSyllabusOpen(false);
   }, [pathname]);
-  useEffect(() => saveUiPrefs({ collapsedStages }), [collapsedStages]);
   useEffect(() => {
     if (STUDY_PAGE.test(pathname)) saveUiPrefs({ lastStudyLocation: loc });
   }, [loc, pathname]);
@@ -416,7 +334,24 @@ export default function AppShell() {
     setMoreOpen(false);
     setTourOpen(true);
   }, []);
-  const closeTour = useCallback(() => setTourOpen(false), []);
+  // first visit: when the welcome tour closes, the dock's glow pulses twice so the menu is noticed
+  const firstVisit = useRef(!getUiPrefs().tourSeen);
+  const [dockHello, setDockHello] = useState(false);
+  const closeTour = useCallback(() => {
+    setTourOpen(false);
+    if (!firstVisit.current) return;
+    firstVisit.current = false;
+    setDockHello(true);
+    setTimeout(() => setDockHello(false), 2600);
+  }, []);
+  // M11: `?` and the Guide keys open this page's guide where there is one, else the welcome tour
+  const [pageGuide, setPageGuide] = useState(null);
+  const openGuideHere = useCallback(() => {
+    const g = guideFor(pathname);
+    if (!g) return openTour();
+    setMoreOpen(false);
+    setPageGuide(g);
+  }, [pathname, openTour]);
   useEffect(() => {
     if (tourOpen) saveUiPrefs({ tourSeen: true });
   }, [tourOpen]);
@@ -433,13 +368,16 @@ export default function AppShell() {
         showPalette();
       } else if (e.key === '?' && !e.metaKey && !e.ctrlKey && !e.altKey && !typingInField(e) && !paletteOpen) {
         e.preventDefault();
-        openTour();
+        openGuideHere();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [paletteOpen, tourOpen, showPalette, openTour]);
+  }, [paletteOpen, tourOpen, showPalette, openGuideHere]);
 
+  const parent = parentOf(pathname);
+  const canGoBack = location.key !== 'default';
+  const goBack = () => (canGoBack ? navigate(-1) : navigate(parent.to));
   const streakLabel = st.current > 0 ? `${st.current}-day streak` : 'no streak yet';
   const moreActive = MORE_MATCH(pathname);
 
@@ -458,9 +396,18 @@ export default function AppShell() {
             DSA&nbsp;Journey<i>.js</i>
           </b>
         </Link>
-        <div className="sl-seg sl-path" title={`~/journey/${crumb}`}>
-          <em>~/journey/</em>
-          <strong>{crumb}</strong>
+        {!NO_BACK.has(pathname) && (
+          <button type="button" className="sl-back" onClick={goBack} aria-label={canGoBack ? 'Back' : `Back to ${parent.label}`} title={canGoBack ? 'Back' : `Back to ${parent.label}`}>
+            <ArrowLeft aria-hidden="true" />
+            <span className="sl-back-t">Back</span>
+          </button>
+        )}
+        <div className="sl-seg sl-page" title={`~/journey/${crumb}`}>
+          <span className="sl-page-chip">
+            <PageIcon aria-hidden="true" />
+            <span className="sr-only">Current page: </span>
+            <strong>{page.label}</strong>
+          </span>
         </div>
         <div className="sl-seg sl-ctx sl-hide-md" title={ctx}>
           {ctx}
@@ -478,26 +425,6 @@ export default function AppShell() {
         </div>
         <div className="sl-seg sl-hide-lg">
           <time dateTime={clock.iso}>{clock.label}</time>
-        </div>
-        <button type="button" className="sl-seg sl-guide" onClick={openTour} aria-label="Open the guide" title="Guide (press ?)">
-          <Compass aria-hidden="true" />
-          <span className="sl-label">guide</span>
-          <span className="kbd" aria-hidden="true">
-            ?
-          </span>
-        </button>
-        <button type="button" className="sl-seg sl-search" onClick={showPalette} aria-label={`Search (${SEARCH_KEY})`} title={`Search (${SEARCH_KEY} or /)`}>
-          <Search aria-hidden="true" className="sl-search-ico" />
-          <span className="sl-label">search</span>
-          <span className="kbd sl-kbd" aria-hidden="true">
-            {SEARCH_KEY}
-          </span>
-        </button>
-        <div className="sl-seg sl-tail">
-          <ThemeSwitch theme={theme} setTheme={setTheme} />
-          <NavLink to="/settings" className="sl-settings" aria-label="Settings" title="Settings">
-            <Settings aria-hidden="true" />
-          </NavLink>
         </div>
       </header>
 
@@ -518,7 +445,7 @@ export default function AppShell() {
 
       {/* ---------- floating dock (desktop) ---------- */}
       <div className="dock-wrap">
-        <nav className="dock" aria-label="Primary">
+        <nav className={`dock${dockHello ? ' dock--hello' : ''}`} aria-label="Primary">
           {DOCK.map((d) => {
             const Icon = d.icon;
             return (
@@ -552,7 +479,7 @@ export default function AppShell() {
             </span>
           </button>
           <span className="dock-sep" aria-hidden="true" />
-          <button type="button" className="dock-item dock-guide" onClick={openTour} aria-label="Guide (press ?)">
+          <button type="button" className="dock-item dock-guide" onClick={openGuideHere} aria-label="Guide (press ?)">
             <span className="dock-q" aria-hidden="true">
               ?
             </span>
@@ -605,23 +532,38 @@ export default function AppShell() {
         </button>
       </nav>
 
+      <button type="button" className="guide-fab" onClick={openGuideHere} aria-label="Guide me: what each part of this page does (press ?)">
+        <span className="guide-fab-q" aria-hidden="true">
+          ?
+        </span>
+        <span className="guide-fab-t">Guide me</span>
+      </button>
+
       <MorePanel
         open={moreOpen}
         onClose={closeMore}
         triggerRef={moreTrigger}
         onSearch={showPalette}
         onGuide={openTour}
-        onSyllabus={openSyllabus}
         theme={theme}
         setTheme={setTheme}
         pathname={pathname}
       />
-      <SyllabusDrawer open={syllabusOpen} onClose={closeSyllabus} progress={progress} collapsedStages={collapsedStages} setCollapsedStages={setCollapsedStages} />
 
       <Toaster />
       <Suspense fallback={null}>
         {paletteLoaded && <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} onOpenGuide={openTour} />}
         {tourOpen && <WelcomeTour onClose={closeTour} />}
+        {pageGuide && (
+          <PageGuide
+            guide={pageGuide}
+            onClose={() => setPageGuide(null)}
+            onOpenTour={() => {
+              setPageGuide(null);
+              openTour();
+            }}
+          />
+        )}
         {/* achievement unlocks wait until the guide is closed */}
         {unlocked.length > 0 && !tourOpen && <AchievementCelebration items={unlocked} onClose={dismissUnlocked} onViewAll={viewAllAchievements} />}
       </Suspense>

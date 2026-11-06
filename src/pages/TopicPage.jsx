@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import LessonPlayer from '../components/lesson/LessonPlayer.jsx';
 import Icon from '../components/ui/Icon.jsx';
 import Markdown from '../components/ui/Markdown.jsx';
@@ -194,7 +194,8 @@ export function QuestionList({ questions, progress, topicId, showTopic = false, 
 
 const HOW_TO = ['Read the problem and constraints.', 'Name the pattern before any hint.', 'Write the brute force in words.', 'Optimise, then code it.', 'Run, then submit against hidden tests.', 'Only then read the solution & alternatives.'];
 
-function PracticeTab({ topic, progress }) {
+/** the topic's question bank: a section under the tabs (always reachable, not a tab of its own) */
+function QuestionBank({ topic, progress }) {
   const [pattern, setPattern] = useState('all');
   const qs = pattern === 'all' ? topic.questions : topic.questions.filter((q) => q.pattern === pattern);
   if (!topic.questions.length)
@@ -212,7 +213,7 @@ function PracticeTab({ topic, progress }) {
           <div>
             <span className="eyebrow">
               <i className="pip" />
-              Practice · question bank
+              Question bank
             </span>
             <h2 id="tp-prac-t" className="h1">
               {topic.questions.length} problems · {s.solved} solved
@@ -593,12 +594,17 @@ const TIPS = {
   review: ['Redo, don’t re-read.', 'Re-answer the checkpoints you missed and retry the listed questions without opening the solution; that is what lifts a weak area.'],
 };
 
+const TABS = ['learn', 'visualize', 'review', 'company', 'cheatsheet'];
+const toQuestions = () => document.getElementById('questions')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
 export default function TopicPage() {
   const { topicId } = useParams();
   const [params, setParams] = useSearchParams();
   const { progress, dispatch } = useProgress();
   const topic = topicById[topicId];
-  const tab = params.get('tab') || 'learn';
+  const { hash } = useLocation();
+  // unknown/removed tabs (e.g. the old ?tab=practice) fall back to the lesson
+  const tab = TABS.includes(params.get('tab')) ? params.get('tab') : 'learn';
   const sParam = params.get('s');
   const initialSection = sParam !== null && /^\d+$/.test(sParam) ? Number(sParam) : undefined;
   const setTab = (t) => setParams(t === 'learn' ? {} : { tab: t }, { replace: true });
@@ -609,6 +615,9 @@ export default function TopicPage() {
   useEffect(() => {
     if (topicById[topicId]) markTabVisited(topicId, tab);
   }, [topicId, tab]);
+  useEffect(() => {
+    if (hash === '#questions') requestAnimationFrame(toQuestions);
+  }, [topicId, hash]);
 
   if (!topic) return <NotFound />;
   const status = topicStatus(topic, progress);
@@ -626,7 +635,7 @@ export default function TopicPage() {
   const curSection = topic.lesson.sections[secIdx];
   const locked = status === 'locked' && !tState.unlockedManually;
   const statusWord = { completed: 'completed', 'in-progress': 'in progress', available: 'unlocked', locked: 'locked' }[status];
-  const crumbTail = tab === 'learn' ? (s.lessonCompleted ? 'lesson ✓' : curSection ? `§${secIdx + 1} ${curSection.title.toLowerCase()}` : 'lesson') : tab;
+  const crumbTail = tab === 'learn' ? (s.lessonCompleted ? 'lesson ✓' : curSection ? `step ${secIdx + 1} ${curSection.title.toLowerCase()}` : 'lesson') : tab;
   const vox = topic.questions.map((q) => {
     const st = progress.questions[q.id]?.status;
     return { id: q.id, st, h: st === 'solved' ? (q.difficulty === 'Hard' ? 3.8 : q.difficulty === 'Medium' ? 3.2 : 2.6) : st === 'attempted' ? 1.8 : 0.4 };
@@ -637,13 +646,13 @@ export default function TopicPage() {
   return (
     <div className="page tp">
       {/* ---------- crumbs ---------- */}
-      <nav className="tp-crumbs rise" aria-label="Breadcrumb">
+      <nav data-guide="tp-crumbs" className="tp-crumbs rise" aria-label="Breadcrumb">
         <ol>
           <li>
-            <Link to="/path">path</Link>
+            <Link to="/contents">contents</Link>
           </li>
           <li>
-            <Link to={`/path#stage-${topic.stageId}`}>
+            <Link to={`/contents#stage-${topic.stageId}`}>
               S{pad2(stageIdx + 1)} · {topic.stageTitle.toLowerCase()}
             </Link>
           </li>
@@ -669,13 +678,9 @@ export default function TopicPage() {
       </nav>
 
       {/* ---------- hero ---------- */}
-      <section className="tile tile--glow tp-hero rise" style={{ '--i': 1 }} aria-labelledby="tp-title">
+      <section data-guide="tp-hero" className="tile tile--glow tp-hero rise" style={{ '--i': 1 }} aria-labelledby="tp-title">
         <div className="tp-hero-main">
           <div className="tp-tags">
-            <Link to={`/path#stage-${topic.stageId}`} className="chip chip--uv">
-              <i className="pip pip--uv" />
-              Stage {pad2(stageIdx + 1)} · {topic.stageTitle}
-            </Link>
             <DiffChip difficulty={topic.difficulty} />
             <span className="tag">~{topic.estMinutes} min lesson</span>
             <span className="tag">
@@ -706,7 +711,7 @@ export default function TopicPage() {
             <div>
               <span className="eyebrow">lesson</span>
               <b className={status === 'in-progress' ? 't-uv' : ''}>
-                {s.lessonCompleted ? '✓' : `§${secIdx + 1}`}
+                {s.lessonCompleted ? '✓' : `${secIdx + 1}`}
                 <em> / {nSec}</em>
               </b>
             </div>
@@ -732,7 +737,7 @@ export default function TopicPage() {
             </div>
           </div>
         </div>
-        <aside className="tile tile--raised tp-prog" aria-label="Topic progress">
+        <aside data-guide="tp-prog" className="tile tile--raised tp-prog" aria-label="Topic progress">
           <div className="eyebrow tp-prog-k">
             <span>Topic progress</span>
             <span className={status === 'completed' ? 't-plasma' : status === 'in-progress' ? 't-uv' : status === 'available' ? 't-ice' : ''}>{statusWord}</span>
@@ -761,9 +766,11 @@ export default function TopicPage() {
           <MasteryBox topic={topic} progress={progress} />
           <div className="tp-prog-foot">
             <span>{s.lessonCompleted ? (status === 'completed' ? 'topic complete' : `completes at ${halfNeed}/${s.total} solved`) : left ? `~${left} min of lesson left` : 'lesson not started'}</span>
-            <button type="button" className="btn btn--chrome btn--sm" onClick={() => setTab('practice')}>
-              Practice
-            </button>
+            {topic.questions.length > 0 && (
+              <button type="button" className="btn btn--chrome btn--sm" onClick={toQuestions}>
+                Questions
+              </button>
+            )}
           </div>
         </aside>
       </section>
@@ -779,30 +786,24 @@ export default function TopicPage() {
         </div>
       )}
 
-      <div className="tp-sp-wrap rise" style={{ '--i': 2 }}>
+      <div data-guide="tp-path" className="tp-sp-wrap rise" style={{ '--i': 2 }}>
         <StudyPath topic={topic} tab={tab} locked={locked} onSelect={setTab} />
-        {tab === 'practice' ? (
-          <CoachTip id="tab:practice" title="Name the pattern first.">
-            Each question asks which pattern fits before any hint. <kbd className="kbd">Ctrl</kbd>/<kbd className="kbd">⌘</kbd> <kbd className="kbd">Enter</kbd> runs the visible tests; Submit also runs hidden ones.
+        {TIPS[tab] && (
+          <CoachTip id={`tab:${tab}`} title={TIPS[tab][0]}>
+            {TIPS[tab][1]}
           </CoachTip>
-        ) : (
-          TIPS[tab] && (
-            <CoachTip id={`tab:${tab}`} title={TIPS[tab][0]}>
-              {TIPS[tab][1]}
-            </CoachTip>
-          )
         )}
       </div>
 
-      <div id="topic-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="tp-panel">
+      <div data-guide="tp-panel" id="topic-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="tp-panel">
         {tab === 'learn' && (status !== 'locked' || tState.unlockedManually || prerequisitesMet(topic, progress)) && (
           <>
-            <LearnTab topic={topic} onFinish={() => setTab(visualCount ? 'visualize' : 'practice')} initialSection={initialSection} onSectionApplied={() => setParams({}, { replace: true })} />
+            <LearnTab topic={topic} onFinish={() => (visualCount ? setTab('visualize') : toQuestions())} initialSection={initialSection} onSectionApplied={() => setParams({}, { replace: true })} />
             {s.lessonCompleted && (
               <NextUp
                 lead="Lesson complete."
                 label={visualCount ? `Next: watch ${visualCount} pattern${visualCount === 1 ? '' : 's'} animate` : `Next: practise ${topic.questions.length} questions`}
-                onClick={() => setTab(visualCount ? 'visualize' : 'practice')}
+                onClick={() => (visualCount ? setTab('visualize') : toQuestions())}
               />
             )}
           </>
@@ -820,14 +821,7 @@ export default function TopicPage() {
         {tab === 'visualize' && (
           <>
             <VisualizeTab topic={topic} />
-            <NextUp lead="Seen how it moves?" label={topic.questions.length ? `Next: practise ${topic.questions.length} questions` : 'Next: the cheatsheet'} onClick={() => setTab(topic.questions.length ? 'practice' : 'cheatsheet')} />
-          </>
-        )}
-        {tab === 'practice' && (
-          <>
-            {!s.lessonCompleted && topic.questions.length > 0 && <p className="tp-faint tp-prac-tip">Tip: finish the lesson first — questions build on its patterns.</p>}
-            <PracticeTab topic={topic} progress={progress} />
-            {status === 'completed' ? <NextUp {...toNextTopic} /> : s.solved > 0 && <NextUp lead={`${s.solved}/${s.total} solved.`} label="Next: review what you missed" onClick={() => setTab('review')} />}
+            <NextUp lead="Seen how it moves?" label={topic.questions.length ? `Next: practise ${topic.questions.length} questions` : 'Next: the cheatsheet'} onClick={() => (topic.questions.length ? toQuestions() : setTab('cheatsheet'))} />
           </>
         )}
         {tab === 'company' && <CompanyTab topic={topic} />}
@@ -845,6 +839,11 @@ export default function TopicPage() {
             <NextUp {...toNextTopic} />
           </>
         )}
+      </div>
+
+      <div data-guide="tp-questions" id="questions" className="tp-panel">
+        {!s.lessonCompleted && topic.questions.length > 0 && <p className="tp-faint tp-prac-tip">Tip: finish the lesson first — questions build on its patterns.</p>}
+        <QuestionBank topic={topic} progress={progress} />
       </div>
     </div>
   );

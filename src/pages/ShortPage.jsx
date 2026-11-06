@@ -69,8 +69,8 @@ export default function ShortPage() {
       </header>
 
       <div className="qp-row sh-bar">
-        <SaveButton saveKey={`short:${s.id}`} item={shortSaveItem(s)} />
-        <div className="seg" role="group" aria-label="Reading speed">
+        <SaveButton data-guide="short-save" saveKey={`short:${s.id}`} item={shortSaveItem(s)} />
+        <div className="seg" data-guide="short-speed" role="group" aria-label="Reading speed">
           {SPEEDS.map((x) => (
             <button key={x.id} type="button" aria-pressed={speed === x.id} onClick={() => saveUiPrefs({ shortSpeed: x.id })}>
               {x.label}
@@ -86,7 +86,7 @@ export default function ShortPage() {
         onSolve={(step, firstTry) => step === s.steps.length - 1 && dispatch({ type: 'SHORT_DONE', id: s.id, correct: firstTry })}
       />
 
-      <nav className="qp-row sh-nav" aria-label="Other Shorts">
+      <nav data-guide="short-nav" className="qp-row sh-nav" aria-label="Other Shorts">
         {prev ? (
           <Link to={`/shorts/${prev.id}`} className="btn btn--ghost btn--sm">
             <ChevronLeft size={15} aria-hidden="true" /> Day {prev.day}

@@ -5,7 +5,7 @@ export default {
   order: 1,
   pattern: 'adv-graph-scc-kosaraju',
   tags: ['graph', 'dfs', 'strongly connected components'],
-  source: { platform: 'Classic', note: "Textbook exercise: Kosaraju's two-pass SCC algorithm (CLRS §22.5)." },
+  source: { platform: 'Classic', note: "Textbook exercise: Kosaraju's two-pass SCC algorithm (CLRS section 22.5)." },
 
   statement: `You are given a **directed** graph with \`n\` nodes labelled \`0 … n-1\` and a list of edges \`[u, v]\` meaning there is an arrow from \`u\` to \`v\`.
 

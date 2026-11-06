@@ -155,17 +155,19 @@ export default function VisualizePage() {
               </>
             )}
             <span className="vz-sp" />
-            {current.topic && (
-              <SaveButton
-                saveKey={`viz:${current.topic.id}/${current.scenario}`}
-                item={{ kind: 'scene', topicId: current.topic.id, scenario: current.scenario, title: SCENARIO_TITLES[current.scenario] }}
-              />
-            )}
-            {selected && (
-              <button type="button" className="btn btn--ghost btn--sm" onClick={() => setParams({})}>
-                <Icon name="x" size={14} /> Clear
-              </button>
-            )}
+            <span className="vz-acts">
+              {current.topic && (
+                <SaveButton
+                  saveKey={`viz:${current.topic.id}/${current.scenario}`}
+                  item={{ kind: 'scene', topicId: current.topic.id, scenario: current.scenario, title: SCENARIO_TITLES[current.scenario] }}
+                />
+              )}
+              {selected && (
+                <button type="button" className="btn btn--ghost btn--sm" onClick={() => setParams({})}>
+                  <Icon name="x" size={14} /> Clear
+                </button>
+              )}
+            </span>
           </div>
           <Suspense fallback={<div className="muted small">Loading animation…</div>}>
             <Visualizer key={current.key} scenario={current.scenario} input={current.input} wide eyebrow={current.stage ? `${current.stage.title} · ${current.topic.title}` : 'step-through'} />

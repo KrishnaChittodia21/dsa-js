@@ -2,7 +2,7 @@
    shell.css — owner: foundation (wave 1). Scope: AppShell (status line, dock, touch tab dock, More
    popover/sheet, syllabus drawer, stage background, main scroll area), SiteFooter, page containers.
 
-   LAYOUT VARIABLES (defined in tokens.css § 5, responsive at ≤900px):
+   LAYOUT VARIABLES (defined in tokens.css section 5, responsive at ≤900px):
      --status-h    fixed top status line height (44px · 52px on touch)
      --dock-h      floating dock / touch tab dock height (62px · 70px)
      --dock-gap    gap between the dock and the bottom edge (18px · 12px)
@@ -117,13 +117,26 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
-/* the path shrinks (ellipsis) so long question ids never push guide / search / theme off the bar;
-   every other segment keeps its size */
+/* the page chip shrinks (ellipsis) so it never pushes the streak off the bar; every other segment keeps its size */
 .sl > .sl-seg { flex-shrink: 0; }
-.sl > .sl-path { color: var(--text-2); min-width: 0; flex: 0 1 auto; overflow: hidden; max-width: 40vw; }
-.sl-path em { font-style: normal; color: var(--muted); flex: none; }
-.sl-path strong { color: var(--text); font-weight: 600; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-/* the page-context segment gives way first so guide + search + theme never get pushed off */
+.sl > .sl-page { min-width: 0; flex: 0 1 auto; overflow: hidden; max-width: 40vw; }
+/* "you are here": accent pill with the page's dock icon, readable in both themes */
+.sl-page-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  max-width: 100%;
+  height: 28px;
+  padding: 0 12px 0 10px;
+  border-radius: var(--r-pill);
+  color: var(--plasma-t);
+  background: color-mix(in srgb, var(--plasma-t) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--plasma-t) 38%, transparent);
+}
+.sl .sl-page-chip svg { width: 15px; height: 15px; }
+.sl-page-chip strong { font: 700 13.5px/1 var(--f-ui); color: var(--text); min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+/* the page-context subtitle gives way first so the streak and stats never get pushed off */
 .sl > .sl-ctx { display: block; min-width: 0; flex: 0 1000 auto; overflow: hidden; text-overflow: ellipsis; line-height: var(--status-h); }
 .sl-spacer { flex: 1 1 0; min-width: 8px; }
 .sl-live { width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--acid); box-shadow: 0 0 10px var(--acid); }
@@ -131,13 +144,6 @@
 .sl-streak { color: var(--plasma-t); }
 .sl-streak.is-off { color: var(--muted); }
 .sl-streak-short { display: none; }
-.sl-guide, .sl-search { color: var(--text-2) !important; transition: color 0.2s, background 0.2s; }
-.sl-guide svg { color: var(--uv-t); }
-.sl-guide:hover { color: var(--text) !important; background: color-mix(in srgb, var(--uv) 8%, transparent) !important; }
-.sl-search:hover { color: var(--text) !important; background: color-mix(in srgb, var(--plasma) 6%, transparent) !important; }
-.sl-search-ico { display: none; }
-.sl-kbd { margin-left: 0; }
-.sl-tail { gap: 8px; padding-right: 0; }
 .sl-theme {
   display: inline-flex;
   align-items: center;
@@ -152,9 +158,27 @@
 .sl-theme button[aria-pressed='true'] { background: var(--surface-3); color: var(--text); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08); }
 :root[data-theme='light'] .sl-theme button[aria-pressed='true'] { background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
 .sl-theme svg { width: 13px; height: 13px; }
-.sl-settings { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 10px; color: var(--muted) !important; transition: color 0.2s, background 0.2s; }
-.sl-settings:hover, .sl-settings.active { color: var(--text) !important; background: var(--surface-2); }
-.sl-settings svg { width: 15px; height: 15px; }
+/* visible hover/focus tooltip naming the theme; right-anchored so it never spills past the panel edge */
+.sl-theme button { position: relative; }
+.sl-theme button[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--surface-3);
+  border: 1px solid var(--line-3);
+  color: var(--text);
+  font: 500 11px/1.2 var(--f-mono);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s;
+  z-index: 5;
+}
+.sl-theme button:hover::after,
+.sl-theme button:focus-visible::after { opacity: 1; }
 
 /* ---------- main scroll area ---------- */
 .main {
@@ -221,12 +245,37 @@
   gap: 4px;
   padding: 8px 10px;
   border-radius: 24px;
-  background: color-mix(in srgb, var(--surface) 68%, transparent);
+  /* stands out from the page: a near-solid face, an accent ring and an accent glow underneath */
+  background: color-mix(in srgb, var(--surface-2, var(--surface)) 92%, transparent);
   backdrop-filter: blur(22px) saturate(160%);
   -webkit-backdrop-filter: blur(22px) saturate(160%);
-  box-shadow: var(--tile-shadow), 0 20px 50px -10px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--tile-shadow), 0 0 0 1px color-mix(in srgb, var(--accent-solid) 38%, transparent),
+    0 14px 44px -12px color-mix(in srgb, var(--accent-solid) 55%, transparent), 0 20px 50px -10px rgba(0, 0, 0, 0.6);
+  animation: dock-in 260ms cubic-bezier(0.23, 1, 0.32, 1) both;
 }
-:root[data-theme='light'] .dock { background: rgba(255, 255, 255, 0.72); box-shadow: var(--tile-shadow), 0 20px 40px -18px rgba(60, 40, 30, 0.35); }
+:root[data-theme='light'] .dock {
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--tile-shadow), 0 0 0 1px color-mix(in srgb, var(--accent-solid) 40%, transparent),
+    0 14px 36px -14px color-mix(in srgb, var(--accent-solid) 50%, transparent), 0 20px 40px -18px rgba(60, 40, 30, 0.35);
+}
+@keyframes dock-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+/* first visit: once the welcome tour closes, the glow pulses twice to say "your menu is here" (AppShell) */
+.dock--hello::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 28px;
+  box-shadow: 0 0 0 2px var(--accent-solid), 0 0 28px 4px color-mix(in srgb, var(--accent-solid) 60%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  animation: dock-hello 1.2s cubic-bezier(0.23, 1, 0.32, 1) 2;
+}
+@keyframes dock-hello { 0%, 100% { opacity: 0; } 35% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .dock { animation: dock-fade 200ms ease both; }
+  .dock--hello::after { animation: none; opacity: 1; }
+}
+@keyframes dock-fade { from { opacity: 0; } to { opacity: 1; } }
 .dock::before { /* chrome rim */
   content: '';
   position: absolute;
@@ -611,7 +660,6 @@
   .dock-search span, .dock-search .kbd { display: none; }
 }
 @media (max-width: 1040px) {
-  .sl-label { display: none; }
   .dock-item { width: 42px; }
 }
 @media (max-width: 900px) {
@@ -619,15 +667,11 @@
   .sl { padding: 0 6px 0 14px; padding-top: env(safe-area-inset-top, 0px); height: calc(var(--status-h) + env(safe-area-inset-top, 0px)); }
   .sl-brand { padding-right: 12px; }
   .sl-seg { padding: 0 10px; }
-  .sl-path em { display: none; }
   .sl > .sl-ctx { display: none; } /* too narrow to say anything useful on a phone */
-  .sl-streak-long, .sl-tail { display: none; }
+  .sl > .sl-page { max-width: none; }
+  .sl-streak-long { display: none; }
   .sl-streak-short { display: inline; }
   .sl-streak { padding: 0 10px; }
-  .sl-guide, .sl-search { width: 44px; height: 44px; padding: 0; justify-content: center; border-left: 0; border-radius: 12px; }
-  .sl-guide .kbd, .sl-search .kbd { display: none; }
-  .sl-search-ico { display: block; }
-  .sl-guide svg, .sl-search svg { width: 18px; height: 18px; }
   .main { padding-top: calc(var(--status-h) + env(safe-area-inset-top, 0px)); }
   /* the dock becomes a touch tab bar */
   .dock-wrap { display: none; }
@@ -695,6 +739,7 @@
   .sl,
   .dock-wrap,
   .tabdock,
+  .guide-fab,
   .bg,
   .site-footer,
   .skip-link {
@@ -709,4 +754,69 @@
     padding: 0;
     height: auto;
   }
+}
+
+/* ---------- Back (status line, every page but the dashboard and the tab roots) ---------- */
+.sl .sl-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  height: 28px;
+  margin-right: 10px;
+  padding: 0 12px 0 9px;
+  border-radius: var(--r-pill);
+  color: var(--text);
+  font: 600 12.5px/1 var(--f-ui);
+  background: var(--surface-3);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+.sl .sl-back:hover { box-shadow: inset 0 0 0 1px var(--line-3); }
+.sl .sl-back:focus-visible { outline: 2px solid var(--plasma-t); outline-offset: 2px; }
+@media (max-width: 560px) {
+  .sl .sl-back { padding: 0 8px; margin-right: 6px; }
+  .sl-back-t { display: none; }
+}
+
+/* ---------- "Guide me": this page's guide, on every page ---------- */
+.guide-fab {
+  position: fixed;
+  z-index: 44; /* under the dock, the More sheet and dialogs */
+  right: 16px;
+  bottom: calc(var(--dock-h) + var(--dock-gap) + 10px + env(safe-area-inset-bottom, 0px));
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px 0 6px;
+  border: 0;
+  border-radius: var(--r-pill);
+  font: 600 13px/1 var(--f-ui);
+  color: var(--text);
+  cursor: pointer;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--tile-shadow), inset 0 0 0 1px var(--line-2);
+}
+.guide-fab-q {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font: 900 16px/1 var(--f-display);
+  background: var(--surface-3);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+.guide-fab:hover .guide-fab-q, .guide-fab:focus-visible .guide-fab-q { box-shadow: inset 0 0 0 1px rgba(169, 150, 255, 0.6), 0 0 16px -2px rgba(123, 92, 255, 0.6); }
+.guide-fab:focus-visible { outline: 2px solid var(--plasma-t); outline-offset: 2px; }
+/* wide screens: beside the centred dock instead of above it */
+@media (min-width: 1300px) {
+  .guide-fab { right: 24px; bottom: calc(var(--dock-gap) + (var(--dock-h) - 40px) / 2); }
+}
+/* phones: a 40px round key, label for screen readers only (aria-label) */
+@media (max-width: 900px) {
+  .guide-fab { right: 14px; padding: 0 6px; }
+  .guide-fab-t { display: none; }
 }

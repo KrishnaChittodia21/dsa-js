@@ -17,6 +17,10 @@
 .wb-tab svg { width: 15px; height: 15px; }
 .wb-tab.active { color: var(--text); background: var(--surface-3); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 8px rgba(0, 0, 0, 0.35); }
 :root[data-theme='light'] .wb-tab.active { background: #fff; box-shadow: 0 1px 3px rgba(60, 40, 30, 0.18); }
+/* Tools hub (ToolsPage): the inner pages render without their own .page frame or big header */
+.tools-tabs { margin: 0 4px var(--gap); }
+.tools-panel .wb-page.page { max-width: none; padding: 0; }
+.wb-embed { margin: 0 4px var(--gap); }
 
 /* ---------- Toolkit index ---------- */
 .tk-grid { margin-bottom: 8px; }
@@ -264,7 +268,7 @@
 
 /* ---------- print (cheat sheet) ---------- */
 @media print {
-  .wb-tabs, .cs-tools, .cs-hero, .cs-coach { display: none !important; }
+  .wb-tabs, .tools-tabs, .tools-page > .set-hero, .cs-tools, .cs-hero, .cs-coach { display: none !important; }
   .wb-head { display: block; margin: 0 0 12px; }
   .wb-title { font-size: 28pt; color: #000 !important; -webkit-text-fill-color: #000 !important; background: none !important; }
   .cheat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }

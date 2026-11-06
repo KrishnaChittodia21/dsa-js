@@ -6,6 +6,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import Icon from "../ui/Icon.jsx";
 import { recordInWorker, runInWorker } from "../../runner/runInWorker.js";
 import { useProgress } from "../../state/ProgressContext.jsx";
+import CoachTip from "../guide/CoachTip.jsx";
 import { describeTest, resolveArgs, resolveDesign } from "../../runner/core.js";
 import { mutants } from "../../runner/bugs.js";
 import {
@@ -164,7 +165,7 @@ export default function AnimateRun({ code, question, tests, lang = "js" }) {
     setShown((s) => ({
       ...s,
       view: "ref",
-      ref: { run, frames: framesOf(run, refCode), info },
+      ref: { run, frames: framesOf(run, refCode), info, at },
     }));
     setBusy("");
   };
@@ -354,6 +355,13 @@ export default function AnimateRun({ code, question, tests, lang = "js" }) {
           </div>
           {shown.view !== "mine" && cur.info && (
             <p className="qp-faint">{cur.info}</p>
+          )}
+          {shown.view === "ref" && shown.ref?.at >= 0 && (
+            <CoachTip id="animate-divergence" title="Your run went a different way here." tag="Animate">
+              The step number above is where your <b>{scene?.compare}</b> first took a value the reference never had. Step
+              back a few frames in your own run (Your run) to see which line set it; fix that line, then animate the same
+              test again. Passing it after a divergence earns <b>Course Corrected</b>.
+            </CoachTip>
           )}
           {shown.yours && (
             <div className={`qp-verdict${shown.yours.passed ? " qp-verdict--ok" : ""}`} role="status">

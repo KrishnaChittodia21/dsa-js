@@ -92,11 +92,11 @@ function BigOHero() {
   );
 }
 
-export default function CheatSheetPage() {
+export default function CheatSheetPage({ embedded }) {
   const [showTemplates, setShowTemplates] = useState(true);
   return (
     <div className="page wb-page cs-page">
-      <WorkbenchHeader title="Cheat sheet" lead="Every pattern on one page: when to use it, the clues that give it away, its template and complexity. Print it, or keep it open mid-problem.">
+      <WorkbenchHeader embedded={embedded} title="Cheat sheet" lead="Every pattern on one page: when to use it, the clues that give it away, its template and complexity. Print it, or keep it open mid-problem.">
         <div className="cs-tools">
           <button type="button" className={`toggle`} role="switch" aria-checked={showTemplates} aria-label="Show templates" onClick={() => setShowTemplates((v) => !v)} />
           <span className="small">Show templates</span>

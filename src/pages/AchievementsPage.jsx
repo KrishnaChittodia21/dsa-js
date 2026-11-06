@@ -22,7 +22,7 @@ const shortDate = (ts) => (ts ? new Date(ts).toLocaleDateString(undefined, { day
 function actionFor(a, step) {
   if (a.group === 'practice') return { to: '/questions', label: 'Practise questions' };
   if (a.group === 'understanding') return { to: step.href, label: 'Go to my next step' };
-  if (a.group === 'content') return { to: '/path', label: 'Open the learning path' };
+  if (a.group === 'content') return { to: '/contents', label: 'Open the contents' };
   return { to: step.href, label: step.kind === 'start' ? 'Start learning' : 'Go to my next step' };
 }
 
@@ -126,7 +126,7 @@ export default function AchievementsPage() {
   return (
     <div className="page ach-page">
       {/* ---------- hero: earned / total + the voxel shelf ---------- */}
-      <section className="tile tile--glow ach-hero rise" aria-labelledby="ach-hero-t">
+      <section data-guide="ach-hero" className="tile tile--glow ach-hero rise" aria-labelledby="ach-hero-t">
         <div className="ach-hero-main">
           <div className="ach-hero-chips">
             <span className="chip">
@@ -153,7 +153,7 @@ export default function AchievementsPage() {
             </span>
           </div>
         </div>
-        <aside className="tile tile--raised ach-shelf" aria-label={`All ${ACHIEVEMENT_TOTAL} badges as a voxel shelf: ${earnedCount} lit`}>
+        <aside data-guide="ach-shelf" className="tile tile--raised ach-shelf" aria-label={`All ${ACHIEVEMENT_TOTAL} badges as a voxel shelf: ${earnedCount} lit`}>
           <div className="eyebrow ach-shelf-head">
             <span>badges[{ACHIEVEMENT_TOTAL}]</span>
             <span>lit = earned</span>
@@ -259,7 +259,7 @@ export default function AchievementsPage() {
           </section>
         )}
 
-        <section className="tile ach-recent rise" style={{ '--i': 2 }} aria-labelledby="ach-rc-t">
+        <section data-guide="ach-recent" className="tile ach-recent rise" style={{ '--i': 2 }} aria-labelledby="ach-rc-t">
           <div className="tile-head">
             <span className="eyebrow" id="ach-rc-t">
               <i className="pip pip--acid" aria-hidden="true" />
@@ -303,7 +303,7 @@ export default function AchievementsPage() {
       </div>
 
       {/* ---------- filters ---------- */}
-      <div className="ach-fbar rise" style={{ '--i': 3 }}>
+      <div data-guide="ach-filter" className="ach-fbar rise" style={{ '--i': 3 }}>
         <div className="seg" role="group" aria-label="Show achievements">
           {FILTERS.map((f) => (
             <button key={f.id} type="button" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>

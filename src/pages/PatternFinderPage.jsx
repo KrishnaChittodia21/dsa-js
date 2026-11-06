@@ -176,7 +176,7 @@ function Finder() {
                     <Link to={`/topic/${result.topic}?tab=visualize`} className="btn btn--ghost btn--sm">
                       <Icon name="play" size={15} /> Visualize
                     </Link>
-                    <Link to={`/topic/${result.topic}?tab=practice`} className="btn btn--ghost btn--sm">
+                    <Link to={`/topic/${result.topic}#questions`} className="btn btn--ghost btn--sm">
                       Practice
                     </Link>
                   </div>
@@ -202,7 +202,7 @@ function Finder() {
           </div>
         </div>
       </div>
-      <aside className="pf-side">
+      <aside data-guide="pf-side" className="pf-side">
         <div className="tile tile--raised">
           <div className="tile-head" style={{ marginBottom: 12 }}>
             <span className="eyebrow">Controls</span>
@@ -324,7 +324,7 @@ export default function PatternFinderPage() {
             Pattern library <Icon name="arrowRight" size={13} />
           </Link>
         </div>
-        <div className="pf-tabs" role="tablist" aria-label="Pattern finder sections">
+        <div data-guide="pf-tabs" className="pf-tabs" role="tablist" aria-label="Pattern finder sections">
           {FINDER_TABS.map((t) => (
             <button
               key={t.id}
@@ -340,7 +340,7 @@ export default function PatternFinderPage() {
             </button>
           ))}
         </div>
-        <div role="tabpanel" aria-label={current.label}>
+        <div data-guide="pf-panel" role="tabpanel" aria-label={current.label}>
           {current.id === 'finder' && <Finder />}
           {current.id === 'keywords' && <Keywords initial={params.get('q')} />}
           {current.id === 'rules' && <GoldenRules />}

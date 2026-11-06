@@ -17,11 +17,11 @@ function Pointers({ list }) {
   return (
     <div className="viz-ptrs">
       {list.map((p) => (
-        <span key={p.label} className={`viz-pointer ptr-${p.color || 'a'}`}>
+        <span key={p.label} data-flip={p.label} className={`viz-pointer ptr-${p.color || 'a'}`}>
           {p.label}
         </span>
       ))}
-      <span className={`viz-beam ptr-${list[0].color || 'a'}`} aria-hidden="true" />
+      <span data-flip={`beam:${list[0].label}`} className={`viz-beam ptr-${list[0].color || 'a'}`} aria-hidden="true" />
     </div>
   );
 }
@@ -46,11 +46,11 @@ export function ArrayPanel({ panel, bars: allowBars }) {
               <Pointers list={byIndex[i]} />
               {bars ? (
                 <>
-                  <span className={`viz-bar-val${st ? ` viz-${st}` : ''}`}>{String(v)}</span>
+                  <span data-pop={i} className={`viz-bar-val${st ? ` viz-${st}` : ''}`}>{String(v)}</span>
                   <div className={`vox viz-vox${st ? ` viz-${st}` : ''}`} style={{ '--h': Math.max(v, 0.3) }} aria-label={String(v)} />
                 </>
               ) : (
-                <div className={cellClass(st)}>{String(v)}</div>
+                <div data-pop={i} className={cellClass(st)}>{String(v)}</div>
               )}
               {showIndices && <div className="viz-index">{i + indexBase}</div>}
             </div>
@@ -110,7 +110,7 @@ export function VarsPanel({ panel }) {
           return (
             <span key={k} className={`viz-var${text.length > 7 ? ' viz-var--wide' : ''}`}>
               <span className="viz-var-k">{k}</span>
-              <span className="viz-var-v">{text}</span>
+              <span data-pop={k} className="viz-var-v">{text}</span>
             </span>
           );
         })}
@@ -261,7 +261,7 @@ export function GridPanel({ panel }) {
       <div className="viz-grid" style={{ gridTemplateColumns: `repeat(${panel.cells[0]?.length || 1}, var(--viz-gc, 38px))` }}>
         {panel.cells.flatMap((row, r) =>
           row.map((v, c) => (
-            <div key={`${r}-${c}`} className={`viz-grid-cell viz-${panel.states?.[r]?.[c] || 'none'}`}>
+            <div key={`${r}-${c}`} data-pop={`${r}-${c}`} className={`viz-grid-cell viz-${panel.states?.[r]?.[c] || 'none'}`}>
               {String(v)}
             </div>
           )),
@@ -289,7 +289,7 @@ export function TablePanel({ panel }) {
             <tr key={i}>
               <th>{panel.rowLabels[i]}</th>
               {row.map((v, j) => (
-                <td key={j} className={`viz-${panel.states?.[i]?.[j] || 'none'}`}>
+                <td key={j} data-pop={`${i}-${j}`} className={`viz-${panel.states?.[i]?.[j] || 'none'}`}>
                   {String(v)}
                 </td>
               ))}

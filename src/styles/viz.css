@@ -10,9 +10,16 @@
    ===================================================================== */
 
 /* ---------- player frame ---------- */
+/* Registered so a cell's face colours cross-fade between frames (gradients themselves can't transition).
+   Every var(--c1/--c2, fallback) in viz.css relies on .viz setting the default below. */
+@property --c1 { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --c2 { syntax: '<color>'; inherits: true; initial-value: transparent; }
 .viz {
   --viz-c1: var(--surface-3);
   --viz-c2: var(--surface-2);
+  --c1: var(--viz-c1);
+  --c2: var(--viz-c2);
+  --viz-ease: cubic-bezier(0.23, 1, 0.32, 1);
   container: viz / inline-size;
   position: relative;
   margin: 0;
@@ -107,7 +114,7 @@
   font: 700 13px/1 var(--f-mono);
   letter-spacing: -0.02em;
   white-space: nowrap;
-  transition: background 0.25s, transform 0.25s var(--ease-out), filter 0.25s, opacity 0.25s;
+  transition: --c1 0.22s var(--viz-ease), --c2 0.22s var(--viz-ease), color 0.22s var(--viz-ease), transform 0.25s var(--viz-ease), filter 0.25s var(--viz-ease), opacity 0.22s var(--viz-ease);
 }
 .viz-cell::before { /* top face */
   content: '';
@@ -187,9 +194,10 @@
 
 /* sorting: value-tall voxel columns (base .vox) */
 .viz-array--bars .viz-col { padding: 0 8px 18px 4px; }
-.viz-vox { --w: 30px; --c1: var(--viz-c1); --c2: var(--viz-c2); margin-right: 15px; transition: height 0.3s var(--ease-out), filter 0.25s; }
+.viz-vox { --w: 30px; --c1: var(--viz-c1); --c2: var(--viz-c2); margin-right: 15px; transition: height 0.3s var(--ease-out), filter 0.25s, --c1 0.22s var(--viz-ease), --c2 0.22s var(--viz-ease); }
 .viz-vox.viz-active, .viz-vox.viz-done, .viz-vox.viz-window, .viz-vox.viz-bad { filter: drop-shadow(0 0 14px var(--glow)); }
 .viz-bar-val { margin: 0 15px 12px 0; font: 700 12px/1 var(--f-mono); color: var(--text-2); }
+.viz-bar-val { transition: color 0.22s var(--viz-ease); }
 .viz-bar-val.viz-active { color: var(--uv-t); }
 .viz-bar-val.viz-done { color: var(--plasma-t); }
 .viz-bar-val.viz-window { color: var(--ice-t); }
@@ -304,7 +312,7 @@
   color: var(--fg, var(--text));
   background: linear-gradient(180deg, var(--c1, var(--viz-c1)), var(--c2, var(--viz-c2)));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 0 0 1px var(--line), 2px 3px 0 -1px rgba(0, 0, 0, 0.35);
-  transition: background 0.25s;
+  transition: --c1 0.22s var(--viz-ease), --c2 0.22s var(--viz-ease), color 0.22s var(--viz-ease);
 }
 .viz-grid-cell.viz-wall { --c1: #4a4550; --c2: #2b2730; --fg: #a49c96; }
 :root[data-theme='light'] .viz-grid-cell.viz-wall { --c1: #6e6873; --c2: #4a4550; --fg: #fff; }
@@ -330,7 +338,7 @@
   color: var(--fg, var(--text));
   background: linear-gradient(180deg, var(--c1, var(--viz-c1)), var(--c2, var(--viz-c2)));
   box-shadow: inset 0 0 0 1px var(--line);
-  transition: background 0.2s;
+  transition: --c1 0.22s var(--viz-ease), --c2 0.22s var(--viz-ease), color 0.22s var(--viz-ease), opacity 0.22s var(--viz-ease);
 }
 .viz-table td.viz-muted { opacity: 0.5; }
 
@@ -349,7 +357,7 @@
   color: var(--fg, var(--text));
   background: linear-gradient(180deg, var(--c1, var(--viz-c1)), var(--c2, var(--viz-c2)));
   box-shadow: inset 0 0 0 1px var(--line-2), 2px 3px 0 -1px rgba(0, 0, 0, 0.35);
-  transition: left 0.25s, width 0.25s, background 0.25s;
+  transition: left 0.25s, width 0.25s, --c1 0.22s var(--viz-ease), --c2 0.22s var(--viz-ease);
 }
 .viz-interval.viz-visited { opacity: 0.6; }
 .viz-axis { position: absolute; left: 0; right: 0; bottom: 0; height: 1.2rem; border-top: 1px solid var(--line-3); }
@@ -385,7 +393,7 @@
 .viz-rail, .viz-fill { position: absolute; top: 14px; left: 0; height: 6px; border-radius: 6px; pointer-events: none; }
 .viz-rail { right: 0; background: var(--sunken); box-shadow: inset 0 0 0 1px var(--line); }
 :root[data-theme='light'] .viz-rail { background: var(--surface-3); }
-.viz-fill { width: var(--p); background: linear-gradient(90deg, var(--ice), var(--uv)); transition: width 0.2s var(--ease-out); }
+.viz-fill { right: 0; transform-origin: 0 50%; transform: scaleX(calc(var(--p, 0) + var(--seg, 0) * var(--f, 0))); background: linear-gradient(90deg, var(--ice), var(--uv)); }
 .viz-tick { position: absolute; top: 17px; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 2px; transform: rotate(45deg); background: var(--surface-3); box-shadow: inset 0 0 0 1.5px var(--line-3); pointer-events: none; z-index: 1; }
 .viz-tick.is-ok { background: var(--good); box-shadow: none; }
 .viz-tick.is-no { background: var(--bad); box-shadow: none; }
@@ -469,6 +477,10 @@
 .vz-player-bar a { color: var(--text-2); }
 .vz-player-bar a:hover { color: var(--plasma-t); }
 .vz-player-bar .vz-sp { flex: 1; }
+/* Save + Clear stay one aligned group; .save-btn's global margin-top (revision.css) knocked Save 10px low */
+.vz-acts { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; }
+.vz-acts .save-btn { margin: 0; }
+.vz-acts:empty { display: none; }
 .vz-player .viz { border-radius: var(--r-xl); }
 
 @media (max-width: 1100px) {

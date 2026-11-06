@@ -1,32 +1,48 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import {
-  BarChart3,
-  Box,
-  Building2,
-  Check,
-  ChevronRight,
-  Code2,
-  FileText,
-  List,
-  Lock,
-  Map as MapIcon,
-  PlayCircle,
-  Puzzle,
-  RefreshCw,
-  Search,
-  Settings,
-  Target,
-  Terminal,
-} from 'lucide-react';
+import { Check, ChevronRight, Lock, PlayCircle, Search } from 'lucide-react';
 import CoachTip from '../components/guide/CoachTip.jsx';
 import { hasVisual } from '../components/PatternVisual.jsx';
 import { TAB_META } from '../components/guide/studyLoop.js';
 import { useProgress } from '../state/ProgressContext.jsx';
-import { mistakeQuestions, recommendations, topicStats, topicStatus } from '../state/selectors.js';
-import { allPatterns, allQuestions, companies, companiesForQuestion, companyById, companyQuestions, companyQuestionsForTopic, EVIDENCE_LEVELS, getCheckpoints, jsSections, stages, toolkit, topics } from '../content/index.js';
-import { fmtH, pad2, stageSummary } from './LearningPath.jsx';
+import { recommendations, topicStats, topicStatus } from '../state/selectors.js';
+import { allPatterns, allQuestions, companiesForQuestion, companyById, companyQuestionsForTopic, EVIDENCE_LEVELS, getCheckpoints, stages, toolkit, topics } from '../content/index.js';
+
+const pad2 = (n) => String(n).padStart(2, '0');
+/** 150 → "2h30", 420 → "7h", 45 → "45m" */
+function fmtH(min) {
+  const m = Math.round(min / 10) * 10;
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  const r = m % 60;
+  return r ? `${h}h${pad2(r)}` : `${h}h`;
+}
+
+/** Stage roll-up: { state: done|cur|part|lock, done, open, solved, total, mastery, minutes, steps } */
+function stageSummary(stage, progress, currentId) {
+  let done = 0;
+  let open = 0;
+  let solved = 0;
+  let total = 0;
+  let mastery = 0;
+  let minutes = 0;
+  let steps = 0;
+  for (const t of stage.topics) {
+    const st = topicStatus(t, progress);
+    const s = topicStats(t, progress);
+    if (st === 'completed') done++;
+    if (st !== 'locked') open++;
+    solved += s.solved;
+    total += s.total;
+    mastery += s.mastery;
+    minutes += t.estMinutes || 0;
+    steps += t.lesson.sections.length;
+  }
+  const n = stage.topics.length;
+  const state = done === n ? 'done' : stage.topics.some((t) => t.id === currentId) ? 'cur' : open > 0 ? 'part' : 'lock';
+  return { state, done, open, solved, total, mastery: Math.round(mastery / Math.max(1, n)), minutes, steps };
+}
 
 /** Highlights every case-insensitive occurrence of `q` in `text`. */
 function Hl({ text, q }) {
@@ -52,12 +68,11 @@ const DIFF_CLS = { Easy: 't-easy', Medium: 't-med', Hard: 't-hard' };
 export default function ContentsPage() {
   const { progress } = useProgress();
   const { hash } = useLocation();
-  const nav = useNavigate();
   const [query, setQuery] = useState('');
   const [onlyUnsolved, setOnlyUnsolved] = useState(false);
   const [onlyViz, setOnlyViz] = useState(false);
   const [collapsed, setCollapsed] = useState({});
-  // per-topic open state; undefined → default (current topic open, or open when a search hits inside it)
+  // per-topic open state; undefined → default (closed, or open when a search hits inside it)
   const [openTopics, setOpenTopics] = useState({});
   const q = query.trim().toLowerCase();
   const filtering = !!q || onlyUnsolved || onlyViz;
@@ -107,7 +122,7 @@ export default function ContentsPage() {
     return out;
   }, [progress, q, onlyUnsolved, onlyViz]);
 
-  // deep links: /contents#stage-<id>, /contents#practice-tools
+  // deep links: /contents#stage-<id>
   useEffect(() => {
     if (!hash) return undefined;
     const id = decodeURIComponent(hash.slice(1));
@@ -117,34 +132,11 @@ export default function ContentsPage() {
     return () => cancelAnimationFrame(raf);
   }, [hash]);
 
-  const jump = (stageId) => {
-    setCollapsed((c) => ({ ...c, [stageId]: false }));
-    nav(`/contents#stage-${stageId}`, { replace: true });
-    document.getElementById(`stage-${stageId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
   const setAll = (open) => {
     setCollapsed(Object.fromEntries(stages.map((s) => [s.id, !open])));
     setOpenTopics(Object.fromEntries(topics.map((t) => [t.id, open])));
   };
   const shownTopics = [...views.values()].reduce((a, l) => a + l.length, 0);
-  const solved = allQuestions.filter((x) => progress.questions[x.id]?.status === 'solved').length;
-  const retry = mistakeQuestions(progress).filter((x) => progress.questions[x.id]?.status !== 'solved').length;
-
-  const tools = [
-    { to: '/questions', icon: List, title: 'Questions', desc: 'Every practice question with topic, difficulty, status and company filters.', count: `${solved}/${allQuestions.length} solved` },
-    { to: '/patterns', icon: Puzzle, title: 'Patterns', desc: 'Every pattern with recognition clues, template, variations and its questions.', count: `${allPatterns.length} patterns` },
-    { to: '/finder', icon: Target, title: 'Pattern Finder', desc: 'Answer a few questions about a new problem and it names the pattern; keyword clues too.' },
-    { to: '/visualize', icon: PlayCircle, title: 'Visualizer', desc: 'Step-through animations that pause to ask what happens next.', count: `${totals.animations} patterns animated` },
-    { to: '/playground', icon: Terminal, title: 'Playground', desc: 'Run any JavaScript with the DSA toolkit classes available as globals.' },
-    { to: '/revision', icon: RefreshCw, title: 'Revision', desc: 'Weak areas, questions to retry and the review of every finished lesson.', count: retry ? `${retry} to retry` : 'nothing to retry' },
-    { to: '/cheatsheet', icon: FileText, title: 'Cheat Sheet', desc: 'Every topic’s pattern, template and complexity on one printable page.' },
-    { to: '/companies', icon: Building2, title: 'Companies', desc: 'Questions linked to companies, each with a source and evidence level.', count: `${companies.length} companies · ${companyQuestions.length} entries` },
-    { to: '/toolkit', icon: Box, title: 'JS DSA Toolkit', desc: 'Readable Stack, Queue, Deque, Heap, Trie, Union-Find, Segment tree… implementations.', count: `${toolkit.length} structures` },
-    { to: '/js', icon: Code2, title: 'JavaScript for DSA', desc: 'The built-ins you need, their complexity and the gotchas.', count: `${jsSections.length} sections` },
-    { to: '/path', icon: MapIcon, title: 'Learning Path', desc: 'The stages as a linked list with prerequisites and unlocks.' },
-    { to: '/progress', icon: BarChart3, title: 'Progress', desc: 'Per-topic table, strong & weak areas, export / import and reset.' },
-    { to: '/settings', icon: Settings, title: 'Settings', desc: 'Theme, accent colour, coach tips and the welcome tour.' },
-  ];
 
   return (
     <div className="page cx">
@@ -165,7 +157,7 @@ export default function ContentsPage() {
           </button>
         </div>
       </div>
-      <div className="cx-tot rise" style={{ '--i': 1 }}>
+      <div data-guide="cx-totals" className="cx-tot rise" style={{ '--i': 1 }}>
         {[
           [stages.length, 'stages'],
           [topics.length, 'topics'],
@@ -192,7 +184,7 @@ export default function ContentsPage() {
         Search filters every stage, topic, lesson step, pattern and question below. Press <kbd className="kbd">⌘</kbd>/<kbd className="kbd">Ctrl</kbd> <kbd className="kbd">K</kbd> anywhere to jump straight to one.
       </CoachTip>
 
-      <div className="cx-toolbar rise" style={{ '--i': 2 }}>
+      <div data-guide="cx-search" className="cx-toolbar rise" style={{ '--i': 2 }}>
         <label className="search-in cx-search">
           <Search aria-hidden="true" />
           <input className="input" type="search" placeholder="Search topics, lesson steps, patterns, questions…" aria-label="Search the contents" value={query} onChange={(e) => setQuery(e.target.value)} />
@@ -205,23 +197,12 @@ export default function ContentsPage() {
         </button>
       </div>
 
-      <nav className="cx-jump" aria-label="Jump to stage">
-        {stages.map((st, i) => (
-          <button key={st.id} type="button" className="cx-jump-b" onClick={() => jump(st.id)} disabled={!views.has(st.id)}>
-            <span className="mono">S{pad2(i + 1)}</span> {st.title}
-          </button>
-        ))}
-        <button type="button" className="cx-jump-b" onClick={() => document.getElementById('practice-tools')?.scrollIntoView({ behavior: 'smooth' })}>
-          <span className="mono">+</span> Practice &amp; tools
-        </button>
-      </nav>
-
-      <div className="cx-list">
+      <div data-guide="cx-list" className="cx-list">
         {stages.map((st, si) => {
           const list = views.get(st.id);
           if (!list) return null;
           const m = stageSummary(st, progress, currentId);
-          const open = filtering || !collapsed[st.id];
+          const open = filtering || collapsed[st.id] === false; // closed by default
           return (
             <section key={st.id} id={`stage-${st.id}`} className={`cx-st cx-st--${m.state}`}>
               <button type="button" className="cx-st-head" aria-expanded={open} onClick={() => setCollapsed((c) => ({ ...c, [st.id]: open }))}>
@@ -264,7 +245,7 @@ export default function ContentsPage() {
                     view={v}
                     q={q}
                     current={v.topic.id === currentId}
-                    open={openTopics[v.topic.id] ?? (v.deep || (!filtering && v.topic.id === currentId))}
+                    open={openTopics[v.topic.id] ?? v.deep}
                     onToggle={(o) => setOpenTopics((s) => ({ ...s, [v.topic.id]: o }))}
                   />
                 ))}
@@ -275,34 +256,6 @@ export default function ContentsPage() {
         {filtering && !views.size && <p className="cx-empty">Nothing matches. Try another word or turn off the toggles.</p>}
       </div>
 
-      <section id="practice-tools" className="cx-tools">
-        <div className="section-head">
-          <div>
-            <span className="eyebrow">
-              <i className="pip pip--ice" />
-              Practice &amp; tools
-            </span>
-            <h2 className="h2 cx-h2">Every page outside the topic lessons</h2>
-          </div>
-        </div>
-        <div className="cx-tools-grid">
-          {tools.map((t) => {
-            const I = t.icon;
-            return (
-              <Link key={t.to} to={t.to} className="cx-tool">
-                <span className="cx-tool-ico" aria-hidden="true">
-                  <I />
-                </span>
-                <span className="cx-tool-txt">
-                  <b>{t.title}</b>
-                  <span>{t.desc}</span>
-                  {t.count && <span className="cx-tool-n">{t.count}</span>}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
     </div>
   );
 }
@@ -379,7 +332,7 @@ function TopicEntry({ view, q, current, open, onToggle }) {
               const checks = (sec.blocks || []).filter((b) => b.type === 'checkpoint').length;
               return (
                 <Link key={sec.id} to={`/topic/${t.id}?s=${i}`} className={`cx-chap ${read ? 'cx-chap--done' : ''} ${cur ? 'cx-chap--cur' : ''}`} aria-current={cur ? 'step' : undefined}>
-                  <span className="cx-chap-s">§{i + 1}</span>
+                  <span className="cx-chap-s">{i + 1}</span>
                   <span>
                     <Hl text={sec.title} q={q} />
                     {checks > 0 && (
@@ -455,7 +408,7 @@ function TopicEntry({ view, q, current, open, onToggle }) {
               {chips
                 .filter(([, n]) => n !== 0)
                 .map(([id, n]) => (
-                  <Link key={id} to={`/topic/${t.id}?tab=${id}`} className="chip">
+                  <Link key={id} to={id === 'practice' ? `/topic/${t.id}#questions` : `/topic/${t.id}?tab=${id}`} className="chip">
                     <TabIcon id={id} /> {TAB_META[id].label}
                     {n !== undefined && <span className="cx-n">{n}</span>}
                   </Link>

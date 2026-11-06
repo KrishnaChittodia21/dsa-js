@@ -8,14 +8,15 @@ import { hasVisual } from '../PatternVisual.jsx';
 export const TAB_META = {
   learn: { label: 'Learn', icon: BookOpen, why: 'An interactive lesson that pauses at checkpoints until you answer.' },
   visualize: { label: 'Visualize', icon: PlayCircle, why: 'Watch each pattern step by step and predict the next move.' },
-  practice: { label: 'Practice', icon: Code2, why: 'Name the pattern, then code and submit against hidden tests.' },
+  // not a loop step (questions sit under the tabs); kept for the Contents page chips
+  practice: { label: 'Questions', icon: Code2, why: 'Name the pattern, then code and submit against hidden tests.' },
   review: { label: 'Review', icon: RefreshCw, why: 'Redo missed checkpoints and the questions you struggled with.' },
   company: { label: 'Company Qs', icon: Building2, why: 'Questions reported at named companies, with sources.' },
   cheatsheet: { label: 'Cheatsheet', icon: FileText, why: 'The pattern, template, complexity and pitfalls on one card.' },
 };
 
 /** the loop steps, in order (side tabs — company, cheatsheet — are extras) */
-export const LOOP = ['learn', 'visualize', 'practice', 'review'];
+export const LOOP = ['learn', 'visualize', 'review'];
 
 /**
  * Progress of one step: { done, total, text, complete }.
@@ -34,9 +35,6 @@ export function stepProgress(progress, topic, id, visited = []) {
     const n = topic.patterns.filter(hasVisual).length;
     const seen = visited.includes('visualize');
     return { done: seen ? n : 0, total: n, text: n ? (seen ? 'watched' : `${n} animation${n === 1 ? '' : 's'}`) : 'none', complete: !n || seen };
-  }
-  if (id === 'practice') {
-    return { done: s.solved, total: s.total, text: s.total ? `${s.solved}/${s.total} solved` : 'coming soon', complete: s.total > 0 && s.solved === s.total };
   }
   if (id === 'review') {
     const retry = mistakeQuestions(progress, topic.id).filter((q) => progress.questions[q.id]?.status !== 'solved').length;

@@ -22,7 +22,7 @@ import { getCheckpoints } from '../../content/index.js';
 
 const pad2 = (n) => String(n).padStart(2, '0');
 
-/** Short label for a block in the "In §n" outline (text blocks are skipped). */
+/** Short label for a block in the "In step n" outline (text blocks are skipped). */
 function blockLabel(b) {
   switch (b.type) {
     case 'checkpoint':
@@ -197,7 +197,7 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
             <i className="pip pip--uv" />
             Learn · lesson[ ] · {sections.length} steps · {allCheckpoints.length} checkpoints
           </span>
-          <span className="ls-ch-note">{mode === 'guided' ? `your place is saved · §${index + 1} open` : 'full lesson · scroll or jump'}</span>
+          <span className="ls-ch-note">{mode === 'guided' ? `your place is saved · step ${index + 1} open` : 'full lesson · scroll or jump'}</span>
         </div>
         <ol className="ls-ch-arr" ref={arrRef}>
           {sections.map((s, i) => {
@@ -224,7 +224,7 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
                     <span>[{i}]</span>
                     <span>{done ? '✓ done' : cur ? 'reading' : locked ? 'locked' : k ? `${k} chk` : ''}</span>
                   </span>
-                  <span className="ls-ch-s">§{i + 1}</span>
+                  <span className="ls-ch-s">{i + 1}</span>
                   <b>{s.title}</b>
                 </button>
               </li>
@@ -240,7 +240,7 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
             <>
               <div className="ls-art-head">
                 <span className="eyebrow">
-                  <i className="pip pip--uv" />§{index + 1} · step {index + 1} of {sections.length}
+                  <i className="pip pip--uv" />step {index + 1} of {sections.length}
                 </span>
                 <span className="ls-art-meta">
                   {curChecks.length ? `${curChecks.filter((c) => checkpointPassed(progress, c.id)).length} / ${curChecks.length} checkpoint${curChecks.length === 1 ? '' : 's'}` : 'no checkpoint'}
@@ -254,7 +254,7 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
               <nav className="ls-pager" aria-label="Lesson pager">
                 {index > 0 ? (
                   <button type="button" className="ls-pg" onClick={() => go(index - 1)}>
-                    <span>← §{index}</span>
+                    <span>← step {index}</span>
                     <b>{sections[index - 1].title}</b>
                   </button>
                 ) : (
@@ -268,13 +268,13 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
                     </button>
                   ) : (
                     <button type="button" className="btn btn--plasma" disabled={!currentDone} onClick={() => go(index + 1)}>
-                      Finish §{index + 1} <Icon name="check" size={16} />
+                      Finish step {index + 1} <Icon name="check" size={16} />
                     </button>
                   )}
                 </div>
                 {!isLast ? (
                   <button type="button" className="ls-pg ls-pg--next" disabled={!currentDone} onClick={() => go(index + 1)} aria-label={`Next: ${sections[index + 1].title}`}>
-                    <span>§{index + 2} →</span>
+                    <span>step {index + 2} →</span>
                     <b>{sections[index + 1].title}</b>
                   </button>
                 ) : (
@@ -299,7 +299,7 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
               {sections.map((s, si) => (
                 <section key={s.id} id={`sec-${s.id}`} className="ls-full-sec">
                   <h3 className="ls-sub-h">
-                    <span className="ls-sub-n">§{si + 1}</span>
+                    <span className="ls-sub-n">{si + 1}</span>
                     {s.title}
                   </h3>
                   <SaveButton saveKey={`sec:${topic.id}/${si}`} item={{ kind: 'section', topicId: topic.id, index: si, title: s.title }} />
@@ -325,7 +325,7 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
         <aside className="ls-aside" aria-label="Lesson outline">
           <section className="tile ls-side">
             <div className="tile-head ls-side-head">
-              <span className="eyebrow">{mode === 'guided' ? `In §${index + 1}` : 'Progress'}</span>
+              <span className="eyebrow">{mode === 'guided' ? `In step ${index + 1}` : 'Progress'}</span>
               <span className="tag">
                 {passedCount} / {allCheckpoints.length} checks
               </span>

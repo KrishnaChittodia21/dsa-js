@@ -8,6 +8,7 @@ import {
   ArrowRight,
   Award,
   Check,
+  Clapperboard,
   Code2,
   Compass,
   Download,
@@ -31,7 +32,7 @@ import { nextStep } from '../../lib/nextStep.js';
 import { useFocusTrap } from '../../lib/useFocusTrap.js';
 import { LOOP, TAB_META } from './studyLoop.js';
 
-const STEP_TITLES = ['What this is', 'The study loop', 'Finding your way', 'Your progress', 'Start here'];
+const STEP_TITLES = ['What this is', 'The study loop', 'Finding your way', "What's new", 'Your progress', 'Start here'];
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 const MOD = isMac ? '⌘' : 'Ctrl';
 
@@ -48,14 +49,13 @@ function ArtStairs({ state }) {
   );
 }
 
-/** step 2: the study loop — four stations on one isometric track, light flowing forward */
+/** step 2: the study loop — three stations on one isometric track, light flowing forward */
 function ArtLoop() {
-  // diamond track: Learn (left) → Visualize (top) → Practice (right) → Review (bottom)
+  // triangle track: Learn (left) → Visualize (top) → Review (right) → back to Learn
   const st = [
-    { id: 'learn', x: 70, y: 110, h: 30, cls: 'uv', lx: 70, ly: 156, anchor: 'middle' },
+    { id: 'learn', x: 90, y: 140, h: 30, cls: 'uv', lx: 90, ly: 186, anchor: 'middle' },
     { id: 'visualize', x: 230, y: 30, h: 42, cls: 'hot', lx: 278, ly: 30, anchor: 'start' },
-    { id: 'practice', x: 390, y: 110, h: 22, cls: 'ghost', lx: 390, ly: 156, anchor: 'middle' },
-    { id: 'review', x: 230, y: 190, h: 12, cls: 'ghost', lx: 278, ly: 210, anchor: 'start' },
+    { id: 'review', x: 370, y: 140, h: 12, cls: 'ghost', lx: 370, ly: 186, anchor: 'middle' },
   ];
   const cube = ({ x, y, h, cls }) => {
     const w = 26;
@@ -71,7 +71,7 @@ function ArtLoop() {
       </g>
     );
   };
-  const track = 'M70,110 L230,30 L390,110 L230,190 Z';
+  const track = 'M90,140 L230,30 L370,140 Z';
   return (
     <svg className="wt-loop" viewBox="0 -36 470 262" aria-hidden="true" focusable="false">
       <defs>
@@ -90,7 +90,7 @@ function ArtLoop() {
       <text className="wt-mid" x="230" y="122" textAnchor="middle">
         SAME LOOP
       </text>
-      <ellipse className="wt-ping" cx="70" cy="110" rx="40" ry="22" />
+      <ellipse className="wt-ping" cx="90" cy="140" rx="40" ry="22" />
       {st.map((s) => (
         <g key={s.id}>{cube(s)}</g>
       ))}
@@ -103,7 +103,7 @@ function ArtLoop() {
   );
 }
 
-const DOCK_ICONS = [House, Route, ListTree, Layers, Code2, Activity, RotateCcw, Award];
+const DOCK_ICONS = [House, Route, ListTree, Layers, Activity, RotateCcw, Award];
 
 /** step 3: the floating dock with its More key, the `?` keycap and ⌘K search */
 function ArtDock() {
@@ -113,11 +113,6 @@ function ArtDock() {
         <i>~/journey/</i>
         <b>dashboard</b>
         <span className="wt-sl-sp" />
-        <span className="kbd">?</span>
-        <span className="wt-sl-k">
-          <Search aria-hidden="true" />
-          {MOD}K
-        </span>
       </span>
       <span className="wt-dock">
         {DOCK_ICONS.map((Icon, i) => (
@@ -138,7 +133,7 @@ function ArtDock() {
   );
 }
 
-/** step 4: auto-save into this browser, export to a file, `?` to reopen */
+/** step 5: auto-save into this browser, export to a file, `?` to reopen */
 function ArtSave() {
   return (
     <div className="wt-save">
@@ -161,7 +156,26 @@ function ArtSave() {
   );
 }
 
-/** step 5: a linked list of steps, "you are here" on the next one (the first one for a fresh start) */
+/** step 4 (new in M11): the languages and Shorts — one language chip leading to a Day N chip */
+function ArtNew() {
+  return (
+    <div className="wt-save">
+      <span className="wt-file">
+        <Code2 />
+        JS · Java · C++
+      </span>
+      <span className="wt-arr">
+        <ArrowRight />
+      </span>
+      <span className="wt-file">
+        <Clapperboard />
+        Day N
+      </span>
+    </div>
+  );
+}
+
+/** step 6: a linked list of steps, "you are here" on the next one (the first one for a fresh start) */
 function ArtNext({ fresh }) {
   const done = fresh ? 0 : 2;
   return (
@@ -254,8 +268,9 @@ export default function WelcomeTour({ onClose }) {
                 {step === 0 && <ArtStairs state={stageState} />}
                 {step === 1 && <ArtLoop />}
                 {step === 2 && <ArtDock />}
-                {step === 3 && <ArtSave />}
-                {step === 4 && <ArtNext fresh={next.kind === 'start'} />}
+                {step === 3 && <ArtNew />}
+                {step === 4 && <ArtSave />}
+                {step === 5 && <ArtNext fresh={next.kind === 'start'} />}
               </div>
 
               {step === 0 && (
@@ -333,22 +348,22 @@ export default function WelcomeTour({ onClose }) {
                     <li>
                       <House aria-hidden="true" />
                       <span>
-                        <b>The dock</b> at the bottom: Dashboard, Path, Topics, Patterns, Practice, Visualizer, Revision and more, one key each. On a phone
-                        it is the tab bar.
+                        <b>The dock</b> at the bottom: Dashboard, Progress, Plan, Topics, Patterns, Visualizer, Revision and more, one key each. Practice
+                        and Tools live under More. On a phone it is the tab bar.
                       </span>
                     </li>
                     <li>
                       <LayoutGrid aria-hidden="true" />
                       <span>
-                        <b>More</b> (the grid key) opens everything else: the stage-by-stage syllabus, Pattern Finder, the JS reference, Playground,
-                        Progress and Settings.
+                        <b>More</b> (the grid key) opens everything else: Practice, Pattern Finder, Tools (cheat sheet, JS toolkit,
+                        JS reference, playground), Saved and Settings. The <b>Guide me</b> button explains the page you are on, and <b>Back</b> in the top bar returns to where you came from.
                       </span>
                     </li>
                     <li>
                       <SquareTerminal aria-hidden="true" />
                       <span>
-                        <b>The status line</b> at the top: where you are, your streak and solved count, the guide <span className="kbd">?</span>, search and
-                        the theme switch.
+                        <b>The status line</b> at the top: where you are, your streak and solved count, and
+                        the theme switch. Search and the guide sit in the dock or under More on a phone (or press <span className="kbd">?</span>).
                       </span>
                     </li>
                     <li>
@@ -368,6 +383,43 @@ export default function WelcomeTour({ onClose }) {
                 </>
               )}
               {step === 3 && (
+                <>
+                  <h2 id="tour-title" className="chrome">
+                    What&apos;s new
+                  </h2>
+                  <ul className="wt-where">
+                    <li>
+                      <Code2 aria-hidden="true" />
+                      <span>
+                        <b>Java and C++ run here too.</b> Pick the language above the editor: Run, Submit and custom input compile in your browser
+                        (the first run downloads the compiler once).
+                      </span>
+                    </li>
+                    <li>
+                      <Activity aria-hidden="true" />
+                      <span>
+                        <b>Animate my run</b> (the Animate tab) replays your JavaScript step by step; in Java or C++ it plays the reference and checks
+                        your answer.
+                      </span>
+                    </li>
+                    <li>
+                      <Clapperboard aria-hidden="true" />
+                      <span>
+                        <b>Shorts</b>: a two-minute story per pattern ending in one question. One more opens each day you study; the dashboard shows
+                        your Short of the day.
+                      </span>
+                    </li>
+                    <li>
+                      <Award aria-hidden="true" />
+                      <span>
+                        <b>New badges</b>: Polyglot, Daily Short, Hands-on Streak, Collector and more. Press <span className="kbd">?</span> on a question,
+                        Shorts or Saved for a guide to that page.
+                      </span>
+                    </li>
+                  </ul>
+                </>
+              )}
+              {step === 4 && (
                 <>
                   <h2 id="tour-title" className="chrome">
                     Your progress saves itself
@@ -401,7 +453,7 @@ export default function WelcomeTour({ onClose }) {
                   </ul>
                 </>
               )}
-              {step === 4 && (
+              {step === 5 && (
                 <>
                   <h2 id="tour-title" className="chrome">
                     Start here

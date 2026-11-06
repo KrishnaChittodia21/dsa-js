@@ -2,11 +2,12 @@
 // study (src/lib/shortsOrder.js); filters by state and topic; Save for later like questions and scenes.
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Lock } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { useProgress } from '../state/ProgressContext.jsx';
 import { topicById } from '../content/index.js';
 import { loadShorts, openCount, shortSaveItem, studyDays } from '../lib/shorts.js';
 import SaveButton from '../components/ui/SaveButton.jsx';
+import ShortThumb from '../components/guide/ShortThumb.jsx';
 
 const SHOWS = [
   { id: 'all', label: 'All' },
@@ -39,7 +40,7 @@ export default function ShortsPage() {
 
   return (
     <div className="page page-narrow sv-page">
-      <header className="set-hero rise">
+      <header data-guide="shorts-head" className="set-hero rise">
         <span className="eyebrow">
           <i className="pip" aria-hidden="true" />
           ~/journey/shorts
@@ -58,7 +59,7 @@ export default function ShortsPage() {
       </header>
 
       <div className="qp-row sh-filters">
-        <div className="seg sv-seg" role="group" aria-label="Show Shorts">
+        <div className="seg sv-seg" data-guide="shorts-filters" role="group" aria-label="Show Shorts">
           {SHOWS.map((k) => (
             <button key={k.id} type="button" aria-pressed={show === k.id} onClick={() => setShow(k.id)}>
               {k.label}
@@ -80,18 +81,20 @@ export default function ShortsPage() {
       ) : shown.length === 0 ? (
         <p className="empty">No Shorts match these filters.</p>
       ) : (
-        <ol className="sv-list">
+        <ol data-guide="shorts-grid" className="sh-grid">
           {shown.map((s) => {
             const done = progress.shorts?.[s.id];
-            const meta = `${s.pattern.name} · ${topicById[s.topicId]?.title || s.topicId}`;
+            const topicTitle = topicById[s.topicId]?.title || s.topicId;
+            const meta = `${s.pattern.name} · ${topicTitle}`;
+            const day = <span className="mono sh-day">Day {s.day}</span>;
             return (
-              <li key={s.id} className={`sv-row${isOpen(s) ? '' : ' sh-locked'}`}>
+              <li key={s.id} className={`sh-card${isOpen(s) ? '' : ' sh-locked'}${done ? ' is-done' : ''}`}>
                 {isOpen(s) ? (
-                  <Link to={`/shorts/${s.id}`} className="sv-link">
-                    <b>
-                      <span className="mono sh-day">Day {s.day}</span> {s.title}
-                    </b>
-                    <small>
+                  <Link to={`/shorts/${s.id}`} className="sh-card-link">
+                    <ShortThumb short={s} topicTitle={topicTitle} done={!!done} />
+                    {day}
+                    <b className="sh-card-title">{s.title}</b>
+                    <small className="sh-card-meta">
                       {meta}
                       {done && (
                         <>
@@ -102,11 +105,11 @@ export default function ShortsPage() {
                     </small>
                   </Link>
                 ) : (
-                  <div className="sv-link" aria-label={`Day ${s.day}: opens after ${s.day} study days`}>
-                    <b>
-                      <span className="mono sh-day">Day {s.day}</span> <Lock size={13} aria-hidden="true" /> {s.title}
-                    </b>
-                    <small>
+                  <div className="sh-card-link" aria-label={`Day ${s.day}: ${s.title}, opens after ${s.day} study days`}>
+                    <ShortThumb short={s} topicTitle={topicTitle} locked />
+                    {day}
+                    <b className="sh-card-title">{s.title}</b>
+                    <small className="sh-card-meta">
                       {meta} · opens after {s.day} study days
                     </small>
                   </div>

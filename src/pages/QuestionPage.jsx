@@ -103,7 +103,7 @@ export default function QuestionPage() {
     <div className="qp">
       <div className="qp-in">
         <div className="qp-bar rise">
-          <Link to={`/topic/${topic.id}?tab=practice`} className="qp-crumb" title={`Back to ${topic.title}`}>
+          <Link to={`/topic/${topic.id}#questions`} className="qp-crumb" title={`Back to ${topic.title}`}>
             <Icon name="chevronLeft" size={14} />
             <span className="qp-crumb-path">~/{topic.id}/</span>
             <b>
@@ -169,7 +169,7 @@ export default function QuestionPage() {
               ))}
             </div>
             <h1 className="display display--s chrome qp-title">{question.title}</h1>
-            <SaveButton saveKey={`q:${question.id}`} item={{ kind: 'question', id: question.id, topicId: question.topicId, title: question.title }} />
+            <SaveButton data-guide="save" saveKey={`q:${question.id}`} item={{ kind: 'question', id: question.id, topicId: question.topicId, title: question.title }} />
           </div>
           {!quiz && (
             <div className="qp-stats">
