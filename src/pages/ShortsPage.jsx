@@ -2,7 +2,7 @@
 // (src/lib/shortsOrder.js). Layout ported from system-design-learn's pages/Shorts.tsx: status line with
 // "Play all unwatched", view chips, Unwatched / Watched sections of thumbnail cards.
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Clapperboard, PlayCircle } from 'lucide-react';
 import { useProgress } from '../state/ProgressContext.jsx';
 import { topicById } from '../content/index.js';

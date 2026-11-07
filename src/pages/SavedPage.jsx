@@ -1,6 +1,6 @@
 // Saved for later: questions, lesson sections and Visualizer scenes, newest first, with a filter per kind.
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { X } from 'lucide-react';
 import { useProgress } from '../state/ProgressContext.jsx';
 import { topicById } from '../content/index.js';

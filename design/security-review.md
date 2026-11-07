@@ -20,11 +20,15 @@ So the review is about what the page itself can be made to do.
   Java TeaVM javac vendored in `public/teavm/` with sha256 checksums in its `NOTICE.md`.
 - **Import:** a progress file goes through `migrate()` (shape normalised, unknown fields kept) and is rendered by React
   (escaped text); nothing from it is executed or injected as HTML.
-- **Dependencies:** `npm audit` → 2 moderate, both in `react-router` 6 (via `react-router-dom`):
-  - open redirect via a backslash in `<Link>` / `useNavigate` (GHSA-wrjc-x8rr-h8h6) — every navigation here is built
-    from the app's own ids/routes, never from a URL a visitor supplies → not exploitable here;
-  - constructor injection in SSR hydration (GHSA-337j-9hxr-rhxg) — the app is client-only, no SSR → not applicable.
-  - The fix is react-router 7 (major, breaking): **recommended as its own small task**, not done here.
+- **Dependencies:** `npm audit` (2026-11-07, after the Vite upgrade) → **0 vulnerabilities**.
+  - ~~esbuild ≤0.24.2 via vite 5 (GHSA-67mh-4wv8-2f99, moderate) and vite ≤6.4.3 (high: optimized-deps `.map` path
+    traversal, `server.fs` allow/deny bypasses, cross-origin script via custom middleware, launch-editor issues).~~
+    **Fixed 2026-11-07:** `vite` 6.4.5 (exact pin; esbuild 0.25.12), `@vitejs/plugin-react` 4.7.0 (exact). All were
+    dev-server only; none were in the built site.
+  - ~~react-router 6: open redirect via a backslash in `<Link>` / `useNavigate` (GHSA-wrjc-x8rr-h8h6), constructor
+    injection in SSR hydration (GHSA-337j-9hxr-rhxg).~~ **Fixed 2026-11-07:** `react-router-dom` 6 replaced by
+    `react-router` 7.18.4 (exact pin). Neither was reachable here anyway (all navigation targets are the app's own
+    routes; no SSR).
 
 ## Optional hardening
 - ~~Pin GitHub Actions to commit SHAs instead of `@v4` / `@v5` tags.~~ **Done 2026-11-07:** every `uses:` in

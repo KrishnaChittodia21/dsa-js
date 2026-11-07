@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router';
 import Icon from '../components/ui/Icon.jsx';
 import EvidenceBadge from '../components/EvidenceBadge.jsx';
 import BigOChip, { firstBigO, useQuestionComplexities } from '../components/BigOChip.jsx';

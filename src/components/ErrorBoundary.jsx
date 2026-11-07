@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 class Boundary extends Component {
   state = { error: null };

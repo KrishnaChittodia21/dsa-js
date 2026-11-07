@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router';
 import LessonPlayer from '../components/lesson/LessonPlayer.jsx';
 import Icon from '../components/ui/Icon.jsx';
 import Markdown from '../components/ui/Markdown.jsx';

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { ArrowRight, Compass, Play } from 'lucide-react';
 import NextStepCard from '../components/guide/NextStepCard.jsx';
 import CoachTip from '../components/guide/CoachTip.jsx';

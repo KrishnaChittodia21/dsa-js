@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 import { MotionConfig } from 'motion/react';
 // self-hosted variable fonts: Archivo (display, wght+wdth), Onest (UI), Martian Mono (code/numbers) — latin
 import './styles/fonts.css';

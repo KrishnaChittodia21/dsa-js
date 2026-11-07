@@ -1,5 +1,5 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, Outlet, matchPath, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Outlet, matchPath, useLocation, useNavigate } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
 import {
   Activity,

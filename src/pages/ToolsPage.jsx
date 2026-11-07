@@ -1,5 +1,5 @@
 import { lazy, Suspense, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router';
 
 const CheatSheetPage = lazy(() => import('./CheatSheetPage.jsx'));
 const ToolkitIndex = lazy(() => import('./ToolkitPage.jsx').then((m) => ({ default: m.ToolkitIndex })));

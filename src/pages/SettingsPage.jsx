@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router';
 import { ArrowRight, BarChart3, Check, Compass, Monitor, Moon, RotateCcw, Sun } from 'lucide-react';
 import { ACCENTS, useTheme } from '../state/ThemeContext.jsx';
 import { saveUiPrefs, useUiPrefs } from '../lib/uiPrefs.js';

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import LogoMark from '../ui/LogoMark.jsx';
 
 /** Footer at the end of every page: logo + wordmark on the left, mono copyright line on the right. */

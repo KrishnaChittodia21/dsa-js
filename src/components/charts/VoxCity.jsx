@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 /**
  * Isometric "pattern city": one tower per topic, one row per stage. Height = topic mastery,

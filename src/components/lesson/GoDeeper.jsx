@@ -1,6 +1,6 @@
 // "Go deeper" at the end of a lesson section (M2): the Visualizer scenes this section uses, the patterns behind
 // them (or the topic's first patterns) and their Shorts (M9), and two practice questions you have not solved yet.
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { topicById } from '../../content/index.js';
 import { visualForPattern } from '../../visualizations/patternVisuals.js';
 import { SCENARIO_TITLES } from '../../visualizations/scenarioTitles.js';

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import Icon from '../components/ui/Icon.jsx';
 import VoxSort from '../components/charts/VoxSort.jsx';
 import { plural } from '../components/charts/core.js';
