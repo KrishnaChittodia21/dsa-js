@@ -562,6 +562,9 @@ deploy. Launch check on the live Pages site: every page loads with no CSP errors
   neither reachable here — upgrade to v7 suggested as its own task. Tests: 61 (`tests/csp.test.js`).
   - **User's steps:** check the built site locally for CSP errors (the browser tool was blocked), commit, merge to
     `main` and push (the workflow tests and deploys), then the launch check in `security-review.md`.
+- **Hardening batch 2026-11-07:** Actions pinned to commit SHAs; C++ compile time limit (60 s after the toolchain
+  loads, then the worker is recreated); main bundle split (TopicPage lazy; `motion`, `content`, `content-manifest`
+  chunks; entry 1,247 kB → 146 kB, no chunk-size warning); unused syllabus-drawer CSS removed from `shell.css`.
 
 ---
 

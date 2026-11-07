@@ -7,6 +7,8 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 import { TOPIC_META, TOPIC_ORDER } from '../src/content/curriculum.js';
 import { runTests } from '../src/runner/core.js';
 import { validateSteps } from '../src/content/stepSchema.js';
+import { validateShortsFile } from '../src/content/shortSchema.js';
+import { signatureProblems } from '../src/languages/signature.js';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const topicsDir = path.join(root, 'src/content/topics');
@@ -21,6 +23,7 @@ const CALLOUTS = new Set(['analogy', 'tip', 'warning', 'insight', 'definition'])
 
 const errors = [];
 let stepSections = 0;
+let shortCount = 0;
 const warnings = [];
 const err = (where, msg) => errors.push(`${where}: ${msg}`);
 const warn = (where, msg) => warnings.push(`${where}: ${msg}`);
@@ -66,6 +69,18 @@ for (const topicId of TOPIC_ORDER) {
       }
     } catch (e) {
       err(`${topicId}/steps.js`, `failed to import: ${e.message}`);
+    }
+  }
+
+  // Shorts (M9): src/content/shorts/<topic>.js, one per pattern, in pattern order (content/shortSchema.js)
+  const shortsFile = path.join(root, 'src/content/shorts', `${topicId}.js`);
+  if (fs.existsSync(shortsFile)) {
+    try {
+      const shorts = (await import(pathToFileURL(shortsFile).href)).default;
+      for (const e of validateShortsFile(shorts, (topic.patterns || []).map((p) => p.id), `shorts/${topicId}.js`)) errors.push(e);
+      shortCount += shorts.length;
+    } catch (e) {
+      err(`shorts/${topicId}.js`, `failed to import: ${e.message}`);
     }
   }
 
@@ -148,6 +163,8 @@ for (const topicId of TOPIC_ORDER) {
     }
     for (const k of ['starterCode', 'solution', 'tests']) if (!q[k]) err(where, `missing "${k}"`);
     if (q.kind === 'design' ? !q.className : !q.functionName) err(where, 'missing functionName/className');
+    // M6: typed signature for Java / C++ (names come from the JS starter)
+    for (const p of signatureProblems(q)) err(where, `signature: ${p}`);
     const tests = q.tests || [];
     if (tests.length < 10) err(where, `only ${tests.length} tests (need 10–15)`);
     if (tests.length > 20) warn(where, `${tests.length} tests (aim for 10–15)`);
@@ -215,4 +232,4 @@ if (errors.length) {
   for (const e of errors) console.log('  ' + e);
   process.exit(1);
 }
-console.log(`\n✔ content valid · ${stepSections} sections with step lessons`);
+console.log(`\n✔ content valid · ${stepSections} sections with step lessons · ${shortCount} Shorts`);

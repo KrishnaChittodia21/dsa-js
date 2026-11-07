@@ -26,9 +26,11 @@ So the review is about what the page itself can be made to do.
   - constructor injection in SSR hydration (GHSA-337j-9hxr-rhxg) — the app is client-only, no SSR → not applicable.
   - The fix is react-router 7 (major, breaking): **recommended as its own small task**, not done here.
 
-## Optional hardening (not done)
-- Pin GitHub Actions to commit SHAs instead of `@v4` / `@v5` tags.
-- A compile time limit for the C++ compiler worker (a pathological template can keep it busy; it never blocks the page).
+## Optional hardening
+- ~~Pin GitHub Actions to commit SHAs instead of `@v4` / `@v5` tags.~~ **Done 2026-11-07:** every `uses:` in
+  `deploy.yml` is a full commit SHA with the release tag as a comment.
+- ~~A compile time limit for the C++ compiler worker.~~ **Done 2026-11-07:** 60 s, counted once the toolchain is loaded;
+  on timeout the worker is terminated and recreated on the next compile (`src/runner/native/runNative.js`).
 - Subresource integrity for the clang files is not possible as loaded (the bundle fetches its own `.wasm`); the pinned
   version on jsDelivr is the safeguard.
 
