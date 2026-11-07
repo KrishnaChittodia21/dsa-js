@@ -47,7 +47,7 @@ const AchievementCelebration = lazy(() => import('../achievements/AchievementCel
 
 /*
  * Kinetic Voxel shell: a slim mono STATUS LINE on top, a floating bottom DOCK (desktop) / touch TAB DOCK
- * (≤900px), a "More" popover/sheet with every other route, a Back button in the status line and a floating
+ * (≤900px), a "More" popover/sheet with every other route, a Back button at the top of the page content and a floating
  * "Guide me" button. <main> is the scroll container (TopicPage scrolls `.main`).
  * Layout vars live in tokens.css: --status-h, --dock-h, --dock-gap, --dock-space (see shell.css).
  */
@@ -277,6 +277,8 @@ export function parentOf(pathname) {
 }
 /** pages without a Back button: the dashboard and the touch tab roots (always one tap away in the tab dock) */
 const NO_BACK = new Set(['/', '/plan', '/progress', '/revision']);
+/** pages whose own content already opens with a back link (All Shorts, JS DSA Toolkit) */
+const OWN_BACK = ['/shorts/:id', '/toolkit/:toolId'];
 
 export default function AppShell() {
   const { theme, setTheme } = useTheme();
@@ -377,6 +379,7 @@ export default function AppShell() {
 
   const parent = parentOf(pathname);
   const canGoBack = location.key !== 'default';
+  const showBack = !NO_BACK.has(pathname) && !OWN_BACK.some((p) => matchPath(p, pathname));
   const goBack = () => (canGoBack ? navigate(-1) : navigate(parent.to));
   const streakLabel = st.current > 0 ? `${st.current}-day streak` : 'no streak yet';
   const moreActive = MORE_MATCH(pathname);
@@ -396,12 +399,6 @@ export default function AppShell() {
             DSA&nbsp;Journey<i>.js</i>
           </b>
         </Link>
-        {!NO_BACK.has(pathname) && (
-          <button type="button" className="sl-back" onClick={goBack} aria-label={canGoBack ? 'Back' : `Back to ${parent.label}`} title={canGoBack ? 'Back' : `Back to ${parent.label}`}>
-            <ArrowLeft aria-hidden="true" />
-            <span className="sl-back-t">Back</span>
-          </button>
-        )}
         <div className="sl-seg sl-page" title={`~/journey/${crumb}`}>
           <span className="sl-page-chip">
             <PageIcon aria-hidden="true" />
@@ -437,6 +434,14 @@ export default function AppShell() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
           >
+            {showBack && (
+              <div className="page-back">
+                <button type="button" className="btn btn--ghost btn--sm" onClick={goBack} title={canGoBack ? 'Back' : `Back to ${parent.label}`}>
+                  <ArrowLeft size={15} aria-hidden="true" />
+                  {canGoBack ? 'Back' : `Back to ${parent.label}`}
+                </button>
+              </div>
+            )}
             <Outlet />
           </motion.div>
         </AnimatePresence>
@@ -479,14 +484,6 @@ export default function AppShell() {
             </span>
           </button>
           <span className="dock-sep" aria-hidden="true" />
-          <button type="button" className="dock-item dock-guide" onClick={openGuideHere} aria-label="Guide (press ?)">
-            <span className="dock-q" aria-hidden="true">
-              ?
-            </span>
-            <span className="dock-tip" aria-hidden="true">
-              Guide · press ?
-            </span>
-          </button>
           <button type="button" className="dock-search" onClick={showPalette} aria-label={`Search (${SEARCH_KEY})`}>
             <Search aria-hidden="true" />
             <span>Find a problem…</span>

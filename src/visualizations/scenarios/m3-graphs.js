@@ -21,6 +21,7 @@ const toInt = (v, d = 0) => (Number.isFinite(Number(v)) ? Math.round(Number(v)) 
 
 // ====================== graph-adjacency-representation ======================
 export const graphAdjacencyBuild = {
+  problem: { name: 'Edge list to adjacency list', statement: 'Convert a list of edges into, for every vertex, the list of its neighbours (and its degree).', example: 'n = 5, edges [0,1] [0,2] [1,2] [1,3] [3,4] → adj = [[1,2], [0,2,3], [0,1], [1,4], [3]]', exampleOutput: [[1, 2], [0, 2, 3], [0, 1], [1, 4], [3]] },
   title: 'Edge list → adjacency list',
   description:
     'One pass over the edges: push v into adj[u] (and u into adj[v] when undirected) and count degrees. n is clamped to 0–8, at most 10 edges; edges with a vertex outside 0..n−1 or a self-loop are dropped.',
@@ -71,6 +72,7 @@ export const graphAdjacencyBuild = {
     if (n === 0) {
       snap('n = 0: no vertices, so adj is an empty array and there is nothing to read.');
       snap('Done: adj = [], degree = []. O(n + m) = O(0).');
+      frames.at(-1).result = adj;
       return frames;
     }
     snap(`Make ${n} separate empty lists with Array.from (fill([]) would share ONE array) and degree = all 0. ${list.length} edge(s) to read.`);
@@ -99,6 +101,7 @@ export const graphAdjacencyBuild = {
       list.length,
     );
     attach(frames, q);
+    frames.at(-1).result = adj;
     return frames;
   },
 };
@@ -109,6 +112,7 @@ const oneApart = (a, b) => a.length === b.length && [...a].filter((c, i) => c !=
 const fmtSet = (s) => `{${[...s].join(', ')}}`;
 
 export const bidirectionalBfs = {
+  problem: { name: 'Word Ladder', statement: 'Change one letter at a time, using only dictionary words, to get from begin to end. Return the length of the shortest chain.', example: 'hit → cog with [hot, dot, dog, lot, log, cog] → 5 (hit, hot, dot, dog, cog)', exampleOutput: 5, questionId: 'word-ladder' },
   title: 'Bidirectional BFS: word ladder',
   description:
     'Words are vertices, one-letter changes are edges. Two frontiers grow from begin and end; the smaller one is expanded each layer, and the search stops when a neighbour is in the other frontier. Words are cut to 4 lowercase letters and at most 8 words are drawn (begin, end and the first 6 others of the same length).',
@@ -188,6 +192,7 @@ export const bidirectionalBfs = {
     snap(`Find the fewest one-letter changes from "${s}" to "${t}". Frontier A = {${s}}, frontier B = {${t}}, one shared seen set.`);
     if (s === t) {
       snap(`begin === end, so the answer is 0 changes before any search. O(1).`);
+      frames.at(-1).result = 1; // ladder length in words, as LeetCode counts it
       return frames;
     }
     let asks = 0;
@@ -234,16 +239,18 @@ export const bidirectionalBfs = {
         break;
       }
     }
-    const pathLen = answer > 0 ? `${answer} change(s), i.e. a ladder of ${answer + 1} words (LeetCode's word ladder counts words, so it returns ${answer + 1})` : '-1: no ladder exists';
+    const pathLen = answer > 0 ? `${answer} change(s), i.e. a ladder of ${answer + 1} words (LeetCode's word ladder counts words, so it returns ${answer + 1})` : '0: no ladder exists';
     const fq = answer > 0 ? pick('The searches met. How many words are in the whole ladder?', answer + 1, [answer, answer + 2, answer - 1 > 0 ? answer - 1 : answer + 3], 2) : undefined;
     snap(`Result: ${pathLen}. ${answer > 0 ? 'Each side searched only about half the depth, which is where the speed-up comes from.' : 'One frontier ran empty first, so the search stopped early.'}`, { met: meet || [], steps: answer });
     attach(frames, fq);
+    frames.at(-1).result = answer > 0 ? answer + 1 : 0; // LeetCode: words in the ladder, 0 if none
     return frames;
   },
 };
 
 // ====================== graph-state-space-bfs ======================
 export const stateSpaceBfs = {
+  problem: { name: 'Shortest Path Visiting All Nodes', statement: 'Return the length of the shortest walk that visits every node (start anywhere, revisits allowed).', example: 'graph [[1,2,3], [0], [0], [0]] → 4', exampleOutput: 4, questionId: 'shortest-path-visiting-all-nodes' },
   title: 'BFS over (node, mask) states',
   description:
     'Shortest path that visits every node: a BFS vertex is a state (node, mask), and bit i of mask means node i was visited. Every node starts in the queue. The graph is cut to 4 nodes (4 · 16 = 64 states at most); bad neighbour ids are dropped and edges are made two-way.',
@@ -289,6 +296,7 @@ export const stateSpaceBfs = {
     if (n === 0) {
       snap('No nodes: the queue never gets a state.');
       snap('The template returns -1 here (the loop never runs). LeetCode guarantees n ≥ 1.');
+      frames.at(-1).result = -1;
       return frames;
     }
     for (let i = 0; i < n; i++) {
@@ -340,6 +348,7 @@ export const stateSpaceBfs = {
     }
     if (answer < 0) snap(`Queue empty and no state reached mask ${bits(full)}: the graph is not connected, so no walk visits every node. Return -1.`);
     else snap(`Answer: ${answer} move(s). At most n · 2^n = ${n * (1 << n)} states, each expanded once: O(2^n · n²) time. ${seenCount} states were seen here.`, queue[head - 1]);
+    frames.at(-1).result = answer;
     return frames;
   },
 };

@@ -59,6 +59,7 @@ function readGrid(raw, maxR, maxC, lo, hi) {
 
 /* ------------------------------------------------------------------ key mapping: accounts merge */
 export const ufAccountsMerge = {
+  problem: { name: 'Accounts Merge', statement: 'Accounts that share any email belong to the same person. Merge them and list each person’s emails.', example: 'the two "John" accounts sharing js@m merge; Mary and the other John stay separate → [["John", "j0@m", "jn@m", "js@m"], ["Mary", "m@m"], ["John", "jb@m"]]', exampleOutput: [['John', 'j0@m', 'jn@m', 'js@m'], ['Mary', 'm@m'], ['John', 'jb@m']], questionId: 'accounts-merge' },
   title: 'Union Find key mapping: accounts merge',
   description:
     'Emails are strings, so getId() gives each new email the next integer id (id.size) the first time it is seen; then every email of an account is unioned with that account\'s first email, and the groups are read back by root. Clamped to 5 accounts, 4 emails per account and 8 distinct emails; accounts without emails are skipped.',
@@ -133,6 +134,7 @@ export const ufAccountsMerge = {
     if (!accs.length) {
       snap(`No accounts with emails to read.${clampNote}`);
       snap('Nothing to merge → return [].');
+      frames.at(-1).result = [];
       return frames;
     }
     snap(`${accs.length} account(s). The DSU only works on ids 0..n−1, so each email gets an id the first time we see it: id.set(email, id.size).${clampNote}`);
@@ -200,12 +202,14 @@ export const ufAccountsMerge = {
       ],
     });
     attach(frames, fq);
+    frames.at(-1).result = merged.map((m) => [m.name, ...m.emails]);
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ weighted DSU: evaluate division */
 export const ufEvaluateDivision = {
+  problem: { name: 'Evaluate Division', statement: 'Given equations like a / b = 2, answer queries x / y (or -1 when they cannot be determined).', example: 'a/b = 2, b/c = 3; queries a/c, a/x → [6, -1]', exampleInput: { equations: [['a', 'b'], ['b', 'c']], values: [2, 3], queries: [['a', 'c'], ['a', 'x']] }, exampleOutput: [6, -1], questionId: 'evaluate-division' },
   title: 'Weighted Union Find: evaluate division',
   description:
     'weight[x] = value(x) / value(parent[x]). find() walks to the root, multiplies the weights and re-points x straight at the root; union(a, b, k) links root(a) under root(b) with weight k·w[b]/w[a]. A query x / y in one group is w[x] / w[y], otherwise −1. Clamped to 6 equations, 8 variables and 5 queries; equations whose value is not a positive number are dropped, and an equation between two variables already in one group is skipped.',
@@ -356,12 +360,14 @@ export const ufEvaluateDivision = {
       attach(frames, q);
     });
     snap(`answers = [${answers.map((a) => (a === -1 ? '−1' : num(a))).join(', ')}]. Path compression alone makes each find O(log n) amortized (adding union by size would bring it to near O(1)), and every answer is one division.`, {}, 'done');
+    frames.at(-1).result = answers;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ online DSU: number of islands II */
 export const ufIslandsOnline = {
+  problem: { name: 'Number of Islands II', statement: 'Land is added to an empty grid one cell at a time. Report the number of islands after each addition.', example: '3 × 3, add (0,0) (0,1) (1,2) (2,1) (1,1) (0,1) → [1, 1, 2, 3, 1, 1]', exampleOutput: [1, 1, 2, 3, 1, 1], questionId: 'number-of-islands-ii' },
   title: 'Online Union Find: number of islands II',
   description:
     'Land appears one cell at a time. Each new cell is +1 island; each successful union with a land neighbour is −1; the count is recorded after every addition. Cell id = r · cols + c. The grid is clamped to 4 × 4 and the list to 8 positions (positions outside the grid are dropped).',
@@ -480,12 +486,14 @@ export const ufIslandsOnline = {
       attach(frames, q);
     });
     snap(adds.length ? `answer = [${out.join(', ')}]. Each addition does ≤ 4 unions, each near O(1) amortized → O(k·α(m·n)) for k additions, plus O(m·n) to set up.` : 'No valid positions → answer = [].');
+    frames.at(-1).result = out;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ minimax Dijkstra: path with minimum effort */
 export const spMinEffort = {
+  problem: { name: 'Path With Minimum Effort', statement: 'A path’s effort is its largest height difference between neighbouring cells. Find the least effort from the top-left to the bottom-right.', example: '[[1,2,2], [3,8,2], [5,3,5]] → 2', exampleOutput: 2, questionId: 'path-with-minimum-effort' },
   title: 'Minimax Dijkstra: path with minimum effort',
   description:
     'A path\'s effort is its largest height step. Dijkstra still works with max instead of +: pop the smallest (effort, cell), and for each neighbour try max(d, |height difference|). The first time the bottom-right cell is popped, its effort is the answer. The grid is clamped to 4 × 4 and heights to 0..99.',
@@ -505,6 +513,7 @@ export const spMinEffort = {
     if (!R) {
       frames.push({ note: 'Empty grid: there is no cell to walk on.', panels: [grid([[' ']], [['muted']], 'heights')] });
       frames.push({ note: 'Nothing to search → effort 0.', panels: [grid([[' ']], [['muted']], 'heights')] });
+      frames.at(-1).result = 0;
       return frames;
     }
     const n = R * C;
@@ -546,6 +555,7 @@ export const spMinEffort = {
         popped[u] = true;
         snap(`Pop ${d}:${rc(u)} — the target. Every path still in the heap already has effort ≥ ${d}, and extending a path never lowers its max, so the answer is ${d}. O(R·C·log(R·C)).`, -1, { [u]: 'done' });
         attach(frames, q);
+        frames.at(-1).result = d;
         return frames;
       }
       if (d > best[u]) {
@@ -579,12 +589,14 @@ export const spMinEffort = {
       attach(frames, q || rq);
     }
     snap('Heap empty without reaching the target → −1 (cannot happen on a full grid).');
+    frames.at(-1).result = -1;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ state BFS: obstacle elimination */
 export const spObstacleElimination = {
+  problem: { name: 'Shortest Path with Obstacles Elimination', statement: 'Find the fewest steps from the top-left to the bottom-right when you may walk through at most k obstacles.', example: 'the default 4 × 4 grid, k = 1 → 6', exampleOutput: 6, questionId: 'shortest-path-in-a-grid-with-obstacles-elimination' },
   title: 'State BFS: shortest path with k obstacle eliminations',
   description:
     'The node is (row, col, eliminations left). BFS goes level by level; stepping on an obstacle (1) costs one elimination. seen[r][c] keeps the MOST eliminations left we ever had at a cell, so a new state is pushed only if it arrives with more. The grid is clamped to 4 × 4 (non-1 cells count as 0) and k to 0..16; the start cell is never charged.',
@@ -609,6 +621,7 @@ export const spObstacleElimination = {
     if (!R) {
       frames.push({ note: 'Empty grid: there is no start cell.', panels: [grid([[' ']], [['muted']], 'grid')] });
       frames.push({ note: 'No path → −1.', panels: [grid([[' ']], [['muted']], 'grid')] });
+      frames.at(-1).result = -1;
       return frames;
     }
     const seen = g.map((row) => row.map(() => -1));
@@ -645,6 +658,7 @@ export const spObstacleElimination = {
           const fq = steps > 0 ? pick('The target state is at the front of the frontier. What does BFS return?', steps, [steps + 1, steps - 1 >= 0 ? steps - 1 : steps + 2, R + C - 2 === steps ? steps + 2 : R + C - 2], 2) : undefined;
           snap(`(${r}, ${c}) is the target, reached at level ${steps} → return ${steps}. BFS levels are step counts, so the first time we pop it is the shortest. O(R·C·(k + 1)) states.`, steps, null, { [`${r},${c}`]: 'done' });
           attach(frames, fq);
+          frames.at(-1).result = steps;
           return frames;
         }
         expanded++;
@@ -679,6 +693,7 @@ export const spObstacleElimination = {
       next = [];
     }
     snap('The frontier is empty and the target was never reached → −1.', -1, null);
+    frames.at(-1).result = -1;
     return frames;
   },
 };

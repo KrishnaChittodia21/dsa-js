@@ -27,6 +27,7 @@ const grid2 = (r, c, v) => Array.from({ length: r }, () => new Array(c).fill(v))
 
 /* ------------------------------------------------------------------ interval DP: burst balloons */
 export const intervalBurstBalloons = {
+  problem: { name: 'Burst Balloons', statement: 'Bursting balloon i earns left × i × right of its current neighbours. Find the most coins from bursting them all.', example: '[3, 1, 5, 8] → 167', exampleOutput: 167, questionId: 'burst-balloons' },
   title: 'Interval DP: burst balloons',
   description:
     'dp[i][j] = most coins from bursting every balloon strictly between walls i and j. Try each k as the LAST balloon burst inside: dp[i][k] + a[i]·a[k]·a[j] + dp[k][j]. Filled by interval length. (≤ 6 balloons, values 0–99.)',
@@ -144,6 +145,7 @@ export const intervalBurstBalloons = {
       `Answer dp[0][${m - 1}] = ${ans}: the most coins for all ${nums.length} balloon(s). Thinking about the LAST balloon (not the first) keeps the two sides independent. O(n³) time — n² ranges × n split points — and O(n²) space.`,
       { st, v: { answer: ans } },
     );
+    frames.at(-1).result = ans;
     return frames;
   },
 };
@@ -152,6 +154,7 @@ export const intervalBurstBalloons = {
 const bin = (mask, n) => mask.toString(2).padStart(n, '0');
 
 export const bitmaskTsp = {
+  problem: { name: 'Travelling salesman (bitmask DP)', statement: 'Start at city 0, visit every city exactly once and return to city 0 at the lowest total road cost.', example: 'the default 4 cities → 80 (0 → 2 → 3 → 1 → 0)', exampleOutput: 80 },
   title: 'Bitmask DP: travelling salesman',
   description:
     'dp[mask][last] = cheapest route from city 0 that visits exactly the cities in mask and stands at last. Each move sets one more bit. (≤ 5 cities; dist[i][j] = road cost, null = no road.)',
@@ -310,6 +313,7 @@ export const bitmaskTsp = {
     }
     if (best === INF) {
       snap('No complete tour exists: some city cannot be reached or there is no road back to city 0. O(2ⁿ·n²) time, O(2ⁿ·n) space.', { mask: FULL, v: { answer: 'none' } });
+      frames.at(-1).result = null;
       return frames;
     }
     const route = [0];
@@ -332,6 +336,7 @@ export const bitmaskTsp = {
       `Shortest tour = ${best}: ${tour.join(' → ')} (rebuilt by following parent pointers back). 2ⁿ·n states × n moves each → O(2ⁿ·n²) time, O(2ⁿ·n) space — far less than trying all (n−1)! orders once n grows.`,
       { mask: FULL, gHl, eHl, st, v: { answer: best, tour: tour.join('→') } },
     );
+    frames.at(-1).result = best;
     return frames;
   },
 };
@@ -357,6 +362,7 @@ function smDiagram(nodeStates = {}, edgeStates = {}) {
 }
 
 export const stateMachineStock = {
+  problem: { name: 'Best Time to Buy and Sell Stock with Cooldown', statement: 'Buy and sell as often as you like, but after selling you must rest one day. Find the maximum profit.', example: 'prices = [1, 2, 3, 0, 2] → 3', exampleOutput: 3, questionId: 'best-time-to-buy-and-sell-stock-with-cooldown' },
   title: 'State-machine DP: stock with cooldown',
   description:
     'Three states at the end of each day — hold (own a share), sold (sold today), rest (free, no cooldown). Each arrow is one transition; every day takes the best arrow into each state. (≤ 8 days.)',
@@ -449,12 +455,14 @@ export const stateMachineStock = {
       `Answer = max(sold, rest) on the last day = ${ans}. Ending in hold is never best — an unsold share is wasted money. O(n) time and O(1) extra space: only yesterday's three numbers are needed.`,
       { day: n - 1, answerRow: ls > lr ? 'sold' : 'rest', nHl: { sold: ls > lr ? 'done' : '', rest: ls > lr ? '' : 'done' }, v: { answer: ans } },
     );
+    frames.at(-1).result = ans;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ grid DP */
 export const gridDp = {
+  problem: { name: 'Minimum Path Sum / Unique Paths', statement: 'Moving only right or down from the top-left to the bottom-right, find the smallest path sum (or count the paths).', example: '[[1,3,1,2], [1,5,1,3], [4,2,1,1]] → min sum 8', exampleOutput: 8, questionId: 'minimum-path-sum' },
   title: 'Grid DP: min path sum / unique paths',
   description:
     'Moves go only right or down, so dp[r][c] depends just on the cell above and the cell to the left — fill row by row. min-sum: dp = cell + min(top, left). count-paths: dp = top + left, obstacles (1) → 0. (≤ 5×6.)',
@@ -613,12 +621,14 @@ export const gridDp = {
         : `Answer dp[${R - 1}][${C - 1}] = ${ans}. The highlighted path is rebuilt by walking back to the cheaper neighbour each time. O(r·c) time; one row of dp is enough for O(c) space.`,
       { gHl, dHl, v: { answer: ans } },
     );
+    frames.at(-1).result = ans;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ Hierholzer: reconstruct itinerary */
 export const hierholzerItinerary = {
+  problem: { name: 'Reconstruct Itinerary', statement: 'Use every flight ticket exactly once, starting at JFK, taking the alphabetically smallest choice when several work.', example: 'JFK→ATL, ATL→DEN, JFK→SFO, SFO→ORD, ORD→JFK → [JFK, SFO, ORD, JFK, ATL, DEN]', exampleOutput: ['JFK', 'SFO', 'ORD', 'JFK', 'ATL', 'DEN'], questionId: 'reconstruct-itinerary' },
   title: "Hierholzer's algorithm: reconstruct itinerary",
   description:
     'Use every ticket exactly once. Keep walking along the smallest unused ticket; when an airport has none left it is finished — pop it onto the path. The path comes out reversed. (≤ 8 airports, ≤ 12 tickets.)',
@@ -758,12 +768,14 @@ export const hierholzerItinerary = {
         : `Stack empty, but only ${path.length - 1} of ${tickets.length} tickets were used: these tickets do not form a single trip from ${start} (degree check fails), so no valid itinerary exists.`,
       { final: true },
     );
+    frames.at(-1).result = ok ? [...path].reverse() : null;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ minimax: predict the winner */
 export const minimaxPredictWinner = {
+  problem: { name: 'Predict the Winner', statement: 'Two players take turns taking a number from either end. Can Player 1 score at least as much as Player 2 with best play?', example: '[1, 5, 233, 7] → true', exampleOutput: true, questionId: 'predict-the-winner' },
   title: 'Minimax: predict the winner',
   description:
     'Players take a number from either end. A node\'s value is (Player 1 − Player 2) under best play: Player 1 levels take the MAX of their children, Player 2 levels the MIN. Values flow up from the leaves. (≤ 4 numbers.)',
@@ -881,6 +893,7 @@ export const minimaxPredictWinner = {
       `Root value ${signed(ans)} → ${ans >= 0 ? 'Player 1 wins' : 'Player 2 wins'}${ans === 0 ? ' (a tie counts as a Player 1 win)' : ''}. Plain recursion visits 2ⁿ positions; memoising diff(i, j) leaves only n² ranges — that is interval DP. With MAX/MIN levels you can also prune: alpha-beta skips a branch once it cannot change the parent's choice.`,
       { v: { answer: signed(ans), winner: ans >= 0 ? 'Player 1' : 'Player 2' } },
     );
+    frames.at(-1).result = ans >= 0;
     return frames;
   },
 };

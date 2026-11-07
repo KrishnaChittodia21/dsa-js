@@ -2,7 +2,7 @@
 import { allPatterns } from '../content/index.js';
 import { orderShorts } from './shortsOrder.js';
 
-export { studyDays, openCount, isOpen, shortOfTheDay } from './shortsOrder.js';
+export { shortOfTheDay, shortLength } from './shortsOrder.js';
 
 const files = import.meta.glob('../content/shorts/*.js', { import: 'default' });
 let all;

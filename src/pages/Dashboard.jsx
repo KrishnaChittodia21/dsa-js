@@ -4,6 +4,8 @@ import { ArrowRight, Compass, Play } from 'lucide-react';
 import NextStepCard from '../components/guide/NextStepCard.jsx';
 import CoachTip from '../components/guide/CoachTip.jsx';
 import ShortOfTheDay from '../components/guide/ShortOfTheDay.jsx';
+import VoxCity from '../components/charts/VoxCity.jsx';
+import Icon from '../components/ui/Icon.jsx';
 import { TAB_META } from '../components/guide/studyLoop.js';
 import { plural } from '../components/charts/core.js';
 import { useProgress } from '../state/ProgressContext.jsx';
@@ -197,6 +199,22 @@ export default function Dashboard() {
   const popped = solvedToday[0];
   const actionsToday = progress.activity?.[today] || 0;
 
+  // ---- pattern city: one tower per topic, grows as mastery rises ----
+  const started = Object.keys(progress.questions).length + Object.keys(progress.topics).length > 0;
+  const statusOf = Object.fromEntries(topics.map((t) => [t.id, topicStatus(t, progress)]));
+  const cityStages = stages
+    .filter((s) => s.topics.length)
+    .map((s, i) => ({
+      id: s.id,
+      number: i + 1,
+      title: s.title.split(' & ')[0].length > 18 ? s.title.split(' ')[0] : s.title.split(' & ')[0],
+      topics: s.topics.map((t) => ({ id: t.id, title: t.title, status: statusOf[t.id], mastery: topicStats(t, progress).mastery, current: started && t.id === heroTopic.id })),
+    }));
+  const counts = { completed: 0, 'in-progress': 0, available: 0, locked: 0 };
+  for (const t of topics) counts[statusOf[t.id]]++;
+  const masteries = topics.map((t) => ({ t, m: topicStats(t, progress).mastery }));
+  const tallest = masteries.reduce((x, y) => (y.m > x.m ? y : x), masteries[0]);
+
   const hour = now.getHours();
   const greet = hour < 5 ? 'Up late' : hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   const dateLabel = now.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
@@ -285,6 +303,60 @@ export default function Dashboard() {
           {nextQ ? <NextProblem q={nextQ} qs={progress.questions[nextQ.id]} /> : <div className="dash-next-empty tile tile--raised">Every question in {heroTopic.title} is solved.</div>}
 
           <NextStepCard step={step} then={then} resume={resume} />
+        </div>
+      </section>
+
+      {/* ================= MASTERY MAP: pattern city ================= */}
+      <section data-guide="dash-city" className="tile section rise dash-city-tile" style={{ '--i': 2 }} aria-labelledby="dash-city-t">
+        <div className="tile-head">
+          <div>
+            <span className="eyebrow">
+              <i className="pip" />
+              Pattern city · {topics.length} topics · {cityStages.length} stages
+            </span>
+            <h2 id="dash-city-t" className="h2 dash-tile-h">
+              Mastery map
+            </h2>
+          </div>
+          <Link to="/patterns" className="tile-link">
+            Patterns <Icon name="arrowRight" size={13} />
+          </Link>
+        </div>
+        <div className="dash-city">
+          <VoxCity stages={cityStages} />
+          <div>
+            <div className="dash-legend-v">
+              <div className="li-l">
+                <span className="cube" style={{ '--c': '#FF7A3D' }} />
+                Completed<b>{counts.completed}</b>
+              </div>
+              <div className="li-l">
+                <span className="cube" style={{ '--c': '#7B5CFF' }} />
+                In progress<b>{counts['in-progress']}</b>
+              </div>
+              <div className="li-l">
+                <span className="cube cube--line" />
+                Unlocked<b>{counts.available}</b>
+              </div>
+              <div className="li-l">
+                <span className="cube cube--ghost" />
+                Locked<b>{counts.locked}</b>
+              </div>
+            </div>
+            <div className="dash-city-note">
+              {tallest && tallest.m > 0 && (
+                <span>
+                  Tallest tower <b>{tallest.t.title}</b> · <span className="mono">{tallest.m}%</span>
+                </span>
+              )}
+              {started && (
+                <span>
+                  Beacon <b className="t-uv">{heroTopic.title}</b> · you are here
+                </span>
+              )}
+              <span>Height = topic mastery (lesson 30%, then Easy, Medium and Hard solved).</span>
+            </div>
+          </div>
         </div>
       </section>
 

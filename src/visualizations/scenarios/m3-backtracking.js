@@ -40,6 +40,7 @@ function treeRecorder(rootLabel) {
 const MAX_TREE = 15;
 
 export const backtrackingCombinationSum = {
+  problem: { name: 'Combination Sum', statement: 'Return every combination of candidates (each reusable) that sums to the target.', example: 'candidates = [2, 3, 6, 7], target = 7 → [[2, 2, 3], [7]]', exampleOutput: [[2, 2, 3], [7]], questionId: 'combination-sum' },
   title: 'Backtracking: combination sum (start index + pruning)',
   description:
     'Combination Sum with reuse: the loop starts at `start`, so each combination is built in one order only; sorting lets us `break` once a candidate is bigger than what remains. Input is clamped to ≤ 4 distinct candidates in 2..20 and a target in 1..8; the tree shows at most 15 calls.',
@@ -130,7 +131,7 @@ export const backtrackingCombinationSum = {
       { i: null, start: null },
     );
 
-    return snaps.map((s) => {
+    const frames = snaps.map((s) => {
       const highlights = {};
       cands.forEach((_, k) => {
         if (s.start != null && k < s.start) highlights[k] = 'muted';
@@ -152,6 +153,8 @@ export const backtrackingCombinationSum = {
       if (s.predict) f.predict = s.predict;
       return f;
     });
+    frames.at(-1).result = result;
+    return frames;
   },
 };
 
@@ -159,6 +162,7 @@ export const backtrackingCombinationSum = {
 // Generate Parentheses: build char by char; open/close counters prune invalid prefixes.
 // ---------------------------------------------------------------------------
 export const backtrackingParentheses = {
+  problem: { name: 'Generate Parentheses', statement: 'Return every well-formed string of n pairs of parentheses.', example: 'n = 2 → ["(())", "()()"]', exampleOutput: ['(())', '()()'], questionId: 'generate-parentheses' },
   title: 'Backtracking: generate parentheses (open / close counts)',
   description:
     'Build the string one character at a time: add "(" only while open < n, add ")" only while close < open, so only valid prefixes are ever built. Red nodes are the branches the counters refuse. n is clamped to 0..2 so the whole tree fits (n = 3 already has 22 valid prefixes).',
@@ -237,7 +241,7 @@ export const backtrackingParentheses = {
     const second = snaps.filter((s) => s.predict && s.predict.question.startsWith('At "'))[1];
     if (second) second.predict = ask(second.predict.question, ['Yes — any character is fine until the end', 'Yes, but the result is filtered out later', second.predict.options[1]], 2, second.predict.explain);
 
-    return snaps.map((s) => {
+    const frames = snaps.map((s) => {
       const f = {
         note: s.note,
         panels: [
@@ -251,6 +255,8 @@ export const backtrackingParentheses = {
       if (s.predict) f.predict = s.predict;
       return f;
     });
+    frames.at(-1).result = result;
+    return frames;
   },
 };
 
@@ -266,6 +272,7 @@ const DIRS = [
 const MAX_FRAMES = 60;
 
 export const backtrackingWordSearch = {
+  problem: { name: 'Word Search', statement: 'Decide whether the word can be traced in the grid through adjacent cells, using each cell at most once.', example: 'board [[A,B,E], [B,C,E], [D,E,E]], word "ABCBD" → true', exampleOutput: true, questionId: 'word-search' },
   title: 'Backtracking: word search (mark, explore, restore)',
   description:
     'For each start cell, dfs(r, c, k) checks the letter, marks the cell "#" so this path cannot reuse it, tries down, up, right, left, then restores the letter so other paths may use it. Green = cells on the current path. Board is clamped to 4×4, word to 8 letters.',
@@ -410,6 +417,7 @@ export const backtrackingWordSearch = {
         panels: [{ kind: 'grid', cells: grid.map((row) => [...row]), states: grid.map((row) => row.map(() => 'muted')), label: 'board' }, arr(w.split(''), { label: 'word' }), vars({ found: 'false' }), stack([], 'call stack')],
       });
     }
+    frames.at(-1).result = found;
     return frames;
   },
 };

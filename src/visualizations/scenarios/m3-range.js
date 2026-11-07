@@ -25,6 +25,7 @@ const lowbit = (i) => i & -i;
 
 // ───────────────────────── 1. Coordinate compression + BIT: count of smaller numbers after self ─────────────────────────
 export const bitCountSmaller = {
+  problem: { name: 'Count of Smaller Numbers After Self', statement: 'For each element, count how many elements to its right are smaller.', example: '[40, -7, 900, 40, 3, 12] → [3, 0, 3, 2, 0, 0]', exampleOutput: [3, 0, 3, 2, 0, 0], questionId: 'count-of-smaller-numbers-after-self' },
   title: 'Compression + BIT: count smaller numbers after self',
   description: 'Values become ranks among the sorted distinct values; scanning right to left, a Fenwick tree over ranks answers "how many values to my right are smaller?" with one prefix sum, then marks the value as seen. First 8 numbers kept, values clamped to ±999.',
   defaultInput: { nums: [40, -7, 900, 40, 3, 12] },
@@ -57,6 +58,7 @@ export const bitCountSmaller = {
     if (!n) {
       push('No numbers → nothing to count.', [numsPanel(-1)], { res: '[]' });
       push('The answer is an empty list. O(n log n) in general: one sort plus two O(log n) BIT walks per element.', [numsPanel(-1)], { res: '[]' });
+      frames.at(-1).result = [];
       return frames;
     }
     push(`For each nums[i], count the values to its RIGHT that are smaller. Brute force compares every pair: O(n²). A BIT indexed by value would be faster, but values like ${sorted[0]} or ${sorted[m - 1]} cannot be array indices.`, [numsPanel(-1), rankPanel(false)], { n });
@@ -100,12 +102,14 @@ export const bitCountSmaller = {
       push(`Mark ${x} as seen AFTER the query (so it never counts itself): add(rank ${r}, +1) climbs ${ups.join(' → ')}. Equal values share a rank and are not "smaller".`, [numsPanel(i, { [i]: 'done' }), rankPanel(true, { [r]: 'done' }), bitPanel(Object.fromEntries(ups.map((k) => [k, 'active'])))], { x, rank: r, res: show(res) }, uPredict);
     }
     push(`Done: res = ${show(res)}. Sort O(n log n) + n × (query + update) O(log n) each → O(n log n) time, O(n) space.`, [numsPanel(-1, Object.fromEntries(a.map((_, k) => [k, 'done']))), rankPanel(true), bitPanel()], { res: show(res) });
+    frames.at(-1).result = res;
     return frames;
   },
 };
 
 // ───────────────────────── 2. Segment tree with lazy propagation: range add + range sum ─────────────────────────
 export const lazySegmentTree = {
+  problem: { name: 'Range add, range sum (lazy segment tree)', statement: 'Support "add d to every element in [l, r]" and "sum of [l, r]", both in O(log n).', example: '[2, 5, 1, 4, 3, 6], add 2 to [0..4], sum [1..3] → 16', exampleOutput: 16, questionId: 'classic-range-add-range-sum' },
   title: 'Lazy segment tree: range add, range sum',
   description: 'A range add stops at nodes fully inside the range (sum += d × length, tag += d). A tag is pushed to the children only when a later update or query must go below that node. Node label = its sum, then the pending tag. First 6 numbers kept, values clamped to ±99, delta to ±9.',
   defaultInput: { nums: [2, 5, 1, 4, 3, 6], addL: 0, addR: 4, delta: 2, qL: 1, qR: 3 },
@@ -135,6 +139,7 @@ export const lazySegmentTree = {
     if (!n) {
       frames.push({ note: 'No numbers → the tree is empty.', panels: [arr([], { label: 'real values' })] });
       frames.push({ note: 'Every range sum is 0. Range add and range sum are O(log n) in general.', panels: [arr([], { label: 'real values' }), vars({ answer: 0 })] });
+      frames.at(-1).result = 0;
       return frames;
     }
     const real = [...a];
@@ -254,12 +259,14 @@ export const lazySegmentTree = {
     const others = [total + d, total - d, total + 1, 2 * total];
     const predict = pick(`What is sum(${ql}..${qr})?`, total, others, 3, 'Add the sums of the fully covered nodes.');
     draw(`sum(${ql}..${qr}) = ${total}. Tags were pushed only along the paths the query walked. Range add and range sum are both O(log n).`, { ...st }, { query: `[${ql}..${qr}]`, answer: total }, undefined, predict);
+    frames.at(-1).result = total;
     return frames;
   },
 };
 
 // ───────────────────────── 3. Per-value index lists + binary search: range frequency queries ─────────────────────────
 export const indexListsRangeFreq = {
+  problem: { name: 'Range Frequency Queries', statement: 'Answer queries "how many times does value appear in arr[l..r]?".', example: 'arr [5, 2, 5, 7, 2, 5, 9, 5], queries [1,5,5] [3,6,2] [0,7,8] → [2, 1, 0]', exampleOutput: [2, 1, 0], questionId: 'range-frequency-queries' },
   title: 'Index lists + binary search: range frequency',
   description: 'Record the positions of each value while scanning (already sorted), then count v in [l, r] as lowerBound(pos[v], r + 1) − lowerBound(pos[v], l). First 8 numbers and 3 queries [l, r, value] kept; l > r is swapped.',
   defaultInput: { arr: [5, 2, 5, 7, 2, 5, 9, 5], queries: [[1, 5, 5], [3, 6, 2], [0, 7, 8]] },
@@ -352,12 +359,14 @@ export const indexListsRangeFreq = {
       push(`count = ${right} − ${left} = ${count}: pos(${v}) entries ${left}..${right - 1} lie inside [${l}..${r}]. Two binary searches → O(log n) per query.`, [arrPanel({ ...range, highlights: vHl }), posTable(v), listPanel(left, right, undefined, inside)], { query: `${l}, ${r}, ${v}`, count }, predict);
     });
     push(`Answers: ${show(answers)}. Build O(n) once, then O(log n) per query and O(n) memory in total — no tree, because the array never changes.`, [arrPanel(), posTable()], { answers: show(answers) });
+    frames.at(-1).result = answers;
     return frames;
   },
 };
 
 // ───────────────────────── 4. Interval coverage on huge coordinates: sorted boundary map (My Calendar III) ─────────────────────────
 export const boundaryMapBookings = {
+  problem: { name: 'My Calendar III', statement: 'After each booking [start, end), report the largest number of bookings that overlap at one moment.', example: '[10,20] [50,60] [10,40] [5,15] [5,10] [25,55] → [1, 1, 2, 3, 3, 3]', exampleOutput: [1, 1, 2, 3, 3, 3], questionId: 'my-calendar-iii' },
   title: 'Boundary map: max overlap after each booking',
   description: 'Each booking [start, end) adds +1 at start and −1 at end in a map; sweeping the keys in sorted order gives the running overlap, and its maximum is the answer. Only endpoints are stored, so coordinates can be huge. First 6 bookings kept, coordinates clamped to 0..10^9; start ≥ end is skipped.',
   defaultInput: { bookings: [[10, 20], [50, 60], [10, 40], [5, 15], [5, 10], [25, 55]] },
@@ -421,6 +430,7 @@ export const boundaryMapBookings = {
     });
     const k = delta.size;
     push(valid.length ? `Returns: ${show(results)}. Each book sorts the ${k} stored keys and sweeps them: O(k log k) per call — fine for a few hundred calls, independent of how large the coordinates are.` : 'No valid booking → nothing to return. Each book costs O(k log k) for k stored keys.', [ivPanel(-1), mapPanel([...delta.keys()].sort((x, y) => x - y))], { returns: show(results) });
+    frames.at(-1).result = results;
     return frames;
   },
 };

@@ -140,7 +140,7 @@ export function ListPanel({ panel }) {
             <div key={i} className="viz-list-item">
               <div className="viz-col">
                 <Pointers list={byIndex[i]} />
-                <div className={`${cellClass(highlights[i])} viz-node-box`}>{String(v)}</div>
+                <div data-pop={i} className={`${cellClass(highlights[i])} viz-node-box`}>{String(v)}</div>
               </div>
               {link}
             </div>

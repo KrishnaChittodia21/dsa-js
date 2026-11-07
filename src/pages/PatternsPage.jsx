@@ -441,9 +441,15 @@ export default function PatternsPage() {
             library<span className="pt-dot">.</span>
           </h1>
           <p className="lead">
-            The curriculum is organised around patterns. Each one shows <b>why it exists</b>, the <b>signals</b> that give it away, its template and how problems escalate. Don’t know which applies? Ask the{' '}
+            A <b>pattern</b> is a reusable way of solving a whole family of problems — learn it once, then recognise it from <b>signals</b> in the problem text (“sorted”, “at most k”, “top k”). Not sure which applies? Ask the{' '}
             <b>Pattern Finder</b>.
           </p>
+          <ul className="holds" aria-label="What each pattern card holds">
+            <li><b>Summary &amp; signals</b>What it does and the clue phrases that give it away.</li>
+            <li><b>Progress</b>A meter of how many of its problems you have solved.</li>
+            <li><b>Problems</b>The first few practice problems; dots show solved, attempted or to do.</li>
+            <li><b>Open the card</b>“Template, not-when &amp; all problems” — why it exists, when not to use it, the code template and mistakes.</li>
+          </ul>
           <div className="pt-jump">
             <Link className="btn btn--plasma" to="/finder">
               Open Pattern Finder <Icon name="target" size={18} />

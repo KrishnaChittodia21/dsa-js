@@ -16,7 +16,7 @@ const reducedMotion = () => {
 };
 
 /** plain text with **bold** and `code` */
-function rich(text) {
+export function rich(text) {
   return text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).map((part, i) =>
     part.startsWith('**') ? <b key={i}>{part.slice(2, -2)}</b> : part.startsWith('`') ? <code key={i}>{part.slice(1, -1)}</code> : <Fragment key={i}>{part}</Fragment>,
   );
@@ -30,7 +30,7 @@ function shuffled(items) {
 
 /** choose options in a fixed rotation picked from the question text, so the right one is not always first or last
  *  wherever the author put it (stable across renders; `answer` stays the index as written) */
-function rotated(list, seed) {
+export function rotated(list, seed) {
   let h = 0;
   for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
   const k = h % list.length;

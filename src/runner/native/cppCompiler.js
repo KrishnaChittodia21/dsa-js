@@ -1,5 +1,6 @@
 // M7: the C++ compiler worker — clang built for WebAssembly (@yowasp/clang), loaded from the CDN on first use
-// (~23 MB, cached by the browser) and kept for the next compiles. Replies { wasm } or { errors: clang's stderr }.
+// (~23 MB, cached by the browser) and kept for the next compiles. Replies { wasm } or { errors: clang's stderr }
+// (after a { type: 'compiling' } once the toolchain is loaded).
 let clang;
 
 self.onmessage = async (e) => {
@@ -12,6 +13,7 @@ self.onmessage = async (e) => {
       return m;
     });
     ({ runClang } = await clang);
+    self.postMessage({ id, type: 'compiling' }); // toolchain ready: the page starts its compile time limit now
   } catch (err) {
     clang = null;
     self.postMessage({ id, type: 'done', fatal: `The C++ compiler failed to load: ${err && err.message ? err.message : err}` });

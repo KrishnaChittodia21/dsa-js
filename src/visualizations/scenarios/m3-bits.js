@@ -20,6 +20,7 @@ const bin = (x, w) => x.toString(2).padStart(w, '0');
 // Bit-by-bit processing: every number appears k times except one → count each bit mod k.
 // ---------------------------------------------------------------------------
 export const bitCountsModK = {
+  problem: { name: 'Single Number II', statement: 'Every number appears k times except one, which appears once. Find it.', example: 'nums = [5, 3, 5, 5, 3, 3, 6], k = 3 → 6', exampleOutput: 6, questionId: 'single-number-ii' },
   title: 'Bit by bit: count each bit mod k',
   description:
     'Single number II: every number appears k times except one. For each bit position b, count how many numbers have bit b set; if count % k ≠ 0, the unique number owns bit b. nums clamped to 8 integers in 0..15 (4 bits), k to 2..5.',
@@ -87,6 +88,7 @@ export const bitCountsModK = {
       `result = ${result} (${bin(result, 4)}) — the number that does not appear ${K} times. Each of the 4 positions (32 in the real problem) scans all n numbers → O(bits · n) time, O(1) space.`,
       [table(-1), arr(bits4(result), { label: `result = ${result}`, showIndices: false, highlights: Object.fromEntries(bits4(result).map((v, i) => [i, v ? 'done' : ''])) }), vars({ answer: result })],
     );
+    frames.at(-1).result = result;
     return frames;
   },
 };
@@ -95,6 +97,7 @@ export const bitCountsModK = {
 // Bitmask as a set: maximum product of word lengths (letters a–d → 4-bit masks).
 // ---------------------------------------------------------------------------
 export const letterMaskProduct = {
+  problem: { name: 'Maximum Product of Word Lengths', statement: 'Return the largest length(a) × length(b) over two words that share no letter.', example: '[ab, cd, abc, dd, bd] → 6 (abc × dd)', exampleOutput: 6, questionId: 'maximum-product-of-word-lengths' },
   title: 'Bitmask as a set: words with no common letter',
   description:
     'Maximum product of word lengths: build one letter mask per word with mask |= bitOf(ch), then two words share no letter exactly when (maskA & maskB) === 0. Only letters a–d are kept (4-bit masks), up to 6 words of ≤ 4 letters.',
@@ -199,6 +202,7 @@ export const letterMaskProduct = {
       `Best product = ${best}${bestPair ? ` ("${ws[bestPair[0]]}" × "${ws[bestPair[1]]}")` : ' (no disjoint pair with letters)'}. Masks cost O(total letters); each pair test is one AND, so pairs cost O(n²) instead of O(n² · L).`,
       [table(bestPair ? { [bestPair[0]]: 'done', [bestPair[1]]: 'done' } : {}), vars({ answer: best })],
     );
+    frames.at(-1).result = best;
     return frames;
   },
 };
@@ -226,6 +230,7 @@ function triePanel(root, states, label) {
 }
 
 export const trieMaxXorWithLimit = {
+  problem: { name: 'Maximum XOR With an Element From Array', statement: 'For each query [x, m], return the largest x XOR v over values v ≤ m, or -1.', example: 'nums [0, 1, 2, 3, 4], queries [3,1] [1,3] [5,6] → [3, 3, 7]', exampleOutput: [3, 3, 7], questionId: 'maximum-xor-with-an-element-from-array' },
   title: 'Binary trie: maximum XOR with an element ≤ m',
   description:
     'Queries [x, m]: max x ^ nums[j] over nums[j] ≤ m, or −1. Sort nums and answer queries in order of m, inserting every num ≤ m into the bit trie before walking it (prefer the opposite bit). nums clamped to 6 integers in 0..7 (3 bits), up to 4 queries with x, m in 0..7.',
@@ -359,6 +364,7 @@ export const trieMaxXorWithLimit = {
       {},
       { answer: `[${ans.join(', ')}]` },
     );
+    frames.at(-1).result = ans;
     return frames;
   },
 };

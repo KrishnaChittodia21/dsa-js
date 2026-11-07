@@ -15,6 +15,7 @@ const attach = (frames, p) => {
 };
 
 export const dpCoinChange = {
+  problem: { name: 'Coin Change', statement: 'Given coin values and an amount, return the fewest coins that add up to the amount (-1 if impossible). Coins can be reused.', example: 'coins = [1, 3, 4], amount = 6 → 2 (3 + 3)', exampleOutput: 2, questionId: 'coin-change' },
   title: 'DP: coin change (fewest coins)',
   description: 'dp[a] = fewest coins to make amount a = 1 + min over coins of dp[a − coin].',
   defaultInput: { coins: [1, 3, 4], amount: 6 },
@@ -46,12 +47,24 @@ export const dpCoinChange = {
         attach(frames, pick(`coins = [${coins.join(', ')}]. dp[${a}] = 1 + min over coins of dp[${a} − coin]. What is dp[${a}]?`, fin ? v : '∞', fin ? [v + 1, v > 1 ? v - 1 : v + 2, '∞'] : [1, 2, 3], a / 2));
       }
     }
-    frames.push({ note: `Answer dp[${amount}] = ${dp[amount] === Infinity ? -1 : dp[amount]}. Greedy (largest coin first) would pick 4+1+1 = 3 coins for 6; DP finds 3+3 = 2. O(amount × coins).`, panels: [arr(fmt(), { label: 'dp[amount]', highlights: { [amount]: 'done' }, showIndices: true })] });
+    // Greedy (largest coin first) on the same input, to contrast with DP.
+    const picked = [];
+    let left = amount;
+    for (const c of [...coins].sort((x, y) => y - x)) while (c > 0 && c <= left) { picked.push(c); left -= c; }
+    const best = dp[amount] === Infinity ? -1 : dp[amount];
+    const greedy = amount === 0 ? '' : left > 0
+      ? ` Greedy (largest coin first) gets stuck with ${left} left over; DP ${best === -1 ? 'confirms it is impossible' : `finds ${best}`}.`
+      : picked.length > best
+        ? ` Greedy (largest coin first) would pick ${picked.join('+')} = ${picked.length} coins; DP finds ${best}.`
+        : ` Greedy (largest coin first) also finds ${picked.length} here, but it can fail on other inputs.`;
+    frames.push({ note: `Answer dp[${amount}] = ${best}.${greedy} O(amount × coins).`, panels: [arr(fmt(), { label: 'dp[amount]', highlights: { [amount]: 'done' }, showIndices: true })] });
+    frames.at(-1).result = dp[amount] === Infinity ? -1 : dp[amount];
     return frames;
   },
 };
 
 export const dpLcs = {
+  problem: { name: 'Longest Common Subsequence', statement: 'Return the length of the longest sequence of characters that appears in both strings in the same order (not necessarily adjacent).', example: 'a = "ABCBDAB", b = "BDCAB" → 4 (e.g. "BCAB")', exampleOutput: 4, questionId: 'longest-common-subsequence' },
   title: 'DP: longest common subsequence',
   description: 'dp[i][j] = LCS of a[0..i) and b[0..j). Match → diagonal + 1, else max(up, left).',
   defaultInput: { a: 'ABCBDAB', b: 'BDCAB' },
@@ -99,11 +112,13 @@ export const dpLcs = {
         }
       }
     frames.push({ note: `LCS length = dp[${m}][${n}] = ${dp[m][n]}. Table size (m+1)×(n+1) → O(m·n) time and space.`, panels: [table(shown, baseStates().map((r, i) => r.map((s, j) => (i === m && j === n ? 'done' : s))), rowLabels, colLabels)] });
+    frames.at(-1).result = dp[m][n];
     return frames;
   },
 };
 
 export const dpKnapsack = {
+  problem: { name: '0/1 knapsack', statement: 'Each item has a weight and a value and can be taken at most once. Find the largest total value whose weight fits the capacity.', example: 'weights [1, 3, 4, 5], values [1, 4, 5, 7], capacity 7 → 9 (weights 3 + 4)', exampleOutput: 9 },
   title: 'DP: 0/1 knapsack',
   description: 'dp[i][c] = best value using the first i items with capacity c: skip item i or take it once.',
   defaultInput: { weights: [1, 3, 4, 5], values: [1, 4, 5, 7], capacity: 7 },
@@ -155,6 +170,7 @@ export const dpKnapsack = {
       }
     }
     frames.push({ note: `Best value = dp[${n}][${capacity}] = ${dp[n][capacity]}. Each item is used at most once because "take" reads from the PREVIOUS row. O(n × capacity).`, panels: [table(shown, base(), rowLabels, colLabels)] });
+    frames.at(-1).result = dp[n][capacity];
     return frames;
   },
 };

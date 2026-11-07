@@ -156,7 +156,7 @@ function ArtSave() {
   );
 }
 
-/** step 4 (new in M11): the languages and Shorts — one language chip leading to a Day N chip */
+/** step 4 (new in M11): the languages and Shorts — one language chip leading to a Shorts chip */
 function ArtNew() {
   return (
     <div className="wt-save">
@@ -169,7 +169,7 @@ function ArtNew() {
       </span>
       <span className="wt-file">
         <Clapperboard />
-        Day N
+        All open
       </span>
     </div>
   );
@@ -405,7 +405,7 @@ export default function WelcomeTour({ onClose }) {
                     <li>
                       <Clapperboard aria-hidden="true" />
                       <span>
-                        <b>Shorts</b>: a two-minute story per pattern ending in one question. One more opens each day you study; the dashboard shows
+                        <b>Shorts</b>: a two-minute story per pattern ending in one question. All are open; the dashboard shows
                         your Short of the day.
                       </span>
                     </li>

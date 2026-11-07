@@ -56,23 +56,39 @@ function javaCompiler() {
 }
 
 // ---------- C++: our clang worker ----------
-let cpp;
+// The time limit starts once the toolchain is loaded (the worker says 'compiling'): the first download can be slow.
+// On timeout the worker is terminated (clang can't be interrupted) and the next compile starts a fresh one.
+const CPP_COMPILE_MS = 60000;
+let cppWorker;
+let cppSeq = 0;
+let cppQueue = Promise.resolve();
 function cppCompile(src, onStatus) {
-  cpp ||= { worker: new Worker(new URL('./cppCompiler.js', import.meta.url), { type: 'module' }), seq: 0, queue: Promise.resolve() };
-  const c = cpp;
   const job = () =>
     new Promise((resolve) => {
-      const id = ++c.seq;
+      const w = (cppWorker ||= new Worker(new URL('./cppCompiler.js', import.meta.url), { type: 'module' }));
+      const id = ++cppSeq;
       let shown = -1;
-      c.worker.onmessage = (e) => {
+      let timer;
+      w.onmessage = (e) => {
         if (e.data.type === 'progress') {
           const pct = Math.floor((100 * e.data.done) / (e.data.total || 1));
           if (pct !== shown) onStatus?.(pct >= 100 ? 'Compiling…' : `Downloading the C++ compiler (about 23 MB, once)… ${(shown = pct)}%`);
-        } else if (e.data.id === id) resolve(e.data);
+        } else if (e.data.id !== id) {
+          // a reply for an earlier job
+        } else if (e.data.type === 'compiling') {
+          timer = setTimeout(() => {
+            w.terminate();
+            if (cppWorker === w) cppWorker = null;
+            resolve({ fatal: 'Compiling took too long — simplify templates/recursion or try again.' });
+          }, CPP_COMPILE_MS);
+        } else {
+          clearTimeout(timer);
+          resolve(e.data);
+        }
       };
-      c.worker.postMessage({ id, src, flags: CPP_BROWSER_FLAGS, url: CLANG_URL });
+      w.postMessage({ id, src, flags: CPP_BROWSER_FLAGS, url: CLANG_URL });
     });
-  return (c.queue = c.queue.then(job, job));
+  return (cppQueue = cppQueue.then(job, job));
 }
 
 // ---------- running ----------

@@ -18,6 +18,7 @@ const toInts = (xs) => (Array.isArray(xs) ? xs : []).map((x) => Math.floor(Numbe
 
 // ───────────────────────────── 1. Hash map with chaining ─────────────────────────────
 export const hashMap = {
+  problem: { name: 'Hash table with chaining', statement: 'Insert string keys into a fixed number of buckets (colliding keys share a chain), then look one key up.', example: 'keys cat, dog, bird, fish, ant, cow in 5 buckets, find "bird" → found in bucket 2 (second in its chain, after "cat")', exampleOutput: 2 },
   title: 'Hash map: buckets and chaining',
   description: 'hash(key) = sum of char codes % buckets picks a bucket; colliding keys share a chain. Then one lookup walks its chain. Up to 10 keys, 1–10 buckets.',
   defaultInput: { keys: ['cat', 'dog', 'bird', 'fish', 'ant', 'cow'], buckets: 5, find: 'bird' },
@@ -118,12 +119,14 @@ export const hashMap = {
       note: `Load factor = ${n}/${B} = ${(n / B).toFixed(2)}. With short chains insert/lookup are O(1) on average; if every key collided, one chain of n keys makes it O(n). That is why JS Map (like Java's HashMap) grows its bucket array and rehashes when the load factor gets high — chains stay short.`,
       panels: [view(), vars({ entries: n, buckets: B, loadFactor: (n / B).toFixed(2), longestChain: longest })],
     });
+    frames.at(-1).result = found >= 0 ? b : -1;
     return frames;
   },
 };
 
 // ───────────────────────────── 2. Frequency map / anagram ─────────────────────────────
 export const frequencyMap = {
+  problem: { name: 'Valid Anagram', statement: 'Decide whether t uses exactly the same letters as s, each the same number of times.', example: 's = "anagram", t = "nagaram" → true', exampleOutput: true, questionId: 'valid-anagram' },
   title: 'Frequency map: is t an anagram of s?',
   description: 'Count each character of s in a Map, then walk t decrementing; a count that would drop below 0 means not an anagram. Strings clamped to 16 chars.',
   defaultInput: { s: 'anagram', t: 'nagaram' },
@@ -159,6 +162,7 @@ export const frequencyMap = {
     });
     if (a.length !== b.length) {
       frames.push({ note: `Lengths differ (${a.length} vs ${b.length}) → t cannot be an anagram of s. We can answer false without walking t. O(n).`, panels: panels(null, null, {}, { anagram: false }) });
+      frames.at(-1).result = false;
       return frames;
     }
     frames.push({ note: `Both have length ${a.length}. Now walk t: every character must "spend" one count from the map.`, panels: panels(null, null, {}, { phase: 'decrement' }) });
@@ -173,6 +177,7 @@ export const frequencyMap = {
           panels: panels(null, j, { [c]: 'bad', __t: 'bad' }, { char: c, anagram: false }),
           predict,
         });
+        frames.at(-1).result = false;
         return frames;
       }
       map.set(c, cnt - 1);
@@ -182,12 +187,14 @@ export const frequencyMap = {
       note: `Every decrement succeeded and lengths match, so all counts are 0 → t IS an anagram of s. O(n) time, O(k) space for k distinct characters.`,
       panels: panels(null, null, {}, { anagram: true }),
     });
+    frames.at(-1).result = true;
     return frames;
   },
 };
 
 // ───────────────────────────── 3. Recursion tree (naive fib) ─────────────────────────────
 export const recursionTree = {
+  problem: { name: 'Fibonacci Number (naive recursion)', statement: 'Compute fib(n), where fib(0) = 0, fib(1) = 1 and fib(n) = fib(n − 1) + fib(n − 2), by calling the recursion directly with no memo.', example: 'n = 5 → 5, using 15 calls', exampleOutput: 5, questionId: 'fibonacci-number' },
   title: 'Recursion tree: naive fib(n)',
   description: 'Each call becomes a node; the call stack shows frames being pushed and popped. Red nodes recompute work already done. n clamped to 0–6.',
   defaultInput: { n: 5 },
@@ -284,12 +291,14 @@ export const recursionTree = {
       note: `fib(${n}) = ${ans} using ${calls} calls. ${repeats.length ? repeats.join(', ') + '. ' : ''}With memoization each of fib(0..${n}) is computed once → ${n + 1} computations. Naive: O(2ⁿ) time, memo: O(n). Stack depth is O(n) either way.`,
       panels: [frames[frames.length - 1].panels[0], stackPanel([], 'call stack'), vars({ answer: ans, naiveCalls: calls, memoizedCalls: n + 1, ...countVars })],
     });
+    frames.at(-1).result = ans;
     return frames;
   },
 };
 
 // ───────────────────────────── 4. Quick sort (Lomuto) ─────────────────────────────
 export const quickSort = {
+  problem: { name: 'Sort an Array (quick sort)', statement: 'Sort an array of numbers in ascending order.', example: '[7, 2, 9, 4, 1, 8, 3, 6] → [1, 2, 3, 4, 6, 7, 8, 9]', exampleOutput: [1, 2, 3, 4, 6, 7, 8, 9], questionId: 'sort-an-array' },
   title: 'Quick sort (Lomuto partition)',
   description: 'Pivot = last element. j scans the range; values < pivot are swapped to the boundary i. The pivot then lands at i, its final spot. Clamped to 10 items.',
   defaultInput: { nums: [7, 2, 9, 4, 1, 8, 3, 6] },
@@ -350,12 +359,14 @@ export const quickSort = {
     };
     qs(0, a.length - 1);
     view(null, null, [], {}, `Sorted: [${a.join(', ')}] with ${comparisons} comparisons. Average O(n log n): each level does O(n) work and a decent pivot halves the range. Worst case O(n²) when the pivot is always the min/max (e.g. already-sorted input). In place, not stable.`);
+    frames.at(-1).result = a;
     return frames;
   },
 };
 
 // ───────────────────────────── 5. Counting sort ─────────────────────────────
 export const countingSort = {
+  problem: { name: 'Sort an Array (counting sort)', statement: 'Sort small non-negative integers without comparing them.', example: '[4, 2, 2, 8, 3, 3, 1] → [1, 2, 2, 3, 3, 4, 8]', exampleOutput: [1, 2, 2, 3, 3, 4, 8], questionId: 'sort-an-array' },
   title: 'Counting sort',
   description: 'Count each value, turn counts into starting positions (prefix sums), then place values left to right — stable, no comparisons. Values clamped to 0–20, length to 12.',
   defaultInput: { nums: [4, 2, 2, 8, 3, 3, 1] },
@@ -410,12 +421,14 @@ export const countingSort = {
       });
     });
     frames.push({ note: `Sorted: [${out.join(', ')}]. O(n + k) time and O(n + k) space, k = max value (${K}). It beats O(n log n) because it never compares — but only works for small integer keys.`, panels: panels({}, {}, {}, Object.fromEntries(out.map((_, i) => [i, 'done']))) });
+    frames.at(-1).result = out;
     return frames;
   },
 };
 
 // ───────────────────────────── 6. Cyclic sort ─────────────────────────────
 export const cyclicSort = {
+  problem: { name: 'Find missing and duplicate numbers', statement: 'An array of length n holds values from 1..n, some repeated. Find which values are missing and which appear twice.', example: '[4, 3, 2, 7, 8, 2, 3, 1] → [missing, duplicates] = [[5, 6], [3, 2]]', exampleOutput: [[5, 6], [3, 2]], questionId: 'find-all-numbers-disappeared-in-an-array' },
   title: 'Cyclic sort: find missing & duplicates',
   description: 'Values are 1..n, so value v belongs at index v−1. Swap each value home, then any index i not holding i+1 reveals a missing number and a duplicate. Clamped to 10 items.',
   defaultInput: { nums: [4, 3, 2, 7, 8, 2, 3, 1] },
@@ -476,12 +489,14 @@ export const cyclicSort = {
       null,
       { missing: `[${missing.join(', ')}]`, duplicates: `[${[...dups].join(', ')}]` },
     );
+    frames.at(-1).result = [missing, [...dups]];
     return frames;
   },
 };
 
 // ───────────────────────────── 7. Sweep line (meeting rooms II) ─────────────────────────────
 export const sweepLine = {
+  problem: { name: 'Meeting Rooms II', statement: 'Given meeting times [start, end), return the smallest number of rooms needed so no two meetings in one room overlap.', example: '[[0,30], [5,10], [10,20], [15,25]] → 3', exampleOutput: 3, questionId: 'meeting-rooms-ii' },
   title: 'Sweep line: meeting rooms II',
   description: 'Turn each meeting [start, end) into a +1 and a −1 event, sort them (ends first on ties), and sweep: the peak running total is the number of rooms. Up to 8 meetings; zero-length ones are ignored.',
   defaultInput: { intervals: [[0, 30], [5, 10], [10, 20], [15, 25]] }, // 8 events: fits a phone
@@ -544,12 +559,14 @@ export const sweepLine = {
       note: `Answer: ${best} room(s). Sorting the 2n events costs O(n log n); the sweep itself is O(n).`,
       panels: [ivPanel(), arr(sorted.map(fmt), { label: 'events (sorted)' }), vars({ maxRooms: best })],
     });
+    frames.at(-1).result = best;
     return frames;
   },
 };
 
 // ───────────────────────────── 8. LIS via patience sorting ─────────────────────────────
 export const lisPatience = {
+  problem: { name: 'Longest Increasing Subsequence', statement: 'Return the length of the longest strictly increasing subsequence.', example: '[10, 9, 2, 5, 3, 7, 101, 18] → 4 (e.g. 2, 3, 7, 18)', exampleOutput: 4, questionId: 'longest-increasing-subsequence' },
   title: 'LIS in O(n log n) (patience / tails)',
   description: 'tails[k] = smallest possible last value of an increasing subsequence of length k+1. Binary-search each number into tails: append it or replace the first tail ≥ it. Clamped to 12 numbers.',
   defaultInput: { nums: [10, 9, 2, 5, 3, 7, 101, 18] },
@@ -604,6 +621,7 @@ export const lisPatience = {
       note: `LIS length = ${tails.length}. Careful: tails [${tails.join(', ')}] need not be a real subsequence — only its length is guaranteed. n numbers × O(log n) search = O(n log n), vs O(n²) for the simple DP.`,
       panels: [arr(a, { label: 'nums' }), arr([...tails], { label: 'tails', highlights: Object.fromEntries(tails.map((_, q) => [q, 'done'])) }), vars({ length: tails.length })],
     });
+    frames.at(-1).result = tails.length;
     return frames;
   },
 };

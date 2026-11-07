@@ -30,6 +30,7 @@ const numList = (nums, max) => (Array.isArray(nums) ? nums : []).map((x) => toIn
 
 // ───────────────────────────── KMP ─────────────────────────────
 export const kmp = {
+  problem: { name: 'Find the first occurrence of a pattern (KMP)', statement: 'Return the first index where the pattern appears in the text, or -1.', example: 'text = "ABABDABACDABABCABAB", pattern = "ABABCABAB" → 10', exampleOutput: 10, questionId: 'find-the-index-of-the-first-occurrence-in-a-string' },
   title: 'KMP string search',
   description: 'Build the LPS table (longest proper prefix that is also a suffix), then scan the text without ever moving i backwards. Text clamped to 24 chars, pattern to 10.',
   defaultInput: { text: 'ABABDABACDABABCABAB', pattern: 'ABABCABAB' },
@@ -53,7 +54,7 @@ export const kmp = {
     const frames = [];
     if (!m) {
       frames.push({ note: 'The pattern is empty.', panels: [arr(t, { label: 'text' })] });
-      frames.push({ note: 'An empty pattern trivially matches at index 0 — there is nothing to search for.', panels: [arr(t, { label: 'text' })] });
+      frames.push({ note: 'An empty pattern trivially matches at index 0 — there is nothing to search for.', panels: [arr(t, { label: 'text' })], result: 0 });
       return frames;
     }
     // Phase 1: LPS
@@ -122,6 +123,7 @@ export const kmp = {
     if (!n || m > n) {
       p2(`Phase 2 — the text ${n ? `(length ${n}) is shorter than the pattern (length ${m})` : 'is empty'}, so there can be no match.`);
       p2('No occurrences. KMP would be O(n + m) in general.');
+      frames.at(-1).result = -1;
       return frames;
     }
     p2('Phase 2 — scan the text with i and the pattern with j. i never moves backwards; on a mismatch only j falls back using lps.');
@@ -152,6 +154,7 @@ export const kmp = {
       }
     }
     p2(matches.length ? `Done: pattern found at index ${matches.join(', ')}. Total O(n + m): i only moves forward and j falls back at most as often as it advanced.` : `Done: no occurrence. Total O(n + m): i only moves forward and j falls back at most as often as it advanced.`);
+    frames.at(-1).result = matches.length ? matches[0] : -1;
     return frames;
   },
 };
@@ -166,6 +169,7 @@ const charVal = (c) => {
 const mod = (x) => ((x % RK_M) + RK_M) % RK_M;
 
 export const rollingHash = {
+  problem: { name: 'Find a pattern with Rabin–Karp', statement: 'Return every index where the pattern appears in the text, comparing window hashes first.', example: 'text = "catchescat", pattern = "cat" → [0, 7]', exampleOutput: [0, 7], questionId: 'find-the-index-of-the-first-occurrence-in-a-string' },
   title: 'Rabin–Karp rolling hash',
   description: `Hash every window in O(1) by removing the left char, shifting, and adding the right char (base ${RK_B}, mod ${RK_M}; a=1 … z=26). Equal hashes are verified char by char. Text clamped to 24, pattern to 8.`,
   defaultInput: { text: 'catchescat', pattern: 'cat' },
@@ -210,6 +214,7 @@ export const rollingHash = {
     if (!m || !n || m > n) {
       snap(`Letters become numbers (a=1 … z=26); a string's hash is Σ value × ${RK_B}^power, mod ${RK_M}.`);
       snap(!m ? 'The pattern is empty — nothing to search for.' : !n ? 'The text is empty — no window to hash, no match.' : `The pattern (length ${m}) is longer than the text (length ${n}) — no window fits, no match.`);
+      frames.at(-1).result = [];
       return frames;
     }
     snap(`Letters become numbers (a=1 … z=26). hash(s) = (s₀·${RK_B}^(m−1) + … + s_(m−1)) mod ${RK_M}. Small numbers keep it readable; real code uses a big prime.`);
@@ -268,6 +273,7 @@ export const rollingHash = {
     }
     s = n - m;
     snap(`Done. Matches at [${matches.join(', ') || 'none'}]${spurious.length ? `, spurious hits at [${spurious.join(', ')}]` : ''}. Each slide is O(1) → O(n + m) expected; many collisions could push it to O(n·m).`);
+    frames.at(-1).result = matches;
     return frames;
   },
 };
@@ -276,6 +282,7 @@ export const rollingHash = {
 const bitsOf = (v, W) => Array.from({ length: W }, (_, idx) => (v >>> (W - 1 - idx)) & 1);
 
 export const bitOps = {
+  problem: { name: 'Bit manipulation basics', statement: 'Check, set, clear and toggle bit k of x, then count how many bits of x are 1.', example: 'x = 44 (101100), k = 1 → bit is 0; set gives 46; 3 set bits', exampleOutput: 3, questionId: 'number-of-1-bits' },
   title: 'Bit manipulation basics',
   description: 'Check / set / clear / toggle bit k with a mask, then count set bits with x & (x − 1). x clamped to 0..65535 (8 or 16 bits shown).',
   defaultInput: { x: 44, k: 1 },
@@ -331,12 +338,14 @@ export const bitOps = {
       count++;
     }
     push(`y = 0 → x = ${x} has ${count} set bit${count === 1 ? '' : 's'}. Each mask op is O(1); counting takes O(number of set bits), not O(${W}).`, [row('x', x, Object.fromEntries(bitsOf(x, W).map((b, idx) => [idx, b ? 'done' : ''])), false), vars({ popcount: count })]);
+    frames.at(-1).result = count;
     return frames;
   },
 };
 
 // ───────────────────────────── XOR single number ─────────────────────────────
 export const xorSingle = {
+  problem: { name: 'Single Number', statement: 'Every number appears twice except one. Find the one that appears once.', example: '[4, 1, 2, 1, 2] → 4', exampleOutput: 4, questionId: 'single-number' },
   title: 'XOR: find the single number',
   description: 'Every number appears twice except one. a ^ a = 0 and a ^ 0 = a, so XOR-ing everything leaves the loner. Non-negative values ≤ 65535, first 12 kept.',
   defaultInput: { nums: [4, 1, 2, 1, 2] },
@@ -354,7 +363,7 @@ export const xorSingle = {
     const numsPanel = (hl = {}) => arr(a, { label: 'nums', highlights: hl });
     frames.push({ note: 'acc starts at 0. XOR rules: a ^ a = 0, a ^ 0 = a, and order does not matter — so pairs cancel wherever they are.', panels: [numsPanel(), positions, bits('acc', acc), vars({ acc })] });
     if (!a.length) {
-      frames.push({ note: 'No numbers → acc stays 0. O(n) time, O(1) space.', panels: [numsPanel(), positions, bits('acc', acc), vars({ answer: 0 })] });
+      frames.push({ note: 'No numbers → acc stays 0. O(n) time, O(1) space.', panels: [numsPanel(), positions, bits('acc', acc), vars({ answer: 0 })], result: 0 });
       return frames;
     }
     a.forEach((v, i) => {
@@ -377,13 +386,14 @@ export const xorSingle = {
     });
     const odd = [...seen.entries()].filter(([, c]) => c % 2 === 1).map(([v]) => v);
     const verdict = odd.length === 1 ? `${acc} is the number without a partner.` : odd.length === 0 ? 'Every value appeared an even number of times, so everything cancelled.' : `More than one value appears an odd number of times (${odd.join(', ')}), so acc is their XOR, not a single number.`;
-    frames.push({ note: `Final acc = ${acc}. ${verdict} O(n) time, O(1) extra space — no hash map needed.`, panels: [numsPanel(), positions, bits('answer', acc, Object.fromEntries(bitsOf(acc, W).map((b, idx) => [idx, b ? 'done' : '']))), vars({ answer: acc })] });
+    frames.push({ note: `Final acc = ${acc}. ${verdict} O(n) time, O(1) extra space — no hash map needed.`, panels: [numsPanel(), positions, bits('answer', acc, Object.fromEntries(bitsOf(acc, W).map((b, idx) => [idx, b ? 'done' : '']))), vars({ answer: acc })], result: acc });
     return frames;
   },
 };
 
 // ───────────────────────────── Segment tree ─────────────────────────────
 export const segmentTree = {
+  problem: { name: 'Range Sum Query – Mutable', statement: 'Answer sums of nums[l..r] while single elements can also be updated.', example: 'nums = [5, 8, 6, 3, 2, 7, 2, 6]: sum of [2..6] = 20; then nums[3] = 10 updates one root-to-leaf path', exampleOutput: 20, questionId: 'range-sum-query-mutable' },
   title: 'Segment tree: range sum + point update',
   description: 'Each node stores the sum of a range. A query takes whole nodes that fit, skips nodes outside, and splits the rest; an update fixes one root-to-leaf path. First 8 numbers kept.',
   defaultInput: { nums: [5, 8, 6, 3, 2, 7, 2, 6], l: 2, r: 6, updateIndex: 3, updateValue: 10 },
@@ -407,7 +417,7 @@ export const segmentTree = {
     const frames = [];
     if (!n) {
       frames.push({ note: 'No numbers → the segment tree is empty.', panels: [arr([], { label: 'nums' })] });
-      frames.push({ note: 'Every query on an empty array returns 0. Build O(n), query/update O(log n).', panels: [arr([], { label: 'nums' })] });
+      frames.push({ note: 'Every query on an empty array returns 0. Build O(n), query/update O(log n).', panels: [arr([], { label: 'nums' })], result: 0 });
       return frames;
     }
     l = clamp(toInt(l), 0, n - 1);
@@ -511,6 +521,7 @@ export const segmentTree = {
       draw(`[${nd.lo}..${nd.hi}] = ${nd.left.sum} + ${nd.right.sum} = ${nd.sum}${k === 0 ? ' — the root is fixed.' : '.'}`, { ...Object.fromEntries(path.slice(0, k).map((p) => [p.id, 'visited'])), ...fixed, [nd.id]: 'active' }, { index: u, delta }, { highlights: { [u]: 'done' } }, predict);
     }
     draw(`Update done: ${path.length + 1} node${path.length ? 's' : ''} changed (the tree height). Build O(n), range query O(log n), point update O(log n).`, fixed, { 'total sum': root.sum });
+    frames.at(-1).result = total;
     return frames;
   },
 };
@@ -518,6 +529,7 @@ export const segmentTree = {
 // ───────────────────────────── Fenwick tree ─────────────────────────────
 const lowbit = (i) => i & -i;
 export const fenwickTree = {
+  problem: { name: 'Prefix sums with updates (Fenwick tree)', statement: 'Answer prefix sums (1-indexed) of an array while elements can also be increased or decreased.', example: 'nums = [3, 2, -1, 6, 5, 4, -3, 3]: sum of the first 7 = 16; add 2 at position 3 → 18', exampleOutput: 18, questionId: 'range-sum-query-mutable' },
   title: 'Fenwick tree (Binary Indexed Tree)',
   description: 'tree[i] stores the sum of the lowbit(i) = i & −i elements ending at position i (1-indexed). Updates climb with i += i & −i, prefix queries descend with i −= i & −i. First 12 numbers kept.',
   defaultInput: { nums: [3, 2, -1, 6, 5, 4, -3, 3], queryIndex: 7, updateIndex: 3, delta: 2 },
@@ -540,7 +552,7 @@ export const fenwickTree = {
     const bin = (i) => i.toString(2).padStart(Math.max(1, n.toString(2).length), '0');
     if (!n) {
       frames.push({ note: 'No numbers → the BIT is empty.', panels: [arr([], { label: 'tree' })] });
-      frames.push({ note: 'Every prefix sum is 0. Query and update are O(log n) in general.', panels: [arr([], { label: 'tree' })] });
+      frames.push({ note: 'Every prefix sum is 0. Query and update are O(log n) in general.', panels: [arr([], { label: 'tree' })], result: 0 });
       return frames;
     }
     const qi = clamp(toInt(queryIndex), 1, n);
@@ -619,6 +631,7 @@ export const fenwickTree = {
     let after = 0;
     for (let k = qi; k > 0; k -= lowbit(k)) after += tree[k];
     draw(`prefix(${qi}) is now ${after} (${ui <= qi ? `was ${before}, +${d} because position ${ui} ≤ ${qi}` : `unchanged: position ${ui} > ${qi}`}). Both operations are O(log n) with just an array — no explicit tree.`, { tHl: touched, extra: { [`prefix(${qi})`]: after } });
+    frames.at(-1).result = after;
     return frames;
   },
 };
@@ -649,6 +662,7 @@ const inorder = (nd, out = []) => {
 };
 
 export const bstOperations = {
+  problem: { name: 'Insert and delete in a BST', statement: 'Build a binary search tree by inserting values, then delete one value while keeping the BST order.', example: 'insert 50, 30, 70, 20, 40, 60, 80, 35, delete 30 → 35 (its in-order successor) takes its place; in-order [20, 35, 40, 50, 60, 70, 80]', exampleOutput: [20, 35, 40, 50, 60, 70, 80], questionId: 'delete-node-in-a-bst' },
   title: 'BST: insert and delete',
   description: 'Insert walks down comparing (smaller → left, bigger → right). Delete handles three cases: leaf, one child, two children (swap in the in-order successor). First 12 values kept; duplicates skipped.',
   defaultInput: { values: [50, 30, 70, 20, 40, 60, 80, 35], remove: 30 },
@@ -718,6 +732,7 @@ export const bstOperations = {
     }
     if (!cur) {
       draw(`Fell off the tree → ${del} is not in the BST, nothing to delete. Search is O(h).`, path, { deleting: del });
+      frames.at(-1).result = inorder(root);
       return frames;
     }
     const kids = (cur.left ? 1 : 0) + (cur.right ? 1 : 0);
@@ -765,12 +780,14 @@ export const bstOperations = {
       draw(`Copy ${sVal} into ${del}'s node, then delete the old ${sVal} node — it has no left child, so that is the easy 0/1-child case${s.right ? ` (${s.right.val} moves up)` : ''}.`, { ...path, [cur.id]: 'done' }, { deleting: del, successor: sVal });
     }
     draw(`Final tree — in-order is still sorted: [${inorder(root).join(', ')}]. Insert, search and delete are O(h): O(log n) if balanced, O(n) for a sorted-input chain.`, {}, { size: inorder(root).length });
+    frames.at(-1).result = inorder(root);
     return frames;
   },
 };
 
 // ───────────────────────────── Backtracking: permutations ─────────────────────────────
 export const backtrackingPermutations = {
+  problem: { name: 'Permutations', statement: 'Given distinct numbers, return every possible ordering.', example: '[1, 2, 3] → 6 permutations', exampleOutput: 6, questionId: 'permutations' },
   title: 'Backtracking: permutations',
   description: 'Pick any unused element (mark used[j]), recurse, then undo the choice. Leaves are the permutations. First 4 items kept (4 items show a compact run).',
   defaultInput: { nums: [1, 2, 3] },
@@ -820,6 +837,7 @@ export const backtrackingPermutations = {
       results.push({ id: root.id, label: '[]' });
       draw(root.id, 'No items: the empty path is already complete.');
       draw(null, 'Exactly 1 permutation (the empty one). 0! = 1.');
+      frames.at(-1).result = 1;
       return frames;
     }
     draw(root.id, `Path is empty. At each level choose any unused item; when the path has ${n} item${n === 1 ? '' : 's'}, record it.`);
@@ -853,12 +871,14 @@ export const backtrackingPermutations = {
     pathIds.length = 0;
     const dup = new Set(a).size !== n;
     draw(null, `All ${results.length} = ${n}! permutations generated${dup ? ' (duplicates appear because the input repeats a value — skip equal siblings to avoid them)' : ''}. n! leaves × O(n) to copy each → O(n · n!).`);
+    frames.at(-1).result = results.length;
     return frames;
   },
 };
 
 // ───────────────────────────── N-Queens ─────────────────────────────
 export const nQueens = {
+  problem: { name: 'N-Queens', statement: 'Place n queens on an n × n board so that no two share a row, column or diagonal.', example: 'n = 4 → first solution: queens in columns [1, 3, 0, 2]', exampleOutput: [1, 3, 0, 2], questionId: 'n-queens' },
   title: 'Backtracking: N-Queens',
   description: 'Place one queen per row so no two share a column or diagonal. Try columns left to right; if a row has no safe column, undo the previous queen. n is clamped to 4..6; stops at the first solution.',
   defaultInput: { n: 4 },
@@ -937,6 +957,7 @@ export const nQueens = {
     };
     solve(0);
     draw(`All ${n} queens placed — first solution: columns [${queens.join(', ')}]. There are ${total} solutions in total for n = ${n}. Pruning attacked cells keeps the search far below the n! worst case.`, { row: undefined });
+    frames.at(-1).result = [...queens];
     return frames;
   },
 };

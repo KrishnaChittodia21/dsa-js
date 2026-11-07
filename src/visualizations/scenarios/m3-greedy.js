@@ -23,6 +23,7 @@ const pairs = (xs, max, lo, hi) =>
 
 // ───────────────────────── 1. Sort, then pick: maximum units on a truck ─────────────────────────
 export const greedyMaxUnits = {
+  problem: { name: 'Maximum Units on a Truck', statement: 'Box types are [count, unitsPerBox]. Load at most truckSize boxes to carry the most units.', example: 'boxTypes [[5,10], [2,5], [4,7], [3,9], [1,8]], truckSize 10 → 92', exampleOutput: 92, questionId: 'maximum-units-on-a-truck' },
   title: 'Sort, then pick: maximum units on a truck',
   description: 'Sort box types by units per box (largest first), then fill the truck one sweep at a time, taking min(boxes, capacity) of each. Up to 6 box types [boxes, unitsPerBox] with values 0–99; truck size 0–50.',
   defaultInput: { boxTypes: [[5, 10], [2, 5], [4, 7], [3, 9], [1, 8]], truckSize: 10 },
@@ -103,6 +104,7 @@ export const greedyMaxUnits = {
     frames.push({
       note: `Maximum units = ${total}${capacity > 0 && cap0 > 0 ? ` (${capacity} slot(s) stay empty — we ran out of boxes)` : ''}. Sorting is O(n log n) and the sweep is O(n), so O(n log n) overall.`,
       panels: [table(sorted, taken, Object.fromEntries(sorted.map((t) => [t.id, taken[t.id] ? 'done' : 'muted'])), 'result'), vars({ capacity, total })],
+      result: total,
     });
     return frames;
   },
@@ -110,6 +112,7 @@ export const greedyMaxUnits = {
 
 // ───────────────────────── 2. Intervals by earliest end: minimum arrows ─────────────────────────
 export const greedyMinArrows = {
+  problem: { name: 'Minimum Number of Arrows to Burst Balloons', statement: 'Each balloon spans [start, end] on a line; an arrow at x bursts every balloon covering x. Return the fewest arrows.', example: '[[10,16], [2,8], [1,6], [7,12], [3,4], [12,15]] → 2', exampleOutput: 2, questionId: 'minimum-number-of-arrows-to-burst-balloons' },
   title: 'Earliest end: minimum arrows to burst balloons',
   description: 'Sort balloons by end. Shoot an arrow at the end of the first balloon not yet burst; every balloon starting at or before that point bursts too (touching counts). Up to 6 balloons, values −99–99; a reversed pair [5, 2] is read as [2, 5].',
   defaultInput: { points: [[10, 16], [2, 8], [1, 6], [7, 12], [3, 4], [12, 15]] },
@@ -173,6 +176,7 @@ export const greedyMinArrows = {
     frames.push({
       note: `Minimum arrows = ${arrows}${shots.length ? ` (at x = ${shots.join(', ')})` : ''}. Same sweep as non-overlapping intervals but with > instead of >=. O(n log n) for the sort, O(n) for the pass.`,
       panels: [panel(sorted, 'all burst', sorted.map(() => 'done')), vars({ arrows })],
+      result: arrows,
     });
     return frames;
   },
@@ -180,6 +184,7 @@ export const greedyMinArrows = {
 
 // ───────────────────────── 3. Heap with regret: minimum refuelling stops ─────────────────────────
 export const greedyRefuelHeap = {
+  problem: { name: 'Minimum Number of Refueling Stops', statement: 'Drive to target starting with startFuel; stations give fuel. Return the fewest stops needed, or -1.', example: 'target 100, startFuel 10, stations [[10,60], [20,30], [30,30], [60,40]] → 2', exampleOutput: 2, questionId: 'minimum-number-of-refueling-stops' },
   title: 'Heap with regret: minimum refuelling stops',
   description: 'Drive as far as the fuel allows, pushing every station passed into a max-heap. When short of the target, "retroactively" stop at the biggest one passed. Up to 6 stations [position, fuel] (sorted by position), values 0–999; target 1–999.',
   defaultInput: { target: 100, startFuel: 10, stations: [[10, 60], [20, 30], [30, 30], [60, 40]] },
@@ -312,6 +317,7 @@ export const greedyRefuelHeap = {
           ? `Answer: −1, the target cannot be reached. Each station is pushed and popped at most once → O(n log n).`
           : `Reach ${fuel} ≥ ${goal} → done. Minimum stops = ${stops}. Each station is pushed and popped at most once → O(n log n).`,
       panels: [...panels(), vars({ fuel, stops, answer: result })],
+      result,
     });
     return frames;
   },
@@ -319,6 +325,7 @@ export const greedyRefuelHeap = {
 
 // ───────────────────────── 4. Local rules & two passes: candy ─────────────────────────
 export const greedyCandyTwoPass = {
+  problem: { name: 'Candy', statement: 'Every child gets at least one candy, and a child with a higher rating than a neighbour gets more than that neighbour. Minimise the total.', example: '[1, 0, 2, 4, 3, 2, 1] → [2, 1, 2, 4, 3, 2, 1] = 15', exampleOutput: 15, questionId: 'candy' },
   title: 'Two passes: candy for neighbours',
   description: 'Everyone starts with 1 candy. Left→right: beat the left neighbour. Right→left: beat the right neighbour with max(), keeping the first rule. Up to 8 ratings, values −99–99.',
   defaultInput: { ratings: [1, 0, 2, 4, 3, 2, 1] },
@@ -381,6 +388,7 @@ export const greedyCandyTwoPass = {
     frames.push({
       note: `Minimum candies = ${total}. Each child holds the smallest amount that satisfies both sides, so no total can be lower. Two O(n) passes, O(n) extra space.`,
       panels: [arr(r, { label: 'ratings' }), arr([...give], { label: 'candies', highlights: Object.fromEntries(give.map((_, k) => [k, 'done'])) }), vars({ total })],
+      result: total,
     });
     return frames;
   },

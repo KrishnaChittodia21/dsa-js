@@ -1,45 +1,208 @@
-/* Shorts (M9): the Shorts list (pages/ShortsPage.jsx), one Short (pages/ShortPage.jsx) and the dashboard's
-   "Short of the day" card (components/guide/ShortOfTheDay.jsx). The player itself is the step lesson (topic.css). */
-.sh-filters { flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
-/* the list: cards with a thumbnail drawn from the Short's first frame (components/guide/ShortThumb.jsx); the style
-   follows system-design-learn's Shorts page */
-.sh-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 12px; }
-.sh-card { position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden; border-radius: var(--r-md, 12px); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
-.sh-card .save-btn { align-self: flex-start; margin: 0 10px 10px; }
-.sh-card-link { flex: 1; display: flex; flex-direction: column; gap: 4px; padding-bottom: 10px; color: var(--text); }
-.sh-card-link:hover { text-decoration: none; }
-.sh-card-title { padding: 6px 14px 0; font-size: 14px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.sh-card-meta { padding: 0 14px; color: var(--muted); font: 500 11.5px/1.3 var(--f-mono); }
-.sh-card.is-done .sh-card-link { opacity: 0.8; }
-.sh-day { position: absolute; top: 10px; left: 10px; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line-2); background: color-mix(in srgb, var(--bg) 80%, transparent); color: var(--text); font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; }
-.sh-locked .sh-card-link { cursor: default; }
-.sh-locked .sh-card-title { color: var(--text-2); }
+/* Shorts (M9): the Shorts list (pages/ShortsPage.jsx), one Short (pages/ShortPage.jsx, the story player) and the
+   dashboard's "Short of the day" card (components/guide/ShortOfTheDay.jsx). Ported from system-design-learn's
+   styles/shorts.css; its --sp-* palette is mapped onto this app's tokens, so light and dark both follow tokens.css. */
+:root {
+  --sp-bg: var(--bg);
+  --sp-ink: var(--text);
+  --sp-ink-2: var(--text-2);
+  --sp-ink-3: var(--muted);
+  --sp-line: var(--line-2);
+  --sp-line-2: var(--line-3);
+  --sp-accent: var(--plasma-t); /* the kicker / question colour (their amber) */
+  --sp-cyan: var(--ice-t);
+  --sp-green: var(--good);
+  --sp-rose: var(--bad);
+  --sp-grad: var(--text-gradient);
+  --sp-frame: var(--surface-3);
+  --sp-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------- the Shorts page (#/shorts) ---------- */
+.sh-page { max-width: 1040px; }
+.sh-head h1 { margin: 6px 0 4px; font: 700 30px/1.15 var(--f-display); letter-spacing: -0.01em; color: var(--text); }
+.sh-head .lead { margin: 0 0 18px; }
+.sh-status { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 8px; font-size: 13px; color: var(--muted); }
+.sh-chips { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.sh-chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.sh-chips .chip { min-height: 34px; padding: 0 14px; font-size: 13px; }
+.sh-chips .chip[aria-checked='true'] {
+  background: var(--primary-fill);
+  color: var(--primary-text);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 6px 16px -8px color-mix(in srgb, var(--accent-solid) 80%, transparent);
+}
+.chip-count { opacity: 0.7; font-size: 11px; }
+.sh-topic { max-width: 100%; }
+.sh-h2 { display: flex; align-items: center; gap: 8px; margin: 22px 0 12px; font: 600 17px/1.3 var(--f-ui); color: var(--text); }
+.sh-n { opacity: 0.7; font: 500 13px var(--f-mono); }
+.sh-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+
+/* a card: the thumbnail on top, number / New badges over its corner, then title and context */
+.sh-card {
+  position: relative; display: flex; flex-direction: column; gap: 6px; height: 100%; padding: 0 0 12px; overflow: hidden;
+  border-radius: 14px; border: 1px solid var(--line-2); background: var(--surface); color: var(--text); text-decoration: none;
+  transition: border-color 0.18s;
+}
+.sh-card:hover { text-decoration: none; border-color: var(--volt-t); }
+.sh-card.seen { opacity: 0.78; }
+.sh-card-title { padding: 0 14px; font: 600 14px/1.35 var(--f-ui); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sh-ctx { margin-top: auto; padding: 0 14px; font-size: 12px; color: var(--muted); }
+.sh-card .sh-tags { position: absolute; top: 12px; left: 12px; display: flex; align-items: center; gap: 6px; }
+.sh-day { padding: 2px 8px; border-radius: 99px; border: 1px solid var(--sp-line-2); background: color-mix(in srgb, var(--sp-bg) 80%, transparent); color: var(--sp-ink); font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; }
+.sh-new { padding: 1px 7px; border-radius: 99px; background: var(--volt); color: var(--on-accent); font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; }
+
+/* ---------- thumbnails: a mini text poster (components/guide/ShortThumb.jsx) ---------- */
 .sh-thumb {
-  position: relative; display: flex; flex-direction: column; justify-content: center; gap: 4px;
-  aspect-ratio: 16 / 10; padding: 38px 14px 14px; overflow: hidden; color: var(--text);
+  position: relative; display: flex; flex-direction: column; justify-content: center; gap: 2px;
+  aspect-ratio: 16 / 10; margin-bottom: 4px; padding: 40px 16px 14px; overflow: hidden; color: var(--sp-ink);
   background:
-    radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--tone) 28%, transparent), transparent 60%),
-    linear-gradient(color-mix(in srgb, var(--line-2) 65%, transparent) 1px, transparent 1px) 0 0 / 18px 18px,
-    linear-gradient(90deg, color-mix(in srgb, var(--line-2) 65%, transparent) 1px, transparent 1px) 0 0 / 18px 18px,
-    var(--sunken);
+    radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--tone) 32%, transparent), transparent 60%),
+    var(--sp-bg);
 }
 .sh-thumb-kicker { padding-right: 40px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--tone); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sh-thumb-main { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 0; }
 .sh-thumb-big { flex: 0 1 auto; min-width: 0; font: 800 17px/1.15 var(--f-display); letter-spacing: -0.01em; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.sh-thumb-glimpse { flex: 1 1 0; max-width: 48%; min-width: 0; height: 56px; overflow: visible; }
-.sh-thumb-play { position: absolute; right: 10px; top: 10px; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: color-mix(in srgb, var(--text) 12%, transparent); transition: transform 0.18s ease, background 0.18s; }
-.sh-thumb-seen { position: absolute; bottom: 8px; left: 10px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 6px; background: color-mix(in srgb, var(--bg) 78%, transparent); color: var(--good); font: 600 11px/1.4 var(--f-ui); }
-.sh-thumb.locked > :not(.sh-thumb-play) { opacity: 0.45; filter: saturate(0.6); }
-@media (hover: hover) and (pointer: fine) {
-  a.sh-card-link:hover .sh-thumb-play { transform: scale(1.08); background: var(--tone); color: var(--on-accent); }
-  a.sh-card-link:hover .sh-card-title { color: var(--plasma-t); }
+.sh-thumb-play {
+  position: absolute; right: 12px; top: 12px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+  background: color-mix(in srgb, var(--sp-ink) 12%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  transition: transform 0.18s var(--sp-ease), background 0.18s, color 0.18s;
+}
+.sh-card:hover .sh-thumb-play { transform: scale(1.08); background: var(--tone); color: var(--on-accent); }
+.sh-thumb-len, .sh-thumb-seen { position: absolute; bottom: 10px; padding: 2px 7px; border-radius: 6px; background: color-mix(in srgb, var(--sp-bg) 78%, transparent); font-size: 11px; }
+.sh-thumb-len { right: 10px; }
+.sh-thumb-seen { left: 10px; display: inline-flex; align-items: center; gap: 4px; color: var(--sp-green); font: 600 11px/1.4 var(--f-ui); }
+
+/* ---------- the player (pages/ShortPage.jsx): a 9:16 story frame ---------- */
+.sp-player {
+  position: relative; display: flex; flex-direction: column; width: min(380px, 100%); aspect-ratio: 9 / 16;
+  max-height: calc(100dvh - var(--status-h, 44px) - 110px); min-height: 600px; margin: 0 auto;
+  border-radius: 34px; overflow: hidden; background: var(--sp-bg); color: var(--sp-ink); border: 1px solid var(--sp-line-2);
+  box-shadow: 0 0 0 8px var(--sp-frame), 0 0 0 9px var(--sp-line), 0 40px 90px -30px color-mix(in srgb, var(--plasma) 35%, transparent);
+  font: 15px/1.55 var(--f-ui); user-select: none; -webkit-user-select: none; touch-action: manipulation;
+}
+.sp-player::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
+  background-image: linear-gradient(var(--sp-line) 1px, transparent 1px), linear-gradient(90deg, var(--sp-line) 1px, transparent 1px);
+  background-size: 28px 28px; -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent); mask-image: radial-gradient(closest-side, #000 30%, transparent);
+}
+.sp-player button { font: inherit; color: inherit; }
+.sp-player :focus-visible { outline: 2px solid var(--sp-cyan); outline-offset: 2px; }
+
+/* progress bars, one per step and one for the end card: filled with a transform so they fill smoothly */
+.sp-bars { position: relative; z-index: 5; flex: none; margin: 12px 12px 0; display: flex; gap: 4px; }
+.sp-bar { flex: 1; height: 3px; border-radius: 3px; background: color-mix(in srgb, var(--sp-ink) 22%, transparent); overflow: hidden; }
+.sp-bar i { display: block; height: 100%; width: 100%; background: var(--sp-ink); transform-origin: left; transform: scaleX(0); will-change: transform; }
+.sp-bar.q { background: color-mix(in srgb, var(--sp-accent) 35%, transparent); }
+.sp-bar.q i { background: var(--sp-accent); }
+
+.sp-top { position: relative; z-index: 5; flex: none; margin: 9px 14px 0; display: flex; align-items: center; gap: 10px; }
+.sp-avatar { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--sp-grad); color: var(--on-accent); font: 800 10px var(--f-mono); }
+.sp-who { min-width: 0; font-size: 13px; line-height: 1.25; }
+.sp-who b { display: block; }
+.sp-who span { display: block; color: var(--sp-ink-3); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sp-pp { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; border: 0; background: color-mix(in srgb, var(--sp-ink) 10%, transparent); cursor: pointer; }
+.sp-pp.sp-speed { width: auto; padding: 0 10px; border-radius: 99px; font: 700 11px var(--f-mono); }
+.sp-save { flex: none; margin-left: auto; }
+/* Save as a round icon button; its "Save" / "Saved" text stays as the accessible name */
+.sp-player .save-btn.btn { width: 32px; height: 32px; min-height: 0; padding: 0; gap: 0; border: 0; border-radius: 50%; font-size: 0; background: color-mix(in srgb, var(--sp-ink) 10%, transparent); box-shadow: none; color: var(--sp-ink); display: grid; place-items: center; }
+.sp-player .save-btn--on { color: var(--sp-accent); }
+
+/* the body takes the space left between the top bar and the caption; the picture zooms down to fit it (Pic) */
+.sp-body { position: relative; z-index: 1; flex: 1 1 0; min-height: 0; }
+.sp-stage {
+  position: absolute; inset: 0; padding: 12px 22px; display: flex; flex-direction: column; justify-content: safe center; gap: 12px;
+  overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; /* a tall frame scrolls instead of being cut */
+}
+.sp-stage::-webkit-scrollbar { display: none; }
+.sp-beat { display: flex; flex-direction: column; gap: 12px; }
+.sp-zone { position: absolute; z-index: 3; top: 0; bottom: 0; width: 22%; border: 0; background: transparent; cursor: pointer; }
+.sp-zone.l { left: 0; }
+.sp-zone.r { right: 0; }
+.sp-zone:focus-visible { outline: none; }
+
+/* kinetic captions */
+.sp-kick { font: 700 10.5px/1.3 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--sp-accent); }
+.sp-head { margin: 0; color: var(--sp-ink); font: 800 23px/1.14 var(--f-display); letter-spacing: -0.02em; }
+.sp-head-q { font-size: 19px; line-height: 1.2; }
+.sp-sub { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--sp-ink-2); }
+.sp-sub b, .sp-cap b, .sp-fb b { color: var(--sp-ink); }
+.sp-player code { font: 500 0.88em/1 var(--f-mono); padding: 1px 5px; border-radius: 5px; background: color-mix(in srgb, var(--sp-ink) 9%, transparent); }
+/* the narration of the current frame, under the picture like a subtitle */
+.sp-cap { position: relative; z-index: 5; flex: none; max-height: 28%; overflow-y: auto; margin: 4px 14px 0; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--sp-ink) 6%, transparent); border-left: 3px solid var(--sp-accent); font-size: 13.5px; line-height: 1.5; color: var(--sp-ink); }
+.sp-cap:empty { display: none; }
+.sp-in { opacity: 0; transform: translateY(14px); animation: sp-up 0.6s var(--sp-ease) forwards; }
+.sp-player .d1 { animation-delay: 0.25s; }
+.sp-player .d2 { animation-delay: 0.6s; }
+.sp-player .d3 { animation-delay: 1.1s; }
+@keyframes sp-up { to { opacity: 1; transform: none; } }
+.sp-player.paused .sp-stage * { animation-play-state: paused !important; }
+
+/* the frame's panels: the Visualizer's own drawing, on the player's floor instead of a card */
+.sp-player .sp-pic { position: relative; z-index: 4; border-radius: 18px; background: color-mix(in srgb, var(--sp-ink) 3%, transparent); box-shadow: inset 0 0 0 1px var(--sp-line); flex: none; }
+.sp-player .sp-pic .viz-stage { min-height: 0; padding: 18px 12px 14px; gap: 14px 20px; overflow-x: hidden; }
+
+/* Your turn */
+.sp-opts { position: relative; z-index: 4; display: grid; gap: 8px; }
+.sp-opt { padding: 11px 14px; border-radius: 14px; border: 1px solid var(--sp-line-2); background: color-mix(in srgb, var(--sp-ink) 5%, transparent); text-align: left; font-weight: 700; font-size: 14px; line-height: 1.35; cursor: pointer; user-select: text; }
+.sp-opt:disabled { cursor: default; }
+.sp-opt.right { border-color: var(--sp-green); background: color-mix(in srgb, var(--sp-green) 14%, transparent); }
+.sp-opt.wrong { border-color: var(--sp-rose); background: color-mix(in srgb, var(--sp-rose) 14%, transparent); animation: sp-shake 0.35s; }
+@keyframes sp-shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.sp-fb { min-height: 42px; margin: 0; font-size: 13.5px; color: var(--sp-ink-2); }
+.sp-fb > b:first-child { color: var(--sp-green); }
+.sp-fb b.no { color: var(--sp-rose); }
+
+/* the end card */
+.sp-end { position: relative; z-index: 4; display: grid; gap: 8px; }
+.sp-end .btn { justify-content: center; }
+.sp-next-title { display: block; font-size: 12px; font-weight: 600; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sp-end .btn-primary > span { min-width: 0; text-align: center; }
+
+/* Back / Next under the frame, so any frame can be read again */
+.sp-foot { position: relative; z-index: 5; flex: none; min-width: 0; padding: 10px 14px 14px; display: grid; gap: 6px; }
+.sp-navrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.sp-nav { padding: 9px 14px; border-radius: 99px; border: 1px solid var(--sp-line-2); background: color-mix(in srgb, var(--sp-ink) 8%, transparent); font-weight: 700; font-size: 13px; cursor: pointer; }
+.sp-nav:disabled { opacity: 0.35; cursor: default; }
+.sp-count { font: 700 11px var(--f-mono); color: var(--sp-ink-3); }
+.sp-paused { color: var(--sp-accent); }
+.sp-title { overflow: hidden; font-weight: 800; font-size: 14px; white-space: nowrap; text-overflow: ellipsis; }
+.sp-tags { overflow: hidden; font: 600 11px var(--f-mono); color: var(--sp-ink-3); white-space: nowrap; text-overflow: ellipsis; }
+.sp-hold { position: absolute; z-index: 6; left: 50%; top: 72px; transform: translateX(-50%); padding: 8px 14px; border-radius: 99px; background: rgba(0, 0, 0, 0.65); color: #f3f6ff; font: 700 12px var(--f-mono); letter-spacing: 0.1em; }
+
+/* short screens: less chrome, so a frame still fits */
+@media (max-height: 760px) {
+  .sp-player { min-height: 540px; }
+  .sp-stage { padding: 10px 18px; gap: 10px; }
+  .sp-head { font-size: 20px; }
+  .sp-head-q { font-size: 17px; }
+  .sp-sub { font-size: 13.5px; line-height: 1.45; }
+  .sp-tags { display: none; }
+  .sp-opt { padding: 9px 13px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .sh-thumb-play { transition: none; }
+  .sp-player *, .sp-player *::before, .sp-player *::after { animation-duration: 0.01ms !important; animation-delay: 0s !important; }
+  .sh-thumb-play, .sh-card { transition: none; }
 }
-.sh-page .display { font-size: clamp(28px, 4.2vw, 46px); } /* titles are sentences: keep them to 2–3 lines */
-.sh-bar { flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
-.sh-nav { margin-top: 16px; }
+
+/* ---------- the Short page ---------- */
+.short-page { display: grid; gap: 18px; justify-items: center; padding-top: 8px; }
+.short-page-top { width: min(380px, 100%); display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13.5px; }
+.short-page-top a { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); text-decoration: none; font-weight: 700; }
+.short-page-top a:hover { color: var(--text); text-decoration: none; }
+.short-missing { max-width: 460px; text-align: center; padding-top: 40px; display: grid; justify-items: center; gap: 10px; }
+.short-missing h1 { margin: 0; font: 700 24px/1.2 var(--f-display); }
+.short-missing p { margin: 0; color: var(--text-2); }
+
+/* phones: the frame takes the full width and the height between the status line and the dock */
+@media (max-width: 640px) {
+  .short-page { gap: 10px; padding-top: 4px; }
+  .short-page .sp-player {
+    width: 100%; min-height: 520px; aspect-ratio: auto;
+    height: calc(100dvh - var(--status-h, 52px) - var(--dock-space, 96px) - 64px);
+    max-height: none; border-radius: 24px; box-shadow: none;
+  }
+}
+
+/* ---------- the dashboard's "Short of the day" ---------- */
 .sh-today { display: flex; align-items: center; gap: 14px; padding: 12px 16px; margin-bottom: 16px; color: var(--text); text-decoration: none; }
 .sh-today > svg { color: var(--ice); flex: none; }
 .sh-today-txt { display: grid; gap: 2px; min-width: 0; }

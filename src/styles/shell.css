@@ -1,6 +1,6 @@
 /* =====================================================================
    shell.css — owner: foundation (wave 1). Scope: AppShell (status line, dock, touch tab dock, More
-   popover/sheet, syllabus drawer, stage background, main scroll area), SiteFooter, page containers.
+   popover/sheet, stage background, main scroll area), SiteFooter, page containers.
 
    LAYOUT VARIABLES (defined in tokens.css section 5, responsive at ≤900px):
      --status-h    fixed top status line height (44px · 52px on touch)
@@ -10,7 +10,7 @@
                    (screens with their own fixed/sticky bottom bars should add it too)
      --topbar-h    legacy alias of --status-h (sticky offsets inside screens)
    The scroll container is `.main` (not the window): sticky children use `top: var(--topbar-h)`.
-   Z-ORDER: status line 40 · dock 45 · touch tabs 61 · More scrim 58 / panel 60 · syllabus 65–66 ·
+   Z-ORDER: status line 40 · dock 45 · touch tabs 61 · More scrim 58 / panel 60 ·
    modals (overlays.css) 70+ · toasts 90.
    ===================================================================== */
 
@@ -362,22 +362,6 @@
   pointer-events: none;
 }
 .dock-sep { width: 1px; align-self: stretch; margin: 6px; background: var(--line-2); }
-/* `?` guide keycap */
-.dock-q {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
-  font: 900 17px/1 var(--f-display);
-  font-stretch: 112%;
-  color: var(--text);
-  background: var(--surface-3);
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.4), inset 0 0 0 1px var(--line-2);
-  transition: box-shadow 0.25s, background 0.25s;
-}
-:root[data-theme='light'] .dock-q { background: #fff; box-shadow: inset 0 -2px 0 rgba(60, 40, 30, 0.14), inset 0 0 0 1px var(--line-2); }
-.dock-guide:hover .dock-q { box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(169, 150, 255, 0.6), 0 0 16px -2px rgba(123, 92, 255, 0.6); }
 .dock-search {
   display: flex;
   align-items: center;
@@ -541,95 +525,6 @@
 :root[data-theme='light'] .more-theme button[aria-pressed='true'] { background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
 .more-theme svg { width: 15px; height: 15px; }
 
-/* ---------- syllabus drawer (the old sidebar's stage → topic tree) ---------- */
-.drawer-scrim { position: fixed; inset: 0; z-index: 65; background: var(--scrim); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
-.syllabus {
-  position: fixed;
-  z-index: 66;
-  top: 10px;
-  bottom: 10px;
-  left: 10px;
-  width: min(370px, calc(100vw - 20px));
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 14px 10px 24px;
-  border-radius: var(--r-lg);
-  background: var(--tile-sheen), var(--tile-bg-2), var(--surface-2);
-  box-shadow: var(--tile-shadow), 0 30px 80px -20px rgba(0, 0, 0, 0.8), inset 0 0 0 1px var(--line-2);
-  scrollbar-width: thin;
-}
-.syllabus-head { display: flex; align-items: center; justify-content: space-between; padding: 0 4px 10px 10px; }
-.syllabus-head .eyebrow { margin: 0; }
-.side-stage + .side-stage { margin-top: 2px; }
-.nav-link {
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 7px 10px;
-  border-radius: var(--r-sm);
-  color: var(--text-2);
-  font-weight: 500;
-  font-size: 0.9rem;
-  line-height: 1.35;
-  text-decoration: none !important;
-  transition: color 0.15s, background-color 0.15s;
-}
-.nav-link:hover { background: var(--surface-3); color: var(--text); }
-.nav-link.active { color: var(--text); font-weight: 600; background: color-mix(in srgb, var(--uv) 14%, var(--surface-2)); box-shadow: inset 2px 0 0 var(--uv); }
-.side-stage-title {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: 0;
-  border-radius: 10px;
-  padding: 8px 10px;
-  margin-top: 4px;
-  font: 650 0.8rem/1.3 var(--f-ui);
-  color: var(--text-2);
-  cursor: pointer;
-  text-align: left;
-}
-.side-stage-title:hover { color: var(--text); background: var(--surface-3); }
-.side-stage-name { display: inline-flex; align-items: center; gap: 9px; min-width: 0; }
-.side-stage-num {
-  display: inline-grid;
-  place-items: center;
-  min-width: 24px;
-  height: 20px;
-  padding: 0 4px;
-  border-radius: 6px;
-  background: var(--surface-3);
-  box-shadow: inset 0 0 0 1px var(--line);
-  color: var(--text-2);
-  font: 600 10px/1 var(--f-mono);
-}
-.side-stage-meta { display: inline-flex; align-items: center; gap: 4px; font: 500 10.5px/1 var(--f-mono); color: var(--muted); }
-.side-stage-list { overflow: hidden; }
-.side-topic { font-size: 0.86rem; padding: 6px 10px 6px 14px; min-height: 36px; }
-.side-topic-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.side-topic-bar { flex: 0 0 40px; display: flex; align-items: center; }
-.side-topic-bar .progress { width: 100%; }
-/* status dots: shape and colour both encode the state (dashed / hollow / half / full) */
-.dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 3px;
-  flex: none;
-  transform: rotate(45deg);
-  border: 1.5px solid var(--line-3);
-}
-.dot-locked { border-style: dashed; }
-.dot-available { border-color: var(--muted); }
-.dot-in-progress { border-color: var(--uv); background: linear-gradient(135deg, var(--uv) 50%, transparent 50%); }
-.dot-completed { border-color: var(--plasma); background: var(--plasma); box-shadow: 0 0 8px color-mix(in srgb, var(--plasma) 60%, transparent); }
-.chev-icon { transition: transform 0.2s ease-out; flex: none; }
-.chev-icon.closed { transform: rotate(-90deg); }
-
 /* ---------- footer ---------- */
 .site-footer {
   margin-top: 48px;
@@ -756,26 +651,16 @@
   }
 }
 
-/* ---------- Back (status line, every page but the dashboard and the tab roots) ---------- */
-.sl .sl-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex: none;
-  height: 28px;
-  margin-right: 10px;
-  padding: 0 12px 0 9px;
-  border-radius: var(--r-pill);
-  color: var(--text);
-  font: 600 12.5px/1 var(--f-ui);
-  background: var(--surface-3);
-  box-shadow: inset 0 0 0 1px var(--line-2);
-}
-.sl .sl-back:hover { box-shadow: inset 0 0 0 1px var(--line-3); }
-.sl .sl-back:focus-visible { outline: 2px solid var(--plasma-t); outline-offset: 2px; }
-@media (max-width: 560px) {
-  .sl .sl-back { padding: 0 8px; margin-right: 6px; }
-  .sl-back-t { display: none; }
+/* ---------- Back (top of the page content, every page but the dashboard and the tab roots) ---------- */
+.page-back { max-width: var(--page-w); width: 100%; margin: 0 auto; padding: 1.25rem 2rem 0; }
+.route:has(> .page-wide) > .page-back, .route:has(> .qp) > .page-back { max-width: 1600px; }
+.route:has(> .page-narrow) > .page-back { max-width: 780px; }
+.page-back + .page { padding-top: 1rem; }
+.page-back + .qp .qp-in { padding-top: 12px; }
+.main-fill .route > .page-back { flex: none; }
+.page-back .btn { height: 30px; padding: 0 12px 0 9px; gap: 6px; font-size: 12.5px; }
+@media (max-width: 900px) {
+  .page-back { padding: 1rem 1rem 0; }
 }
 
 /* ---------- "Guide me": this page's guide, on every page ---------- */

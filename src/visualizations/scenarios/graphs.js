@@ -37,6 +37,7 @@ const adjOf = (n, edges, directed) => {
 };
 
 export const graphBfs = {
+  problem: { name: 'Breadth-first search of a graph', statement: 'Given an undirected graph and a start node, visit every reachable node in order of distance (fewest edges first).', example: 'n = 7, start = 0 → visit order [0, 1, 2, 3, 4, 5, 6]', exampleOutput: [0, 1, 2, 3, 4, 5, 6], questionId: 'find-if-path-exists-in-graph' },
   title: 'Graph BFS',
   description: 'Explore in layers using a queue: all nodes at distance 1, then distance 2, …',
   defaultInput: { n: 7, edges: [[0, 1], [0, 2], [1, 3], [2, 4], [3, 5], [4, 5], [5, 6]], start: 0 },
@@ -79,11 +80,13 @@ export const graphBfs = {
       attach(frames, q);
     }
     snap('Queue empty. Green edges form the BFS tree; distances are shortest paths in an unweighted graph.');
+    frames.at(-1).result = queue;
     return frames;
   },
 };
 
 export const graphDfs = {
+  problem: { name: 'Depth-first search of a graph', statement: 'Given an undirected graph and a start node, visit every reachable node by going as deep as possible before backtracking.', example: 'n = 7, start = 0 → visit order [0, 1, 3, 5, 4, 2, 6]', exampleOutput: [0, 1, 3, 5, 4, 2, 6], questionId: 'find-if-path-exists-in-graph' },
   title: 'Graph DFS',
   description: 'Go as deep as possible, then backtrack. Uses recursion (the call stack).',
   defaultInput: { n: 7, edges: [[0, 1], [0, 2], [1, 3], [2, 4], [3, 5], [4, 5], [5, 6]], start: 0 },
@@ -125,6 +128,7 @@ export const graphDfs = {
     };
     dfs(start);
     snap(`DFS order: ${order.join(' → ')}. Each node and edge processed once → O(V + E).`);
+    frames.at(-1).result = order;
     return frames;
   },
 };
@@ -132,6 +136,7 @@ export const graphDfs = {
 const gridPanel = (grid, states, label) => ({ kind: 'grid', cells: grid, states, label });
 
 export const gridBfs = {
+  problem: { name: 'Multi-source grid BFS (rotting oranges)', statement: 'In a grid, 2 = source, 1 = open cell, 0 = wall. Find the minute the wave from the nearest source reaches each open cell.', example: 'The default grid has sources in two corners → -1: the open cell at the bottom-left is walled off and never reached', exampleOutput: -1, questionId: 'rotting-oranges' },
   title: 'Multi-source BFS on a grid',
   description: 'All sources start in the queue together; the wave spreads one ring per minute.',
   defaultInput: { grid: [[2, 1, 1, 0], [1, 1, 0, 1], [0, 1, 1, 1], [1, 0, 1, 2]] },
@@ -174,11 +179,13 @@ export const gridBfs = {
     }
     const unreached = g.some((row, r) => row.some((v, c) => v === 1 && dist[r][c] === null));
     frames.push({ note: unreached ? 'Some open cells were never reached (walled off).' : `Every reachable cell has its distance to the NEAREST source. O(R·C).`, panels: [gridPanel(cells(), states.map((r) => [...r]))] });
+    frames.at(-1).result = unreached ? -1 : Math.max(0, t - 1);
     return frames;
   },
 };
 
 export const gridDfs = {
+  problem: { name: 'Number of Islands', statement: 'A grid holds 1 (land) and 0 (water). Count the islands: groups of land cells joined up, down, left or right.', example: '[[1,1,0,0,1], [1,0,0,1,1], [0,0,1,0,0], [1,0,1,1,0]] → 4', exampleOutput: 4, questionId: 'number-of-islands' },
   title: 'Grid DFS: counting islands',
   description: 'Scan cells; each unvisited land cell starts a DFS that sinks the whole island.',
   defaultInput: { grid: [[1, 1, 0, 0, 1], [1, 0, 0, 1, 1], [0, 0, 1, 0, 0], [1, 0, 1, 1, 0]] },
@@ -215,11 +222,13 @@ export const gridDfs = {
         if (frames.length > 1 && asks < 3) attach(frames, pick(`The scan finds unvisited land at (${r}, ${c}) → island #${islands}. How many cells will DFS mark for this island?`, size, [size + 1, size - 1 > 0 ? size - 1 : size + 2, size + 2, size + 3], asks++));
       }
     frames.push({ note: `Total islands: ${islands}. Every cell is visited a constant number of times → O(R·C).`, panels: [gridPanel(cells(), states())] });
+    frames.at(-1).result = islands;
     return frames;
   },
 };
 
 export const topoSort = {
+  problem: { name: 'Course Schedule II (topological order)', statement: 'Given n tasks and edges u → v ("u before v"), output an order that respects every edge.', example: 'edges 5→2, 5→0, 4→0, 4→1, 2→3, 3→1 → one valid order: [4, 5, 2, 0, 3, 1]', exampleOutput: [4, 5, 2, 0, 3, 1], questionId: 'course-schedule-ii' },
   title: "Topological sort (Kahn's algorithm)",
   description: 'Repeatedly take a node with in-degree 0 (no remaining prerequisites).',
   defaultInput: { n: 6, edges: [[5, 2], [5, 0], [4, 0], [4, 1], [2, 3], [3, 1]] },
@@ -266,11 +275,13 @@ export const topoSort = {
       attach(frames, tq);
     }
     snap(order.length === n ? `Topological order: ${order.join(' → ')}. Every edge points forward in this order.` : `Only ${order.length}/${n} nodes processed → the rest are stuck in a CYCLE.`);
+    frames.at(-1).result = order.length === n ? order : [];
     return frames;
   },
 };
 
 export const unionFind = {
+  problem: { name: 'Number of connected components', statement: 'Given n nodes and a list of undirected edges, count how many separate groups the nodes form.', example: 'n = 8, edges [0,1] [2,3] [1,3] [4,5] [6,7] [5,7] [0,3] → 2 groups', exampleOutput: 2, questionId: 'number-of-connected-components-in-an-undirected-graph' },
   title: 'Union Find',
   description: 'Each group is a tree; find() walks to the root, union() links roots.',
   defaultInput: { n: 8, edges: [[0, 1], [2, 3], [1, 3], [4, 5], [6, 7], [5, 7], [0, 3]] },
@@ -317,11 +328,13 @@ export const unionFind = {
       frames.push({ note: `union(${a}, ${b}): roots ${ra} and ${rb} differ → attach root ${small} under ${big} (union by rank). Groups = ${groups}.`, panels: [forest({ [a]: 'active', [b]: 'active', [big]: 'done' }), arr([...parent], { label: 'parent' }), vars({ groups })] });
       attach(frames, q);
     });
+    frames.at(-1).result = groups;
     return frames;
   },
 };
 
 export const dijkstra = {
+  problem: { name: 'Shortest paths from one source (Dijkstra)', statement: 'Given an undirected graph with non-negative edge weights, find the shortest distance from the start node to every other node.', example: 'start = 0 → distances [0, 7, 9, 20, 20, 11]', exampleOutput: [0, 7, 9, 20, 20, 11], questionId: 'network-delay-time' },
   title: "Dijkstra's shortest paths",
   description: 'Always finalize the closest unfinished node (min-heap), then relax its edges.',
   defaultInput: { n: 6, edges: [[0, 1, 7], [0, 2, 9], [0, 5, 14], [1, 2, 10], [1, 3, 15], [2, 3, 11], [2, 5, 2], [3, 4, 6], [4, 5, 9]], start: 0 },
@@ -375,6 +388,7 @@ export const dijkstra = {
       attach(frames, dq);
     }
     snap('All nodes finalised. Green edges form the shortest-path tree. O((V + E) log V) with a heap.');
+    frames.at(-1).result = dist.map((d) => (d === Infinity ? -1 : d));
     return frames;
   },
 };

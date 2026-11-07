@@ -15,6 +15,7 @@ const attach = (frames, p) => {
 };
 
 export const twoPointersPairSum = {
+  problem: { name: 'Two Sum II (sorted array)', statement: 'Given a sorted array and a target, find the two numbers that add up to the target.', example: 'nums = [1, 2, 4, 6, 8, 9, 14, 15], target = 13 → 4 + 9, indices [2, 5]', exampleOutput: [2, 5], questionId: 'two-sum-ii-input-array-is-sorted' },
   title: 'Two pointers: pair with target sum',
   description: 'Sorted array. If the sum is too small move left up; if too big move right down.',
   defaultInput: { nums: [1, 2, 4, 6, 8, 9, 14, 15], target: 13 },
@@ -43,6 +44,7 @@ export const twoPointersPairSum = {
       if (sum === target) {
         frames.push({ note: `${a[l]} + ${a[r]} = ${sum} — found the pair!`, panels: [arr(a, { pointers: ptr(), highlights: { [l]: 'done', [r]: 'done' } }), vars({ sum, target })] });
         attach(frames, p);
+        frames.at(-1).result = [l, r];
         return frames;
       }
       if (sum < target) {
@@ -54,12 +56,13 @@ export const twoPointersPairSum = {
       }
       attach(frames, p);
     }
-    frames.push({ note: 'Pointers met — no pair adds up to the target.', panels: [arr(a, { pointers: ptr() }), vars({ target })] });
+    frames.push({ note: 'Pointers met — no pair adds up to the target.', panels: [arr(a, { pointers: ptr() }), vars({ target })], result: null });
     return frames;
   },
 };
 
 export const dutchFlag = {
+  problem: { name: 'Sort Colors', statement: 'An array holds only 0s, 1s and 2s. Sort it in place in a single pass.', example: '[2, 0, 2, 1, 1, 0] → [0, 0, 1, 1, 2, 2]', exampleInput: { nums: [2, 0, 2, 1, 1, 0] }, exampleOutput: [0, 0, 1, 1, 2, 2], questionId: 'sort-colors' },
   title: 'Dutch National Flag (sort 0s, 1s, 2s)',
   description: 'low marks the end of 0s, high the start of 2s, mid scans the unknown region.',
   defaultInput: { nums: [2, 0, 2, 1, 1, 0, 1, 2, 0] },
@@ -111,11 +114,13 @@ export const dutchFlag = {
       attach(frames, p);
     }
     snap('mid passed high — the unknown region is empty. Sorted in one pass!');
+    frames.at(-1).result = a;
     return frames;
   },
 };
 
 export const slidingWindowFixed = {
+  problem: { name: 'Maximum sum of k consecutive elements', statement: 'Given an array and a window size k, find the largest sum of any k neighbouring elements.', example: 'nums = [2, 1, 5, 1, 3, 2], k = 3 → 9 (5 + 1 + 3)', exampleOutput: 9, questionId: 'maximum-average-subarray-i' },
   title: 'Fixed-size sliding window: max sum of k elements',
   description: 'Each step one element enters on the right and one leaves on the left.',
   defaultInput: { nums: [2, 1, 5, 1, 3, 2], k: 3 },
@@ -165,11 +170,13 @@ export const slidingWindowFixed = {
       attach(frames, p);
     }
     if (bestRange) frames.push({ note: `Done. Best window [${bestRange[0]}, ${bestRange[1]}] with sum ${best}. Total work: O(n).`, panels: [arr(nums, { range: bestRange, highlights: {} }), vars({ best })] });
+    frames.at(-1).result = best;
     return frames;
   },
 };
 
 export const slidingWindowVariable = {
+  problem: { name: 'Longest Substring Without Repeating Characters', statement: 'Find the length of the longest substring of s in which no character repeats.', example: 's = "abcabcbb" → 3 ("abc")', exampleOutput: 3, questionId: 'longest-substring-without-repeating-characters' },
   title: 'Variable window: longest substring without repeats',
   description: 'Right explores; left repairs the window when a duplicate appears.',
   defaultInput: { s: 'abcabcbb' },
@@ -209,12 +216,13 @@ export const slidingWindowVariable = {
         panels: [arr(chars, { range: [left, right], highlights: { [right]: 'active' }, pointers: [{ index: left, label: 'L', color: 'a' }, { index: right, label: 'R', color: 'b' }] }), vars({ window: [...inWin].join(''), best })],
       });
     }
-    frames.push({ note: `Done: longest length = ${best}. Each index entered and left at most once → O(n).`, panels: [arr(chars, {}), vars({ best })] });
+    frames.push({ note: `Done: longest length = ${best}. Each index entered and left at most once → O(n).`, panels: [arr(chars, {}), vars({ best })], result: best });
     return frames;
   },
 };
 
 export const prefixSum = {
+  problem: { name: 'Range Sum Query (prefix sums)', statement: 'Pre-compute running totals of an array so that the sum of any range nums[l..r] can be answered in O(1).', example: 'nums = [3, 1, 4, 1, 5, 9, 2] → prefix = [0, 3, 4, 8, 9, 14, 23, 25]', exampleOutput: [0, 3, 4, 8, 9, 14, 23, 25], questionId: 'range-sum-query-immutable' },
   title: 'Prefix sums',
   description: 'prefix[i+1] = prefix[i] + nums[i]; any range sum is prefix[r+1] − prefix[l].',
   defaultInput: { nums: [3, 1, 4, 1, 5, 9, 2] },
@@ -241,11 +249,13 @@ export const prefixSum = {
       });
       attach(frames, pick(`Query: sum(nums[${l}..${r}]) = ? (use the prefix array)`, `prefix[${r + 1}] − prefix[${l}] = ${prefix[r + 1] - prefix[l]}`, [`prefix[${r}] − prefix[${l}] = ${prefix[r] - prefix[l]}`, `prefix[${r + 1}] − prefix[${l + 1}] = ${prefix[r + 1] - prefix[l + 1]}`, `prefix[${r}] − prefix[${l - 1}] = ${prefix[r] - prefix[l - 1]}`], 0));
     }
+    frames.at(-1).result = prefix;
     return frames;
   },
 };
 
 export const kadane = {
+  problem: { name: 'Maximum Subarray', statement: 'Find the contiguous subarray with the largest sum and return that sum.', example: '[-2, 1, -3, 4, -1, 2, 1, -5, 4] → 6 ([4, -1, 2, 1])', exampleOutput: 6, questionId: 'maximum-subarray' },
   title: "Kadane's algorithm",
   description: 'At each index: extend the previous subarray or start fresh here — whichever is bigger.',
   defaultInput: { nums: [-2, 1, -3, 4, -1, 2, 1, -5, 4] },
@@ -279,12 +289,13 @@ export const kadane = {
       frames.push({ note, panels: [arr(nums, { range: [start, i], highlights: { [i]: 'active' } }), vars({ current: cur, best })] });
       attach(frames, p);
     }
-    frames.push({ note: `Maximum subarray = ${best}, indices [${bestRange[0]}, ${bestRange[1]}].`, panels: [arr(nums, { range: bestRange, highlights: {} }), vars({ best })] });
+    frames.push({ note: `Maximum subarray = ${best}, indices [${bestRange[0]}, ${bestRange[1]}].`, panels: [arr(nums, { range: bestRange, highlights: {} }), vars({ best })], result: best });
     return frames;
   },
 };
 
 export const binarySearch = {
+  problem: { name: 'Binary Search', statement: 'Given a sorted array and a target, return the index of the target, or -1 if it is not there.', example: 'nums = [1, 3, 5, …, 21], target = 15 → 7', exampleOutput: 7, questionId: 'binary-search' },
   title: 'Binary search',
   description: 'Compare with the middle; one comparison discards half of the remaining range.',
   defaultInput: { nums: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21], target: 15 },
@@ -315,7 +326,7 @@ export const binarySearch = {
       const bc = a[mid] === target ? 0 : a[mid] < target ? 1 : 2;
       const p = step >= 2 ? pick(`Step ${step}: range [${lo}..${hi}], mid = ${mid}, a[mid] = ${a[mid]} vs target ${target}. Which half survives?`, bOpts[bc], bOpts.filter((_, k) => k !== bc), step) : null;
       if (a[mid] === target) {
-        frames.push({ note: `Step ${step}: a[${mid}] = ${a[mid]} = target. Found at index ${mid}!`, panels: [arr(a, { pointers: ptrs, highlights: { ...muted(), [mid]: 'done' } }), vars({ lo, mid, hi, 'range size': hi - lo + 1 })] });
+        frames.push({ note: `Step ${step}: a[${mid}] = ${a[mid]} = target. Found at index ${mid}!`, panels: [arr(a, { pointers: ptrs, highlights: { ...muted(), [mid]: 'done' } }), vars({ lo, mid, hi, 'range size': hi - lo + 1 })], result: mid });
         attach(frames, p);
         return frames;
       }
@@ -328,12 +339,13 @@ export const binarySearch = {
       }
       attach(frames, p);
     }
-    frames.push({ note: `lo > hi: the range is empty, so ${target} is not present. (lo = ${lo} is where it would be inserted.)`, panels: [arr(a, { highlights: muted(), pointers: lo < a.length ? [{ index: lo, label: 'lo', color: 'a' }] : [] }), vars({ lo, hi })] });
+    frames.push({ note: `lo > hi: the range is empty, so ${target} is not present. (lo = ${lo} is where it would be inserted.)`, panels: [arr(a, { highlights: muted(), pointers: lo < a.length ? [{ index: lo, label: 'lo', color: 'a' }] : [] }), vars({ lo, hi })], result: -1 });
     return frames;
   },
 };
 
 export const mergeSort = {
+  problem: { name: 'Sort an Array (merge sort)', statement: 'Sort an array of numbers in ascending order.', example: '[38, 27, 43, 3, 9, 82, 10] → [3, 9, 10, 27, 38, 43, 82]', exampleOutput: [3, 9, 10, 27, 38, 43, 82], questionId: 'sort-an-array' },
   title: 'Merge sort',
   description: 'Split in halves until size 1, then merge sorted halves with two pointers.',
   defaultInput: { nums: [38, 27, 43, 3, 9, 82, 10] },
@@ -374,11 +386,13 @@ export const mergeSort = {
     };
     sort(0, a.length - 1, 0);
     snap('Sorted! log n levels of splitting × O(n) merging per level = O(n log n).');
+    frames.at(-1).result = a;
     return frames;
   },
 };
 
 export const intervalMerge = {
+  problem: { name: 'Merge Intervals', statement: 'Merge all overlapping intervals and return the non-overlapping intervals that cover the same ranges.', example: '[[1,3], [8,10], [2,6], [15,18], [9,12]] → [[1,6], [8,12], [15,18]]', exampleOutput: [[1, 6], [8, 12], [15, 18]], questionId: 'merge-intervals' },
   title: 'Merge intervals',
   description: 'Sort by start; extend the last merged interval while the next one overlaps it.',
   defaultInput: { intervals: [[1, 3], [8, 10], [2, 6], [15, 18], [9, 12]] },
@@ -414,6 +428,7 @@ export const intervalMerge = {
       attach(frames, p);
     });
     view(merged, sorted.length, `Result: ${JSON.stringify(merged)}. O(n log n) for the sort, O(n) for the scan.`);
+    frames.at(-1).result = merged;
     return frames;
   },
 };

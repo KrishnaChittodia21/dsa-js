@@ -70,6 +70,7 @@ function graphPanel(n, edges, { states = {}, edgeStates = {}, labels, directed =
 
 /* ------------------------------------------------------------------ in/out-degree counting: town judge */
 export const topoTownJudge = {
+  problem: { name: 'Find the Town Judge', statement: 'The judge trusts nobody and is trusted by everyone else. Given trust pairs [a, b] (a trusts b), find the judge or -1.', example: 'n = 4, trust [1,3] [1,4] [2,3] [2,4] [4,3] → 3', exampleOutput: 3, questionId: 'find-the-town-judge' },
   title: 'Degree counting: find the town judge',
   description:
     'Each trust pair [a, b] is the edge a → b: b gains in-degree, a gains out-degree. The judge is trusted by everyone else (in-degree n − 1) and trusts nobody (out-degree 0). People are labelled 1..n; n is clamped to 8 and the list to 16 pairs (invalid or repeated pairs are dropped).',
@@ -107,6 +108,7 @@ export const topoTownJudge = {
     if (n === 0) {
       snap('n = 0: there is nobody in town.');
       snap('No people, so no judge → return −1.');
+      frames.at(-1).result = -1;
       return frames;
     }
     snap(`Town of ${n}. The template only COUNTS: for every pair [a, b], outdeg[a]++ and indeg[b]++. No traversal needed.${clampNote(rawN, n, dropped)}`);
@@ -147,6 +149,7 @@ export const topoTownJudge = {
         : `Nobody has in = n − 1 and out = 0 → return −1. O(n + m): one pass over the pairs, one over the people.`,
       states,
     );
+    frames.at(-1).result = judge >= 0 ? judge + 1 : -1;
     return frames;
   },
 };
@@ -154,6 +157,7 @@ export const topoTownJudge = {
 /* ------------------------------------------------------------------ DFS post-order + white/gray/black */
 const LETTER = ['W', 'G', 'B'];
 export const topoThreeColor = {
+  problem: { name: 'Course Schedule (cycle check + order)', statement: 'Given directed edges, detect a cycle with DFS colours, or produce a topological order from reversed post-order.', example: 'n = 6, edges 0→1, 0→2, 1→3, 2→3, 3→4, 5→4 → no cycle; order [5, 0, 2, 1, 3, 4]', exampleOutput: [5, 0, 2, 1, 3, 4], questionId: 'course-schedule' },
   title: 'DFS post-order + 3-colour cycle check',
   description:
     'White = unseen, gray = on the current DFS path, black = finished. A vertex is appended to post when it turns black; reversed post is a topological order. Meeting a gray vertex is a back edge → cycle. n is clamped to 8 and edges to 16 (invalid or repeated edges are dropped).',
@@ -206,6 +210,7 @@ export const topoThreeColor = {
     if (n === 0) {
       snap('n = 0: no vertices.');
       snap('Nothing to visit → the empty order [] is valid.');
+      frames.at(-1).result = [];
       return frames;
     }
     snap(`All ${n} vertices start WHITE (unseen). The outer loop will start a DFS from each vertex that is still white.${clampNote(rawN, n, dropped)}`);
@@ -254,12 +259,14 @@ export const topoThreeColor = {
     for (let i = 0; i < n && !hasCycle; i++) if (color[i] === 0) dfs(i, i > 0);
     if (hasCycle) {
       snap('hasCycle is true → return []. A directed cycle means no topological order exists. O(V + E).', null, Object.fromEntries(frames[frames.length - 1].panels[0].nodes.filter((x) => x.state === 'bad').map((x) => [x.id, 'bad'])));
+      frames.at(-1).result = [];
       return frames;
     }
     const topo = [...post].reverse();
     const q = pick(`post = ${list(post)}. What does topoDfs return?`, list(topo), [list(post), list(order)], 1, 'Reverse the post-order; pre-order (entry order) is not a topological order in general.');
     snap(`Return post reversed: ${list(topo)}. Every edge u → v points forward in it, because v always finished before u. O(V + E).`, null, {}, arr(topo, { label: 'topological order = post reversed', highlights: Object.fromEntries(topo.map((_, i) => [i, 'done'])) }));
     attach(frames, q);
+    frames.at(-1).result = topo;
     return frames;
   },
 };
@@ -292,6 +299,7 @@ const isTree = (n, edges) => {
 };
 
 export const topoLeafTrimming = {
+  problem: { name: 'Minimum Height Trees', statement: 'Among all roots of an undirected tree, return those that give the smallest height.', example: 'n = 8, edges [0,1] [1,2] [1,3] [3,4] [4,5] [4,6] [6,7] → [3, 4]', exampleOutput: [3, 4], questionId: 'minimum-height-trees' },
   title: 'Leaf trimming: minimum height trees',
   description:
     'Peel all current leaves (degree 1) of an undirected tree layer by layer, like Kahn on in-degree 0; the last 1–2 vertices are the centres = the roots of minimum height trees. n is clamped to 8; invalid or repeated edges are dropped, and a graph that is not a tree is rejected.',
@@ -348,11 +356,13 @@ export const topoLeafTrimming = {
     if (!tree) {
       snap(`This graph is not a tree: a tree on n vertices is connected with exactly n − 1 edges (here ${edges.length}).${extra}`);
       snap('With a cycle, its vertices never become leaves; with separate parts there is no single middle. Leaf trimming (and "centre") needs a tree.');
+      frames.at(-1).result = null;
       return frames;
     }
     if (n <= 2) {
       snap(`n = ${n}.${extra}`);
       snap(`n ≤ 2: return every vertex ${list([...Array(n).keys()])}. ${n === 1 ? 'A single vertex has no edges, so no leaves — the special case avoids an empty answer.' : n === 2 ? 'Both ends of the only edge give height 1.' : 'No vertices, no centres.'}`, Object.fromEntries([...Array(n).keys()].map((i) => [i, 'done'])));
+      frames.at(-1).result = [...Array(n).keys()];
       return frames;
     }
     snap(`Count each vertex's degree. A leaf has degree 1 — like in-degree 0 in Kahn, it can be removed first.${extra}`);
@@ -397,12 +407,14 @@ export const topoLeafTrimming = {
     for (let h = 0; h < bq.length; h++) for (const v of full[bq[h]]) if (dist[v] < 0) (dist[v] = dist[bq[h]] + 1), bq.push(v);
     const height = Math.max(...dist);
     snap(`Centres: ${list(leaves)}. Rooting the tree at ${leaves.length === 2 ? 'either one' : 'it'} gives the minimum height, ${height}. Each vertex and edge is handled once → O(n).`, Object.fromEntries(leaves.map((l) => [l, 'done'])), { answer: list(leaves) });
+    frames.at(-1).result = leaves;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ DP along Kahn's order: parallel courses III */
 export const topoDagDp = {
+  problem: { name: 'Parallel Courses III', statement: 'Course v takes time[v] and can start once all its prerequisites finish. Return the earliest time all courses are done.', example: 'time [3, 2, 4, 1, 2, 3] with the default edges → 12', exampleOutput: 12, questionId: 'parallel-courses-iii' },
   title: "DAG DP: earliest finish along Kahn's order",
   description:
     'Parallel courses III: course v takes time[v] and starts after all its prerequisites. Kahn pops u only when all its prerequisites are done, so finish[u] is final; then push finish[v] = max(finish[v], finish[u] + time[v]) along each edge. The answer is the largest finish. n is clamped to 8, edges to 16, times to 1–99 (missing → 1).',
@@ -456,6 +468,7 @@ export const topoDagDp = {
     if (n === 0) {
       snap('n = 0: no courses.');
       snap('Nothing to take → total time 0.');
+      frames.at(-1).result = 0;
       return frames;
     }
     snap(`Start with finish = time (a course with no prerequisites ends after its own time). indeg counts unfinished prerequisites.${clampNote(rawN, n, dropped)}`);
@@ -493,6 +506,7 @@ export const topoDagDp = {
     if (head < n) {
       const stuck = [...Array(n).keys()].filter((i) => !done[i]);
       snap(`Queue empty after ${head} of ${n} courses. ${list(stuck)} never reached indeg 0 → they sit on or behind a cycle. No schedule exists → return −1.`, Object.fromEntries(stuck.map((i) => [i, 'bad'])));
+      frames.at(-1).result = -1;
       return frames;
     }
     const best = Math.max(...finish);
@@ -501,6 +515,7 @@ export const topoDagDp = {
     const fq = pick('Every course is processed. What is the minimum time to finish ALL courses (in parallel)?', best, [sum, Math.min(...finish), finish[n - 1], time[at]], asks + 1, 'The answer is the latest finish time, max(finish).');
     snap(`All ${n} courses done in topological order. Answer = max(finish) = ${best} (course ${at} ends last). One Kahn pass, each edge relaxed once → O(V + E).`, { [at]: 'done' }, Object.fromEntries(finish.map((f, i) => [i, f === best ? 'done' : ''])));
     attach(frames, fq);
+    frames.at(-1).result = best;
     return frames;
   },
 };

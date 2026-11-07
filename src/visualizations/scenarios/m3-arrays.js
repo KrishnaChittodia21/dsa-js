@@ -16,6 +16,7 @@ const show = (a) => `[${a.join(', ')}]`;
 
 // ───────────────────────── 1. Single pass with running state (stock profit) ─────────────────────────
 export const runningStateStock = {
+  problem: { name: 'Best Time to Buy and Sell Stock', statement: 'Buy on one day and sell on a later day. Return the largest possible profit (0 if none).', example: '[7, 1, 5, 3, 6, 4] → 5 (buy at 1, sell at 6)', exampleOutput: 5, questionId: 'best-time-to-buy-and-sell-stock' },
   title: 'Single pass with running state: best stock profit',
   description: 'Walk prices once, carrying minSoFar (cheapest day before today) and best (best profit so far). Up to 10 prices.',
   defaultInput: { prices: [7, 1, 5, 3, 6, 4] },
@@ -77,6 +78,7 @@ export const runningStateStock = {
         ? `With ${p.length} day(s) there is no buy-then-sell pair, so the answer is ${best}. One pass, two variables → O(n) time, O(1) space.`
         : `Done: max profit = ${best}. One pass, two variables → O(n) time, O(1) space, instead of checking every (buy, sell) pair in O(n²).`,
       panels: [view(p.length), vars({ minSoFar: fmt(minSoFar), answer: best })],
+      result: best,
     });
     return frames;
   },
@@ -84,6 +86,7 @@ export const runningStateStock = {
 
 // ───────────────────────── 2. In-place rewrite & reversal (rotate by k) ─────────────────────────
 export const rotateByReversal = {
+  problem: { name: 'Rotate Array', statement: 'Rotate the array to the right by k steps, in place.', example: '[1, 2, 3, 4, 5, 6, 7], k = 3 → [5, 6, 7, 1, 2, 3, 4]', exampleOutput: [5, 6, 7, 1, 2, 3, 4], questionId: 'rotate-array' },
   title: 'In-place reversal: rotate right by k',
   description: 'Rotate right by k with three in-place reversals: whole array, first k, the rest. Up to 10 values; k is reduced with k %= n.',
   defaultInput: { nums: [1, 2, 3, 4, 5, 6, 7], k: 3 },
@@ -99,7 +102,7 @@ export const rotateByReversal = {
     const kIn = Math.max(0, Math.trunc(Number(k) || 0));
     if (n === 0) {
       frames.push({ note: 'Empty array: nothing to rotate (and k %= 0 would be NaN, so stop early).', panels: [arr([], { label: 'nums' }), vars({ k: kIn })] });
-      frames.push({ note: 'Result: []. O(n) time, O(1) extra space.', panels: [arr([], { label: 'nums' }), vars({ result: '[]' })] });
+      frames.push({ note: 'Result: []. O(n) time, O(1) extra space.', panels: [arr([], { label: 'nums' }), vars({ result: '[]' })], result: [] });
       return frames;
     }
     const kk = kIn % n;
@@ -152,6 +155,7 @@ export const rotateByReversal = {
       note: `Rotated right by ${kk}: ${show(a)}. ${swaps} swap(s) in total, each element moved at most twice → O(n) time, O(1) extra space.`,
       panels: [arr([...a], { label: 'nums', highlights: Object.fromEntries(a.map((_, i) => [i, 'done'])) }), vars({ result: show(a), k: kk })],
       predict: n > 2 && kk > 0 ? pick(`The last reversal finished. What is the final array?`, show(expect), [show(after1), show([...before.slice(kk), ...before.slice(0, kk)]), show(before)], 3) : undefined,
+      result: a,
     });
     return frames;
   },
@@ -159,6 +163,7 @@ export const rotateByReversal = {
 
 // ───────────────────────── 3. Prefix & suffix passes (product except self) ─────────────────────────
 export const productExceptSelf = {
+  problem: { name: 'Product of Array Except Self', statement: 'For every index, return the product of all the other elements, without using division.', example: '[1, 2, 3, 4] → [24, 12, 8, 6]', exampleOutput: [24, 12, 8, 6], questionId: 'product-of-array-except-self' },
   title: 'Prefix & suffix passes: product except self',
   description: 'Forward pass writes the product of everything LEFT of i into answer; backward pass multiplies in everything RIGHT of i. No division. Up to 8 values in −9..9.',
   defaultInput: { nums: [1, 2, 3, 4] },
@@ -221,6 +226,7 @@ export const productExceptSelf = {
         ? `answer = ${show(out)}. Two O(n) passes, and the answer array itself stored the left products → O(1) extra space besides the output.`
         : 'Empty input → empty answer. Two O(n) passes, O(1) extra space besides the output.',
       panels: [...view(null, null, 'done'), vars({ answer: show(out) })],
+      result: out,
     });
     return frames;
   },
@@ -228,6 +234,7 @@ export const productExceptSelf = {
 
 // ───────────────────────── 4. String building (run-length compression) ─────────────────────────
 export const runLengthBuilder = {
+  problem: { name: 'String Compression (run-length)', statement: 'Replace every run of a repeated character with the character followed by the run length (runs of 1 keep just the character).', example: '"aaabcc" → "a3bc2"', exampleOutput: 'a3bc2', questionId: 'string-compression' },
   title: 'String building: run-length compression',
   description: 'i marks the start of a run, j scans to its end; each run pushes one piece into parts, joined once at the end. Up to 10 characters.',
   defaultInput: { s: 'aaabcc' },
@@ -282,6 +289,7 @@ export const runLengthBuilder = {
       note: `parts.join('') = "${result}". One O(total length) join instead of creating a new string on every +=. i and j each move left to right once → O(n).`,
       panels: [view(n, null), partsPanel(), vars({ result: `"${result}"` })],
       predict: parts.length > 1 ? pick('What does parts.join(\'\') return?', `"${result}"`, [`"${parts.join(',')}"`, `"${parts.slice(0, -1).join('')}"`, `"${parts.join(' ')}"`], 0) : undefined,
+      result,
     });
     return frames;
   },
@@ -289,6 +297,7 @@ export const runLengthBuilder = {
 
 // ───────────────────────── 5. Index marking with negation ─────────────────────────
 export const indexMarkingNegation = {
+  problem: { name: 'Find All Duplicates in an Array', statement: 'Values are in 1..n. Find the values that appear twice (and those that are missing) using O(1) extra space.', example: '[4, 3, 2, 7, 8, 2, 3, 1] → duplicates [2, 3], missing [5, 6]', exampleOutput: [2, 3], questionId: 'find-all-duplicates-in-an-array' },
   title: 'Index marking: sign of nums[v − 1] as a "seen" flag',
   description: 'For each v = |nums[i]|, negate nums[v − 1] to mark "v seen"; already negative means v is a duplicate; still-positive cells give the missing values. Up to 10 values, each clamped to 1..n.',
   defaultInput: { nums: [4, 3, 2, 7, 8, 2, 3, 1] },
@@ -359,6 +368,7 @@ export const indexMarkingNegation = {
     frames.push({
       note: `Missing = ${show(missing)}, duplicates = ${show(dups)}. One pass over n cells → O(n) time, and the array was its own hash set → O(1) extra space. (Restore with Math.abs if the caller needs the input back.)`,
       panels: [arr(a.map(Math.abs), { label: 'nums (signs restored)' }), vars({ missing: show(missing), duplicates: show(dups) })],
+      result: dups,
     });
     return frames;
   },

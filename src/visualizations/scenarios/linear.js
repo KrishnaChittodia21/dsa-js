@@ -15,6 +15,7 @@ const attach = (frames, p) => {
 };
 
 export const stackParentheses = {
+  problem: { name: 'Valid Parentheses', statement: 'A string holds only ()[]{} brackets. Decide whether every bracket is closed by the matching type in the right order.', example: 's = "{[()()]}(" → false (the last "(" is never closed)', exampleOutput: false, questionId: 'valid-parentheses' },
   title: 'Stack: valid parentheses',
   description: 'Push openers; on a closer, the top of the stack must be its matching opener.',
   defaultInput: { s: '{[()()]}(' },
@@ -42,16 +43,19 @@ export const stackParentheses = {
       } else {
         frames.push({ note: `'${c}' does not match the top (${st.length ? `'${st[st.length - 1]}'` : 'empty stack'}) → invalid.`, panels: [arr(chars, { highlights: { [i]: 'bad' } }), stack([...st], { label: 'stack' })] });
         attach(frames, p);
+        frames.at(-1).result = false;
         return frames;
       }
       attach(frames, p);
     }
     frames.push({ note: st.length ? `End of string but the stack still holds ${st.length} unclosed opener(s) → invalid.` : 'End of string and the stack is empty → valid!', panels: [arr(chars, {}), stack([...st], { label: 'stack' })] });
+    frames.at(-1).result = st.length === 0;
     return frames;
   },
 };
 
 export const monotonicStack = {
+  problem: { name: 'Next Greater Element', statement: 'For every element, find the first larger value to its right, or -1 if there is none.', example: '[2, 1, 2, 4, 3, 1, 5] → [4, 2, 4, 5, 5, 5, -1]', exampleOutput: [4, 2, 4, 5, 5, 5, -1], questionId: 'next-greater-element-i' },
   title: 'Monotonic stack: next greater element',
   description: 'Keep indices whose next-greater is still unknown; values on the stack decrease from bottom to top.',
   defaultInput: { nums: [2, 1, 2, 4, 3, 1, 5] },
@@ -91,11 +95,13 @@ export const monotonicStack = {
       attach(frames, pp);
     }
     frames.push({ note: 'Indices left on the stack never found a greater element → answer −1. Every index is pushed and popped at most once: O(n).', panels: [arr(nums, {}), stack(st.map((k) => `${nums[k]} (i=${k})`), { label: 'stack' }), arr(res, { label: 'answer' })] });
+    frames.at(-1).result = res;
     return frames;
   },
 };
 
 export const monotonicDeque = {
+  problem: { name: 'Sliding Window Maximum', statement: 'A window of size k slides over the array one step at a time. Report the maximum of every window.', example: 'nums = [1, 3, -1, -3, 5, 3, 6, 7], k = 3 → [3, 3, 5, 5, 6, 7]', exampleOutput: [3, 3, 5, 5, 6, 7], questionId: 'sliding-window-maximum' },
   title: 'Monotonic deque: sliding window maximum',
   description: 'Deque holds indices with decreasing values; the front is always the window maximum.',
   defaultInput: { nums: [1, 3, -1, -3, 5, 3, 6, 7], k: 3 },
@@ -145,11 +151,13 @@ export const monotonicDeque = {
       attach(frames, kp);
     }
     frames.push({ note: `Result: [${out.join(', ')}]. Each index enters and leaves the deque once → O(n).`, panels: [arr(nums, {}), dqPanel(), arr(out, { label: 'maxima' })] });
+    frames.at(-1).result = out;
     return frames;
   },
 };
 
 export const linkedListReverse = {
+  problem: { name: 'Reverse Linked List', statement: 'Reverse a singly linked list in place and return the new head.', example: '[1, 2, 3, 4, 5] → [5, 4, 3, 2, 1]', exampleOutput: [5, 4, 3, 2, 1], questionId: 'reverse-linked-list' },
   title: 'Reverse a linked list in place',
   description: 'Three pointers: prev, curr, next. Flip one arrow per step.',
   defaultInput: { values: [1, 2, 3, 4, 5] },
@@ -188,11 +196,13 @@ export const linkedListReverse = {
     }
     frames.push({ note: `curr is null → prev (${prev === null ? 'null' : values[prev]}) is the new head. O(n) time, O(1) extra space.`, panels: [{ kind: 'list', values, next: [...next], pointers: prev !== null ? [{ index: prev, label: 'head', color: 'a' }] : [] }] });
     if (n >= 2) attach(frames, pick('curr is now null. Which node is the head of the reversed list?', `prev (${values[n - 1]})`, [`the old head (${values[0]})`, 'null'], 2));
+    frames.at(-1).result = (() => { const out = []; for (let k = prev; k !== null; k = next[k]) out.push(values[k]); return out; })();
     return frames;
   },
 };
 
 export const fastSlowPointers = {
+  problem: { name: 'Middle of the Linked List', statement: 'Return the middle node of a singly linked list in one pass.', example: '1 → 2 → … → 7 → the middle is 4', exampleOutput: 4, questionId: 'middle-of-the-linked-list' },
   title: 'Fast & slow pointers: find the middle',
   description: 'Slow moves 1 step, fast moves 2. When fast reaches the end, slow is in the middle.',
   defaultInput: { values: [1, 2, 3, 4, 5, 6, 7] },
@@ -207,7 +217,7 @@ export const fastSlowPointers = {
       { index: slow, label: 'slow', color: 'a' },
       ...(fast !== null && fast < n ? [{ index: fast, label: 'fast', color: 'b' }] : []),
     ];
-    if (!n) return [{ note: 'Empty list.', panels: [] }];
+    if (!n) return [{ note: 'Empty list.', panels: [], result: null }];
     frames.push({ note: 'Both start at the head.', panels: [{ kind: 'list', values, next, pointers: ptrs() }] });
     const at = (i) => (i < n ? `${values[i]} (index ${i})` : 'past the end');
     let moves = 0;
@@ -222,6 +232,7 @@ export const fastSlowPointers = {
     }
     frames.push({ note: `fast can't move 2 more steps → slow (${values[slow]}) is the middle. For even length it's the second middle.`, panels: [{ kind: 'list', values, next, pointers: ptrs(), highlights: { [slow]: 'done' } }] });
     if (n >= 3) attach(frames, pick(`fast is at ${fast === null ? 'past the end' : at(fast)} and cannot move 2 more. Which node is the middle?`, at(slow), [at(slow - 1), at(slow + 1), at(fast === null ? n - 1 : fast)], 0));
+    frames.at(-1).result = values[slow];
     return frames;
   },
 };

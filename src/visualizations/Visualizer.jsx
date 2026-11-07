@@ -4,6 +4,8 @@ import { Panel } from './panels.jsx';
 import { useFitZoom } from './useFitZoom.js';
 import { SCENARIO_COMPLEXITY, bigoClass } from './complexity.js';
 import Icon from '../components/ui/Icon.jsx';
+import { Link } from 'react-router-dom';
+import { questionById } from '../content/index.js';
 
 const PREDICT_KEY = 'dsa-journey:predict-mode';
 function loadPredictPref() {
@@ -22,41 +24,62 @@ function savePredictPref(on) {
 }
 
 const LETTERS = 'ABCD';
-const EASE = 'cubic-bezier(0.23, 1, 0.32, 1)';
+const SNAP = 'cubic-bezier(0.23, 1, 0.32, 1)'; // stepping by hand: quick ease-out
+const GLIDE = 'cubic-bezier(0.45, 0, 0.25, 1)'; // playing: ease-in-out spread over most of the step, so motion reads as one flow
 const reducedMotion = () => !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+/** Motion length for a frame change: most of the step while playing, short when stepping by hand. */
+const motionFor = (playing, speed) => (playing ? { ms: Math.min(Math.round(speed * 0.8), 600), ease: GLIDE } : { ms: 240, ease: SNAP });
+
+/** What the player shows right now: pointer boxes ([data-flip]) and cell texts ([data-pop]), per panel index. */
+function snapshot(root) {
+  const m = new Map();
+  root.querySelectorAll('.viz-panel').forEach((panel, pi) => {
+    for (const el of panel.querySelectorAll('[data-flip]')) m.set(`${pi}f${el.dataset.flip}`, el.getBoundingClientRect());
+    for (const el of panel.querySelectorAll('[data-pop]')) m.set(`${pi}p${el.dataset.pop}`, el.textContent);
+  });
+  return m;
+}
+const stop = (el) => el.getAnimations().forEach((a) => a.id === 'viz' && a.cancel()); // ours only, never the CSS transitions
 
 /**
  * Tween between frames: pointers ([data-flip], remounted in a new column) slide from where they were
- * (FLIP via the `translate` property, so CSS transforms on the element still apply), and cells whose
- * text changed ([data-pop]) pop. Keys are per panel index, so two arrays can both have an `i`.
+ * (FLIP via the `translate` property, so CSS transforms on the element still apply), new pointers fade
+ * in, and cells whose text changed ([data-pop]) pop. The "before" is read during render, while the DOM
+ * still shows the old frame, so a slide interrupted by a fast step continues from where it visibly is.
  */
-function useFrameMotion(ref, frame) {
-  const prev = useRef(null);
+function useFrameMotion(ref, frame, motion) {
+  const before = useRef(null);
+  const shown = useRef(null);
+  if (frame !== shown.current && ref.current) before.current = snapshot(ref.current);
   useLayoutEffect(() => {
     const root = ref.current;
-    if (!root) return;
-    const seen = new Map();
-    const reduce = reducedMotion();
+    const was = shown.current !== null ? before.current : null; // first paint: nothing to tween from
+    shown.current = frame;
+    if (!root || !was || reducedMotion() || !root.animate) return;
+    const { ms, ease } = motion;
+    const opts = { id: 'viz', duration: ms, easing: ease };
     root.querySelectorAll('.viz-panel').forEach((panel, pi) => {
       for (const el of panel.querySelectorAll('[data-flip]')) {
-        const k = `${pi}f${el.dataset.flip}`;
+        stop(el);
+        const old = was.get(`${pi}f${el.dataset.flip}`);
+        if (!old) {
+          el.animate([{ opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1 }], opts);
+          continue;
+        }
         const r = el.getBoundingClientRect();
-        seen.set(k, r);
-        const was = prev.current?.get(k);
-        if (reduce || !was || !el.animate) continue;
-        const z = el.offsetWidth ? r.width / el.offsetWidth : 1; // the stage may be CSS-zoomed to fit
-        const dx = (was.left - r.left) / z;
-        const dy = (was.top - r.top) / z;
-        if (Math.abs(dx) + Math.abs(dy) > 0.5) el.animate([{ translate: `${dx}px ${dy}px` }, { translate: '0 0' }], { duration: 240, easing: EASE });
+        const z = el.currentCSSZoom || 1; // translate is applied inside the stage's fit-zoom: screen px ÷ zoom
+        const dx = (old.left - r.left) / z;
+        const dy = (old.top - r.top) / z;
+        if (Math.abs(dx) + Math.abs(dy) > 0.5) el.animate([{ translate: `${dx}px ${dy}px` }, { translate: '0 0' }], opts);
       }
       for (const el of panel.querySelectorAll('[data-pop]')) {
-        const k = `${pi}p${el.dataset.pop}`;
-        seen.set(k, el.textContent);
-        const was = prev.current?.get(k);
-        if (!reduce && was !== undefined && was !== el.textContent && el.animate) el.animate([{ scale: 1.14 }, { scale: 1 }], { duration: 220, easing: EASE });
+        const old = was.get(`${pi}p${el.dataset.pop}`);
+        if (old === undefined || old === el.textContent) continue;
+        stop(el);
+        el.animate([{ scale: 1.14 }, { scale: 1 }], { ...opts, duration: Math.min(ms, 320), easing: SNAP });
       }
     });
-    prev.current = seen;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ref, frame]);
 }
 // Sorting animations draw arrays as value-tall voxel columns (other arrays are single cubes).
@@ -282,15 +305,26 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing, step, speed]);
-  useFrameMotion(body, frames[step]);
+  const motion = motionFor(playing, speed);
+  useFrameMotion(body, frames[step], motion);
 
-  const [stageRef, zoom] = useFitZoom(frames[step]); // before the early return: hooks run in the same order
+  const [stageRef, zoom] = useFitZoom(frames[step], undefined, frames); // before the early return: hooks run in the same order
+  // decided per run, not per frame, so the side column never appears or vanishes mid-run
+  const hasSide = useMemo(() => frames.some((f) => f.panels?.some((p) => SIDE_KINDS.has(p.kind))), [frames]);
   if (!def) return <div className="card muted small">Unknown visualization “{scenario}”.</div>;
   const frame = frames[Math.min(step, frames.length - 1)] || { note: '', panels: [] };
   const last = frames.length - 1;
   const bars = barsProp ?? BAR_SCENARIOS.has(scenario);
   const stagePanels = frame.panels.filter((p) => !SIDE_KINDS.has(p.kind));
   const sidePanels = frame.panels.filter((p) => SIDE_KINDS.has(p.kind));
+  const problem = def.problem;
+  const linked = problem?.questionId ? questionById[problem.questionId] : null;
+  const practice = linked && (
+    <Link className="viz-prob-q" to={`/topic/${linked.topicId}/q/${linked.id}`}>
+      Practice: {linked.title} <Icon name="chevronRight" size={13} />
+    </Link>
+  );
+  const brief = compact || !!caption; // embedded where the lesson already explains it: a one-line problem name
   const showCx = wide && !!SCENARIO_COMPLEXITY[scenario];
   const at = last > 0 ? Math.min(step, last) / last : 0; // fill = at + seg × (fraction of this step played)
   const seg = last > 0 && step < last ? 1 / last : 0;
@@ -330,7 +364,11 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
   };
 
   return (
-    <figure ref={fig} className={`viz ${compact ? 'viz--compact' : ''} ${wide ? 'viz--wide' : ''}`} tabIndex={0} onKeyDown={onKey} aria-label={`Visualization: ${def.title}`}>
+    <figure
+      ref={fig}
+      className={`viz ${compact ? 'viz--compact' : ''} ${wide ? 'viz--wide' : ''}${playing ? ' is-playing' : ''}`}
+      style={{ '--viz-t': `${motion.ms}ms`, '--viz-ease': motion.ease }}
+      tabIndex={0} onKeyDown={onKey} aria-label={`Visualization: ${def.title}`}>
       <div className="viz-head">
         <div className="viz-head-txt">
           <span className="eyebrow">
@@ -338,6 +376,27 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
             {eyebrow || 'step-through'}
           </span>
           <div className="viz-title">{def.title}</div>
+          {problem && brief && (
+            <p className="viz-prob-line">
+              <span className="viz-k">Problem</span> {problem.name}
+              {practice}
+            </p>
+          )}
+          {problem && !brief && (
+            <div className="viz-prob">
+              <span className="viz-k">Problem</span>
+              <p className="viz-prob-st">
+                <b>{problem.name}.</b> {problem.statement}
+              </p>
+              {problem.example && (
+                <p className="viz-prob-ex">
+                  <span>Example</span> {problem.example}
+                </p>
+              )}
+              {practice}
+            </div>
+          )}
+          {problem && !brief && <span className="viz-k viz-k--see">What you’re seeing</span>}
           <p className="viz-desc">{caption || def.description}</p>
         </div>
         <div className="viz-head-act">
@@ -394,13 +453,13 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
         </div>
       )}
 
-      <div ref={body} className={`viz-body${sidePanels.length || showCx ? ' viz-body--side' : ''}`}>
+      <div ref={body} className={`viz-body${hasSide || showCx ? ' viz-body--side' : ''}`}>
         <div className="viz-stage" ref={stageRef} style={zoom < 1 ? { zoom } : undefined}>
           {stagePanels.map((p, i) => (
             <Panel key={i} panel={p} bars={bars} />
           ))}
         </div>
-        {(sidePanels.length > 0 || showCx) && (
+        {(hasSide || showCx) && (
           <div className="viz-side">
             {sidePanels.map((p, i) => (
               <Panel key={i} panel={p} />
@@ -422,8 +481,17 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
       )}
       <div className="viz-controls">
         <div className="viz-ctrls">
-          <button type="button" className="iconbtn" onClick={restart} disabled={step === 0 && pending === null} aria-label="First step">
-            <Icon name="skipBack" size={16} />
+          <button
+            type="button"
+            className="iconbtn"
+            onClick={() => {
+              restart();
+              setPlaying(true);
+            }}
+            aria-label="Replay from the start"
+            title="Replay from the start"
+          >
+            <Icon name="rotate" size={16} />
           </button>
           <button type="button" className="iconbtn" onClick={() => { setPending(null); setStep((s) => Math.max(0, s - 1)); }} disabled={step === 0} aria-label="Previous step">
             <Icon name="chevronLeft" size={16} />
@@ -436,9 +504,9 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
               if (step >= last) restart();
               setPlaying((p) => !p);
             }}
-            aria-label={playing ? 'Pause' : step >= last ? 'Replay' : 'Play'}
+            aria-label={playing ? 'Pause' : 'Play'}
           >
-            <Icon name={playing ? 'pause' : step >= last ? 'rotate' : 'play'} size={16} />
+            <Icon name={playing ? 'pause' : 'play'} size={16} />
           </button>
           <button type="button" className="iconbtn" onClick={next} disabled={step >= last || pending !== null} aria-label="Next step">
             <Icon name="chevronRight" size={16} />

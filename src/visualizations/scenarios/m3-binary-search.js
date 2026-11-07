@@ -28,6 +28,7 @@ const lhm = (lo, mid, hi) => [
 
 // ───────────────────────── 1. Boundaries: first and last position ─────────────────────────
 export const bsFirstLast = {
+  problem: { name: 'Find First and Last Position of Element', statement: 'In a sorted array, return the first and last index of the target, or [-1, -1].', example: 'nums = [5, 7, 7, 8, 8, 10], target = 8 → [3, 4]', exampleOutput: [3, 4], questionId: 'find-first-and-last-position-of-element-in-sorted-array' },
   title: 'Binary search boundaries: first and last position',
   description: 'Two lower-bound searches with lo < hi and hi = mid: first index with nums[i] >= target, then first index with nums[i] > target. The extra "end" cell is index n. Up to 7 numbers, sorted for you.',
   defaultInput: { nums: [5, 7, 7, 8, 8, 10], target: 8 },
@@ -97,6 +98,7 @@ export const bsFirstLast = {
       frames.push({
         note: `lowerBound = ${lb}, but ${lb === n ? 'that is n' : `nums[${lb}] = ${a[lb]} ≠ ${t}`}, so ${t} is not in the array: answer [-1, -1]. (${lb} is where it would be inserted.) Each search is O(log n).`,
         panels: [arr(cells, { label: 'nums (+ end = n)', highlights: { [n]: 'muted' }, pointers: [{ index: lb, label: 'insert', color: 'a' }] }), vars({ first: -1, last: -1 })],
+        result: [-1, -1],
       });
       return frames;
     }
@@ -106,6 +108,7 @@ export const bsFirstLast = {
     frames.push({
       note: `first = lowerBound = ${lb}, last = upperBound − 1 = ${ub - 1}. Answer [${lb}, ${ub - 1}] (count = ${ub - lb}). Two O(log n) searches, O(1) space — duplicates never slow it down.`,
       panels: [arr(cells, { label: 'nums (+ end = n)', highlights: hl, pointers: [{ index: lb, label: 'first', color: 'a' }, { index: ub - 1, label: 'last', color: 'b' }] }), vars({ first: lb, last: ub - 1 })],
+      result: [lb, ub - 1],
     });
     return frames;
   },
@@ -113,6 +116,7 @@ export const bsFirstLast = {
 
 // ───────────────────────── 2. Rotated sorted array ─────────────────────────
 export const bsRotated = {
+  problem: { name: 'Search in Rotated Sorted Array', statement: 'A sorted array was rotated at some pivot. Find the target’s index in O(log n), or -1.', example: 'nums = [6, 7, 8, 1, 2, 3, 4, 5], target = 8 → 2', exampleOutput: 2, questionId: 'search-in-rotated-sorted-array' },
   title: 'Search in a rotated sorted array',
   description: 'At every mid one half is sorted; check whether the target lies in that sorted half, and discard the other. Up to 8 numbers; duplicates are removed and the input is rebuilt as a rotation of its sorted values starting at its first number.',
   defaultInput: { nums: [6, 7, 8, 1, 2, 3, 4, 5], target: 8 },
@@ -196,6 +200,7 @@ export const bsRotated = {
         ? `Answer: index ${idx}. Each step discarded half the range using only the sorted half → O(log n) time, O(1) space.`
         : `lo > hi: the range is empty, so ${t} is not present. Answer -1. Still O(log n): each step discarded half.`,
       panels: [arr(a, { label: 'nums', highlights: found ? { [idx]: 'done' } : {}, pointers: found ? [{ index: idx, label: 'answer', color: 'c' }] : [] }), vars({ answer: idx })],
+      result: idx,
     });
     return frames;
   },
@@ -203,6 +208,7 @@ export const bsRotated = {
 
 // ───────────────────────── 3. Binary search on the answer (Koko) ─────────────────────────
 export const bsOnAnswerKoko = {
+  problem: { name: 'Koko Eating Bananas', statement: 'Find the slowest eating speed k (bananas per hour, one pile per hour at most) that finishes all piles within h hours.', example: 'piles = [3, 6, 7, 11], h = 8 → 4', exampleOutput: 4, questionId: 'koko-eating-bananas' },
   title: 'Binary search on the answer: Koko eating bananas',
   description: 'Search the eating speed k in [1, max(piles)]; feasible(k) = total of ceil(pile / k) hours ≤ h. Up to 6 piles of 1–99 bananas; h is clamped to [number of piles, 99] so the max speed always works.',
   defaultInput: { piles: [3, 6, 7, 11], h: 8 },
@@ -271,6 +277,7 @@ export const bsOnAnswerKoko = {
     frames.push({
       note: `lo === hi = ${lo}: the minimum speed is ${lo} (${hrs.reduce((x, y) => x + y, 0)} hours ≤ ${H}). ${step} feasibility checks of O(n) each instead of trying every speed → O(n log max).`,
       panels: [pilesPanel, arr(hrs, { label: `hours per pile at k = ${lo}`, highlights: Object.fromEntries(hrs.map((_, i) => [i, 'done'])) }), range(lo, lo), vars({ answer: lo })],
+      result: lo,
     });
     return frames;
   },
@@ -278,6 +285,7 @@ export const bsOnAnswerKoko = {
 
 // ───────────────────────── 4. Peak element ─────────────────────────
 export const bsPeak = {
+  problem: { name: 'Find Peak Element', statement: 'Return the index of any element larger than its neighbours, in O(log n).', example: '[1, 2, 1, 3, 5, 6, 4] → 5 (value 6; index 1 is also a peak)', exampleOutput: 5, questionId: 'find-peak-element' },
   title: 'Binary search for a peak element',
   description: 'Compare nums[mid] with nums[mid + 1] and keep the uphill side; the outside is −∞, so a peak always exists there. Up to 8 numbers (equal neighbours give an index not lower than its neighbours).',
   defaultInput: { nums: [1, 2, 1, 3, 5, 6, 4] },
@@ -290,7 +298,7 @@ export const bsPeak = {
     const view = (lo, hi, mid, hl = {}) => arr(a, { label: 'nums', range: [lo, hi], highlights: { ...outside(n, lo, hi), ...hl }, pointers: lhm(lo, mid, hi) });
     if (!n) {
       frames.push({ note: 'Find a peak: an element bigger than its neighbours (outside the array counts as −∞).', panels: [arr(a, { label: 'nums' })] });
-      frames.push({ note: 'The array is empty, so there is no peak to return.', panels: [arr(a, { label: 'nums' }), vars({ answer: 'none' })] });
+      frames.push({ note: 'The array is empty, so there is no peak to return.', panels: [arr(a, { label: 'nums' }), vars({ answer: 'none' })], result: -1 });
       return frames;
     }
     frames.push({
@@ -322,6 +330,7 @@ export const bsPeak = {
     frames.push({
       note: `lo === hi = ${lo}: nums[${lo}] = ${a[lo]} is a peak (${lo > 0 ? a[lo - 1] : '−∞'} ≤ ${a[lo]} ≥ ${lo < n - 1 ? a[lo + 1] : '−∞'}). Note lo < hi keeps mid + 1 inside the array. O(log n) time, O(1) space.`,
       panels: [arr(a, { label: 'nums', highlights: { [lo]: 'done' }, pointers: [{ index: lo, label: 'peak', color: 'c' }] }), vars({ answer: lo })],
+      result: lo,
     });
     return frames;
   },

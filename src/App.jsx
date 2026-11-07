@@ -3,10 +3,10 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import AppShell from './components/layout/AppShell.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import Dashboard from './pages/Dashboard.jsx';
-import TopicPage from './pages/TopicPage.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 // Pages with heavy dependencies (the code editor) are split into separate chunks.
+const TopicPage = lazy(() => import('./pages/TopicPage.jsx'));
 const QuestionPage = lazy(() => import('./pages/QuestionPage.jsx'));
 const PatternsPage = lazy(() => import('./pages/PatternsPage.jsx'));
 const QuestionsPage = lazy(() => import('./pages/QuestionsPage.jsx'));

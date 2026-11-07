@@ -94,6 +94,7 @@ function triePanel(root, states, label, getLabel) {
 // Two heaps: running median.
 // ---------------------------------------------------------------------------
 export const twoHeapsMedian = {
+  problem: { name: 'Find Median from Data Stream', statement: 'Numbers arrive one at a time; report the median after each one.', example: '5, 2, 8, 3, 9 → medians [5, 3.5, 5, 4, 5]', exampleOutput: [5, 3.5, 5, 4, 5], questionId: 'find-median-from-data-stream' },
   title: 'Two heaps: running median',
   description:
     'Find median from data stream: low is a max-heap of the smaller half, high a min-heap of the larger half. Each add pushes to low, moves low’s top to high, and rebalances so low has the extra element. Input is clamped to 8 integers in −99..99.',
@@ -153,6 +154,7 @@ export const twoHeapsMedian = {
       note: xs.length ? `Medians after each add: ${medians.join(', ')}. Each add is O(log n) (three heap ops at most); median() is O(1).` : 'No values → no median. Each add would be O(log n); median() is O(1).',
       panels: [arr(medians, { label: 'running medians', highlights: Object.fromEntries(medians.map((_, i) => [i, 'done'])) }), heapPanel(low.a, { 0: 'done' }, 'low · max-heap'), heapPanel(high.a, { 0: 'done' }, 'high · min-heap')],
     });
+    frames.at(-1).result = medians;
     return frames;
   },
 };
@@ -161,6 +163,7 @@ export const twoHeapsMedian = {
 // K-way merge with a heap of heads.
 // ---------------------------------------------------------------------------
 export const kWayMergeHeap = {
+  problem: { name: 'Merge k Sorted Lists', statement: 'Merge k sorted lists into one sorted list.', example: '[1, 4, 7], [2, 6], [3, 5, 8] → [1, 2, 3, 4, 5, 6, 7, 8]', exampleOutput: [1, 2, 3, 4, 5, 6, 7, 8], questionId: 'merge-k-sorted-lists' },
   title: 'K-way merge: heap of list heads',
   description:
     'Merge k sorted lists: the min-heap holds one head per list as {val, i, j}; pop the smallest, output it, push its successor from the same list. Input is clamped to 4 lists and 8 integers (−99..99) in total; each list is sorted first.',
@@ -228,6 +231,7 @@ export const kWayMergeHeap = {
       note: out.length ? `Merged: [${out.join(', ')}]. N = ${out.length} elements each pass through a heap of at most k = ${L.length} → O(N log k) time, O(k) heap space.` : 'Nothing to merge → out = []. In general O(N log k).',
       panels: [arr(out, { label: 'out (merged)', highlights: Object.fromEntries(out.map((_, x) => [x, 'done'])) }), vars({ N: out.length, k: L.length })],
     });
+    frames.at(-1).result = out;
     return frames;
   },
 };
@@ -236,6 +240,7 @@ export const kWayMergeHeap = {
 // Greedy simulation: last stone weight (pop two, combine, push back).
 // ---------------------------------------------------------------------------
 export const lastStoneWeightHeap = {
+  problem: { name: 'Last Stone Weight', statement: 'Repeatedly smash the two heaviest stones; equal stones vanish, otherwise the difference remains. Return the last weight (or 0).', example: '[2, 7, 4, 1, 8, 1] → 1', exampleOutput: 1, questionId: 'last-stone-weight' },
   title: 'Greedy heap: last stone weight',
   description:
     'Last stone weight: a max-heap keeps the heaviest stones on top; each turn pop the two heaviest, smash them, and push back the difference if any. Input is clamped to 7 stones of weight 1..99.',
@@ -276,6 +281,7 @@ export const lastStoneWeightHeap = {
       note: `${heap.size() ? `One stone left → answer ${ans}.` : 'No stones left → answer 0.'} Each turn is O(log n) and there are at most n − 1 turns → O(n log n).`,
       panels: [heapPanel(heap.a, { 0: 'done' }, 'max-heap'), arr([...smashed], { label: 'turns' }), vars({ answer: ans })],
     });
+    frames.at(-1).result = ans;
     return frames;
   },
 };
@@ -313,6 +319,7 @@ function cleanWords(words, maxWords, maxLen, maxNodes) {
 }
 
 export const trieWildcardSearch = {
+  problem: { name: 'Design Add and Search Words', statement: 'Store words and search for a word where "." matches any one letter.', example: 'words bat, dad, mad, search ".ad" → true', exampleOutput: true, questionId: 'design-add-and-search-words-data-structure' },
   title: 'Trie: wildcard search (DFS on ".")',
   description:
     'Add and search words: a letter follows one child, a "." tries EVERY child with DFS, and the answer at the end of the query is node.isEnd. Words are clamped to 5 lowercase words; longer words than 3 letters are dropped (≤ 12 trie nodes); the query to 3 characters of a-z or ".".',
@@ -409,6 +416,7 @@ export const trieWildcardSearch = {
       note: `search("${q}") = ${found}. A letter follows one edge; each "." multiplies the work by the number of children, but the trie prunes every dead prefix. Time O(L) without dots, up to O(nodes) with them.`,
       panels: [triePanel(root, { ...states }, 'trie (● = isEnd)', label), vars({ query: q || '""', result: found })],
     });
+    frames.at(-1).result = found;
     return frames;
   },
 };
@@ -420,6 +428,7 @@ const BITS = 3;
 const bin = (x) => x.toString(2).padStart(BITS, '0');
 
 export const trieMaxXor = {
+  problem: { name: 'Maximum XOR of Two Numbers', statement: 'Return the largest a XOR b over all pairs in the array.', example: '[3, 5, 6, 1] → 7 (6 XOR 1)', exampleOutput: 7, questionId: 'maximum-xor-of-two-numbers-in-an-array' },
   title: 'Binary trie: maximum XOR (take the opposite bit)',
   description:
     'Maximum XOR of two numbers: numbers go into a bit trie from the highest bit down; for each x walk the trie preferring the OPPOSITE bit, then insert x. Input is clamped to 5 integers in 0..7 (3 bits) so the trie stays small.',
@@ -493,6 +502,7 @@ export const trieMaxXor = {
       note: `Maximum XOR = ${best} (${bin(best)}). Each insert and query walks ${BITS} bits (31 in the real problem) → O(n · bits) instead of O(n²) pairs.`,
       panels: [panel(), vars({ answer: `${bin(best)} (${best})` })],
     });
+    frames.at(-1).result = best;
     return frames;
   },
 };
@@ -501,6 +511,7 @@ export const trieMaxXor = {
 // Word search II: grid backtracking guided by a trie.
 // ---------------------------------------------------------------------------
 export const trieWordSearchGrid = {
+  problem: { name: 'Word Search II', statement: 'Return every dictionary word that can be traced in the letter grid through adjacent cells.', example: 'board ["oat", "eta", "ihe"], words [oat, eat, tea] → [oat, eat]', exampleOutput: ['oat', 'eat'], questionId: 'word-search-ii' },
   title: 'Word search II: grid DFS guided by a trie',
   description:
     'Find all dictionary words in a grid: one DFS walks the board and the trie together, stops as soon as the trie has no child for the next letter, records node.word once, and deletes dead leaves. Board clamped to 3×4 letters, rows trimmed to the shortest; up to 4 lowercase words, words longer than 3 letters dropped (≤ 12 trie nodes).',
@@ -608,6 +619,7 @@ export const trieWordSearchGrid = {
         vars({ words: ws.length, found: found.length }),
       ],
     });
+    frames.at(-1).result = found;
     return frames;
   },
 };

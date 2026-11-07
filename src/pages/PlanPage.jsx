@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, Clock3, PartyPopper, Trash2 } from 'lucide-react';
 import { useProgress } from '../state/ProgressContext.jsx';
@@ -54,14 +54,50 @@ function Count({ value }) {
   );
 }
 
+// the trail: three switchbacks climbing from bottom-left to the summit, top-right (viewBox 0 0 340 210)
+const TRAIL = 'M 22 188 C 150 198 316 186 306 150 C 296 114 48 132 40 96 C 32 58 262 76 292 40 C 300 30 304 24 312 20';
+
+/** eases a set of 0..1 positions to new values (≈450ms, rAF) so markers travel along the trail, not across it */
+function useGlide(target) {
+  const [cur, setCur] = useState(target);
+  const shown = useRef(target);
+  const sig = JSON.stringify(target);
+  useEffect(() => {
+    if (reducedMotion()) {
+      shown.current = target;
+      setCur(target);
+      return undefined;
+    }
+    const from = shown.current;
+    const t0 = performance.now();
+    let raf;
+    const tick = (t) => {
+      const p = Math.min(1, (t - t0) / 450);
+      const e = p < 0.5 ? 4 * p ** 3 : 1 - (-2 * p + 2) ** 3 / 2;
+      const next = {};
+      for (const k of Object.keys(target)) next[k] = (from[k] ?? target[k]) + (target[k] - (from[k] ?? target[k])) * e;
+      shown.current = next;
+      setCur(next);
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [sig]); // eslint-disable-line react-hooks/exhaustive-deps
+  return cur;
+}
+
 /**
- * The journey as a glowing route (decorative; the same facts are in the text around it). Covered stages sit in the
- * lit zone on the left, the rest are placed by date on a time axis that only rescales when the finish leaves it,
- * so changing your pace slides the stops and the finish along the route.
+ * The journey as a trail (decorative; the same facts are in the text around it). The trail behind you glows, the
+ * dashed trail ahead runs to the flag on your finish date. Covered stages sit behind the traveller (how far depends
+ * on how much of the goal you've covered); the rest are placed by date on a time scale that only rescales when the
+ * finish leaves it, so a new pace walks the waypoints and the flag along the trail.
  */
 function Route({ stops, dates, today }) {
   const ref = useRef(null);
+  const trail = useRef(null);
   const [inView, setInView] = useState(false);
+  const [len, setLen] = useState(0);
+  useLayoutEffect(() => setLen(trail.current?.getTotalLength?.() || 0), []);
   useEffect(() => {
     const el = ref.current;
     if (!el || typeof IntersectionObserver === 'undefined') {
@@ -84,40 +120,64 @@ function Route({ stops, dates, today }) {
   const finishDays = dates.length && dates[dates.length - 1] ? daysFrom(today, dates[dates.length - 1]) : 0;
   const horizon = useRef(0);
   if (finishDays > horizon.current || finishDays < horizon.current * 0.4) horizon.current = Math.max(7, Math.ceil(finishDays * 1.25));
-  const zone = doneN ? 22 : 4; // % of the route for covered stages
-  const at = (d) => zone + (100 - zone) * Math.min(1, daysFrom(today, d) / horizon.current);
+  const total = stops.reduce((a, s) => a + s.minutes, 0) || 1;
+  const done = stops.reduce((a, s) => a + s.minutes - s.remaining, 0);
+  const target = { you: 0.05 + 0.4 * (done / total) };
+  const at = (d) => target.you + (1 - target.you) * Math.min(1, daysFrom(today, d) / horizon.current);
   let k = 0;
-  const xs = dates.map((d) => (d === null ? (zone * ++k) / (doneN + 1) : at(d)));
-  const end = finishDays ? xs[xs.length - 1] : zone;
+  stops.forEach((s, i) => {
+    target[s.id] = dates[i] === null ? (target.you * ++k) / (doneN + 1) : at(dates[i]);
+  });
+  target.end = finishDays ? at(dates[dates.length - 1]) : target.you;
+  const g = useGlide(target);
+  const pt = (f) => (len ? trail.current.getPointAtLength(Math.max(0, Math.min(1, f)) * len) : { x: 22, y: 188 });
+  const place = (f) => {
+    const p = pt(f);
+    return { transform: `translate(${p.x}px, ${p.y}px)` };
+  };
 
   return (
     <div ref={ref} className={`pl-route${inView ? ' is-in' : ''}`} aria-hidden="true">
-      <div className="pl-rt-track">
-        <div className="pl-rt-draw">
-          <i className="pl-rt-rail" />
-          <i className="pl-rt-done" style={{ width: `${zone}%` }} />
-          <i className="pl-rt-fut" style={{ left: `${zone}%`, width: `${100 - zone}%`, transform: `scaleX(${(end - zone) / (100 - zone)})` }} />
-        </div>
-        {doneN > 0 && (
-          <span className="pl-rt-pulse-w" style={{ width: `${zone}%` }}>
-            <span className="pl-rt-pulse">
-              <i />
-            </span>
-          </span>
+      <svg className="pl-rt-svg" viewBox="0 0 340 210" focusable="false">
+        <defs>
+          <mask id="pl-rt-reveal" maskUnits="userSpaceOnUse" x="0" y="0" width="340" height="210">
+            <path className="pl-rt-reveal" d={TRAIL} pathLength="1" />
+          </mask>
+        </defs>
+        <g mask="url(#pl-rt-reveal)">
+          <path ref={trail} className="pl-rt-bed" d={TRAIL} />
+          <path className="pl-rt-plan" d={TRAIL} pathLength="1" style={{ strokeDasharray: `0 ${g.you} ${Math.max(0, g.end - g.you)} 2` }} />
+          <path className="pl-rt-ahead" d={TRAIL} />
+          <path className="pl-rt-done" d={TRAIL} pathLength="1" style={{ strokeDasharray: `${g.you} 2` }} />
+        </g>
+        {len > 0 && (
+          <>
+            {stops.map((s, i) => (
+              <g key={s.id} style={place(g[s.id] ?? target[s.id])}>
+                <g className={`pl-rt-wp${dates[i] === null ? ' pl-rt-wp--done' : ''}`} style={{ '--f': target[s.id] }}>
+                  <circle r="8" />
+                  <text dy="3.5">{i + 1}</text>
+                </g>
+              </g>
+            ))}
+            <g style={place(g.end)}>
+              <g className="pl-rt-flag" style={{ '--f': target.end }}>
+                <path d="M 0 0 V -24" />
+                <path className="pl-rt-cloth" d="M 0 -24 L 14 -19.5 L 0 -15 Z" />
+              </g>
+            </g>
+            <g style={place(g.you)}>
+              <g className="pl-rt-you">
+                <circle className="pl-rt-ping" r="9" />
+                <circle r="6" />
+              </g>
+            </g>
+          </>
         )}
-        {stops.map((s, i) => (
-          <span key={s.id} className="pl-rt-at" style={{ transform: `translateX(${xs[i]}%)` }}>
-            <i className={`pl-rt-dot${dates[i] === null ? ' pl-rt-dot--done' : ''}${i === stops.length - 1 && finishDays ? ' pl-rt-dot--end' : ''}`} style={{ '--x': xs[i] }} />
-          </span>
-        ))}
-        <span className="pl-rt-at" style={{ transform: `translateX(${zone}%)` }}>
-          <i className="pl-rt-dot pl-rt-dot--now" style={{ '--x': zone }} />
-        </span>
-      </div>
+      </svg>
       <div className="pl-rt-legend mono">
-        <span>{doneN ? `${doneN} covered` : 'start'}</span>
-        <span className="pl-rt-now">today</span>
-        <span className="pl-rt-end">{finishDays ? `${finishDays}d →` : 'arrived'}</span>
+        <span>{doneN ? `${doneN} stage${doneN > 1 ? 's' : ''} behind you` : 'at the trailhead'}</span>
+        <span className="pl-rt-end">{finishDays ? `flag in ${finishDays}d` : 'summit reached'}</span>
       </div>
     </div>
   );

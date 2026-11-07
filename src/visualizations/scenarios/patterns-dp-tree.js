@@ -59,6 +59,7 @@ const levelOrder = (nodes, rootId) => {
 
 /* ------------------------------------------------------------------ binary search the partition: median of two sorted arrays */
 export const medianPartition = {
+  problem: { name: 'Median of Two Sorted Arrays', statement: 'Find the median of two sorted arrays in O(log(min(m, n))) time.', example: 'a = [1, 12, 15, 26, 38], b = [2, 13, 17, 30, 45, 50] → 17', exampleOutput: 17, questionId: 'median-of-two-sorted-arrays' },
   title: 'Binary search the cut: median of two sorted arrays',
   description:
     'Binary search i = how many of the SHORTER array go to the left half; the other array must give j = half − i. The cut is right when both left neighbours ≤ both right neighbours (−∞ / +∞ beyond the ends). (≤ 10 numbers per array; unsorted input is sorted first.)',
@@ -220,6 +221,7 @@ export const medianPartition = {
         : `Even total (${total}): median = (max(left) + min(right)) / 2 = (${fmt(maxLeft)} + ${fmt(minRight)}) / 2 = ${fmt(median)}. ${iter} probe(s) of the cut → O(log min(m, n)) time, O(1) space.`,
       { i, lo: i, hi: i, st: { a: ['done', 'done'], b: ['done', 'done'] }, v: { answer: median } },
     );
+    frames.at(-1).result = median;
     return frames;
   },
 };
@@ -228,6 +230,7 @@ export const medianPartition = {
 const letter = (code) => String.fromCharCode(64 + code);
 
 export const decodeWays = {
+  problem: { name: 'Decode Ways', statement: 'Digits map to letters (1 → A … 26 → Z). Count the ways to decode the whole digit string.', example: 's = "12206" → 2 (1·2·20·6 and 12·20·6)', exampleOutput: 2, questionId: 'decode-ways' },
   title: 'Decode ways: 1- and 2-digit steps',
   description:
     'dp[i] = number of ways to decode the first i digits (1 → A … 26 → Z). The last letter uses one digit (not "0") → add dp[i−1], or two digits (10–26, no leading 0) → add dp[i−2]. (≤ 12 digits.)',
@@ -337,12 +340,14 @@ export const decodeWays = {
       dpHl: { [n]: 'done' },
       v: { answer: ans },
     });
+    frames.at(-1).result = ans;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ 1D DP: word break */
 export const wordBreak = {
+  problem: { name: 'Word Break', statement: 'Decide whether s can be split into a sequence of dictionary words.', example: 's = "catsanddog", words = [cat, cats, and, sand, dog] → true', exampleOutput: true, questionId: 'word-break' },
   title: 'Word break: segment a prefix',
   description:
     'dp[i] = can the first i letters be split into dictionary words? dp[i] is true when some j has dp[j] true AND s[j..i) is a word. j with dp[j] false are skipped; the first match wins. (≤ 16 letters, ≤ 10 words.)',
@@ -456,6 +461,7 @@ export const wordBreak = {
         dpHl: { [n]: 'bad' },
         v: { answer: 'false' },
       });
+      frames.at(-1).result = false;
       return frames;
     }
     const parts = [];
@@ -474,12 +480,14 @@ export const wordBreak = {
         : 'dp[0] = ✓ — the empty string needs no words.',
       { sHl, dpHl, v: { answer: 'true', split: sentence || '(empty)' } },
     );
+    frames.at(-1).result = true;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ tree construction: preorder + inorder */
 export const treeFromTraversals = {
+  problem: { name: 'Construct Binary Tree from Preorder and Inorder', statement: 'Rebuild the unique binary tree from its preorder and inorder listings.', example: 'preorder [8, 3, 1, 6, 4, 10, 14, 13], inorder [1, 3, 4, 6, 8, 10, 13, 14] → level order [8, 3, 10, 1, 6, null, 14, null, null, 4, null, 13]', exampleOutput: '[8, 3, 10, 1, 6, null, 14, null, null, 4, null, 13]', questionId: 'construct-binary-tree-from-preorder-and-inorder-traversal' },
   title: 'Build a tree from preorder + inorder',
   description:
     'The next preorder value is always the root of the current inorder range; its inorder index (from a value → index Map) splits the range into the left and right subtrees. Recurse left first. (≤ 12 unique values.)',
@@ -607,12 +615,14 @@ export const treeFromTraversals = {
     snap(`Done: every preorder value was used once, left to right. Level order ${levelOrder(nodes, 0)}, height ${depth}. One Map lookup per node → O(n) time, O(n) for the Map + O(h) stack. (indexOf or slicing per call would make it O(n²).)`, {
       v: { answer: levelOrder(nodes, 0), height: depth },
     });
+    frames.at(-1).result = levelOrder(nodes, 0);
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ functional graph: peel the trees, keep the cycles */
 export const functionalGraph = {
+  problem: { name: 'Cycles in a functional graph', statement: 'Each node i points to exactly one node f[i]. Find which nodes lie on cycles and the longest chain of tree nodes feeding into each.', example: 'f = [1, 2, 0, 0, 0, 4, 3] → cycles [[0, 1, 2]]; nodes 3, 4, 5, 6 are tree nodes feeding into it', exampleOutput: [[0, 1, 2]], questionId: 'maximum-employees-to-be-invited-to-a-meeting' },
   title: 'Functional graph: peel trees, find cycles',
   description:
     'Every node has exactly one arrow i → f[i], so each piece is a cycle with trees feeding into it. Kahn-style peeling removes nodes with in-degree 0 (tree nodes) and tracks the longest chain into each node; whatever is never peeled lies on a cycle. (≤ 10 nodes.)',
@@ -726,6 +736,7 @@ export const functionalGraph = {
     snap(`${cycles.length} cycle(s), lengths [${cycles.map((c) => c.length).join(', ')}]; ${n - cycNodes.length} tree node(s). Every node is queued at most once and every arrow removed once → O(n) time, O(n) space — no need to simulate a walk from every node.`, {
       v: { cycles: cycles.length, 'longest cycle': longest, answer: cycles.map((c) => c.join('→')).join(' | ') },
     });
+    frames.at(-1).result = cycles;
     return frames;
   },
 };
@@ -739,6 +750,7 @@ const num = (v) => {
 };
 
 export const fastPower = {
+  problem: { name: 'Pow(x, n)', statement: 'Compute x raised to the integer power n in O(log n) multiplications.', example: 'x = 2, n = 10 → 1024', exampleOutput: 1024, questionId: 'powx-n' },
   title: 'Fast power: halve the exponent',
   description:
     'pow(e) calls pow(⌊e/2⌋) ONCE and squares the result (times x when e is odd), so the call stack is only about log₂ n deep. A negative n flips x to 1/x first. (|n| ≤ 1 000 000, |x| ≤ 100.)',
@@ -849,12 +861,14 @@ export const fastPower = {
         : `${num(x)}^${n < 0 ? `−${E}` : E} = ${num(res[0])}. ${es.length} call(s) for exponent ${E} (one per binary digit, plus the base case — n = 2³¹ would need only 33): ${E} = ${bin}₂, and each odd step (a 1 bit) adds the extra · x. O(log n) time and O(log n) stack — computing half ONCE is what keeps it from doubling back to O(n).`,
       { v: { answer: num(res[0]), calls: es.length } },
     );
+    frames.at(-1).result = res[0];
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ BST: sorted array → height-balanced */
 export const bstBuildBalanced = {
+  problem: { name: 'Convert Sorted Array to Binary Search Tree', statement: 'Build a height-balanced BST from a sorted array.', example: '[-10, -3, 0, 5, 9, 12, 20] → root 5, height 3', exampleOutput: 3, questionId: 'convert-sorted-array-to-binary-search-tree' },
   title: 'Sorted array → balanced BST',
   description:
     'build(lo, hi) makes the middle element the root, then builds the left half into the left subtree and the right half into the right subtree. Every level halves the range, so the height is ⌈log₂(n + 1)⌉. (≤ 15 values; input is sorted and de-duplicated.)',
@@ -937,12 +951,14 @@ export const bstBuildBalanced = {
     snap(`Done: ${nums.length} node(s), height ${height} = ⌈log₂(${nums.length} + 1)⌉ = ${ideal} — the minimum possible (a sorted insert chain would have height ${nums.length}). In-order traversal gives back nums. O(n) time, O(log n) recursion depth.`, {
       v: { answer: levelOrder(nodes, 0), height },
     });
+    frames.at(-1).result = height;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ digit DP: count the digit 1 in 0…N */
 export const digitDpOnes = {
+  problem: { name: 'Number of Digit One', statement: 'Count how many times the digit 1 is written in all numbers from 0 to N.', example: 'N = 235 → 154', exampleOutput: 154, questionId: 'number-of-digit-one' },
   title: 'Digit DP: count the 1s in 0…N',
   description:
     'go(pos, tight, ones) chooses digits left to right. While tight (the prefix equals N’s) the digit is capped at N’s digit; once free it can be 0–9, and free states are memoised in memo[pos][ones] — repeats become memo hits. (0 ≤ N ≤ 9999.)',
@@ -1076,6 +1092,7 @@ export const digitDpOnes = {
     snap(`Answer: digit 1 appears ${ans} time(s) in 0…${N}. Only ${memo.size} free state(s) were computed; every repeat was a memo hit. O(digits × ones-states × 10) time instead of walking all ${N + 1} numbers.`, {
       v: { answer: ans, 'memo states': memo.size },
     });
+    frames.at(-1).result = ans;
     return frames;
   },
 };

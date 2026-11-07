@@ -28,6 +28,7 @@ const cleanInts = (xs, max, lo, hi) =>
 
 /* ------------------------------------------------------------------ 1D linear: house robber */
 export const dpLinearRobber = {
+  problem: { name: 'House Robber', statement: 'Rob houses along a street for the most money without robbing two neighbours.', example: '[2, 7, 9, 3, 1, 5] → 16 (2 + 9 + 5)', exampleOutput: 16, questionId: 'house-robber' },
   title: '1D DP: house robber (look back two cells)',
   description:
     'dp[i] = best loot from the first i houses = max(dp[i−1] skip house i, dp[i−2] + money take it). Only the last two cells are ever read, so two variables are enough. (≤ 7 houses, money 0–99.)',
@@ -88,6 +89,7 @@ export const dpLinearRobber = {
     frames.push({
       note: `Answer dp[${n}] = ${dp[n]} — the most money without robbing two neighbours. O(n) time, O(1) extra space with the two variables.`,
       panels: [...show(null, { [n]: 'done' }), vars({ answer: dp[n] })],
+      result: dp[n],
     });
     return frames;
   },
@@ -95,6 +97,7 @@ export const dpLinearRobber = {
 
 /* ------------------------------------------------------------------ 1D + extra state: frog jump */
 export const dpFrogJumpMap = {
+  problem: { name: 'Frog Jump', statement: 'After a jump of k units the frog may jump k − 1, k or k + 1. Starting with a 1-unit jump, can it reach the last stone?', example: 'stones [0, 1, 3, 5, 6, 8, 12, 17] → true', exampleOutput: true, questionId: 'frog-jump' },
   title: '1D DP + state map: frog jump',
   description:
     'reach[stone] = the set of jump sizes k the frog can arrive with. From a stone reached with k, try k − 1, k, k + 1 (only > 0) and record the size on the stone it lands on. (≤ 8 stones, 0–99; sorted and de-duplicated.)',
@@ -167,6 +170,7 @@ export const dpFrogJumpMap = {
     frames.push({
       note: `${ok ? `The last stone ${last} has a non-empty set {${setStr(last)}}, so the frog can cross: true.` : `The last stone ${last} has an empty set — no jump sequence reaches it: false.`} Work = the reachable (stone, k) states × 3 tries, at most O(n²).`,
       panels: panels(finalHl, undefined, { answer: ok }),
+      result: ok,
     });
     return frames;
   },
@@ -174,6 +178,7 @@ export const dpFrogJumpMap = {
 
 /* ------------------------------------------------------------------ unbounded knapsack: coin change II */
 export const dpUnboundedCoinWays = {
+  problem: { name: 'Coin Change II', statement: 'Count the combinations of coins (each reusable) that make up the amount.', example: 'coins = [1, 2, 5], amount = 5 → 4', exampleOutput: 4, questionId: 'coin-change-ii' },
   title: 'Unbounded knapsack: coin change II (count combinations)',
   description:
     'dp[a] = number of coin combinations that make a. Coins in the OUTER loop, amounts FORWARDS in the inner loop: dp[a] += dp[a − coin] reads a cell this coin has already updated, so the coin can be reused. Row r = dp after coin r. (≤ 5 distinct coins 1–9, amount 0–6.)',
@@ -243,6 +248,7 @@ export const dpUnboundedCoinWays = {
     frames.push({
       note: `Answer dp[${amount}] = ${dp[amount]} combination${dp[amount] === 1 ? '' : 's'}. Coins outer fixes an order on the coins, so each multiset is counted once (amount outer would count permutations). O(coins × amount) time, O(amount) space.`,
       panels: [table(cells(), states((r, a) => (r === rows.length - 1 && a === amount ? 'done' : base(r))), rowLabels, colLabels, 'ways to make each amount'), vars({ answer: dp[amount] })],
+      result: dp[amount],
     });
     return frames;
   },
@@ -250,6 +256,7 @@ export const dpUnboundedCoinWays = {
 
 /* ------------------------------------------------------------------ palindromic DP: longest palindromic subsequence */
 export const dpPalindromeSubseq = {
+  problem: { name: 'Longest Palindromic Subsequence', statement: 'Return the length of the longest subsequence that reads the same forwards and backwards.', example: 's = "agbdba" → 5 ("abdba")', exampleOutput: 5, questionId: 'longest-palindromic-subsequence' },
   title: 'Palindromic DP: longest palindromic subsequence',
   description:
     'dp[i][j] = longest palindromic subsequence of s[i..j]. Equal ends wrap the inside: dp[i+1][j−1] + 2; otherwise drop one end: max(dp[i+1][j], dp[i][j−1]). i goes DOWN so row i+1 is ready. (≤ 7 characters.)',
@@ -312,6 +319,7 @@ export const dpPalindromeSubseq = {
       }
     }
     snap(`Answer dp[0][${n - 1}] = ${dp[0][n - 1]}: the longest palindromic subsequence of "${s.join('')}". n² / 2 cells, O(1) each → O(n²) time and space.`, (a, b) => (a === 0 && b === n - 1 ? 'done' : ''), { answer: dp[0][n - 1] });
+    frames.at(-1).result = dp[0][n - 1];
     return frames;
   },
 };
@@ -355,6 +363,7 @@ function buildTree(raw, maxNodes = 9, maxDepth = 3) {
 }
 
 export const dpTreeRobber = {
+  problem: { name: 'House Robber III', statement: 'Houses form a binary tree; robbing a node and its direct child is not allowed. Maximise the loot.', example: '[3, 4, 5, 1, 3, null, 1] → 9 (4 + 5)', exampleOutput: 9, questionId: 'house-robber-iii' },
   title: 'Tree DP: house robber III ([rob, skip] per node)',
   description:
     'Post-order: each node returns [rob, skip]. rob = val + left.skip + right.skip (children must be skipped); skip = max(left) + max(right) (children free). A finished node is labelled rob|skip. (≤ 9 nodes, 4 levels, values 0–99.)',
@@ -434,6 +443,7 @@ export const dpTreeRobber = {
     frames.push({
       note: `The root returns [${r0}, ${s0}]; the answer is max = ${ans} (${r0 >= s0 ? 'rob the root' : 'skip the root'}). Each node is visited once and combines its children in O(1): O(n) time, O(height) stack.`,
       panels: [panel('rob|skip once a node is finished'), vars({ rob: r0, skip: s0, answer: ans })],
+      result: ans,
     });
     if (asks < 3) attach(frames, pick(`The root returns [${r0}, ${s0}]. What is the answer?`, ans, [r0 + s0, Math.min(r0, s0), ans + 1], 1));
     return frames;

@@ -54,6 +54,7 @@ function windowArr(values, cur, opts = {}) {
 
 // ====================== mst-prim-dense ======================
 export const mstDensePrim = {
+  problem: { name: 'Min Cost to Connect All Points', statement: 'Connect all points so every pair is joined by some path; a link costs the Manhattan distance. Return the smallest total cost.', example: '[[0,0], [2,2], [3,10], [5,2], [7,0]] → 20', exampleOutput: 20, questionId: 'min-cost-to-connect-all-points' },
   title: 'Dense Prim: connect all points',
   description:
     'Min cost to connect points (Manhattan distance). O(n²) Prim with a minCost array and no heap: a linear scan picks the closest outside point, then every outside point is relaxed against it. Grey lines show each outside point’s current cheapest link. At most 7 points, coordinates clamped to −20..20.',
@@ -113,6 +114,7 @@ export const mstDensePrim = {
     if (!n) {
       snap('No points: nothing to connect. minCost is empty.');
       snap('Done: total = 0. O(n²) time, O(n) memory.');
+      frames.at(-1).result = 0;
       return frames;
     }
     snap(`${n} point(s); any two can be joined at cost |x1 − x2| + |y1 − y2|. No edge list: minCost[0] = 0 and every other minCost = ∞.`);
@@ -154,12 +156,14 @@ export const mstDensePrim = {
       );
     }
     snap(`All ${n} points are in the tree. Minimum cost = ${total}. n rounds × O(n) scan + O(n) relax = O(n²) time, O(n) memory — no edge list was ever built.`, { round: n });
+    frames.at(-1).result = total;
     return frames;
   },
 };
 
 // ====================== mst-virtual-node ======================
 export const mstVirtualNode = {
+  problem: { name: 'Optimize Water Distribution in a Village', statement: 'Each house can build its own well or be joined by pipes to a house with water. Return the cheapest way to supply every house.', example: 'n = 4, wells [2, 6, 5, 1] with the default pipes → 8', exampleOutput: 8, questionId: 'optimize-water-distribution-in-a-village' },
   title: 'MST with a virtual node: wells and pipes',
   description:
     'Optimize water distribution: add node 0 joined to every house i by an edge of weight wells[i − 1], then run Kruskal on the n + 1 nodes and stop at n edges. Houses are 1..n; n is clamped to 0–7 and to wells.length, at most 9 pipes (weights 0–99); bad pipes are dropped.',
@@ -220,6 +224,7 @@ export const mstVirtualNode = {
     if (!n) {
       snap('n = 0: no houses, nothing to supply.');
       snap('Done: total cost = 0.');
+      frames.at(-1).result = 0;
       return frames;
     }
     snap(`${n} house(s). Each can build its own well (wells = [${cost.slice(0, n).join(', ')}]) or get water through a pipe. A well is not an edge, so plain MST does not apply yet.`);
@@ -264,12 +269,14 @@ export const mstVirtualNode = {
       `Done: ${n} edges used. Wells at house(s) ${wellsAt.join(', ')}; the other houses get pipes. Minimum total cost = ${total}. Kruskal on m + n edges: O((m + n) log(m + n)).`,
       { predict: q },
     );
+    frames.at(-1).result = total;
     return frames;
   },
 };
 
 // ====================== mst-edge-classification ======================
 export const mstCriticalEdges = {
+  problem: { name: 'Critical and Pseudo-Critical MST Edges', statement: 'Classify each edge: in every minimum spanning tree (critical), in some but not all (pseudo-critical), or in none.', example: 'the default graph → [[0, 3, 4], [1, 2]] (critical #0, #3, #4; pseudo-critical #1, #2)', exampleOutput: [[0, 3, 4], [1, 2]], questionId: 'find-critical-and-pseudo-critical-edges-in-minimum-spanning-tree' },
   title: 'Critical and pseudo-critical MST edges',
   description:
     'Run Kruskal once for the best weight, then for each edge: ban it (weight goes up or graph splits → critical), otherwise force it first (weight stays the same → pseudo-critical). n is clamped to 0–5 and at most 6 edges; self-loops and bad edges are dropped; #i is the edge’s index in the kept list.',
@@ -357,10 +364,12 @@ export const mstCriticalEdges = {
     const best = base.total;
     if (n <= 1) {
       snap(`n = ${n}: a spanning tree needs ${Math.max(0, n - 1)} edges, so best = 0 and no edge is used by any MST.`, { best: 0 });
+      frames.at(-1).result = [[], []];
       return frames;
     }
     if (best === Infinity) {
       snap(`Kruskal could not reach n − 1 = ${n - 1} edges: the graph is disconnected, so no spanning tree exists and the question has no answer (the problem guarantees a connected graph).`, { taken: base.taken, best: '∞' });
+      frames.at(-1).result = null;
       return frames;
     }
     snap(`Plain Kruskal: best = ${best}. This is ONE MST — with ties, being in it does not decide anything, so each edge gets its own test.`, { taken: base.taken, best });
@@ -398,6 +407,7 @@ export const mstCriticalEdges = {
     }
     const names = (c) => es.filter((_, i) => cls[i] === c).map((e) => `#${e[3]}`).join(', ') || 'none';
     snap(`Done. Critical: ${names('crit')}. Pseudo-critical: ${names('pseudo')}. Neither: ${names('none')}. Up to 2m extra Kruskal runs: O(m · m α(n)) after the sort.`, { taken: base.taken, best });
+    frames.at(-1).result = ['crit', 'pseudo'].map((c) => es.filter((_, i) => cls[i] === c).map((e) => e[3]).sort((a, b) => a - b));
     return frames;
   },
 };
@@ -409,6 +419,7 @@ function sortedEdges(edges, n) {
 
 // ====================== adv-graph-lowlink-bridges ======================
 export const tarjanBridges = {
+  problem: { name: 'Critical Connections in a Network', statement: 'Find every edge whose removal disconnects the graph (a bridge).', example: 'triangles 0-1-2 and 3-4-5, plus 1–3 and 5–6 → bridges [[1, 3], [5, 6]]', exampleOutput: [[1, 3], [5, 6]], questionId: 'critical-connections-in-a-network' },
   title: 'Bridges with disc / low (Tarjan)',
   description:
     'Critical connections: one DFS sets disc[u] = low[u] = time++; a back edge lowers low[u] to disc[v], a returning child lowers it to low[v], and tree edge u–v is a bridge when low[v] > disc[u]. n is clamped to 0–8, at most 10 undirected edges; self-loops and bad edges are dropped (parallel edges are kept).',
@@ -518,6 +529,7 @@ export const tarjanBridges = {
     }
     if (n) snap(`Done. Bridges: ${bridges.length ? bridges.map((b) => `${b.u}–${b.v}`).join(', ') : 'none (every edge lies on a cycle)'}. One DFS: O(V + E).`, { end: true });
     else snap('Done: no bridges. O(V + E) = O(0).', { end: true });
+    frames.at(-1).result = bridges.map((b) => [Math.min(b.u, b.v), Math.max(b.u, b.v)]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
     return frames;
   },
 };
@@ -525,6 +537,7 @@ export const tarjanBridges = {
 // ====================== adv-graph-scc-kosaraju ======================
 const LETTERS = 'ABCDEFGH';
 export const kosarajuScc = {
+  problem: { name: 'Strongly connected components (Kosaraju)', statement: 'Split a directed graph into groups in which every node can reach every other.', example: 'the default 7-node graph → [[0, 1, 2], [3, 4, 5], [6]]', exampleOutput: [[0, 1, 2], [3, 4, 5], [6]], questionId: 'classic-count-scc-kosaraju' },
   title: 'Kosaraju: strongly connected components',
   description:
     'Pass 1: DFS the graph and push each node when it FINISHES. Pass 2: DFS the reversed graph in decreasing finish time; each pass-2 tree is one SCC (letter after the node id). n is clamped to 0–8, at most 12 directed edges; self-loops and bad edges are dropped.',
@@ -583,6 +596,7 @@ export const kosarajuScc = {
     if (!n) {
       snap('Empty graph: no nodes, no SCCs.');
       snap('Done: count = 0.');
+      frames.at(-1).result = [];
       return frames;
     }
     snap(`${n} node(s), ${list.length} directed edge(s). An SCC is a group where every node can reach every other. Pass 1 records the order in which DFS calls FINISH.`);
@@ -627,12 +641,14 @@ export const kosarajuScc = {
       snap(`SCC ${LETTERS[c]} = {${members.join(', ')}}: the reversed DFS from ${u} can't leave it, because every other SCC it could reach is already assigned.`, { ptr: i, predict: q });
     }
     snap(`Done: ${count} SCC(s). Collapsing each SCC to one node gives a DAG (the condensation). Two DFS passes: O(V + E).`);
+    frames.at(-1).result = Array.from({ length: count }, (_, c) => comp.map((x, k) => (x === c ? k : -1)).filter((k) => k >= 0)).sort((a, b) => a[0] - b[0]);
     return frames;
   },
 };
 
 // ====================== adv-graph-meta-bfs ======================
 export const busRoutesMetaBfs = {
+  problem: { name: 'Bus Routes', statement: 'Each bus loops through its stops. Return the fewest buses needed to travel from source to target, or -1.', example: 'routes [[1,2,7], [3,6,7], [2,5], [5,9,6]], 1 → 9 → 3 buses', exampleOutput: 3, questionId: 'bus-routes' },
   title: 'Bus routes: BFS over routes',
   description:
     'Least number of buses: index stop → routes, then BFS level by level; boarding a route marks it used and puts all its new stops in the next frontier. The graph shows routes as nodes (linked when they share a stop). At most 5 routes of 4 stops each (stop ids 0–99).',
@@ -704,6 +720,7 @@ export const busRoutesMetaBfs = {
     snap(`${groups.length} route(s). Riding inside a route is free; each new route costs 1 bus. Index stop → routes first, so each stop finds its routes in O(1).`);
     if (source === target) {
       snap(`source === target (${source}): no bus needed. Answer 0.`);
+      frames.at(-1).result = 0;
       return frames;
     }
     let asks = 0;
@@ -735,6 +752,7 @@ export const busRoutesMetaBfs = {
           if (found) {
             const q = pick(`Board R${gid} from stop ${item}: it contains target ${target}. What is the answer?`, steps, [steps + 1, steps - 1, -1].filter((x) => x >= -1), asks++, 'The answer is the BFS level = number of buses.');
             snap(`Board R${gid} from stop ${item}: it stops at ${target}! Answer = ${steps} bus(es). Each route is scanned at most once: O(total stops).`, { cur: gid, item, hit: gid, predict: q });
+            frames.at(-1).result = steps;
             return frames;
           }
           const q = boards++ % 2 === 0 ? pick(`Board R${gid} (stops ${groups[gid].join(',')}). Which stops are added to the next frontier?`, fresh.join(',') || 'none', [groups[gid].join(','), groups[gid].filter((x) => x !== item).join(',') || 'none', 'none'], asks++, 'Only stops never seen before join the next frontier.') : undefined;
@@ -745,6 +763,7 @@ export const busRoutesMetaBfs = {
       next = [];
     }
     snap(`The frontier is empty and ${target} was never reached: answer −1. Each route was scanned at most once: O(total stops).`);
+    frames.at(-1).result = -1;
     return frames;
   },
 };

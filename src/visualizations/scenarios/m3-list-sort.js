@@ -17,6 +17,7 @@ const show = (a) => `[${a.join(', ')}]`;
 
 // ───────────────────────── 1. Linked list merge sort (split at middle + merge with dummy) ─────────────────────────
 export const listMergeSort = {
+  problem: { name: 'Sort List', statement: 'Sort a singly linked list in O(n log n) time.', example: '[4, 2, 5, 1, 3] → [1, 2, 3, 4, 5]', exampleOutput: [1, 2, 3, 4, 5], questionId: 'sort-list' },
   title: 'Linked list: merge sort (split + merge)',
   description: 'Find the first middle with slow/fast, cut mid.next = null, sort both halves, then merge them with a dummy head and a tail pointer. Up to 8 nodes.',
   defaultInput: { list: [4, 2, 5, 1, 3] },
@@ -130,6 +131,7 @@ export const listMergeSort = {
       note: `Sorted: ${show(res.map((id) => vals[id]))}. log n levels of splitting, O(n) merging per level → O(n log n) time; only O(log n) recursion stack, no extra array.`,
       panels: [chainPanel(res, { label: 'sorted list', highlights: Object.fromEntries(res.map((_, i) => [i, 'done'])) }), st()],
     });
+    frames.at(-1).result = res.map((id) => vals[id]);
     return frames;
   },
 };
@@ -157,6 +159,7 @@ function validBool(s) {
 }
 
 export const recursiveDescentBool = {
+  problem: { name: 'Parsing A Boolean Expression', statement: 'Evaluate an expression made of t, f, !(e), &(e, …) and |(e, …).', example: '"&(t,!(f))" → true', exampleOutput: true, questionId: 'parsing-a-boolean-expression' },
   title: 'Recursive descent: evaluate a boolean expression',
   description: 'One function expr() parses one level; a shared cursor i moves through the string and each nested "(…)" is a recursive call. Grammar: t, f, !(e), &(e,…), |(e,…). Spaces removed, up to 20 characters.',
   defaultInput: { s: '&(t,!(f))' },
@@ -169,6 +172,7 @@ export const recursiveDescentBool = {
     if (!validBool(str)) {
       frames.push({ note: 'The parser expects t, f, !(e), &(e,…) or |(e,…). Check the input against that grammar first.', panels: [arr(chars, { label: 's' })] });
       frames.push({ note: `"${str}" does not follow the grammar (${str ? 'unbalanced, wrong separator or extra characters' : 'empty string'}), so there is nothing to evaluate.`, panels: [arr(chars, { label: 's', highlights: Object.fromEntries(chars.map((_, k) => [k, 'bad'])) })] });
+      frames.at(-1).result = null;
       return frames;
     }
     const tf = (b) => (b ? 't' : 'f');
@@ -238,12 +242,14 @@ export const recursiveDescentBool = {
     };
     const res = expr();
     frames.push({ note: `The outermost call returned → the expression is ${res ? 'true' : 'false'}. Every character is read once by the shared cursor → O(n) time, O(depth) call stack.`, panels: view({}, { answer: res ? 'true' : 'false' }) });
+    frames.at(-1).result = res;
     return frames;
   },
 };
 
 // ───────────────────────── 3. Sort as preprocessing: H-Index ─────────────────────────
 export const sortThenScanHIndex = {
+  problem: { name: 'H-Index', statement: 'Return the largest h such that at least h papers have h or more citations each.', example: '[3, 0, 6, 1, 5] → 3', exampleOutput: 3, questionId: 'h-index' },
   title: 'Sort first, then scan: H-Index',
   description: 'Sort a copy of the citations descending; then the paper at position i has i + 1 papers with at least its citations, so h is the largest i + 1 with c[i] ≥ i + 1. Up to 8 papers; negatives become 0.',
   defaultInput: { citations: [3, 0, 6, 1, 5] },
@@ -301,12 +307,14 @@ export const sortThenScanHIndex = {
       note: `H-Index = ${h}${c.length ? '' : ' (no papers)'}. The sort costs O(n log n) once; the scan after it is O(n).`,
       panels: [arr(c, { label: 'citations (input)' }), arr(sorted, { label: 'sorted ↓', showIndices: true, highlights: hl }), vars({ answer: h })],
     });
+    frames.at(-1).result = h;
     return frames;
   },
 };
 
 // ───────────────────────── 4. Intervals: greedy by earliest end (non-overlapping intervals) ─────────────────────────
 export const greedyEarliestEnd = {
+  problem: { name: 'Non-overlapping Intervals', statement: 'Return the fewest intervals to remove so the rest do not overlap.', example: '[[1,3], [2,4], [3,5], [1,7], [5,6], [6,8]] → 2', exampleOutput: 2, questionId: 'non-overlapping-intervals' },
   title: 'Greedy by earliest end: non-overlapping intervals',
   description: 'Sort by end; keep an interval when it starts at or after lastEnd, otherwise skip it. Removals = n − kept. Up to 8 intervals; a reversed pair [5, 2] is read as [2, 5].',
   defaultInput: { intervals: [[1, 3], [2, 4], [3, 5], [1, 7], [5, 6], [6, 8]] },
@@ -368,6 +376,7 @@ export const greedyEarliestEnd = {
       note: `Kept ${kept} of ${n} → remove ${n - kept}. One sort O(n log n) plus one pass O(n); no search or DP needed.`,
       panels: [panel(sorted.filter((_, k) => states[k] === 'done'), 'kept', sorted.map(() => 'done')), vars({ kept, removals: n - kept })],
     });
+    frames.at(-1).result = n - kept;
     return frames;
   },
 };

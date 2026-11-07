@@ -24,6 +24,7 @@ const mapTable = (map, hl = {}, label) =>
 
 // ───────────────────────────── 1. Complement lookup (two sum) ─────────────────────────────
 export const complementLookup = {
+  problem: { name: 'Two Sum', statement: 'Return the indices of the two numbers that add up to the target.', example: 'nums = [4, 1, 7, 3, 8, 5], target = 12 → [0, 4] (4 + 8)', exampleOutput: [0, 4], questionId: 'two-sum' },
   title: 'Complement lookup: two sum with a map',
   description: 'Scan once; for each x ask the map (value → index of EARLIER elements) for target − x; if it is missing, store x. Up to 10 integers in −999..999.',
   defaultInput: { nums: [4, 1, 7, 3, 8, 5], target: 12 },
@@ -69,6 +70,7 @@ export const complementLookup = {
           panels: [arr(a, { pointers: ptr(i), highlights: { ...seen(i), [j]: 'done', [i]: 'done' } }), mapTable(indexOf, { [need]: 'done' }, label), vars({ answer: `[${j}, ${i}]` })],
           predict: p,
         });
+        frames.at(-1).result = [j, i];
         return frames;
       }
       indexOf.set(x, i);
@@ -82,12 +84,14 @@ export const complementLookup = {
       note: `Scanned every element and no complement was ever in the map, so no pair adds up to ${T}: return []. Still one pass: O(n) time, O(n) space.`,
       panels: [arr(a, { highlights: seen(a.length) }), mapTable(indexOf, {}, label), vars({ answer: '[]' })],
     });
+    frames.at(-1).result = [];
     return frames;
   },
 };
 
 // ───────────────────────────── 2. Canonical key (group anagrams) ─────────────────────────────
 export const canonicalKeyGroups = {
+  problem: { name: 'Group Anagrams', statement: 'Group the words that are anagrams of each other.', example: '[eat, tea, tan, ate, nat, bat] → [[eat, tea, ate], [tan, nat], [bat]]', exampleOutput: [['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']], questionId: 'group-anagrams' },
   title: 'Canonical keys: group anagrams',
   description: 'Each word → its sorted-letters key; words with the same key land in the same Map bucket. Up to 8 words of up to 8 characters.',
   defaultInput: { words: ['eat', 'tea', 'tan', 'ate', 'nat', 'bat'] },
@@ -130,12 +134,14 @@ export const canonicalKeyGroups = {
       note: `Done: ${groups.size} group(s) = [...groups.values()]. Each word costs one sort, so O(n · k log k) for n words of length ≤ k. (A string key works; an array key would not — Map compares arrays by reference.)`,
       panels: [arr(ws.map(show), { highlights: done(ws.length) }), groupTable(), vars({ groups: groups.size, n: ws.length, k })],
     });
+    frames.at(-1).result = [...groups.values()];
     return frames;
   },
 };
 
 // ───────────────────────────── 3. Index map + array (RandomizedSet) ─────────────────────────────
 export const randomizedSetDesign = {
+  problem: { name: 'Insert Delete GetRandom O(1)', statement: 'Design a set with insert, remove and getRandom, each in average O(1) time.', example: 'insert 10, 20, 30, 40, remove 20 → 40 moves into 20’s slot: [10, 40, 30]', exampleInput: { ops: ['insert 10', 'insert 20', 'insert 30', 'insert 40', 'remove 20'] }, exampleOutput: [10, 40, 30], questionId: 'insert-delete-getrandom-o1' },
   title: 'Index map + array: O(1) insert / remove / getRandom',
   description: 'vals[] plus a map value → index; remove swaps the last element into the hole and pops. getRandom uses a FIXED Math.random() = 0.5 (index ⌊0.5 · size⌋) so the run is repeatable. Up to 10 ops like "insert 5", "remove 5", "getRandom".',
   defaultInput: { ops: ['insert 10', 'insert 20', 'insert 30', 'insert 40', 'remove 20', 'insert 30', 'getRandom', 'remove 30', 'remove 99', 'getRandom'] },
@@ -235,12 +241,14 @@ export const randomizedSetDesign = {
       note: `All operations done. Returns: ${out.length ? out.join(', ') : '(none)'}. insert, remove and getRandom are each O(1) average; space O(n).`,
       panels: panels(Object.fromEntries(vals.map((_, k) => [k, 'done'])), {}, { size: vals.length }),
     });
+    frames.at(-1).result = [...vals];
     return frames;
   },
 };
 
 // ───────────────────────────── 4. Sort + two pointers (3Sum) ─────────────────────────────
 export const threeSumDedup = {
+  problem: { name: '3Sum', statement: 'Find all unique triplets in the array that sum to 0.', example: '[-1, 0, 1, 2, -1, -4] → [[-1, -1, 2], [-1, 0, 1]]', exampleOutput: [[-1, -1, 2], [-1, 0, 1]], questionId: '3sum' },
   title: '3Sum: sort, fix i, two pointers, skip duplicates',
   description: 'Sort, fix nums[i], then move l / r on the rest to hit sum 0; equal values are skipped so each triplet appears once. Up to 10 integers in −99..99.',
   defaultInput: { nums: [-1, 0, 1, 2, -1, -4] },
@@ -312,12 +320,14 @@ export const threeSumDedup = {
       note: `Done: ${res.length ? res.map((t) => `[${t.join(', ')}]`).join(', ') : 'no triplet sums to 0'}. Sorting is O(n log n), each fixed i runs one O(n) two-pointer pass → O(n²) total, O(1) extra space besides the output.`,
       panels: [arr(a), resTable()],
     });
+    frames.at(-1).result = res;
     return frames;
   },
 };
 
 // ───────────────────────────── 5. Hoare partition (evens before odds) ─────────────────────────────
 export const hoarePartitionParity = {
+  problem: { name: 'Sort Array By Parity', statement: 'Move all even numbers before all odd numbers, in place.', example: '[3, 8, 5, 2, 7, 4, 6, 1] → [6, 8, 4, 2, 7, 5, 3, 1]', exampleOutput: [6, 8, 4, 2, 7, 5, 3, 1], questionId: 'sort-array-by-parity' },
   title: 'Hoare partition: evens before odds',
   description: 'isLeft = "is even". l skips evens, r skips odds; then nums[l] and nums[r] are both misplaced and one swap fixes both. Up to 10 integers in −999..999.',
   defaultInput: { nums: [3, 8, 5, 2, 7, 4, 6, 1] },
@@ -380,12 +390,14 @@ export const hoarePartitionParity = {
       panels: [view(), vars({ boundary: l, result: `[${a.join(', ')}]` })],
       predict: n > 1 ? pick('l has passed r. What does the partition return?', `boundary ${l}`, [`boundary ${Math.max(0, l - 1)}`, `boundary ${l + 1}`, `boundary ${n}`], q++) : undefined,
     });
+    frames.at(-1).result = a;
     return frames;
   },
 };
 
 // ───────────────────────────── 6. Move the bottleneck (trapping rain water) ─────────────────────────────
 export const trapBottleneck = {
+  problem: { name: 'Trapping Rain Water', statement: 'Bars of the given heights stand side by side. How much rain water is trapped between them?', example: '[3, 0, 2, 0, 4, 1, 2] → 8', exampleOutput: 8, questionId: 'trapping-rain-water' },
   title: 'Move the bottleneck: trapping rain water',
   description: 'leftMax / rightMax are the running maxima; the side with the smaller one is the bottleneck, so its water level is known exactly — add it and move that pointer. Up to 10 bars, heights 0..20.',
   defaultInput: { height: [3, 0, 2, 0, 4, 1, 2] },
@@ -443,6 +455,7 @@ export const trapBottleneck = {
       note: `l meets r${n ? ` at bar ${l}, the tallest bar seen — it holds no water` : ''}. Total water = ${total}. Each step settles one bar: O(n) time, O(1) space.`,
       panels: [arr(h, { label: 'height', highlights: Object.fromEntries(h.map((_, k) => [k, 'done'])) }), arr([...water], { label: 'water above bar' }), vars({ water: total })],
     });
+    frames.at(-1).result = total;
     return frames;
   },
 };

@@ -30,6 +30,7 @@ const fmtList = (xs) => `[${xs.join(', ')}]`;
 /* ------------------------------------------------------------------ arrays: matrix spiral */
 
 export const spiralMatrix = {
+  problem: { name: 'Spiral Matrix', statement: 'Return the elements of a matrix in clockwise spiral order.', example: '[[1,2,3,4], [5,6,7,8], [9,10,11,12]] → [1, 2, 3, 4, 8, 12, 11, 10, 9, 5, 6, 7]', exampleOutput: [1, 2, 3, 4, 8, 12, 11, 10, 9, 5, 6, 7], questionId: 'spiral-matrix' },
   title: 'Spiral order: shrinking boundaries',
   description: 'Walk the top row, right column, bottom row and left column, moving each wall inward after its side. The two re-checks stop a lone row or column from being walked twice. Clamped to 6 × 6; missing cells count as 0.',
   defaultInput: { matrix: [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]] },
@@ -134,6 +135,7 @@ export const spiralMatrix = {
       note: `The walls crossed (${top > bottom ? `top ${top} > bottom ${bottom}` : `left ${left} > right ${right}`}) → every cell is visited. Spiral order = ${fmtList(out)}. Each cell once → O(m·n) time, O(1) extra space besides out.`,
       panels: [table(M.map((row) => [...row]), done, M.map((_, r) => String(r)), M[0].map((_, c) => String(c)), 'matrix'), arr([...out], { label: 'out', highlights: Object.fromEntries(out.map((_, i) => [i, 'done'])) }), vars({ count: out.length, result: fmtList(out) })],
     });
+    frames.at(-1).result = out;
     return frames;
   },
 };
@@ -141,6 +143,7 @@ export const spiralMatrix = {
 /* ------------------------------------------------------------------ two pointers: merge from the back */
 
 export const mergeSortedInPlace = {
+  problem: { name: 'Merge Sorted Array', statement: 'nums1 has m sorted values and room for n more; merge the sorted nums2 into it in place.', example: 'nums1 = [1, 3, 5, 7], nums2 = [2, 4, 6] → [1, 2, 3, 4, 5, 6, 7]', exampleOutput: [1, 2, 3, 4, 5, 6, 7], questionId: 'merge-sorted-array' },
   title: 'Merge sorted arrays in place (from the back)',
   description: 'nums1 holds m sorted values plus n free slots; write the LARGER of nums1[i] and nums2[j] at k = m + n − 1 and move left, so nothing unread is overwritten. Enter only nums1’s m real values (the free slots are added); inputs are sorted and clamped to 7 each.',
   defaultInput: { nums1: [1, 3, 5, 7], nums2: [2, 4, 6] },
@@ -182,6 +185,7 @@ export const mergeSortedInPlace = {
     if (!n) {
       frames.push({ note: `nums2 is empty → nums1 ${fmtList(A)} is already the merged result.`, panels: view() });
       frames.push({ note: `Result ${fmtList(A)}. Nothing to move: O(1).`, panels: view({}, {}, { result: fmtList(A) }) });
+      frames.at(-1).result = A;
       return frames;
     }
     frames.push({
@@ -228,6 +232,7 @@ export const mergeSortedInPlace = {
       note: `Merged: ${fmtList(result)}. Every step fills one slot with a single comparison → O(m + n) time, O(1) extra space.`,
       panels: [arr(result, { label: 'nums1 (merged)', highlights: Object.fromEntries(result.map((_, t) => [t, 'done'])) }), arr([...B], { label: 'nums2', highlights: Object.fromEntries(B.map((_, t) => [t, 'muted'])) }), vars({ result: fmtList(result) })],
     });
+    frames.at(-1).result = result;
     return frames;
   },
 };
@@ -251,6 +256,7 @@ function cleanIntervals(raw, name) {
 }
 
 export const intervalIntersection = {
+  problem: { name: 'Interval List Intersections', statement: 'Given two sorted lists of disjoint intervals, return all their overlaps.', example: 'A = [[0,2],[5,10],[13,23],[24,25]], B = [[1,5],[8,12],[15,24],[25,26]] → [[1,2],[5,5],[8,10],[15,23],[24,24],[25,25]]', exampleOutput: [[1, 2], [5, 5], [8, 10], [15, 23], [24, 24], [25, 25]], questionId: 'interval-list-intersections' },
   title: 'Interval list intersections (two pointers)',
   description: 'Two sorted, disjoint lists: the overlap of A[i] and B[j] is [max(starts), min(ends)] when lo ≤ hi; then advance whichever interval ends first. Lists are sorted (overlaps inside one list merged) and clamped to 6 intervals each.',
   defaultInput: { A: [[0, 2], [5, 10], [13, 23], [24, 25]], B: [[1, 5], [8, 12], [15, 24], [25, 26]] },
@@ -318,6 +324,7 @@ export const intervalIntersection = {
       note: `${i >= A.length ? 'A' : 'B'} is exhausted → nothing left can intersect. Result ${out.length ? out.map((x) => `[${x.join(', ')}]`).join(' ') : '[] (no overlaps)'}. Each step drops one interval → O(n + m) time, O(1) extra space besides the output.`,
       panels: view('active', { result: out.length }),
     });
+    frames.at(-1).result = out;
     return frames;
   },
 };
@@ -327,6 +334,7 @@ export const intervalIntersection = {
 const JG_MODES = ['can reach the end (Jump Game I)', 'fewest jumps (Jump Game II)'];
 
 export const jumpGame = {
+  problem: { name: 'Jump Game (I and II)', statement: 'nums[i] is the longest jump from index i. Can you reach the last index (I)? What is the fewest number of jumps (II)?', example: '[3, 1, 2, 0, 1, 0, 4] → false: index 5 is the farthest you can reach', exampleOutput: false, questionId: 'jump-game' },
   title: 'Jump game: farthest reach & BFS levels',
   description: 'nums[i] = longest jump from i. Jump Game I keeps reach = farthest reachable index and fails at the first i > reach. Jump Game II scans level by level: when i hits curEnd, jumps++ and curEnd = farthest. Clamped to 14 non-negative integers.',
   defaultInput: { nums: [3, 1, 2, 0, 1, 0, 4], mode: JG_MODES[0] },
@@ -379,6 +387,7 @@ export const jumpGame = {
       const hl = {};
       for (let t = 0; t < n; t++) hl[t] = t <= reach ? 'done' : 'muted';
       frames.push({ note: `${result ? `Loop finished with reach = ${reach} ≥ last index ${n - 1} → true.` : `Stopped at a gap: reach = ${reach} < last index ${n - 1} → false.`} One pass, one variable → O(n) time, O(1) space.`, panels: [arr([...a], { highlights: hl, range: [0, Math.min(reach, n - 1)] }), vars({ reach, result })] });
+      frames.at(-1).result = result;
       return frames;
     }
     // Jump Game II: BFS levels on the array
@@ -434,6 +443,7 @@ export const jumpGame = {
     const hl = {};
     for (let t = 0; t < n; t++) hl[t] = result === -1 && t > farthest ? 'muted' : 'done';
     frames.push({ note: `${result === -1 ? 'The last index is unreachable → −1.' : `Fewest jumps = ${result}: one jump per level crossed.`} Each index is scanned once → O(n) time, O(1) space (BFS without a queue).`, panels: [arr([...a], { highlights: hl }), vars({ jumps, result })] });
+    frames.at(-1).result = result;
     return frames;
   },
 };
@@ -453,6 +463,7 @@ function parseStackOps(raw) {
 }
 
 export const minStack = {
+  problem: { name: 'Min Stack', statement: 'Design a stack that supports push, pop, top and getMin, all in O(1).', example: 'push 5, push 2, push 7, getMin, pop, getMin, push 1, getMin, pop, pop, getMin → [2, 7, 2, 1, 1, 2, 5]', exampleOutput: [2, 7, 2, 1, 1, 2, 5], questionId: 'min-stack' },
   title: 'Stack design: min stack & two-stack queue',
   description: 'Min stack: every push also records min(x, min below) on a parallel stack, so getMin is O(1) and survives pops. Queue mode: push into inbox; pop/top pour inbox into outbox only when outbox is empty (getMin is ignored there). Ops: "push x", "pop", "top", "getMin"; up to 20.',
   defaultInput: { ops: ['push 5', 'push 2', 'push 7', 'getMin', 'pop', 'getMin', 'push 1', 'getMin', 'pop', 'pop', 'getMin'], mode: MS_MODES[0] },
@@ -508,6 +519,7 @@ export const minStack = {
         attach(frames, p);
       });
       frames.push({ note: `Outputs: ${outputs.length ? fmtList(outputs) : 'none'}. push, pop, top and getMin are all O(1); the extra stack costs O(n) space.`, panels: view({ outputs: outputs.length ? fmtList(outputs) : '—' }) });
+      frames.at(-1).result = outputs;
       return frames;
     }
     // queue from two stacks
@@ -551,6 +563,7 @@ export const minStack = {
       attach(frames, p);
     });
     frames.push({ note: `Outputs: ${outputs.length ? fmtList(outputs) : 'none'}. A pour can cost O(n), but each element is pushed, moved and popped at most once → amortised O(1) per operation, O(n) space.`, panels: view({ outputs: outputs.length ? fmtList(outputs) : '—' }) });
+    frames.at(-1).result = outputs;
     return frames;
   },
 };
@@ -558,6 +571,7 @@ export const minStack = {
 /* ------------------------------------------------------------------ linked list: LRU cache */
 
 export const lruCache = {
+  problem: { name: 'LRU Cache', statement: 'Design a key–value cache of fixed capacity that evicts the least recently used key; get and put in O(1).', example: 'capacity 2: put 1, put 2, get 1, put 3 (evicts 2), get 2, put 4 (evicts 1), get 1, get 3, get 4 → [1, -1, -1, 3, 4]', exampleOutput: [1, -1, -1, 3, 4], questionId: 'lru-cache' },
   title: 'LRU cache: hash map + doubly linked list',
   description: 'The Map finds a key’s node in O(1); the doubly linked list (sentinels H and T) keeps recency order. get moves the node to the front, put inserts at the front and evicts T.prev when full. Ops: "put k v", "get k"; capacity ≤ 5, up to 16 ops.',
   defaultInput: { capacity: 2, ops: ['put 1 1', 'put 2 2', 'get 1', 'put 3 3', 'get 2', 'put 4 4', 'get 1', 'get 3', 'get 4'] },
@@ -642,6 +656,7 @@ export const lruCache = {
       frames.push({ note: `Create node ${k}:${v}, insert it right after H (most recent) and map.set(${k}, node). Size ${order.length}/${cap}.`, panels: view({ 0: 'active' }, { k, st: 'active' }, { op: `put ${k} ${v}` }) });
     });
     frames.push({ note: `get results: ${outputs.length ? fmtList(outputs) : 'none'}. Every get / put is one map lookup plus a constant number of pointer splices → O(1) per operation, O(capacity) space.`, panels: view({}, null, { results: outputs.length ? fmtList(outputs) : '—' }) });
+    frames.at(-1).result = outputs;
     return frames;
   },
 };
@@ -651,6 +666,7 @@ export const lruCache = {
 const GC_MODES = ['i ^ (i >> 1)', 'reflect and prefix'];
 
 export const grayCode = {
+  problem: { name: 'Gray Code', statement: 'List all n-bit numbers starting at 0 so that neighbours differ in exactly one bit.', example: 'n = 3 → [0, 1, 3, 2, 6, 7, 5, 4]', exampleOutput: [0, 1, 3, 2, 6, 7, 5, 4], questionId: 'gray-code' },
   title: 'Gray code: one bit flips at a time',
   description: 'List all n-bit numbers so neighbours differ in exactly one bit — either with g = i ^ (i >> 1), or by writing Gray(n−1) forwards with a 0 prefix and backwards with a 1 prefix. n is clamped to 1..4.',
   defaultInput: { n: 3, mode: GC_MODES[0] },
@@ -728,6 +744,7 @@ export const grayCode = {
     const wrap = n > 1 ? ` The last code ${final[final.length - 1]} and the first ${final[0]} also differ in one bit — the sequence is cyclic.` : '';
     frames.push({ note: `Gray(${n}) = ${fmtList(seq)}.${wrap} 2ⁿ codes, O(1) each → O(2ⁿ) time, O(1) extra space besides the output.`, panels: [tableOf(final, n, hl), vars({ result: fmtList(seq) })] });
     if (mode !== GC_MODES[1] && n >= 2) attach(frames, pick(`How many bits differ between the last code ${final[final.length - 1]} and the first ${final[0]}?`, 'Exactly one', ['None — they are equal', `All ${n}`, 'Two'], 2));
+    frames.at(-1).result = seq;
     return frames;
   },
 };
@@ -735,6 +752,7 @@ export const grayCode = {
 /* ------------------------------------------------------------------ advanced structures: sparse table */
 
 export const sparseTable = {
+  problem: { name: 'Range Minimum Query (sparse table)', statement: 'Pre-compute a table so the minimum of any range nums[l..r] is answered in O(1).', example: 'nums = [4, 6, 1, 5, 7, 3, 2], l = 1, r = 5 → 1', exampleOutput: 1, questionId: 'classic-range-minimum-query' },
   title: 'Sparse table: O(1) range minimum',
   description: 'st[k][i] = min of the block of length 2^k starting at i, built from two halves of level k − 1. A query [l, r] takes k = ⌊log2(len)⌋ and the min of two overlapping blocks. Clamped to 10 numbers.',
   defaultInput: { nums: [4, 6, 1, 5, 7, 3, 2], l: 1, r: 5 },
@@ -809,6 +827,7 @@ export const sparseTable = {
     const fin = {};
     for (let t = l; t <= r; t++) fin[t] = a[t] === ans ? 'done' : 'window';
     frames.push({ note: `min(${st[k][l]}, ${st[k][s2]}) = ${ans} (checking every element of [${l}, ${r}] gives ${brute}). Build O(n log n) once; each query is two lookups → O(1). Only for idempotent ops (min, max, gcd) — a sum would double-count the overlap.`, panels: view({ [`${k},${l}`]: 'done', [`${k},${s2}`]: 'done' }, { highlights: fin, range: [l, r] }, { ...qVars, answer: ans }) });
+    frames.at(-1).result = ans;
     return frames;
   },
 };

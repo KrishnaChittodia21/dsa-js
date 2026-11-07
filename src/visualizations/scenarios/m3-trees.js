@@ -86,13 +86,14 @@ const levelOrderOf = (nodes, root) => {
   return `[${out.join(', ')}]`;
 };
 const trimNote = (T, max) => (T.trimmed ? ` (Input trimmed to ${max} nodes / 4 levels.)` : '');
-const emptyFrames = (what, answer, v = {}) => [
+const emptyFrames = (what, answer, v = {}, result = null) => [
   { note: `The tree is empty (root = null). ${what}`, panels: [vars(v)] },
-  { note: `Nothing to visit, so the answer is ${answer}.`, panels: [vars({ ...v, answer })] },
+  { note: `Nothing to visit, so the answer is ${answer}.`, panels: [vars({ ...v, answer })], result },
 ];
 
 /* ------------------------------------------------------------------ top-down: count good nodes */
 export const treeGoodNodes = {
+  problem: { name: 'Count Good Nodes in Binary Tree', statement: 'A node is good if no node on the path from the root to it has a larger value. Count the good nodes.', example: '[3, 1, 4, 3, null, 1, 5] → 4', exampleOutput: 4, questionId: 'count-good-nodes-in-binary-tree' },
   title: 'Top-down: count good nodes',
   description: 'A node is good if no node on the path from the root to it is bigger. maxSoFar flows DOWN as a parameter. Trees are trimmed to 11 nodes / 4 levels.',
   defaultInput: { tree: [3, 1, 4, 3, null, 1, 5] },
@@ -100,7 +101,7 @@ export const treeGoodNodes = {
   testInputs: [{ tree: [] }, { tree: [7] }, { tree: [1, 2, null, 3, null, 4] }, { tree: [2, 2, 2, 2, 2] }, { tree: [5, 4, 6, 3, null, null, 1, 9, 8] }, { tree: [3, 3, null, 4, 2] }],
   generate({ tree }) {
     const T = buildTree(tree);
-    if (!T.nodes.length) return emptyFrames('countGood(null) never calls dfs on a real node.', 0, { count: 0 });
+    if (!T.nodes.length) return emptyFrames('countGood(null) never calls dfs on a real node.', 0, { count: 0 }, 0);
     const { nodes } = T;
     const frames = [];
     const states = {};
@@ -135,12 +136,14 @@ export const treeGoodNodes = {
     };
     dfs(0, -INF);
     snap(`Done: ${count} good node${count === 1 ? '' : 's'}. The answer needed only what lies ABOVE each node, so it travelled down as a parameter. Each node once → O(n) time, O(h) stack.`, null, { answer: count });
+    frames.at(-1).result = count;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ path backtracking: path sum II */
 export const treePathSumII = {
+  problem: { name: 'Path Sum II', statement: 'Return every root-to-leaf path whose values add up to the target.', example: 'target = 22 on the default tree → [[5, 4, 11, 2], [5, 8, 4, 5]]', exampleOutput: [[5, 4, 11, 2], [5, 8, 4, 5]], questionId: 'path-sum-ii' },
   title: 'Path sum II: push, record, pop',
   description: 'One shared path array: push the node on entry, record a copy at a leaf whose remaining sum is 0, pop on return. Trees are trimmed to 11 nodes / 4 levels.',
   defaultInput: { tree: [5, 4, 8, 11, null, 13, 4, 7, 2, null, null, 5, 1], target: 22 },
@@ -152,7 +155,7 @@ export const treePathSumII = {
   generate({ tree, target }) {
     const T = buildTree(tree);
     target = clamp(Math.round(Number(target) || 0), -9999, 9999);
-    if (!T.nodes.length) return emptyFrames('dfs(null) returns at once.', '[] (no paths)', { target });
+    if (!T.nodes.length) return emptyFrames('dfs(null) returns at once.', '[] (no paths)', { target }, []);
     const { nodes } = T;
     const frames = [];
     const states = {};
@@ -213,6 +216,7 @@ export const treePathSumII = {
     frames.push({
       note: `Found ${result.length} path${result.length === 1 ? '' : 's'}: ${result.length ? result.map((p) => `[${p.map(fmt).join(', ')}]`).join(', ') : 'none'}. One shared array with push/pop uses O(h) memory; copying a path at each valid leaf costs O(h).`,
       panels: [treePanel(nodes, done, {}, 'green leaf = end of a found path'), arr([], { label: 'path (shared array)' }), vars({ target, answer: result.length ? result.map((p) => p.map(fmt).join('→')).join(' | ') : '[]' })],
+      result,
     });
     return frames;
   },
@@ -220,6 +224,7 @@ export const treePathSumII = {
 
 /* ------------------------------------------------------------------ lowest common ancestor */
 export const treeLcaRecursive = {
+  problem: { name: 'Lowest Common Ancestor of a Binary Tree', statement: 'Find the deepest node that has both p and q in its subtree (a node counts as its own descendant).', example: 'tree [3, 5, 1, 6, 2, 0, 8, null, null, 7, 4], p = 6, q = 4 → 5', exampleOutput: 5, questionId: 'lowest-common-ancestor-of-a-binary-tree' },
   title: 'Lowest common ancestor (recursive)',
   description: 'Each call returns p or q if it found one, the LCA if it found both, else null. The first node where both sides are non-null is the LCA. p and q are values; with duplicates the first match in level order is used. Trees are trimmed to 11 nodes / 4 levels.',
   defaultInput: { tree: [3, 5, 1, 6, 2, 0, 8, null, null, 7, 4], p: 6, q: 4 },
@@ -293,6 +298,7 @@ export const treeLcaRecursive = {
     frames.push({
       note: ans == null ? 'The root returned null: neither p nor q is in the tree. Each node visited at most once → O(n) time, O(h) stack.' : P == null || Q == null ? `The root returned ${name(ans)}, but only one of p, q exists — the "nodes may be missing" variation counts found nodes (${found}) before trusting this. O(n) time.` : `LCA(${fmt(pv)}, ${fmt(qv)}) = ${fmt(nodes[ans].val)}. ${lca == null ? 'One target sits inside the other\'s subtree, so the higher one was passed all the way up.' : 'It is the lowest node where both sides reported something.'} Each node visited at most once → O(n) time, O(h) stack.`,
       panels: [treePanel(nodes, final, labels, 'answer = green'), vars({ p: fmt(pv), q: fmt(qv), answer: ans == null ? 'null' : fmt(nodes[ans].val) })],
+      result: ans == null ? null : nodes[ans].val,
     });
     return frames;
   },
@@ -311,6 +317,7 @@ const tokenRows = (tokens, highlights = {}, ptr = null, label = 'tokens') => {
 };
 
 export const treeSerializePreorder = {
+  problem: { name: 'Serialize and Deserialize Binary Tree', statement: 'Turn a binary tree into a string and rebuild exactly the same tree from that string.', example: '[1, 2, 3, null, null, 4, 5] → "1,2,#,#,3,4,#,#,5,#,#"', exampleOutput: '1,2,#,#,3,4,#,#,5,#,#', questionId: 'serialize-and-deserialize-binary-tree' },
   title: 'Serialize & deserialize (preorder + #)',
   description: 'Preorder that writes # for every missing child, then the same preorder reads the tokens back and rebuilds the exact shape. Trees are trimmed to 7 nodes / 4 levels so the token list fits.',
   defaultInput: { tree: [1, 2, 3, null, null, 4, 5] },
@@ -327,7 +334,7 @@ export const treeSerializePreorder = {
     if (!nodes.length) {
       return [
         { note: 'The tree is empty. serialize(null): dfs(null) writes a single "#".', panels: [vars({ root: 'null' })] },
-        { note: 'Serialized string = "#". deserialize("#") reads "#" → returns null: the empty tree round-trips.', panels: [arr(['#'], { label: 'tokens', highlights: { 0: 'done' } }), vars({ answer: '"#" → null' })] },
+        { note: 'Serialized string = "#". deserialize("#") reads "#" → returns null: the empty tree round-trips.', panels: [arr(['#'], { label: 'tokens', highlights: { 0: 'done' } }), vars({ answer: '"#" → null' })], result: '#' },
       ];
     }
     s1(`Serialize with preorder: write the node's value, then serialize left, then right. A missing child writes "#" so the shape is kept.${trimNote(T, 7)}`, null);
@@ -409,6 +416,7 @@ export const treeSerializePreorder = {
     frames.push({
       note: `All ${tokens.length} tokens used. Rebuilt tree in level order: ${levelOrderOf(built, 0)} — ${same ? 'identical to the original' : 'MISMATCH'}. Both directions touch each token once → O(n).`,
       panels: [treePanel(built, Object.fromEntries(built.map((b) => [b.id, 'done'])), {}, 'rebuilt tree'), ...tokenRows(tokens, Object.fromEntries(tokens.map((_, j) => [j, 'done']))), vars({ answer: `"${tokens.join(',')}" → ${levelOrderOf(built, 0)}` })],
+      result: tokens.join(','),
     });
     return frames;
   },
@@ -416,6 +424,7 @@ export const treeSerializePreorder = {
 
 /* ------------------------------------------------------------------ BST: validate with (low, high) bounds */
 export const bstValidateBounds = {
+  problem: { name: 'Validate Binary Search Tree', statement: 'Decide whether every node is greater than everything in its left subtree and smaller than everything in its right subtree.', example: '[5, 3, 8, 1, 6, null, 9] → false (6 sits left of 5)', exampleOutput: false, questionId: 'validate-binary-search-tree' },
   title: 'Validate a BST with (low, high) bounds',
   description: 'Every node must lie strictly inside the open range inherited from its ancestors: going left tightens high, going right tightens low. Trees are trimmed to 11 nodes / 4 levels.',
   defaultInput: { tree: [5, 3, 8, 1, 6, null, 9] },
@@ -423,7 +432,7 @@ export const bstValidateBounds = {
   testInputs: [{ tree: [] }, { tree: [4] }, { tree: [8, 4, 12, 2, 6, 10, 14] }, { tree: [2, 2, 2] }, { tree: [1, null, 2, null, 3, null, 4] }, { tree: [10, 5, 15, null, null, 6, 20] }],
   generate({ tree }) {
     const T = buildTree(tree);
-    if (!T.nodes.length) return emptyFrames('valid(null) returns true: an empty tree is a valid BST.', 'true');
+    if (!T.nodes.length) return emptyFrames('valid(null) returns true: an empty tree is a valid BST.', 'true', {}, true);
     const { nodes } = T;
     const frames = [];
     const states = {};
@@ -478,12 +487,14 @@ export const bstValidateBounds = {
     const ans = valid(0, -INF, INF, '');
     for (const n of nodes) if (!states[n.id]) states[n.id] = 'muted';
     snap(ans ? 'valid(root) = true: every node sat inside the range set by ALL its ancestors. O(n) time, O(h) stack.' : `valid(root) = false. Grey nodes were never checked — the first violation ends the search. Note: a parent/child-only check can miss this (each node is checked against ALL ancestors here). O(n) time, O(h) stack.`, null, { answer: String(ans) });
+    frames.at(-1).result = ans;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ BST: bottom-up info (max-sum BST) */
 export const bstMaxSumBottomUp = {
+  problem: { name: 'Maximum Sum BST in Binary Tree', statement: 'Find the largest sum of keys of any subtree that is itself a valid BST.', example: 'the default tree → 20', exampleOutput: 20, questionId: 'maximum-sum-bst-in-binary-tree' },
   title: 'Max-sum BST: bottom-up (isBST, min, max, sum)',
   description: 'Post-order: each subtree returns [isBST, min, max, sum]; a node is a BST root iff both children are and left.max < val < right.min. Trees are trimmed to 11 nodes / 4 levels.',
   defaultInput: { tree: [1, 4, 3, 2, 4, 2, 5, null, null, null, null, null, null, 4, 6] },
@@ -491,7 +502,7 @@ export const bstMaxSumBottomUp = {
   testInputs: [{ tree: [] }, { tree: [-4] }, { tree: [4, 3, null, 1, 2] }, { tree: [-4, -2, -5] }, { tree: [2, 1, 3] }, { tree: [5, 5, 5, 5] }, { tree: [1, null, 2, null, 3, null, 4] }],
   generate({ tree }) {
     const T = buildTree(tree);
-    if (!T.nodes.length) return emptyFrames('dfs(null) returns [true, +∞, −∞, 0]; the best sum stays 0 (the empty BST counts).', 0, { best: 0 });
+    if (!T.nodes.length) return emptyFrames('dfs(null) returns [true, +∞, −∞, 0]; the best sum stays 0 (the empty BST counts).', 0, { best: 0 }, 0);
     const { nodes } = T;
     const frames = [];
     const states = {};
@@ -550,6 +561,7 @@ export const bstMaxSumBottomUp = {
     frames.push({
       note: bestId == null ? `No BST subtree has a positive sum, so the answer is 0 (the empty BST counts). One post-order pass, O(1) per node → O(n).` : `Answer = ${best}: the BST rooted at ${fmt(nodes[bestId].val)} (green). One post-order pass with O(1) work per node → O(n) instead of O(n²).`,
       panels: [treePanel(nodes, fin, labels, 'best BST subtree = green'), vars({ answer: best })],
+      result: best,
     });
     return frames;
   },

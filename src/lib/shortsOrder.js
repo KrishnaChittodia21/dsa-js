@@ -1,22 +1,30 @@
-// M9: which Shorts are open. Pure (no content imports) so it is unit-tested; src/lib/shorts.js loads the files.
-// Shorts follow the course's pattern order; one more opens on each day you study (a day with any activity),
-// so Short N carries "Day N". The first one is always open.
+// M9: the Shorts order. Pure (no content imports) so it is unit-tested; src/lib/shorts.js loads the files.
+// Every Short is always open; they follow the course's pattern order, so Short N carries its number `n`.
 
-/** Shorts in course order, each with its day: `patterns` = every pattern in course order, `byId` = Shorts by id */
+/** Shorts in course order, each with its number: `patterns` = every pattern in course order, `byId` = Shorts by id */
 export function orderShorts(patterns, byId) {
-  return patterns.filter((p) => byId[p.id]).map((p, i) => ({ ...byId[p.id], day: i + 1, pattern: p, topicId: p.topicId }));
+  return patterns.filter((p) => byId[p.id]).map((p, i) => ({ ...byId[p.id], n: i + 1, pattern: p, topicId: p.topicId }));
 }
 
 /** days with any study activity (progress.activity is { 'YYYY-MM-DD': count }) */
 export const studyDays = (progress) => Object.keys(progress?.activity || {}).length;
 
-/** how many Shorts are open: one per study day, at least one */
-export const openCount = (progress) => Math.max(1, studyDays(progress));
-
-export const isOpen = (short, progress) => short.day <= openCount(progress);
-
-/** the first open Short not answered yet; when all open ones are done, the newest open one */
+/** a daily suggestion, never a gate: from Short #(study days) in order, the first one not answered yet
+ *  (wrapping round); when all are answered, Short #(study days) itself */
 export function shortOfTheDay(shorts, progress) {
-  const open = shorts.filter((s) => isOpen(s, progress));
-  return open.find((s) => !progress?.shorts?.[s.id]) || open[open.length - 1] || null;
+  if (!shorts.length) return null;
+  const start = Math.max(0, studyDays(progress) - 1) % shorts.length;
+  const order = [...shorts.slice(start), ...shorts.slice(0, start)];
+  return order.find((s) => !progress?.shorts?.[s.id]) || order[0];
+}
+
+/** "1:35": a Short at `frameMs` per frame (a step's last frame stays 1.6×, as in the player), the question as 15 s */
+export function shortLength(short, frameMs = 2200) {
+  const ms = short.steps.reduce((a, s) => {
+    const frames = [...(s.frames || []), ...(s.then || [])].length;
+    const last = (s.frames?.length ? 1 : 0) + (s.then?.length ? 1 : 0);
+    return a + (frames + last * 0.6) * frameMs + (s.kind === 'turn' ? 15000 : 0);
+  }, 0);
+  const sec = Math.round(ms / 1000);
+  return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
 }

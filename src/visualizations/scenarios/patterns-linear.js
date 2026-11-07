@@ -24,6 +24,7 @@ const nums = (xs, max) => (Array.isArray(xs) ? xs : []).filter((x) => typeof x =
 /* ------------------------------------------------------------------ string algorithms */
 
 export const palindromeExpand = {
+  problem: { name: 'Longest Palindromic Substring', statement: 'Return the longest substring that reads the same forwards and backwards.', example: 's = "abaxyzzyxf" → "xyzzyx"', exampleOutput: 'xyzzyx', questionId: 'longest-palindromic-substring' },
   title: 'Palindromes: expand around centre',
   description: 'Try all 2n − 1 centres (every character and every gap) and grow outward while both ends match; keep the widest. Input clamped to 16 characters.',
   defaultInput: { s: 'abaxyzzyxf' },
@@ -112,11 +113,13 @@ export const palindromeExpand = {
       panels: [arr(ch, { highlights: hl, range: best }), vars({ best: str(best[0], best[1]), length: best[1] - best[0] + 1, count })],
     });
     if (n >= 2) attach(frames, pick('All centres are done. Which substring is reported as the longest palindrome?', str(best[0], best[1]), [`"${ch[0]}"`, `"${ch.join('')}"`, `"${ch.slice(0, 2).join('')}"`], 1));
+    frames.at(-1).result = ch.slice(best[0], best[1] + 1).join('');
     return frames;
   },
 };
 
 export const zAlgorithm = {
+  problem: { name: 'Z-array of a string', statement: 'For every position i, compute z[i] = how many characters starting at i match the start of the string.', example: 's = "aabcaabxaaz" → z = [11, 1, 0, 0, 3, 1, 0, 0, 2, 1, 0] (z[4] = 3: "aab" repeats the prefix)', exampleOutput: [11, 1, 0, 0, 3, 1, 0, 0, 2, 1, 0], questionId: 'sum-of-scores-of-built-strings' },
   title: 'Z-algorithm: the z-box',
   description: 'z[i] = how far s[i..] matches the prefix of s. Inside the z-box [l, r) copy the mirror value z[i − l]; only compare characters past r. Input clamped to 16 characters.',
   defaultInput: { s: 'aabcaabxaaz' },
@@ -144,6 +147,7 @@ export const zAlgorithm = {
     if (n < 2) {
       frames.push({ note: n ? 'One character: z[0] = n = 1 by convention (the whole string matches itself).' : 'Empty string → empty z-array.', panels: panels(n, {}, n ? { 0: 'done' } : {}) });
       frames.push({ note: `z = [${z.join(', ')}]. Nothing else to compute: O(n).`, panels: panels(n, {}, {}) });
+      frames.at(-1).result = z;
       return frames;
     }
     frames.push({ note: `z[0] = n = ${n} by convention. The z-box [l, r) will be the rightmost window known to equal a prefix of s; it starts empty.`, panels: panels(1, {}, { 0: 'done' }) });
@@ -202,6 +206,7 @@ export const zAlgorithm = {
       attach(frames, gp);
     }
     frames.push({ note: `z = [${z.join(', ')}]. r only ever moves right and every comparison either grows r or ends a position → O(n) time, O(n) space.`, panels: [arr(ch, {}), arr(z, { label: 'z', highlights: Object.fromEntries(z.map((_, i) => [i, 'done'])) }), vars({ n, sum: z.reduce((a, b) => a + b, 0) })] });
+    frames.at(-1).result = z;
     return frames;
   },
 };
@@ -209,6 +214,7 @@ export const zAlgorithm = {
 /* ------------------------------------------------------------------ array techniques */
 
 export const boyerMoore = {
+  problem: { name: 'Majority Element', statement: 'Find the value that appears more than n / 2 times, using O(1) extra space.', example: '[2, 2, 1, 1, 1, 2, 2] → 2', exampleOutput: 2, questionId: 'majority-element' },
   title: 'Boyer–Moore majority voting',
   description: 'Keep one candidate and a vote count. Same value votes for it, a different value cancels one vote, count 0 adopts a new candidate. A verification pass confirms the majority. Clamped to 14 numbers.',
   defaultInput: { nums: [2, 2, 1, 1, 1, 2, 2] },
@@ -267,11 +273,13 @@ export const boyerMoore = {
       panels: [arr(a, { highlights: hl }), votes(), vars({ candidate: cand, occurrences: occ, majority: ok ? cand : 'none' })],
     });
     attach(frames, pick(`The scan ends with candidate ${cand} (count ${count}). Is ${cand} a majority (> n/2 times)?`, ok ? `Yes — it appears ${occ} times` : `No — it appears only ${occ} times`, [ok ? 'Unknown until we count again — it is not' : `Yes — the survivor is always the majority`, `Yes — count ${count} > 0 proves it`], 2));
+    frames.at(-1).result = ok ? cand : null;
     return frames;
   },
 };
 
 export const nextPermutation = {
+  problem: { name: 'Next Permutation', statement: 'Rearrange the numbers into the next larger ordering in dictionary order (or the smallest one if none is larger), in place.', example: '[1, 3, 5, 4, 2] → [1, 4, 2, 3, 5]', exampleOutput: [1, 4, 2, 3, 5], questionId: 'next-permutation' },
   title: 'Next permutation',
   description: 'Find the pivot (rightmost i with nums[i] < nums[i + 1]), swap it with the smallest larger value to its right, then reverse the descending suffix. Clamped to 12 numbers.',
   defaultInput: { nums: [1, 3, 5, 4, 2] },
@@ -290,6 +298,7 @@ export const nextPermutation = {
     frames.push({ note: n < 2 ? `${n ? 'One element' : 'Empty array'}: there is only one arrangement.` : 'Scan from the right for the pivot: the first i with nums[i] < nums[i + 1]. Everything to its right is in descending order (its largest arrangement).', panels: [arr([...a], {}), vars({ step: '1 · find pivot' })] });
     if (n < 2) {
       frames.push({ note: `Result: [${a.join(', ')}] (unchanged). O(1).`, panels: [arr([...a], {}), vars({ result: `[${a.join(', ')}]` })] });
+      frames.at(-1).result = a;
       return frames;
     }
     let i = n - 2;
@@ -329,6 +338,7 @@ export const nextPermutation = {
     const hl = {};
     for (let k = 0; k < n; k++) hl[k] = 'done';
     frames.push({ note: `Next permutation: [${a.join(', ')}]. One scan for the pivot, one for the successor, one reverse → O(n) time, O(1) space.`, panels: [arr([...a], { highlights: hl }), vars({ result: `[${a.join(', ')}]` })] });
+    frames.at(-1).result = a;
     return frames;
   },
 };
@@ -336,6 +346,7 @@ export const nextPermutation = {
 /* ------------------------------------------------------------------ prefix sums */
 
 export const differenceArray = {
+  problem: { name: 'Range updates (difference array)', statement: 'Start with n zeros, apply updates "add v to every index in [l, r]", and return the final array.', example: 'n = 6, updates [1,3,+5] [2,5,+2] [0,1,−3] → [-3, 2, 7, 7, 2, 2]', exampleOutput: [-3, 2, 7, 7, 2, 2], questionId: 'corporate-flight-bookings' },
   title: 'Difference array: range updates',
   description: 'Each "add v to [l, r]" writes only diff[l] += v and diff[r + 1] −= v; one prefix-sum pass rebuilds the final array. n ≤ 12, up to 6 updates [l, r, v].',
   defaultInput: { n: 6, updates: [[1, 3, 5], [2, 5, 2], [0, 1, -3]] },
@@ -380,11 +391,13 @@ export const differenceArray = {
       attach(frames, p);
     }
     frames.push({ note: `Final array: [${res.join(', ')}]. diff[${n}] is never read — it only absorbs the "stop" marks. u updates in O(u) + one O(n) pass → O(n + u) instead of O(n·u).`, panels: [dPanel({ [n]: 'muted' }), arr(res, { label: 'result', highlights: Object.fromEntries(res.map((_, i) => [i, 'done'])) }), vars({ result: `[${res.join(', ')}]` })] });
+    frames.at(-1).result = res;
     return frames;
   },
 };
 
 export const prefixSum2d = {
+  problem: { name: 'Range Sum Query 2D', statement: 'Pre-compute a matrix so the sum of any rectangle can be answered with four lookups.', example: 'query rows 1–2, cols 1–3 of the default matrix → 14', exampleOutput: 14, questionId: 'range-sum-query-2d-immutable' },
   title: '2D prefix sums',
   description: 'Build P where P[r+1][c+1] = sum of the rectangle (0,0)–(r,c), then answer a rectangle query with four lookups (inclusion–exclusion). Matrix clamped to 5 × 6.',
   defaultInput: { matrix: [[3, 0, 1, 4], [5, 6, 3, 2], [1, 2, 0, 1]], query: [1, 1, 2, 3] },
@@ -466,6 +479,7 @@ export const prefixSum2d = {
     const ans = A - B - C + D;
     const done = qStates().map((row) => row.map((s) => (s ? 'done' : '')));
     frames.push({ note: `Answer = ${A} − ${B} − ${C} + ${D} = ${ans} (direct sum of the highlighted cells: ${brute}). Build O(r·c) once, then every query is O(1).`, panels: [mTable(done), pTable(qs([[r2 + 1, c2 + 1, 'done'], [r1, c2 + 1, 'done'], [r2 + 1, c1, 'done'], [r1, c1, 'done']])), qv({ answer: ans })] });
+    frames.at(-1).result = ans;
     return frames;
   },
 };
@@ -475,6 +489,7 @@ export const prefixSum2d = {
 const RW_MODES = ['remove duplicates (sorted)', 'move zeroes'];
 
 export const readWritePointers = {
+  problem: { name: 'Remove Duplicates from Sorted Array', statement: 'Compact the array in place so each value appears once (or zeros are removed, in the other mode) and return the new length.', example: '[0, 0, 1, 1, 1, 2, 2, 3, 3, 4] → 5, starting [0, 1, 2, 3, 4]', exampleOutput: [0, 1, 2, 3, 4], questionId: 'remove-duplicates-from-sorted-array' },
   title: 'Read / write pointers: compact in place',
   description: 'read scans every element; write marks where the next kept element goes. nums[0..write) is always the answer so far. Clamped to 14 numbers; duplicates mode sorts the input first.',
   defaultInput: { nums: [0, 0, 1, 1, 1, 2, 2, 3, 3, 4], mode: RW_MODES[0] },
@@ -538,6 +553,7 @@ export const readWritePointers = {
     for (let k = 0; k < write; k++) hl[k] = 'done';
     frames.push({ note: `read finished. k = write = ${write}: nums[0..${write}) = [${a.slice(0, write).join(', ')}]${zeroes ? ', zeros pushed to the back' : ''}. One pass, O(n) time, O(1) extra space.`, panels: [arr([...a], { highlights: hl, ...(write ? { range: [0, write - 1] } : {}) }), vars({ k: write, result: `[${a.slice(0, write).join(', ')}]` })] });
     attach(frames, pick(`read has passed the end with write = ${write}. What does the function return?`, `${write} (= write)`, [`${write - 1} (= write − 1)`, `${n} (the original length)`], 1));
+    frames.at(-1).result = a.slice(0, write);
     return frames;
   },
 };
@@ -545,6 +561,7 @@ export const readWritePointers = {
 /* ------------------------------------------------------------------ linked list */
 
 export const dummyHead = {
+  problem: { name: 'Remove linked list elements', statement: 'Delete every node whose value equals val and return the new head.', example: '6 → 6 → 1 → 2 → 6 → 3, val = 6 → [1, 2, 3]', exampleOutput: [1, 2, 3] },
   title: 'Linked list: dummy head',
   description: 'Remove every node with value val. A dummy node D before the head gives every real node a predecessor, so deleting the head needs no special case. Clamped to 10 nodes.',
   defaultInput: { values: [6, 6, 1, 2, 6, 3], val: 6 },
@@ -595,6 +612,7 @@ export const dummyHead = {
     for (let i = 1; i < order.length; i++) hl[i] = 'done';
     frames.push({ note: `prev.next is null → done. Return dummy.next (${res.length ? res[0] : 'null'}), not the old head: the old head may have been removed. Result: [${res.join(' → ')}]. O(n) time, O(1) space.`, panels: [view({ highlights: { 0: 'muted', ...hl }, pointers: res.length ? [{ index: 1, label: 'dummy.next', color: 'a' }] : [{ index: 0, label: 'D', color: 'a' }] }), vars({ removed, result: res.length ? res.join('→') : 'null' })] });
     if (vals.length && vals[0] === val) attach(frames, pick(`The original head (${vals[0]}) was removed. What should the function return?`, `dummy.next (${res.length ? res[0] : 'null'})`, [`head (${vals[0]}, the old head)`, 'dummy (D)'], 1));
+    frames.at(-1).result = res;
     return frames;
   },
 };
@@ -629,6 +647,7 @@ function tokenize(expr) {
 }
 
 export const expressionEval = {
+  problem: { name: 'Evaluate an arithmetic expression', statement: 'Evaluate an integer expression with + − × ÷ and parentheses (or in postfix / RPN form).', example: '"2 * (3 + 4) - 10 / 5" → 12', exampleOutput: 12, questionId: 'evaluate-reverse-polish-notation' },
   title: 'Stack: evaluate an expression',
   description: 'Infix: an operand stack and an operator stack; an operator first applies every waiting operator of higher or equal precedence. Postfix (RPN, e.g. "3 4 + 2 *") needs only the operand stack. Integer division truncates.',
   defaultInput: { expr: '2 * (3 + 4) - 10 / 5' },
@@ -734,6 +753,7 @@ export const expressionEval = {
     }
     if (vals.length !== 1) throw new Error('malformed expression — operands and operators do not match up');
     frames.push({ note: `Result = ${vals[0]}. Every token is pushed and popped at most once → O(n) time, O(n) stack space.`, panels: [arr(toks, { highlights: Object.fromEntries(toks.map((_, k) => [k, 'done'])) }), stack([...vals], { label: 'operands' }), vars({ mode: rpn ? 'RPN' : 'infix', result: vals[0] })] });
+    frames.at(-1).result = vals[0];
     return frames;
   },
 };
@@ -741,6 +761,7 @@ export const expressionEval = {
 /* ------------------------------------------------------------------ queue / deque */
 
 export const circularBuffer = {
+  problem: { name: 'Design Circular Queue', statement: 'Build a fixed-size queue on an array whose indices wrap around instead of shifting.', example: 'capacity 4: push 1, push 2, push 3, pop → queue [2, 3] (front is 2)', exampleInput: { capacity: 4, ops: ['push 1', 'push 2', 'push 3', 'pop'] }, exampleOutput: [2, 3], questionId: 'design-circular-queue' },
   title: 'Circular buffer (ring queue)',
   description: 'A fixed array plus head and count. The back slot is (head + count) % cap; indices wrap to 0 instead of shifting. Ops: "push x", "pop", "front", "rear". cap ≤ 8, up to 20 ops.',
   defaultInput: { capacity: 4, ops: ['push 1', 'push 2', 'push 3', 'pop', 'push 4', 'push 5', 'push 6', 'pop', 'pop', 'push 7', 'rear', 'pop'] },
@@ -816,6 +837,7 @@ export const circularBuffer = {
       attach(frames, p);
     });
     frames.push({ note: `Final queue (front → back): [${logical().join(', ')}]. Every operation is a couple of index calculations → O(1) time, O(cap) memory, nothing ever shifts.`, panels: panels() });
+    frames.at(-1).result = logical();
     return frames;
   },
 };

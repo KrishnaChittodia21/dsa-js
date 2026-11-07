@@ -28,6 +28,7 @@ const clampInt = (v, lo, hi, d) => {
 /* ------------------------------------------------------------------ prefix sum + hash map */
 
 export const prefixSumHashmap = {
+  problem: { name: 'Subarray Sum Equals K', statement: 'Count the contiguous subarrays whose sum is exactly k.', example: 'nums = [1, 2, 1, -1, 2, 1], k = 3 → 5', exampleOutput: 5, questionId: 'subarray-sum-equals-k' },
   title: 'Prefix sum + hash map: subarrays with sum k',
   description: 'Scan once keeping a running prefix sum; every earlier prefix equal to prefix − k starts a subarray that sums to k, so a map of prefix counts gives the answer in O(n). Clamped to 10 numbers.',
   defaultInput: { nums: [1, 2, 1, -1, 2, 1], k: 3 },
@@ -55,6 +56,7 @@ export const prefixSumHashmap = {
     });
     if (!a.length) {
       frames.push({ note: 'No numbers → no subarrays. count = 0.', panels: [arr(a), mapPanel(null), vars({ prefix, count })] });
+      frames.at(-1).result = 0;
       return frames;
     }
     for (let j = 0; j < a.length; j++) {
@@ -87,6 +89,7 @@ export const prefixSumHashmap = {
       panels: [arr(a), mapPanel(null), vars({ prefix, count })],
     });
     attach(frames, pick('The scan is over. What is the answer?', count, [count + 1, Math.max(0, count - 1), a.length], 2));
+    frames.at(-1).result = count;
     return frames;
   },
 };
@@ -94,6 +97,7 @@ export const prefixSumHashmap = {
 /* ------------------------------------------------------------------ prefix sum modulo k */
 
 export const prefixSumModulo = {
+  problem: { name: 'Subarray Sums Divisible by K', statement: 'Count the contiguous subarrays whose sum is divisible by k.', example: 'nums = [4, 5, 0, -2, -3, 1], k = 5 → 7', exampleOutput: 7, questionId: 'subarray-sums-divisible-by-k' },
   title: 'Prefix sum mod k: divisible subarrays',
   description: 'Two prefixes with the same remainder mod k enclose a subarray whose sum is divisible by k. Count each remainder in an array of size k; negative remainders are normalised with ((x % k) + k) % k. Clamped to 10 numbers and 1 ≤ k ≤ 9.',
   defaultInput: { nums: [4, 5, 0, -2, -3, 1], k: 5 },
@@ -118,6 +122,7 @@ export const prefixSumModulo = {
     });
     if (!a.length) {
       frames.push({ note: 'No numbers → no subarrays. total = 0.', panels: [arr(a), cnt({}), vars({ prefix: rem, total })] });
+      frames.at(-1).result = 0;
       return frames;
     }
     for (let j = 0; j < a.length; j++) {
@@ -157,6 +162,7 @@ export const prefixSumModulo = {
       panels: [arr(a), cnt({}), vars({ prefix: rem, total })],
     });
     attach(frames, pick('All numbers are scanned. How many subarrays are divisible by k?', total, [total + 1, Math.max(0, total - 1), a.length], 3));
+    frames.at(-1).result = total;
     return frames;
   },
 };
@@ -164,6 +170,7 @@ export const prefixSumModulo = {
 /* ------------------------------------------------------------------ monotonic stack: histogram */
 
 export const histogramPrevSmaller = {
+  problem: { name: 'Largest Rectangle in Histogram', statement: 'Find the area of the largest rectangle that fits inside the histogram bars.', example: '[2, 1, 5, 6, 2, 3] → 10', exampleOutput: 10, questionId: 'largest-rectangle-in-histogram' },
   title: 'Monotonic stack: largest rectangle in a histogram',
   description: 'An increasing stack of bar indices; when a bar is popped, the new top is its previous smaller bar and the current index is its next smaller bar, so its widest rectangle is known. A height-0 sentinel at the end flushes the stack. Clamped to 9 bars; negative heights become 0.',
   defaultInput: { heights: [2, 1, 5, 6, 2, 3] },
@@ -227,6 +234,7 @@ export const histogramPrevSmaller = {
       panels: [bars({}, bestRange && bestRange[1] >= bestRange[0] ? bestRange : null), stPanel(), vars({ best })],
     });
     if (n) attach(frames, pick('Every bar has been measured. What is the largest area?', best, [Math.max(...h), best + 1, h.reduce((s, x) => s + x, 0) === best ? best + 2 : h.reduce((s, x) => s + x, 0)], 1));
+    frames.at(-1).result = best;
     return frames;
   },
 };
@@ -234,6 +242,7 @@ export const histogramPrevSmaller = {
 /* ------------------------------------------------------------------ monotonic stack: contribution */
 
 export const subarrayMinContribution = {
+  problem: { name: 'Sum of Subarray Minimums', statement: 'Add up the minimum of every contiguous subarray.', example: '[3, 1, 2, 4] → 17', exampleOutput: 17, questionId: 'sum-of-subarray-minimums' },
   title: 'Contribution technique: sum of subarray minimums',
   description: 'Instead of listing every subarray, count for each element how many subarrays have it as the minimum: (choices of left end) × (choices of right end). Single-pass version: when index j is popped by i, left = j − newTop and right = i − j. Clamped to 9 numbers.',
   defaultInput: { nums: [3, 1, 2, 4] },
@@ -287,6 +296,7 @@ export const subarrayMinContribution = {
       panels: [view({}), stPanel(), vars({ total })],
     });
     if (n > 1) attach(frames, pick('Every element has been popped. What is the sum of all subarray minimums?', total, [a.reduce((s, x) => s + x, 0), total + Math.min(...a), total - 1], 0));
+    frames.at(-1).result = total;
     return frames;
   },
 };
@@ -294,6 +304,7 @@ export const subarrayMinContribution = {
 /* ------------------------------------------------------------------ queue simulation: ticket line */
 
 export const ticketQueueSimulation = {
+  problem: { name: 'Time Needed to Buy Tickets', statement: 'People queue for tickets; each turn the front person buys one (1 second) and rejoins the back if they need more. When does person k finish?', example: 'tickets = [2, 3, 2, 1], k = 1 → 8', exampleOutput: 8, questionId: 'time-needed-to-buy-tickets' },
   title: 'Queue simulation: the ticket line',
   description: 'Person i wants tickets[i] tickets; each turn the front person buys one (1 second) and goes to the back if they still need more. Find when person k finishes. Clamped to 8 people with 1–5 tickets each.',
   defaultInput: { tickets: [2, 3, 2, 1], k: 1 },
@@ -350,6 +361,7 @@ export const ticketQueueSimulation = {
       panels: [qPanel(), people({ [k]: 'done' }), vars({ time })],
     });
     attach(frames, pick(`When does p${k} finish?`, time, [time + 1, t.reduce((s, x) => s + x, 0) === time ? time - 1 : t.reduce((s, x) => s + x, 0), t[k] * n === time ? time + 2 : t[k] * n], 2));
+    frames.at(-1).result = time;
     return frames;
   },
 };
@@ -357,6 +369,7 @@ export const ticketQueueSimulation = {
 /* ------------------------------------------------------------------ monotonic deque over prefix sums */
 
 export const shortestSubarrayDeque = {
+  problem: { name: 'Shortest Subarray with Sum at Least K', statement: 'Return the length of the shortest contiguous subarray with sum ≥ k (numbers may be negative), or -1.', example: 'nums = [2, -1, 2, 3, -2, 4], k = 5 → 2 ([2, 3])', exampleOutput: 2, questionId: 'shortest-subarray-with-sum-at-least-k' },
   title: 'Monotonic deque on prefix sums: shortest subarray with sum ≥ k',
   description: 'Scan prefix sums P; the deque keeps start indices with increasing P. Pop the front while P[j] − P[front] ≥ k (a valid subarray — the front is used up), pop the back while its P ≥ P[j] (a later, smaller prefix is a better start). Works with negatives. Clamped to 9 numbers.',
   defaultInput: { nums: [2, -1, 2, 3, -2, 4], k: 5 },
@@ -436,6 +449,7 @@ export const shortestSubarrayDeque = {
       panels: [numsPanel(bestRange), pPanel(), dqPanel()],
     });
     if (a.length > 1) attach(frames, pick('The scan is over. What is the answer?', ans, [ans === -1 ? 1 : -1, ans + 1, a.length], 1));
+    frames.at(-1).result = ans;
     return frames;
   },
 };
@@ -443,6 +457,7 @@ export const shortestSubarrayDeque = {
 /* ------------------------------------------------------------------ monotonic deque DP: Jump Game VI */
 
 export const jumpGameDequeDp = {
+  problem: { name: 'Jump Game VI', statement: 'Start at index 0 and jump forward at most k steps at a time to the last index. Maximise the sum of the values you land on.', example: 'nums = [1, -1, -2, 4, -7, 3], k = 2 → 7', exampleOutput: 7, questionId: 'jump-game-vi' },
   title: 'Monotonic deque DP: Jump Game VI',
   description: 'best[i] = nums[i] + max(best[i−k..i−1]). The inner max is a sliding-window maximum over best itself, so a decreasing deque of indices answers it in O(1) amortised. Clamped to 9 numbers and 1 ≤ k ≤ 9.',
   defaultInput: { nums: [1, -1, -2, 4, -7, 3], k: 2 },
@@ -517,6 +532,7 @@ export const jumpGameDequeDp = {
       panels: [arr(a, { label: `nums (k = ${k})` }), arr([...best], { label: 'best[i]', highlights: { [n - 1]: 'done' } }), dqPanel()],
     });
     if (n > 1) attach(frames, pick('All indices are done. What is the maximum score?', best[n - 1], [a.reduce((s, x) => s + x, 0), a[0] + a[n - 1], best[n - 1] + 1], 3));
+    frames.at(-1).result = best[n - 1];
     return frames;
   },
 };

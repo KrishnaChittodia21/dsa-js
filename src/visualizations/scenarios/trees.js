@@ -23,6 +23,7 @@ const nodeLink = (layout, states = {}, opts = {}) => ({
 });
 
 export const treeTraversal = {
+  problem: { name: 'Binary tree traversals', statement: 'List the values of a binary tree in preorder, inorder, postorder or level order.', example: 'tree = [1, 2, 3, 4, 5, null, 6], preorder → [1, 2, 4, 5, 3, 6]', exampleOutput: [1, 2, 4, 5, 3, 6], questionId: 'binary-tree-level-order-traversal' },
   title: 'Tree traversal',
   description: 'Pre-order: node, left, right. In-order: left, node, right. Post-order: left, right, node. Level: BFS by depth.',
   defaultInput: { tree: [1, 2, 3, 4, 5, null, 6], order: 'preorder' },
@@ -38,7 +39,7 @@ export const treeTraversal = {
     const byId = Object.fromEntries(layout.nodes.map((n) => [n.id, n]));
     const snap = (note, extra = {}) =>
       frames.push({ note, panels: [nodeLink(layout, { ...states, ...extra }), arr([...visited], { label: 'visit order' })] });
-    if (!layout.root) return [{ note: 'Empty tree.', panels: [] }];
+    if (!layout.root) return [{ note: 'Empty tree.', panels: [], result: [] }];
     if (order === 'level') {
       let level = [layout.root];
       let depth = 0;
@@ -64,6 +65,7 @@ export const treeTraversal = {
         depth++;
       }
       snap('BFS finished: nodes grouped by depth.');
+      frames.at(-1).result = visited;
       return frames;
     }
     const expected = [];
@@ -109,11 +111,13 @@ export const treeTraversal = {
     };
     walk(byId[0], 0);
     snap(`${order} complete: [${visited.join(', ')}]. Each node visited once → O(n).`);
+    frames.at(-1).result = visited;
     return frames;
   },
 };
 
 export const heapOperations = {
+  problem: { name: 'Min-heap push and pop', statement: 'Insert numbers one by one into a min-heap, then pop the smallest values. Each pop returns the current minimum.', example: 'push 5, 3, 8, 1, 9, 2, then pop 3 times → [1, 2, 3]', exampleOutput: [1, 2, 3] },
   title: 'Min-heap: push and pop',
   description: 'Push: add at the end, sift up. Pop: move last to root, sift down.',
   defaultInput: { nums: [5, 3, 8, 1, 9, 2] },
@@ -177,11 +181,13 @@ export const heapOperations = {
       } else snap(`Pop min = ${top}. Heap is empty.`);
     }
     frames.push({ note: `Popped in order: ${out.join(', ')} — always the smallest first.`, panels: [nodeLink(layoutHeap(h), {}, { directed: false }), arr(out, { label: 'popped' })] });
+    frames.at(-1).result = out;
     return frames;
   },
 };
 
 export const trieInsert = {
+  problem: { name: 'Implement Trie (insert)', statement: 'Insert words into a prefix tree so that words with a common prefix share the same nodes.', example: 'car, cat, cart, dog, do → 8 letter nodes ("ca" and "do" are shared paths)', exampleOutput: 8, questionId: 'implement-trie-prefix-tree' },
   title: 'Trie: inserting words',
   description: 'Each edge is a character; shared prefixes share nodes. ● marks the end of a word.',
   defaultInput: { words: ['car', 'cat', 'cart', 'dog', 'do'] },
@@ -221,11 +227,13 @@ export const trieInsert = {
       node.end = true;
       frames.push({ note: `Mark the end of "${w}" (●). Insert cost = O(word length).`, panels: [build({ ...path, [node.id]: 'done' })] });
     });
+    frames.at(-1).result = nextId - 1;
     return frames;
   },
 };
 
 export const backtrackingSubsets = {
+  problem: { name: 'Subsets', statement: 'Given distinct numbers, return every possible subset (the power set).', example: '[1, 2, 3] → 8 subsets, in the order found: [[1,2,3], [1,2], [1,3], [1], [2,3], [2], [3], []]', exampleOutput: [[1, 2, 3], [1, 2], [1, 3], [1], [2, 3], [2], [3], []], questionId: 'subsets' },
   title: 'Backtracking: subsets (include / exclude)',
   description: 'At each element choose: include it or not. Leaves are the subsets.',
   defaultInput: { nums: [1, 2, 3] },
@@ -266,7 +274,7 @@ export const backtrackingSubsets = {
       seen.add(node.id);
       pathStack.push(node.id);
       if (i === nums.length) {
-        results.push({ id: node.id, label: `[${path.join(',')}]` });
+        results.push({ id: node.id, label: `[${path.join(',')}]`, path });
         draw(node.id, `No elements left → record subset [${path.join(', ')}]. Then UNDO the last choice and go back up.`);
       } else {
         draw(node.id, `Path = [${path.join(', ')}]. Decide about ${nums[i]}: include it first (choose → explore).`);
@@ -279,6 +287,7 @@ export const backtrackingSubsets = {
     };
     dfs(root, 0, []);
     frames.push({ note: `All ${results.length} = 2^${nums.length} subsets generated. Each level doubles the branches → O(2ⁿ · n).`, panels: [nodeLink(layout, Object.fromEntries(layout.nodes.map((n) => [n.id, results.some((r) => r.id === n.id) ? 'done' : 'visited']))), arr(results.map((r) => r.label), { label: 'subsets' })] });
+    frames.at(-1).result = results.map((r) => r.path);
     return frames;
   },
 };
