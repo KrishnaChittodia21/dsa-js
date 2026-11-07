@@ -565,6 +565,23 @@ deploy. Launch check on the live Pages site: every page loads with no CSP errors
 - **Hardening batch 2026-11-07:** Actions pinned to commit SHAs; C++ compile time limit (60 s after the toolchain
   loads, then the worker is recreated); main bundle split (TopicPage lazy; `motion`, `content`, `content-manifest`
   chunks; entry 1,247 kB → 146 kB, no chunk-size warning); unused syllabus-drawer CSS removed from `shell.css`.
+- **React Router 7, 2026-11-07:** `react-router-dom` 6.30 → `react-router` **7.18.4** (exact; newest 7.x at least 14
+  days old; peer `react >=18`, React 18 kept). Imports in 41 `src` files now say `'react-router'`; `react-router-dom`
+  removed. Fixes GHSA-wrjc-x8rr-h8h6 and GHSA-337j-9hxr-rhxg; `npm audit` now shows only esbuild/vite (dev server).
+  v6→v7 changes reviewed: every `<Link>`/`navigate` target is absolute (`/…`) or a number, so the relative-splat
+  change doesn't affect the `path="*"` shell route; router updates now run in `startTransition` (lazy pages keep the
+  old screen until the chunk loads, instead of a flash of "Loading…"); no data router, fetchers, `json`/`defer` or
+  `ScrollRestoration`; `BrowserRouter basename={BASE_URL}` and the `404.html` copy unchanged; no new inline script
+  (CSP unchanged).
+- **Vite 6, 2026-11-07:** `vite` 5.4.21 → **6.4.5** (exact; 2026-10-21, newest 6.x at least 14 days old; 6.4.4+ is the
+  lowest release that clears the audit, so Vite 7 wasn't needed). `@vitejs/plugin-react` pinned at **4.7.0** (already the
+  newest 4.x; peer `vite ^4.2 || ^5 || ^6 || ^7`). esbuild 0.21.5 → 0.25.12. `npm audit`: 1 moderate + 1 high → **0**.
+  Node: Vite 6 needs `^18 || ^20 || >=22`; workflow's `node-version: 22` already fine. v5→v6 guide checked: no custom
+  `resolve.conditions`, no JSON imports, no Sass, no PostCSS config, no CJS Node API, no `splitVendorChunkPlugin`;
+  `manualChunks`, `worker.format: 'es'`, `new Worker(new URL(…, import.meta.url), { type: 'module' })` and
+  `import.meta.glob` `query` syntax all unchanged — no config or code changes. Build output the same size (JS 14.2 MB,
+  entry 144 kB, 614 assets); CSP meta present and its sha256 matches the inline theme script; `/dsa-js/` asset paths,
+  the 4 workers and `teavm/` emitted; `vite preview` serves `/dsa-js/` and a deep link with 200. 72 tests pass.
 
 ---
 
