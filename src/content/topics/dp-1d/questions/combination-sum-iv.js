@@ -38,6 +38,8 @@ Different orders count as different sequences: \`(1, 2)\` and \`(2, 1)\` are bot
 
   functionName: 'combinationSum4',
   paramNames: ['nums', 'target'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} target

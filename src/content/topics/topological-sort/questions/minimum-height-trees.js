@@ -40,6 +40,8 @@ The survivors are the middle of the tree's longest path (diameter), which is whe
 
   functionName: 'findMinHeightTrees',
   paramNames: ['n', 'edges'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int[]',
   compare: 'unordered',
   starterCode: `/**
  * @param {number} n

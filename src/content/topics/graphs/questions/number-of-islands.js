@@ -36,6 +36,8 @@ An **island** is a group of land cells connected horizontally or vertically (not
 
   functionName: 'numIslands',
   paramNames: ['grid'],
+  paramTypes: ['char[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {character[][]} grid
  * @return {number}

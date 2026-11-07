@@ -37,6 +37,8 @@ Worst case O(m·n) (m, n = node counts) — e.g. many nodes with the same value 
 
   functionName: 'isSubtree',
   paramNames: ['root', 'subRoot'],
+  paramTypes: ['TreeNode', 'TreeNode'],
+  returnType: 'boolean',
   io: { params: ['tree', 'tree'] },
   starterCode: `/**
  * Definition: TreeNode { val, left, right }

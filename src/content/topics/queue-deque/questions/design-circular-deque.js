@@ -65,6 +65,17 @@ export default {
 This is exactly how the toolkit \`Deque\` works (it additionally doubles its array when full).`,
 
   className: 'MyCircularDeque',
+  methodTypes: {
+    constructor: { params: ['int'] },
+    insertLast: { params: ['int'], returns: 'boolean' },
+    insertFront: { params: ['int'], returns: 'boolean' },
+    getRear: { params: [], returns: 'int' },
+    isFull: { params: [], returns: 'boolean' },
+    deleteLast: { params: [], returns: 'boolean' },
+    getFront: { params: [], returns: 'int' },
+    deleteFront: { params: [], returns: 'boolean' },
+    isEmpty: { params: [], returns: 'boolean' },
+  },
   starterCode: `class MyCircularDeque {
   /** @param {number} k */
   constructor(k) {

@@ -46,6 +46,8 @@ O(C) where C is the total number of characters (the alphabet has at most 26 lett
 
   functionName: 'alienOrder',
   paramNames: ['words'],
+  paramTypes: ['string[]'],
+  returnType: 'string',
   starterCode: `/**
  * @param {string[]} words
  * @return {string}

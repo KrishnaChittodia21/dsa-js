@@ -36,6 +36,8 @@ A tree is connected and has no cycles.`,
 
   functionName: 'validTree',
   paramNames: ['n', 'edges'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} edges

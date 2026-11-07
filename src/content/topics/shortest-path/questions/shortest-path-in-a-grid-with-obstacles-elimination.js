@@ -40,6 +40,8 @@ Return the **minimum number of steps** from the top-left \`(0, 0)\` to the botto
 
   functionName: 'shortestPath',
   paramNames: ['grid', 'k'],
+  paramTypes: ['int[][]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} grid
  * @param {number} k

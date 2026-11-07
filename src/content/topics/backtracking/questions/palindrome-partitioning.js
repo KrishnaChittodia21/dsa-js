@@ -36,6 +36,8 @@ Each split is a list of pieces in their original order; the list of splits may b
 
   functionName: 'partition',
   paramNames: ['s'],
+  paramTypes: ['string'],
+  returnType: 'string[][]',
   starterCode: `/**
  * @param {string} s
  * @return {string[][]}

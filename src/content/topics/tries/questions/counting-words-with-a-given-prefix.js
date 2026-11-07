@@ -33,6 +33,8 @@ The solution below uses the toolkit's global \`Trie\`, whose \`countPrefix\` imp
 
   functionName: 'prefixCount',
   paramNames: ['words', 'pref'],
+  paramTypes: ['string[]', 'string'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string[]} words
  * @param {string} pref

@@ -27,7 +27,7 @@ export default {
   return x;
 }`,
       variations: [
-        { name: 'Two unpaired values', description: 'XOR all → a ^ b; pick any set bit of it (x & −x) and split the array into two XOR groups.' },
+        { name: 'Two unpaired values', description: 'XOR all → a ^ b; pick its lowest set bit (x & −x) and split the array into two XOR groups.' },
         { name: 'Missing number', description: 'XOR indices 0..n with all values.' },
         { name: 'Hamming distance', description: 'popcount(x ^ y).' },
       ],
@@ -74,6 +74,7 @@ export default {
   for (let b = 0; b < 32; b++) {
     let count = 0;
     for (const x of nums) count += (x >> b) & 1;  // how many have bit b set
+    // (x >> b) & 1 and (x >>> b) & 1 read the same bit; >>> only matters when you keep the shifted value (>> copies the sign bit in)
     if (count % k !== 0) result |= 1 << b;        // the unique element owns this bit
   }
   return result;   // | produced a signed 32-bit value → negatives come back correctly
@@ -126,7 +127,7 @@ function fromGray(g) {           // position of g in the Gray sequence
         { name: 'Reflect and prefix', description: 'Gray(n) = Gray(n−1) followed by its reverse with the top bit set.' },
         { name: 'Minimum one-bit operations', description: 'The rules generate the Gray sequence, so the answer is fromGray(n).' },
       ],
-      mistakes: ['Using >>> vs >> doesn\'t matter for non-negative inputs, but mixing signed numbers will', 'Forgetting that the sequence must start at 0'],
+      mistakes: ['Using >>> vs >> doesn\'t matter for non-negative inputs, but with a negative input `g >>= 1` keeps it negative (it never reaches 0), so the loop never ends — use >>> for signed inputs', 'Forgetting that the sequence must start at 0'],
       evolution: { easy: '—', medium: 'Gray code generation.', hard: 'Minimum one bit operations to make integers zero (inverse Gray code).' },
     },
     {
@@ -160,7 +161,7 @@ function maxXor(x) {                  // trie must be non-empty
         { name: 'Offline queries with a bound', description: 'Sort elements and queries by the bound; insert elements ≤ m before answering.' },
         { name: 'Subarray XOR', description: 'Insert prefix XORs; max over pairs = max subarray XOR.' },
       ],
-      mistakes: ['Inserting least-significant bit first (the greedy needs MSB first)', 'Answering a query before any element is inserted (should return −1)', 'Naming your class `Trie` inside this app — the toolkit already defines a global Trie'],
+      mistakes: ['Inserting least-significant bit first (the greedy needs MSB first)', 'Answering a query before any element is inserted (in the offline-queries version that query should return −1)', 'Naming your class `Trie` inside this app — the toolkit already defines a global Trie'],
       evolution: { easy: '—', medium: 'Maximum XOR of two numbers in an array.', hard: 'Maximum XOR with an element (offline + trie), XOR queries with deletions (counts on nodes).' },
     },
   ],
@@ -817,6 +818,7 @@ The seam is safe because the reversed list starts where the forward list ended; 
 
 **Inverse:** given g, recover i by prefix-XOR from the top: \`i = g ^ (g >> 1) ^ (g >> 2) ^ …\`.`,
           },
+          { type: 'visual', scenario: 'gray-code', caption: 'g = i ^ (i >> 1) flips exactly one bit per step; switch to "reflect and prefix" to build the same list by mirroring.' },
         ],
       },
       {

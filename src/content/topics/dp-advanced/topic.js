@@ -45,7 +45,7 @@ export default {
       id: 'dp-adv-palindrome',
       name: 'Palindromic DP (Expand Around Center & Interval Table)',
       summary: 'Palindromes are defined from the inside out: s[i..j] is a palindrome iff s[i] === s[j] and s[i+1..j-1] is one. Either expand from each of the 2n−1 centers, or fill a table over (i, j) by increasing length.',
-      whyItExists: 'Checking every substring is O(n³). Reusing the inner answer makes each (i, j) O(1), giving O(n²) — and expansion does it with O(1) memory.',
+      whyItExists: 'Brute force is slow: checking each substring for being a palindrome is O(n³), and trying every subsequence is 2^n. Reusing the inner answer makes each (i, j) O(1), giving O(n²) — and expansion does it with O(1) memory.',
       whenToUse: ['Longest palindromic substring / count of palindromic substrings', 'Longest palindromic SUBSEQUENCE (can skip characters)', 'Minimum insertions/deletions to make a palindrome'],
       clues: ['"palindrome"', '"reads the same backwards"', '"minimum insertions to make palindrome"', '"longest palindromic"'],
       whenNotToUse: ['n ≥ 10^5 and you need all palindromic substrings in linear time → Manacher (see String Algorithms)'],
@@ -133,7 +133,7 @@ function lps(s) {
 for (let len = 2; len < m; len++) {          // interval size, small → large
   for (let i = 0; i + len < m; i++) {
     const j = i + len;
-    for (let k = i + 1; k < j; k++) {        // k = the LAST thing done inside (i, j)
+    for (let k = i + 1; k < j; k++) {        // k = the LAST balloon burst inside (i, j) (for cutting a stick: the FIRST cut)
       dp[i][j] = best(dp[i][j], dp[i][k] + dp[k][j] + cost(i, k, j));
     }
   }
@@ -179,7 +179,7 @@ for (let mask = 1; mask <= FULL; mask++) {
       id: 'dp-adv-digit',
       name: 'Digit DP (Count Numbers ≤ N with a Property)',
       summary: 'Build numbers digit by digit from the most significant one, remembering whether you are still "tight" (equal to N\'s prefix so far). Memoize on (position, tight, extra state).',
-      whyItExists: 'Iterating over all numbers up to 10^9 is too slow. The property usually depends only on a little summary of the digits chosen so far, so the number of states is (digits × 2 × state), tiny.',
+      whyItExists: 'Iterating over all numbers up to 10^9 is too slow. The property usually depends only on a little summary of the digits chosen so far, so the number of states is (digits × 2 × state), tiny. (The template memoizes only the non-tight half; tight states form a single path and are computed once anyway.)',
       whenToUse: ['Count integers in [0, N] (or [L, R] via f(R) − f(L−1)) satisfying a digit property', 'Count occurrences of a digit across a range'],
       clues: ['"count numbers from 1 to n"', '"how many times digit d appears"', '"digits are unique / non-decreasing"', 'n up to 10^9 or 10^18'],
       whenNotToUse: ['The property is about the value arithmetically (primes, divisors) and not about digits'],
@@ -266,7 +266,7 @@ Once you can name the family, the rest is the standard recipe.`,
 - Superstring: n! word orders.
 - Digit counting up to 10^9: a billion numbers.
 
-The DP versions are O(n log n), O(n·k), O(n), O(n³), O(2^n·n²) and O(digits) respectively — because each finds the *minimum information about the past* that the future depends on.`,
+The DP versions are O(n log n), O(n·k), O(n), O(n³), O(2^n·n²) (the TSP-style superstring; a partition bitmask is O(n·2^n)) and O(digits) respectively — because each finds the *minimum information about the past* that the future depends on.`,
           },
           {
             type: 'checkpoint',
@@ -671,6 +671,11 @@ answer  = max(sold[n-1], rest[n-1])
             md: 'A DP whose state is **(position, mode)** where "mode" is one of a few named situations. Transitions are exactly the arrows of the diagram. Because each day depends only on the previous day, you only need O(#modes) variables.',
           },
           {
+            type: 'visual',
+            scenario: 'stock-state-machine',
+            caption: 'Each day, every state takes the best arrow into it — computed from YESTERDAY\'s column only. Buying is only allowed from rest, which is what enforces the cooldown.',
+          },
+          {
             type: 'checkpoint',
             id: 'dp-advanced-cp-6',
             question: 'Why is `hold` initialised to `-Infinity` (not 0) before day 0?',
@@ -989,7 +994,13 @@ dp[i][j] = (pos[j] − pos[i]) + min over i < k < j of dp[i][k] + dp[k][j]
               ['(1,4) → {1,5}', 'k=3 (5 last)', 'dp[1][3] + dp[3][4] + 3·5·8 = 15 + 0 + 120 = 135'],
               ['(0,5) → all', 'k=4 (8 last)', 'dp[0][4] + dp[4][5] + 1·8·1 = 159 + 0 + 8 = 167'],
             ],
-            note: 'dp[0][4] = 159 (burst 1, then 5, then 3 with 8 as the right wall). Final answer 167.',
+            note: 'dp[0][4] = 159, with 8 as the right wall: burst the 1 first (3·1·5 = 15), then the 5 (3·5·8 = 120), and the 3 last (1·3·8 = 24). Final answer 167.',
+          },
+          {
+            type: 'visual',
+            scenario: 'interval-dp-burst',
+            input: { nums: [3, 1, 5, 8] },
+            caption: 'The same dry run, step by step: ranges are filled by length, and for each range every k is tried as the LAST balloon burst.',
           },
         ],
       },
@@ -1085,6 +1096,11 @@ for (let mask = 1; mask < N; mask++) {
 }
 // pick the best last in dp[N - 1][*], then walk parent[][] backwards to rebuild the order`,
           },
+          {
+            type: 'visual',
+            scenario: 'bitmask-tsp',
+            caption: 'Each move switches on one bit (mask | 1 << j). Several orders reach the same (mask, last) state — only the cheapest survives, which is why 2ⁿ·n states replace n! orders.',
+          },
         ],
       },
       {
@@ -1110,6 +1126,12 @@ count of 1s at place p =
 \`\`\`
 
 Example n = 13, p = 1: high = 1, cur = 3, low = 0 → 1·1 + 1 = 2 (the 1s in 1 and 11). p = 10: high = 0, cur = 1, low = 3 → 0 + 4 (10, 11, 12, 13). Total 6 ✓.`,
+          },
+          {
+            type: 'visual',
+            scenario: 'digit-dp',
+            input: { n: 235 },
+            caption: 'go(pos, tight, ones) for n = 235: choosing 0 or 1 first frees the rest, choosing 2 stays tight. Free states fill memo[pos][ones] once; later calls on the same state are memo hits.',
           },
           {
             type: 'checkpoint',

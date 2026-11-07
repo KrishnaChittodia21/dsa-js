@@ -36,6 +36,8 @@ A subsequence is obtained by deleting zero or more characters from \`t\` **witho
 
   functionName: 'isSubsequence',
   paramNames: ['s', 't'],
+  paramTypes: ['string', 'string'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {string} s
  * @param {string} t

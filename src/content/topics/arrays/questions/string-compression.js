@@ -35,6 +35,8 @@ Write the result into the **beginning of \`chars\`** and return the new length. 
 
   functionName: 'compress',
   paramNames: ['chars'],
+  paramTypes: ['char[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {character[]} chars
  * @return {number}

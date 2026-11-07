@@ -61,6 +61,11 @@ export default {
 Without dots this is O(L). With d dots it explores at most 26^d branches (d ≤ 2 here), pruned by missing children.`,
 
   className: 'WordDictionary',
+  methodTypes: {
+    constructor: { params: [] },
+    addWord: { params: ['string'], returns: 'void' },
+    search: { params: ['string'], returns: 'boolean' },
+  },
   starterCode: `class WordDictionary {
   constructor() {
     

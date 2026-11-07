@@ -10,9 +10,18 @@
    ===================================================================== */
 
 /* ---------- player frame ---------- */
+/* Registered so a cell's face colours cross-fade between frames (gradients themselves can't transition).
+   Every var(--c1/--c2, fallback) in viz.css relies on .viz setting the default below. */
+@property --c1 { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --c2 { syntax: '<color>'; inherits: true; initial-value: transparent; }
 .viz {
   --viz-c1: var(--surface-3);
   --viz-c2: var(--surface-2);
+  --c1: var(--viz-c1);
+  --c2: var(--viz-c2);
+  /* frame-change motion; Visualizer.jsx overrides both with the playback speed (long + ease-in-out while playing) */
+  --viz-t: 240ms;
+  --viz-ease: cubic-bezier(0.23, 1, 0.32, 1);
   container: viz / inline-size;
   position: relative;
   margin: 0;
@@ -28,6 +37,19 @@
 .viz-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px 20px; padding: 20px 22px 16px; flex-wrap: wrap; }
 .viz-head-txt { min-width: 0; flex: 1 1 320px; }
 .viz-title { margin-top: 10px; font: 750 19px/1.2 var(--f-display); font-stretch: 108%; letter-spacing: -0.015em; color: var(--text); }
+/* problem context: what question this animation answers, then how to read it */
+.viz-k { display: block; margin-top: 12px; font: 500 10.5px/1.3 var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.viz-prob { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--uv) 6%, transparent); box-shadow: inset 0 0 0 1px var(--line); max-width: 72ch; }
+.viz-prob .viz-k { margin-top: 0; }
+.viz-prob-st { margin: 4px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--text-2); }
+.viz-prob-st b { color: var(--text); }
+.viz-prob-ex { margin: 6px 0 0; font: 500 12px/1.5 var(--f-mono); color: var(--text-2); overflow-wrap: anywhere; }
+.viz-prob-ex span { color: var(--muted); margin-right: 4px; }
+.viz-prob-q { display: inline-flex; align-items: center; gap: 2px; margin-top: 6px; font-size: 12.5px; font-weight: 600; color: var(--uv-t); }
+.viz-prob-line { margin: 6px 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 13px; color: var(--text); }
+.viz-prob-line .viz-k { display: inline; margin: 0; }
+.viz-prob-line .viz-prob-q { margin-top: 0; }
+.viz-k--see + .viz-desc { margin-top: 2px; }
 .viz-desc { margin: 6px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--muted); max-width: 64ch; }
 .viz-head-act { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .viz-predict-toggle { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; }
@@ -42,17 +64,23 @@
 .viz-error { font-size: 12.5px; color: var(--bad); }
 
 /* ---------- stage (dot-matrix floor) + side column ---------- */
-.viz-body { border-top: 1px solid var(--line); display: grid; grid-template-columns: minmax(0, 1fr); }
+.viz { --viz-h: clamp(320px, 50vh, 460px); --viz-side-h: clamp(150px, 24vh, 210px); }
+.viz--compact { --viz-h: clamp(240px, 38vh, 340px); }
+/* fixed stage height: frames never grow or shrink the player; useFitZoom scales the drawing to fit */
+.viz-body { border-top: 1px solid var(--line); display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: var(--viz-h); }
+.viz-body--side { grid-template-rows: var(--viz-h) var(--viz-side-h); }
 .viz-stage {
   position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  justify-content: center;
+  align-content: safe center;
+  justify-content: safe center;
   gap: 26px 40px;
-  min-height: 230px;
+  min-height: 0;
   padding: 30px 24px 26px;
-  overflow-x: auto;
+  overflow: auto;
+  scrollbar-gutter: stable; /* a scrollbar appearing must not change the width the zoom was fitted to */
   isolation: isolate;
   background: linear-gradient(180deg, transparent 35%, rgba(0, 0, 0, 0.18));
 }
@@ -67,13 +95,12 @@
   -webkit-mask: linear-gradient(180deg, transparent 0, #000 70%);
   mask: linear-gradient(180deg, transparent 0, #000 70%);
 }
-.viz--compact .viz-stage { min-height: 170px; padding: 24px 16px 20px; gap: 20px 28px; }
-.viz-side { display: flex; flex-wrap: wrap; gap: 18px 26px; padding: 18px 22px 20px; border-top: 1px solid var(--line); align-items: flex-start; }
+.viz--compact .viz-stage { padding: 24px 16px 20px; gap: 20px 28px; }
+.viz-side { display: flex; flex-wrap: wrap; gap: 18px 26px; padding: 18px 22px 20px; border-top: 1px solid var(--line); align-items: flex-start; align-content: flex-start; min-height: 0; overflow: auto; overscroll-behavior: contain; }
 @container viz (min-width: 900px) {
-  .viz-body--side { grid-template-columns: minmax(0, 1fr) minmax(250px, 300px); }
+  .viz-body--side { grid-template-columns: minmax(0, 1fr) 280px; grid-template-rows: var(--viz-h); }
   .viz-body--side .viz-side { flex-direction: column; flex-wrap: nowrap; border-top: 0; border-left: 1px solid var(--line); }
   .viz-body--side .viz-side > .viz-panel { width: 100%; }
-  .viz--wide .viz-stage { min-height: 320px; }
 }
 .viz-panel { min-width: 0; }
 .viz-label { margin-bottom: 12px; font: 500 10.5px/1.3 var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
@@ -107,7 +134,9 @@
   font: 700 13px/1 var(--f-mono);
   letter-spacing: -0.02em;
   white-space: nowrap;
-  transition: background 0.25s, transform 0.25s var(--ease-out), filter 0.25s, opacity 0.25s;
+  transition-property: --c1, --c2, color, transform, filter, opacity;
+  transition-duration: var(--viz-t);
+  transition-timing-function: var(--viz-ease);
 }
 .viz-cell::before { /* top face */
   content: '';
@@ -140,9 +169,8 @@
 .viz-index::before { content: '['; } .viz-index::after { content: ']'; }
 
 /* range = a bracket on the floor + a faint ice wash under the cubes */
-.viz-col.in-range::after {
-  content: '';
-  position: absolute;
+.viz-col::after, .viz-col::before { content: ''; position: absolute; pointer-events: none; opacity: 0; transition: opacity var(--viz-t) var(--viz-ease); }
+.viz-col::after {
   left: 0;
   right: 0;
   bottom: 2px;
@@ -152,10 +180,12 @@
 }
 .viz-col.range-start::after { border-left: 2px solid var(--ice); border-bottom-left-radius: 8px; left: 2px; }
 .viz-col.range-end::after { border-right: 2px solid var(--ice); border-bottom-right-radius: 8px; right: 2px; }
-.viz-col.in-range { background: linear-gradient(180deg, transparent 40%, color-mix(in srgb, var(--ice) 7%, transparent)); }
+.viz-col::before { inset: 0; z-index: -1; background: linear-gradient(180deg, transparent 40%, color-mix(in srgb, var(--ice) 7%, transparent)); }
+.viz-col.in-range::after, .viz-col.in-range::before { opacity: 1; }
 
 /* pointers: label chip + hard-edged beam falling onto the cube */
-.viz-ptrs { display: flex; flex-direction: column; align-items: center; gap: 3px; margin-right: 9px; }
+/* width 0: a pointer's chip never widens its column (that shoved every cube sideways as pointers moved) */
+.viz-ptrs { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 0; margin-right: 9px; }
 .viz-pointer {
   --pc: var(--viz-ptr-a);
   display: inline-flex;
@@ -187,9 +217,10 @@
 
 /* sorting: value-tall voxel columns (base .vox) */
 .viz-array--bars .viz-col { padding: 0 8px 18px 4px; }
-.viz-vox { --w: 30px; --c1: var(--viz-c1); --c2: var(--viz-c2); margin-right: 15px; transition: height 0.3s var(--ease-out), filter 0.25s; }
+.viz-vox { --w: 30px; --c1: var(--viz-c1); --c2: var(--viz-c2); margin-right: 15px; transition-property: height, filter, --c1, --c2; transition-duration: var(--viz-t); transition-timing-function: var(--viz-ease); }
 .viz-vox.viz-active, .viz-vox.viz-done, .viz-vox.viz-window, .viz-vox.viz-bad { filter: drop-shadow(0 0 14px var(--glow)); }
 .viz-bar-val { margin: 0 15px 12px 0; font: 700 12px/1 var(--f-mono); color: var(--text-2); }
+.viz-bar-val { transition: color var(--viz-t) var(--viz-ease); }
 .viz-bar-val.viz-active { color: var(--uv-t); }
 .viz-bar-val.viz-done { color: var(--plasma-t); }
 .viz-bar-val.viz-window { color: var(--ice-t); }
@@ -214,7 +245,10 @@
   font: 500 12px/1 var(--f-mono);
   color: var(--text-2);
   white-space: nowrap;
-  animation: viz-slab-in 0.28s var(--ease-out);
+  transition-property: --c1, --c2, color, box-shadow;
+  transition-duration: var(--viz-t);
+  transition-timing-function: var(--viz-ease);
+  animation: viz-slab-in var(--viz-t) var(--viz-ease);
 }
 .viz-slab::before { content: ''; position: absolute; left: 0; right: 0; bottom: 100%; height: 7px; background: color-mix(in srgb, var(--c1) 70%, white); transform-origin: 0 100%; transform: skewX(-63deg); opacity: 0.5; }
 .viz-slab::after { content: ''; position: absolute; left: 100%; top: 0; bottom: 0; width: 14px; background: color-mix(in srgb, var(--c2) 55%, black); transform-origin: 0 100%; transform: skewY(-27deg); }
@@ -222,6 +256,7 @@
 :root[data-theme='light'] .viz-slab::after { background: #cfc7be; }
 .viz-slab-d { color: var(--faint); font-size: 10.5px; }
 .viz-slab-v { color: var(--text); font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+.viz-slab-d, .viz-slab-v { transition: color var(--viz-t) var(--viz-ease); }
 .viz-slab-t { margin-left: auto; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
 .viz-slab--top { --c1: #6b52e8; --c2: #3a2a9e; color: #e8e2ff; box-shadow: inset 0 0 0 1px rgba(201, 187, 255, 0.4), 0 12px 26px -12px rgba(123, 92, 255, 0.7); }
 .viz-slab--top .viz-slab-v, .viz-slab--top .viz-slab-d, .viz-slab--top .viz-slab-t { color: #fff; }
@@ -262,17 +297,27 @@
 
 /* ---------- graphs / trees (svg nodes = pucks) ---------- */
 .viz-svg-wrap svg { display: block; overflow: visible; }
-.viz-edge { stroke: var(--line-3); stroke-width: 2; transition: stroke 0.25s; }
+.viz-edge { stroke: var(--line-3); stroke-width: 2; transition-property: stroke, stroke-width, opacity; transition-duration: var(--viz-t); transition-timing-function: var(--viz-ease); animation: viz-in var(--viz-t) var(--viz-ease); }
 .viz-edge-done { stroke: var(--plasma); stroke-width: 3; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--plasma) 60%, transparent)); }
 .viz-edge-active { stroke: var(--uv); stroke-width: 3; }
 .viz-edge-muted { opacity: 0.3; stroke-dasharray: 4 4; }
+/* the other panel states, so an edge can be marked like a node (a bridge, a rejected or conflicting edge) */
+.viz-edge-bad { stroke: var(--bad); stroke-width: 3; }
+.viz-edge-visited { stroke: var(--ice); stroke-width: 2.5; }
+.viz-edge-window { stroke: var(--plasma); stroke-width: 2.5; stroke-dasharray: 6 4; }
 .viz-arrowhead { fill: var(--line-3); }
+.viz-node { transition: opacity var(--viz-t) var(--viz-ease); animation: viz-in var(--viz-t) var(--viz-ease); }
+.viz-node text, .viz-node-side { transition: fill var(--viz-t) var(--viz-ease); }
+@keyframes viz-in { from { opacity: 0; } }
 .viz-edge-label { fill: var(--text-2); font: 600 11px var(--f-mono); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; }
 :root[data-theme='light'] .viz-edge-label { stroke: #fff; }
-.viz-node-face { fill: var(--viz-c1); stroke: var(--line-3); stroke-width: 1.5; transition: fill 0.25s, stroke 0.25s; }
+.viz-node-face { fill: var(--viz-c1); stroke: var(--line-3); stroke-width: 1.5; transition-property: fill, stroke, filter; transition-duration: var(--viz-t); transition-timing-function: var(--viz-ease); }
 .viz-node-side { fill: color-mix(in srgb, var(--viz-c2) 60%, black); }
 :root[data-theme='light'] .viz-node-side { fill: #cfc7be; }
 .viz-node text { fill: var(--text); font: 700 11px var(--f-mono); letter-spacing: -0.04em; pointer-events: none; }
+/* a variable pointing at this node (Animate my run): cur, slow, fast… */
+.viz-node .viz-node-tag { fill: #a58bff; font: 700 10px var(--f-mono); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; }
+:root[data-theme='light'] .viz-node .viz-node-tag { fill: #5b3fd6; stroke: #fff; }
 .viz-node-active .viz-node-face { fill: #7b5cff; stroke: #c9bbff; filter: drop-shadow(0 0 8px rgba(123, 92, 255, 0.7)); }
 .viz-node-active .viz-node-side { fill: #3a2a9e; }
 .viz-node-active text { fill: #fff; }
@@ -297,7 +342,9 @@
   color: var(--fg, var(--text));
   background: linear-gradient(180deg, var(--c1, var(--viz-c1)), var(--c2, var(--viz-c2)));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 0 0 1px var(--line), 2px 3px 0 -1px rgba(0, 0, 0, 0.35);
-  transition: background 0.25s;
+  transition-property: --c1, --c2, color, opacity;
+  transition-duration: var(--viz-t);
+  transition-timing-function: var(--viz-ease);
 }
 .viz-grid-cell.viz-wall { --c1: #4a4550; --c2: #2b2730; --fg: #a49c96; }
 :root[data-theme='light'] .viz-grid-cell.viz-wall { --c1: #6e6873; --c2: #4a4550; --fg: #fff; }
@@ -323,7 +370,9 @@
   color: var(--fg, var(--text));
   background: linear-gradient(180deg, var(--c1, var(--viz-c1)), var(--c2, var(--viz-c2)));
   box-shadow: inset 0 0 0 1px var(--line);
-  transition: background 0.2s;
+  transition-property: --c1, --c2, color, opacity;
+  transition-duration: var(--viz-t);
+  transition-timing-function: var(--viz-ease);
 }
 .viz-table td.viz-muted { opacity: 0.5; }
 
@@ -342,14 +391,17 @@
   color: var(--fg, var(--text));
   background: linear-gradient(180deg, var(--c1, var(--viz-c1)), var(--c2, var(--viz-c2)));
   box-shadow: inset 0 0 0 1px var(--line-2), 2px 3px 0 -1px rgba(0, 0, 0, 0.35);
-  transition: left 0.25s, width 0.25s, background 0.25s;
+  transition-property: left, width, --c1, --c2, color, opacity;
+  transition-duration: var(--viz-t);
+  transition-timing-function: var(--viz-ease);
+  animation: viz-in var(--viz-t) var(--viz-ease);
 }
 .viz-interval.viz-visited { opacity: 0.6; }
 .viz-axis { position: absolute; left: 0; right: 0; bottom: 0; height: 1.2rem; border-top: 1px solid var(--line-3); }
 .viz-axis span { position: absolute; top: 4px; transform: translateX(-50%); font: 500 10.5px/1 var(--f-mono); color: var(--faint); }
 
 /* ---------- note / predict ---------- */
-.viz-note { display: flex; gap: 12px; align-items: flex-start; min-height: 3.4rem; padding: 14px 22px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.5; color: var(--text-2); }
+.viz-note { display: flex; gap: 12px; align-items: flex-start; min-height: calc(3em + 28px); padding: 14px 22px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.5; color: var(--text-2); }
 .viz-note-n { flex: none; display: inline-grid; place-items: center; height: 22px; padding: 0 8px; border-radius: 7px; font: 600 11px/1 var(--f-mono); color: var(--uv-t); background: color-mix(in srgb, var(--uv) 12%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--uv) 35%, transparent); }
 .viz-predict { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px 22px; padding: 18px 22px 20px; border-top: 1px solid var(--line); background: color-mix(in srgb, var(--uv) 5%, transparent); animation: fadeUp 0.2s ease; }
 .viz-predict.is-correct, .viz-predict.is-wrong { grid-template-columns: minmax(0, 1fr) minmax(220px, 300px); }
@@ -378,7 +430,8 @@
 .viz-rail, .viz-fill { position: absolute; top: 14px; left: 0; height: 6px; border-radius: 6px; pointer-events: none; }
 .viz-rail { right: 0; background: var(--sunken); box-shadow: inset 0 0 0 1px var(--line); }
 :root[data-theme='light'] .viz-rail { background: var(--surface-3); }
-.viz-fill { width: var(--p); background: linear-gradient(90deg, var(--ice), var(--uv)); transition: width 0.2s var(--ease-out); }
+.viz-fill { right: 0; transform-origin: 0 50%; transform: scaleX(calc(var(--p, 0) + var(--seg, 0) * var(--f, 0))); background: linear-gradient(90deg, var(--ice), var(--uv)); transition: transform var(--viz-t) var(--viz-ease); }
+.viz.is-playing .viz-fill { transition: none; }
 .viz-tick { position: absolute; top: 17px; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 2px; transform: rotate(45deg); background: var(--surface-3); box-shadow: inset 0 0 0 1.5px var(--line-3); pointer-events: none; z-index: 1; }
 .viz-tick.is-ok { background: var(--good); box-shadow: none; }
 .viz-tick.is-no { background: var(--bad); box-shadow: none; }
@@ -462,6 +515,10 @@
 .vz-player-bar a { color: var(--text-2); }
 .vz-player-bar a:hover { color: var(--plasma-t); }
 .vz-player-bar .vz-sp { flex: 1; }
+/* Save + Clear stay one aligned group; .save-btn's global margin-top (revision.css) knocked Save 10px low */
+.vz-acts { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; }
+.vz-acts .save-btn { margin: 0; }
+.vz-acts:empty { display: none; }
 .vz-player .viz { border-radius: var(--r-xl); }
 
 @media (max-width: 1100px) {

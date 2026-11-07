@@ -582,6 +582,7 @@ r=2     [ 7,  8,  9 ] ]      grid[1][2] === 6
 
 The two re-checks matter for non-square matrices: after the first two sides, a single remaining row or column must not be walked twice.`,
           },
+          { type: 'visual', scenario: 'spiral-matrix', caption: 'Each side is walked once and its wall moves inward; on this 3 × 4 matrix the inner layer is a single row, so the re-check skips the bottom side.' },
           {
             type: 'code',
             title: 'Spiral order — O(m·n) time, O(1) extra space (besides the output)',

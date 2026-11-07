@@ -33,6 +33,8 @@ For each value \`x\` of \`nums1\`, find \`x\` inside \`nums2\` and return the fi
 
   functionName: 'nextGreaterElement',
   paramNames: ['nums1', 'nums2'],
+  paramTypes: ['int[]', 'int[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums1
  * @param {number[]} nums2

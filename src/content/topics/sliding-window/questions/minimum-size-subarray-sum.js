@@ -40,6 +40,8 @@ If no such subarray exists, return \`0\`.`,
 
   functionName: 'minSubArrayLen',
   paramNames: ['target', 'nums'],
+  paramTypes: ['int', 'int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} target
  * @param {number[]} nums

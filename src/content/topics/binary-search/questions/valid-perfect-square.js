@@ -33,6 +33,8 @@ Do not use built-in square-root or power functions.`,
 
   functionName: 'isPerfectSquare',
   paramNames: ['num'],
+  paramTypes: ['int'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number} num
  * @return {boolean}

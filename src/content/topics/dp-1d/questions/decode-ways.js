@@ -38,6 +38,8 @@ Base \`dp[0] = 1\`, \`dp[1] = s[0] === '0' ? 0 : 1\`. Answer \`dp[n]\`. Rolling 
 
   functionName: 'numDecodings',
   paramNames: ['s'],
+  paramTypes: ['string'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string} s
  * @return {number}

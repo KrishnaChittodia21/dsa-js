@@ -36,6 +36,8 @@ export default {
 
   functionName: 'kthSmallest',
   paramNames: ['root', 'k'],
+  paramTypes: ['TreeNode', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {TreeNode} root
  * @param {number} k

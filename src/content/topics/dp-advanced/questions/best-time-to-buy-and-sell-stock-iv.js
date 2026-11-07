@@ -41,6 +41,8 @@ Updating buy[j] then sell[j] on the same day is safe: it can only simulate "buy 
 
   functionName: 'maxProfit',
   paramNames: ['k', 'prices'],
+  paramTypes: ['int', 'int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} k
  * @param {number[]} prices

@@ -42,6 +42,8 @@ Return every critical cable, in any order (each as \`[a, b]\` in any order).`,
 
   functionName: 'criticalConnections',
   paramNames: ['n', 'connections'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} connections

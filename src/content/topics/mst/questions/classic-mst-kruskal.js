@@ -43,6 +43,8 @@ It is correct by the **cut property**: when an edge joins two different componen
 
   functionName: 'mstKruskal',
   paramNames: ['n', 'edges'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} edges  [u, v, w]

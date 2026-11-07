@@ -41,6 +41,8 @@ export default {
 
   functionName: 'isValidBST',
   paramNames: ['root'],
+  paramTypes: ['TreeNode'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {TreeNode} root
  * @return {boolean}

@@ -36,6 +36,8 @@ Return \`true\` if it is possible to assign an integer to every variable so that
 
   functionName: 'equationsPossible',
   paramNames: ['equations'],
+  paramTypes: ['string[]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {string[]} equations
  * @return {boolean}

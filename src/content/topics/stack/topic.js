@@ -205,6 +205,7 @@ export default {
   let best = 0;
   for (let i = 0; i <= heights.length; i++) {
     const h = i === heights.length ? 0 : heights[i]; // sentinel flushes the stack
+    // >= with equal heights is still correct: an earlier equal bar gets a short width, but the last equal bar is measured with the full width
     while (st.length && heights[st[st.length - 1]] >= h) {
       const height = heights[st.pop()];
       const left = st.length ? st[st.length - 1] : -1; // previous smaller
@@ -247,7 +248,7 @@ export default {
 // answer   = Σ nums[i] * left[i] * right[i]`,
       variations: [
         { name: 'Maximum instead of minimum', description: 'Use greater instead of smaller boundaries.' },
-        { name: 'Single-pass version', description: 'When index j is popped by i, its right boundary is i and its left boundary is the new top — add nums[j] × (j − top) × (i − j) right there.' },
+        { name: 'Single-pass version', description: 'When index j is popped by i, its right boundary is i and its left boundary is the new top — add nums[j] × (j − top) × (i − j) right there (top = −1 if the stack is empty). Pop while nums[top] ≥ nums[i] — this is the strict-left / non-strict-right rule, so equal values count once — and finish with a −∞ sentinel so every index is popped.' },
       ],
       mistakes: [
         'Duplicates counted twice: use strict on one side and non-strict on the other',
@@ -600,6 +601,7 @@ for (const token of input) {
 
 This is called a **sign stack**: it remembers, for each open parenthesis, what to add the inner value to and with which sign.`,
           },
+          { type: 'visual', scenario: 'expression-eval', caption: "The two-stack (operands + operators) version handles × ÷ precedence and parentheses; enter postfix like \"3 4 + 2 *\" to see RPN." },
           {
             type: 'dryrun',
             title: 'Calculator: "1 - (4 + 5 - 2) + 3"',
@@ -702,6 +704,7 @@ pop    → [(5,5)]                 getMin = 5  ← recovered for free
 
 **Queue from two stacks.** Push into \`inbox\`. To dequeue, take from \`outbox\`; if \`outbox\` is empty, pour **all** of \`inbox\` into it (this reverses the order, so the oldest element ends on top).`,
           },
+          { type: 'visual', scenario: 'min-stack', caption: 'Each push records the minimum so far, so getMin survives pops. Switch the design to "queue from two stacks" to watch inbox pour into outbox.' },
           {
             type: 'callout',
             variant: 'insight',
@@ -787,7 +790,7 @@ If \`left[i]\` = number of choices for the left end (distance to the previous sm
 answer = Σ nums[i] × left[i] × right[i]
 \`\`\`
 
-**Duplicates.** In \`[2, 2]\` the subarray \`[2, 2]\` has two equal minimums. If both sides use "strictly smaller" as the boundary, both 2s claim it — double counting. If both use "smaller or equal", neither claims it. Fix: **strict on one side, non-strict on the other** — e.g. previous *strictly* smaller on the left, next *smaller-or-equal* on the right. Then each subarray is credited to exactly one minimum (the leftmost one, with this choice).`,
+**Duplicates.** In \`[2, 2]\` the subarray \`[2, 2]\` has two equal minimums. If both sides use "strictly smaller" as the boundary, both 2s claim it — double counting. If both use "smaller or equal", neither claims it. Fix: **strict on one side, non-strict on the other** — e.g. previous *strictly* smaller on the left, next *smaller-or-equal* on the right. Then each subarray is credited to exactly one minimum (the rightmost one, with this choice).`,
           },
           {
             type: 'checkpoint',

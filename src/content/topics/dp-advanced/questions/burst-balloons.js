@@ -38,6 +38,8 @@ Burst every balloon; return the maximum total coins.`,
 
   functionName: 'maxCoins',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

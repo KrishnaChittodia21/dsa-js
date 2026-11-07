@@ -39,6 +39,8 @@ A signal is sent from node \`k\`. Return the minimum time until **all** \`n\` no
 
   functionName: 'networkDelayTime',
   paramNames: ['times', 'n', 'k'],
+  paramTypes: ['int[][]', 'int', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} times
  * @param {number} n

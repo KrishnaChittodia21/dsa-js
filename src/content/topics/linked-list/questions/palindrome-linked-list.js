@@ -39,6 +39,8 @@ Follow-up: can you do it in O(n) time and O(1) extra space?`,
 
   functionName: 'isPalindrome',
   paramNames: ['head'],
+  paramTypes: ['ListNode'],
+  returnType: 'boolean',
   io: { params: ['list'] },
   starterCode: `/**
  * @param {ListNode} head

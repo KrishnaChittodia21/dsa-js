@@ -32,6 +32,8 @@ export default {
 
   functionName: 'dailyTemperatures',
   paramNames: ['temperatures'],
+  paramTypes: ['int[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} temperatures
  * @return {number[]}

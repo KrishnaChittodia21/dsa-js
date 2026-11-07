@@ -37,6 +37,8 @@ The **effort** of a route is the **largest absolute height difference** between 
 
   functionName: 'minimumEffortPath',
   paramNames: ['heights'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} heights
  * @return {number}

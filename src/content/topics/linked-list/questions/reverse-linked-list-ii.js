@@ -40,6 +40,8 @@ Each step keeps the list fully connected, so there is no separate "reconnect" st
 
   functionName: 'reverseBetween',
   paramNames: ['head', 'left', 'right'],
+  paramTypes: ['ListNode', 'int', 'int'],
+  returnType: 'ListNode',
   io: { params: ['list', 'any', 'any'], returns: 'list' },
   starterCode: `/**
  * @param {ListNode} head

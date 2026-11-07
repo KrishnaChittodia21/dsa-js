@@ -141,7 +141,7 @@ export default function RevisionPage() {
 
   return (
     <div className="page rv-page">
-      <section className="tile tile--glow rv-hero rise" aria-labelledby="rv-t">
+      <section data-guide="rv-hero" className="tile tile--glow rv-hero rise" aria-labelledby="rv-t">
         <div className="rv-hero-l">
           <div className="row row--wrap" style={{ gap: 10 }}>
             <span className="chip rv-chip-ice">
@@ -182,7 +182,7 @@ export default function RevisionPage() {
           </div>
         </div>
 
-        <aside className="tile tile--raised tile--hot rv-drill" aria-label="Drill the queue">
+        <aside data-guide="rv-drill" className="tile tile--raised tile--hot rv-drill" aria-label="Drill the queue">
           <div className="eyebrow rv-drill-eb">
             <span>dequeue()</span>
             <span className="t-ice">front · [0]</span>
@@ -226,7 +226,7 @@ export default function RevisionPage() {
                 <Link className="btn btn--plasma" to={front.to}>
                   Start drill <Icon name="play" size={18} />
                 </Link>
-                <Link className="btn btn--ghost" to="/cheatsheet">
+                <Link className="btn btn--ghost" to="/tools?tab=cheatsheet">
                   Cheat sheet
                 </Link>
               </div>
@@ -248,8 +248,8 @@ export default function RevisionPage() {
               <h3>The queue is empty</h3>
               <p className="rv-drill-why">Finish a lesson or attempt a few questions — anything you fail, mis-spot or peek at gets enqueued here automatically.</p>
               <div className="rv-drill-foot">
-                <Link className="btn btn--plasma" to="/path">
-                  Continue the path <Icon name="arrowRight" size={18} />
+                <Link className="btn btn--plasma" to="/">
+                  Continue learning <Icon name="arrowRight" size={18} />
                 </Link>
               </div>
             </>
@@ -257,7 +257,7 @@ export default function RevisionPage() {
         </aside>
       </section>
 
-      <section className="section rise" style={{ '--i': 1 }} aria-labelledby="rv-q-t">
+      <section data-guide="rv-queue" className="section rise" style={{ '--i': 1 }} aria-labelledby="rv-q-t">
         <div className="rv-qhead">
           <div>
             <span className="eyebrow">revision: Queue&lt;Item&gt; · first in, first out</span>
@@ -327,7 +327,7 @@ export default function RevisionPage() {
       </section>
 
       <div className="grid section rv-cats">
-        <section className="tile c-4 rv-cat rise" style={{ '--i': 2 }} aria-labelledby="rv-weak-t">
+        <section data-guide="rv-weak" className="tile c-4 rv-cat rise" style={{ '--i': 2 }} aria-labelledby="rv-weak-t">
           <div className="tile-head">
             <div>
               <span className="eyebrow">
@@ -376,7 +376,7 @@ export default function RevisionPage() {
           )}
         </section>
 
-        <section className="tile c-4 rv-cat rise" style={{ '--i': 3 }} aria-labelledby="rv-retry-t">
+        <section data-guide="rv-retry" className="tile c-4 rv-cat rise" style={{ '--i': 3 }} aria-labelledby="rv-retry-t">
           <div className="tile-head">
             <div>
               <span className="eyebrow">
@@ -414,7 +414,7 @@ export default function RevisionPage() {
           )}
         </section>
 
-        <section className="tile c-4 rv-cat rise" style={{ '--i': 4 }} aria-labelledby="rv-les-t">
+        <section data-guide="rv-lessons" className="tile c-4 rv-cat rise" style={{ '--i': 4 }} aria-labelledby="rv-les-t">
           <div className="tile-head">
             <div>
               <span className="eyebrow">
@@ -454,7 +454,7 @@ export default function RevisionPage() {
             </div>
           )}
           <p className="rv-foot-note">
-            Every topic also has a cheatsheet tab — or open the <Link to="/cheatsheet">global cheat sheet</Link>. Numbers over time live on <Link to="/progress">Progress</Link>.
+            Every topic also has a cheatsheet tab — or open the <Link to="/tools?tab=cheatsheet">global cheat sheet</Link>. Numbers over time live on <Link to="/progress">Progress</Link>.
           </p>
         </section>
       </div>

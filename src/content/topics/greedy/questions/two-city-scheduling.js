@@ -36,6 +36,8 @@ Exactly \`n\` people must fly to **each** city. Return the **minimum total cost*
 
   functionName: 'twoCitySchedCost',
   paramNames: ['costs'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} costs
  * @return {number}

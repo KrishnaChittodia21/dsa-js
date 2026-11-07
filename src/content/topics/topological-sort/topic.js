@@ -201,7 +201,7 @@ In graph terms: every task is a vertex, every rule "X before Y" is a **directed 
         blocks: [
           {
             type: 'text',
-            md: `Plain DFS/BFS from the previous topic tells you *what is reachable*. It does not tell you *in what order things may be done*. BFS order from a source can violate dependencies: in the graph \`0 → 1 → 2\` plus \`0 → 2\`, BFS from 0 visits 2 at distance 1 — right after 0 — even though 2 also needs 1 first.
+            md: `Plain DFS/BFS from the previous topic tells you *what is reachable*. It does not tell you *in what order things may be done*. BFS order from a source can violate dependencies: in the graph \`0 → 1 → 2\` plus \`0 → 2\`, 2 is at distance 1 from 0, so if \`0 → 2\` is listed first, BFS visits 2 right after 0 — even though 2 also needs 1 first.
 
 Topological sort gives:
 1. **A schedule** that respects every dependency.
@@ -501,7 +501,7 @@ Run DFS. On entering \`u\` colour it gray; after all neighbours are done colour 
   for (let i = 0; i < n; i++) if (color[i] === WHITE && !dfs(i)) return null;
   return post.reverse();
 }`,
-            caption: 'Recursion depth can reach n; for n in the tens of thousands with long chains prefer Kahn in JavaScript.',
+            caption: 'Recursion depth can reach n; for n in the tens of thousands with long chains prefer Kahn in JavaScript. This version returns null on a cycle; the pattern template returns [] instead — both just signal “no order”, so pick one convention and stick to it.',
           },
         ],
       },

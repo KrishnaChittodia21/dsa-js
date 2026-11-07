@@ -34,6 +34,8 @@ Find the node whose value equals \`val\` and return **the subtree rooted at that
 
   functionName: 'searchBST',
   paramNames: ['root', 'val'],
+  paramTypes: ['TreeNode', 'int'],
+  returnType: 'TreeNode',
   starterCode: `/**
  * Definition for a binary tree node (available as the global TreeNode):
  * function TreeNode(val, left, right) { this.val = val; this.left = left; this.right = right; }

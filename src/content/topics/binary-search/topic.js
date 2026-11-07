@@ -150,7 +150,7 @@ function lowerBound(nums, target) {
       template: `function minFeasible(lo, hi, feasible) {
   // invariant: the answer is in [lo, hi]; feasible(hi) is true
   while (lo < hi) {
-    const mid = Math.floor((lo + hi) / 2);  // Math.floor: answers can exceed 2^31
+    const mid = Math.floor((lo + hi) / 2);  // Math.floor: answers can exceed 2^31 (below 2^31, lo + ((hi - lo) >> 1) is equally fine)
     if (feasible(mid)) hi = mid;            // mid works → maybe something smaller works too
     else lo = mid + 1;                      // mid fails → everything below fails too
   }
@@ -204,7 +204,9 @@ function lowerBound(nums, target) {
       clues: ['"two sorted arrays"', '"median"', '"O(log (m+n))"'],
       whenNotToUse: ['O(m + n) is acceptable — a two-pointer merge is much simpler'],
       template: `// cut A at i, B at j = half - i; valid when
-// A[i-1] <= B[j] && B[j-1] <= A[i]   (use -Infinity / Infinity outside the arrays)`,
+// A[i-1] <= B[j] && B[j-1] <= A[i]   (use -Infinity / Infinity outside the arrays)
+// loop (A = shorter array, m = A.length): lo = 0, hi = m; while (lo <= hi) { i = mid; j = half - i;
+//   if (A[i-1] > B[j]) hi = i - 1; else if (B[j-1] > A[i]) lo = i + 1; else done }`,
       variations: [{ name: 'k-th of two sorted arrays', description: 'Same idea with half replaced by k.' }],
       mistakes: ['Binary searching the longer array (j can become negative)', 'Forgetting ±Infinity sentinels at the edges', 'Mixing up odd/even total length'],
       evolution: { easy: '—', medium: 'k-th smallest of two sorted arrays by discarding k/2 each step.', hard: 'Median of two sorted arrays via partition.' },
@@ -807,6 +809,11 @@ valid  ⇔  Aleft <= Bright  &&  Bleft <= Aright
 \`\`\`
 
 If \`Aleft > Bright\`, i is too big → move it left. If \`Bleft > Aright\`, i is too small → move right. That is monotonic in i, so binary search i over the **shorter** array: O(log min(m, n)). Median = max of the lefts (odd total) or the average of max(lefts) and min(rights) (even total).`,
+          },
+          {
+            type: 'visual',
+            scenario: 'median-partition',
+            caption: 'i is binary searched over the shorter array and j = half − i follows. Watch which neighbour pair breaks the rule: a too-big left neighbour in A moves i left, a too-big one in B moves i right. −∞ / +∞ stand in past the ends.',
           },
           {
             type: 'checkpoint',

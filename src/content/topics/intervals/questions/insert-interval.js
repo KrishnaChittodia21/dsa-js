@@ -40,6 +40,8 @@ You cannot beat O(n) because in the worst case the whole output must be written.
 
   functionName: 'insert',
   paramNames: ['intervals', 'newInterval'],
+  paramTypes: ['int[][]', 'int[]'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number[][]} intervals
  * @param {number[]} newInterval

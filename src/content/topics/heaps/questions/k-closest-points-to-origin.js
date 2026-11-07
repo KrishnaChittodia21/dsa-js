@@ -33,6 +33,8 @@ export default {
 
   functionName: 'kClosest',
   paramNames: ['points', 'k'],
+  paramTypes: ['int[][]', 'int'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number[][]} points
  * @param {number} k

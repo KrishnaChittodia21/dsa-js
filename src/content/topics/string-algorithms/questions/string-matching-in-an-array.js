@@ -33,6 +33,8 @@ export default {
 
   functionName: 'stringMatching',
   paramNames: ['words'],
+  paramTypes: ['string[]'],
+  returnType: 'string[]',
   starterCode: `/**
  * @param {string[]} words
  * @return {string[]}

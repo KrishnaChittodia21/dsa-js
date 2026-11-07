@@ -38,6 +38,8 @@ Each index enters and leaves the deque once.`,
 
   functionName: 'shortestSubarray',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

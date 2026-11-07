@@ -41,6 +41,8 @@ Invariant: \`nums[0..write-1]\` are the distinct values of \`nums[0..read-1]\`, 
 
   functionName: 'removeDuplicates',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number} k — the number of unique elements

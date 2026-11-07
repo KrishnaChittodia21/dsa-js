@@ -37,6 +37,8 @@ export default {
 
   functionName: 'repeatedStringMatch',
   paramNames: ['a', 'b'],
+  paramTypes: ['string', 'string'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string} a
  * @param {string} b

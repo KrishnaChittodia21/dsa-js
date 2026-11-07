@@ -1,11 +1,13 @@
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
+import { java } from '@codemirror/lang-java';
+import { cpp } from '@codemirror/lang-cpp';
 import { EditorView, keymap } from '@codemirror/view';
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import { tags as t } from '@lezer/highlight';
 import { useMemo, useRef } from 'react';
 
-// Theme built from CSS variables. Code is a dark island in both themes (tokens.css § 3 re-points the theme
+// Theme built from CSS variables. Code is a dark island in both themes (tokens.css section 3 re-points the theme
 // tokens inside .cm-editor), so tooltips / autocomplete / fold markers use the Graphite values everywhere.
 const varTheme = EditorView.theme(
   {
@@ -36,14 +38,16 @@ const highlight = HighlightStyle.define([
   { tag: [t.variableName], color: 'var(--code-text)' },
 ]);
 
-export default function CodeEditor({ value, onChange, onRun, onSubmit, readOnly = false, height = '100%', label = 'Code editor' }) {
+const SYNTAX = { js: javascript, java, cpp };
+
+export default function CodeEditor({ value, onChange, onRun, onSubmit, readOnly = false, height = '100%', label = 'Code editor', language = 'js' }) {
   const runRef = useRef(onRun);
   const submitRef = useRef(onSubmit);
   runRef.current = onRun;
   submitRef.current = onSubmit;
   const extensions = useMemo(
     () => [
-      javascript(),
+      (SYNTAX[language] || javascript)(),
       varTheme,
       syntaxHighlighting(highlight),
       EditorView.lineWrapping,
@@ -53,7 +57,7 @@ export default function CodeEditor({ value, onChange, onRun, onSubmit, readOnly 
         { key: 'Mod-Enter', run: () => (runRef.current?.(), true) },
       ]),
     ],
-    [label],
+    [label, language],
   );
   return (
     <CodeMirror
@@ -63,7 +67,7 @@ export default function CodeEditor({ value, onChange, onRun, onSubmit, readOnly 
       theme="none"
       height={height}
       readOnly={readOnly}
-      basicSetup={{ foldGutter: true, highlightActiveLine: true, autocompletion: true, bracketMatching: true, closeBrackets: true, tabSize: 2 }}
+      basicSetup={{ foldGutter: true, highlightActiveLine: true, autocompletion: true, bracketMatching: true, closeBrackets: true, tabSize: language === 'js' ? 2 : 4 }}
       style={{ height }}
     />
   );

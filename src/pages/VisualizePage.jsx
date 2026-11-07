@@ -1,6 +1,7 @@
 import { lazy, Suspense, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import Icon from '../components/ui/Icon.jsx';
+import SaveButton from '../components/ui/SaveButton.jsx';
 import CoachTip from '../components/guide/CoachTip.jsx';
 import { stages } from '../content/index.js';
 import { visualForPattern } from '../visualizations/patternVisuals.js';
@@ -75,7 +76,7 @@ export default function VisualizePage() {
 
   return (
     <div className="page page-wide vz">
-      <header className="vz-head rise">
+      <header data-guide="vz-head" className="vz-head rise">
         <div>
           <span className="eyebrow">
             <i className="pip pip--uv" />
@@ -85,8 +86,14 @@ export default function VisualizePage() {
             Watch it run<span className="vz-dot">.</span>
           </h1>
           <p className="lead">
-            {unique} algorithms on voxels and nodes. Each pauses at key moments to ask what happens next — turn off <b>Predict mode</b> to just watch.
+            Watch an algorithm run <b>step by step</b> on real data — {unique} of them, drawn as voxels and nodes. Each step says what just happened, and <b>Predict mode</b> pauses at key moments to ask what comes next.
           </p>
+          <ul className="holds" aria-label="What this page holds">
+            <li><b>Pick</b>Filter by stage or search, then choose an algorithm.</li>
+            <li><b>Stage &amp; state</b>The data moving on the stage, with variables and stacks beside it.</li>
+            <li><b>Player</b>Play, step, Replay, scrub the track and set the speed — or try your own input.</li>
+            <li><b>Save / Clear</b>Save the scene for later; Clear goes back to the default.</li>
+          </ul>
         </div>
         <div className="vz-stats">
           <div>
@@ -108,7 +115,7 @@ export default function VisualizePage() {
         Focus an animation and use ← → to step; it pauses to ask what happens next. “Try your own input” tests edge cases.
       </CoachTip>
 
-      <section className="tile vz-pick rise" style={{ '--i': 1 }} aria-label="Algorithm picker">
+      <section data-guide="vz-pick" className="tile vz-pick rise" style={{ '--i': 1 }} aria-label="Algorithm picker">
         <div className="vz-pick-top">
           <div className="vz-cats" role="group" aria-label="Stages">
             <button type="button" aria-pressed={cat === 'all'} onClick={() => setCat('all')}>
@@ -138,7 +145,7 @@ export default function VisualizePage() {
       </section>
 
       {current && (
-        <section id="viz-player" className="vz-player rise" style={{ '--i': 2 }} aria-label="Player">
+        <section data-guide="vz-player" id="viz-player" className="vz-player rise" style={{ '--i': 2 }} aria-label="Player">
           <div className="vz-player-bar">
             {current.stage && <span>{current.stage.title}</span>}
             {current.topic && (
@@ -154,11 +161,19 @@ export default function VisualizePage() {
               </>
             )}
             <span className="vz-sp" />
-            {selected && (
-              <button type="button" className="btn btn--ghost btn--sm" onClick={() => setParams({})}>
-                <Icon name="x" size={14} /> Clear
-              </button>
-            )}
+            <span className="vz-acts">
+              {current.topic && (
+                <SaveButton
+                  saveKey={`viz:${current.topic.id}/${current.scenario}`}
+                  item={{ kind: 'scene', topicId: current.topic.id, scenario: current.scenario, title: SCENARIO_TITLES[current.scenario] }}
+                />
+              )}
+              {selected && (
+                <button type="button" className="btn btn--ghost btn--sm" onClick={() => setParams({})}>
+                  <Icon name="x" size={14} /> Clear
+                </button>
+              )}
+            </span>
           </div>
           <Suspense fallback={<div className="muted small">Loading animation…</div>}>
             <Visualizer key={current.key} scenario={current.scenario} input={current.input} wide eyebrow={current.stage ? `${current.stage.title} · ${current.topic.title}` : 'step-through'} />

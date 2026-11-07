@@ -37,6 +37,8 @@ Equivalently: is there a substring of \`s2\` with exactly the same letter counts
 
   functionName: 'checkInclusion',
   paramNames: ['s1', 's2'],
+  paramTypes: ['string', 'string'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {string} s1
  * @param {string} s2

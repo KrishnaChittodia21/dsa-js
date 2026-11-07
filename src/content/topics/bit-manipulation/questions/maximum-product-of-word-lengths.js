@@ -37,6 +37,8 @@ This is the "bitmask as a set" idea that powers bitmask DP later: a subset of a 
 
   functionName: 'maxProduct',
   paramNames: ['words'],
+  paramTypes: ['string[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string[]} words
  * @return {number}

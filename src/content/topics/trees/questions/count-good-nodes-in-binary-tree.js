@@ -42,6 +42,8 @@ Note the mix: the max flows **down** (parameter) while the count flows **up** (r
 
   functionName: 'goodNodes',
   paramNames: ['root'],
+  paramTypes: ['TreeNode'],
+  returnType: 'int',
   starterCode: `/**
  * @param {TreeNode} root
  * @return {number}

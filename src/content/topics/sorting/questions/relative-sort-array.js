@@ -38,6 +38,8 @@ O(n + m + 1000).`,
 
   functionName: 'relativeSortArray',
   paramNames: ['arr1', 'arr2'],
+  paramTypes: ['int[]', 'int[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} arr1
  * @param {number[]} arr2

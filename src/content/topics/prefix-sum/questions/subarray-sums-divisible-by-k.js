@@ -36,6 +36,8 @@ export default {
 
   functionName: 'subarraysDivByK',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

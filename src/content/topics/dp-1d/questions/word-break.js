@@ -35,6 +35,8 @@ Optimisation: words are ≤ 20 characters, so only try \`j ≥ i − maxLen\`. T
 
   functionName: 'wordBreak',
   paramNames: ['s', 'wordDict'],
+  paramTypes: ['string', 'string[]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {string} s
  * @param {string[]} wordDict

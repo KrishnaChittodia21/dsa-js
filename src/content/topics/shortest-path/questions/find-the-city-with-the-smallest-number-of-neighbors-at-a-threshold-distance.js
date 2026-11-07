@@ -39,6 +39,8 @@ For each city, count how many **other** cities can be reached with a shortest-pa
 
   functionName: 'findTheCity',
   paramNames: ['n', 'edges', 'distanceThreshold'],
+  paramTypes: ['int', 'int[][]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} edges

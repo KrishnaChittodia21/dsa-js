@@ -37,6 +37,8 @@ Return \`true\` if \`target\` is in the matrix. Aim for **O(log(m · n))**.`,
 
   functionName: 'searchMatrix',
   paramNames: ['matrix', 'target'],
+  paramTypes: ['int[][]', 'int'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[][]} matrix
  * @param {number} target

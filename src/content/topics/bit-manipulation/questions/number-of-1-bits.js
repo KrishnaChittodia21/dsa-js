@@ -35,6 +35,8 @@ export default {
 
   functionName: 'hammingWeight',
   paramNames: ['n'],
+  paramTypes: ['long'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @return {number}

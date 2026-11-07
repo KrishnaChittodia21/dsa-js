@@ -38,6 +38,8 @@ You must **not modify** the array and must use only **O(1) extra space**.`,
 
   functionName: 'findDuplicate',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

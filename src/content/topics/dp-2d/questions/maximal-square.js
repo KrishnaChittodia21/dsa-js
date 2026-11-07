@@ -35,6 +35,8 @@ export default {
 
   functionName: 'maximalSquare',
   paramNames: ['matrix'],
+  paramTypes: ['char[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {character[][]} matrix
  * @return {number}

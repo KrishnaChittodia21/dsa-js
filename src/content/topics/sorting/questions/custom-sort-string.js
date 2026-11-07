@@ -40,6 +40,8 @@ O(|s| + 26).`,
 
   functionName: 'customSortString',
   paramNames: ['order', 's'],
+  paramTypes: ['string', 'string'],
+  returnType: 'string',
   starterCode: `/**
  * @param {string} order
  * @param {string} s

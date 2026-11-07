@@ -33,6 +33,8 @@ Return the groups in any order; the words inside each group may also be in any o
 
   functionName: 'groupAnagrams',
   paramNames: ['strs'],
+  paramTypes: ['string[]'],
+  returnType: 'string[][]',
   starterCode: `/**
  * @param {string[]} strs
  * @return {string[][]}

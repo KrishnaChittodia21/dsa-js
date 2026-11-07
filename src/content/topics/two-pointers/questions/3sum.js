@@ -42,6 +42,8 @@ Every unique triplet is produced exactly once: it is found at the *first* index 
 
   functionName: 'threeSum',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number[][]}

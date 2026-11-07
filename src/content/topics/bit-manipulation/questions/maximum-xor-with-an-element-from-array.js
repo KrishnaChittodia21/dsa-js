@@ -66,6 +66,8 @@ Return the answers in the same order as the queries.`,
 
   functionName: 'maximizeXor',
   paramNames: ['nums', 'queries'],
+  paramTypes: ['int[]', 'int[][]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number[][]} queries

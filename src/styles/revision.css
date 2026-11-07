@@ -5,8 +5,9 @@
 
 /* ============ Revision · hero + dequeue port ============ */
 .rv-hero { display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 44px; padding: 38px 44px 40px; border-radius: var(--r-xl); }
-.rv-hero-l { min-width: 0; }
-.rv-title { margin: 22px 0 22px -4px; }
+/* title sized to its column, like .dash-hero-title: .chrome paints via background-clip:text, so glyphs past the h1 box vanish */
+.rv-hero-l { min-width: 0; container-type: inline-size; }
+.rv-title { margin: 22px 0 22px -4px; font-size: clamp(40px, min(7.6vw, calc(100cqi / (9 * 0.8))), 116px); overflow-wrap: break-word; }
 .rv-dot { -webkit-text-fill-color: var(--ice); color: var(--ice); }
 :root[data-theme='light'] .rv-dot { -webkit-text-fill-color: var(--ice-t); color: var(--ice-t); }
 .rv-hero .lead b { color: var(--text); font-weight: 600; }
@@ -250,14 +251,13 @@
 .pg-hm-scale i.l0 { background: var(--surface-3); }
 
 /* stage mastery */
-.pg-st-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) 48px; gap: 14px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.pg-st-row { display: grid; grid-template-columns: minmax(0, 1fr) 48px; gap: 14px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
 .pg-st-row:first-of-type { border-top: 0; }
-.pg-sc { font: 700 11px/1 var(--f-mono); color: var(--muted); }
 .pg-nm { display: flex; justify-content: space-between; gap: 10px; font: 600 13.5px/1.2 var(--f-ui); margin-bottom: 7px; flex-wrap: wrap; }
 .pg-nm small { font: 500 11px/1.2 var(--f-mono); color: var(--muted); }
 .pg-pc { font: 600 12.5px/1 var(--f-mono); text-align: right; }
 .pg-st-row .vmeter i { height: 9px; }
-.pg-st-row--cur .pg-sc, .pg-st-row--cur .pg-pc { color: var(--uv-t); }
+.pg-st-row--cur .pg-pc { color: var(--uv-t); }
 .pg-st-row--lock { opacity: 0.62; }
 .pg-sw { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
 .pg-sw .eyebrow { display: block; margin-bottom: 10px; }
@@ -324,3 +324,20 @@ a.pg-ev:hover b { color: var(--plasma-t); }
 :root[data-theme='light'] .pg-page .vox--ghost::after { background: #d9d2c9; }
 :root[data-theme='light'] .pg-page .vox--ghost { background: #ece7e0; box-shadow: inset 0 0 0 1px rgba(40, 28, 20, 0.1); }
 .pg-stat .small, .rv-kpis .small { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: -0.01em; }
+
+/* ---------- M1: backup nudge (Progress), Save button, Saved page ---------- */
+.pg-backup { margin: 8px 0 0; padding-left: 10px; border-left: 2px solid var(--line); color: var(--text-2); font-size: 13.5px; }
+.pg-backup--warn { border-left-color: var(--warn); color: var(--text); }
+
+.save-btn { margin-top: 10px; gap: 6px; }
+.save-btn--on { color: var(--plasma-t); }
+.ls-full-sec > .save-btn { margin: 0 0 8px; }
+
+.sv-seg { margin: 20px 0 16px; max-width: 100%; overflow-x: auto; }
+.sv-seg button { white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; }
+.sv-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.sv-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--r-md, 12px); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+.sv-link { flex: 1; min-width: 0; display: grid; gap: 3px; color: var(--text); }
+.sv-link:hover { text-decoration: none; color: var(--plasma-t); }
+.sv-link b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sv-link small { color: var(--muted); font: 500 11.5px/1.3 var(--f-mono); }

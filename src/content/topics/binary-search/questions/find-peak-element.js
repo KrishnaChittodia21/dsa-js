@@ -36,6 +36,8 @@ With \`lo < hi\`, \`mid + 1 <= hi\` is always a valid index.`,
 
   functionName: 'findPeakElement',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

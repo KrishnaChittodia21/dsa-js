@@ -39,6 +39,8 @@ The k-th revealed position gets the k-th smallest card. O(n log n) for sorting, 
 
   functionName: 'deckRevealedIncreasing',
   paramNames: ['deck'],
+  paramTypes: ['int[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} deck
  * @return {number[]}

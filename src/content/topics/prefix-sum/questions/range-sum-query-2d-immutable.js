@@ -60,6 +60,10 @@ Each \`sumRegion\` call must run in **O(1)** time.`,
 - **Query** \`(r1,c1)\`–\`(r2,c2)\`: the big rectangle, minus the strip above (rows < r1), minus the strip to the left (cols < c1), plus the top-left corner that was subtracted twice.`,
 
   className: 'NumMatrix',
+  methodTypes: {
+    constructor: { params: ['int[][]'] },
+    sumRegion: { params: ['int', 'int', 'int', 'int'], returns: 'int' },
+  },
   starterCode: `class NumMatrix {
   /**
    * @param {number[][]} matrix

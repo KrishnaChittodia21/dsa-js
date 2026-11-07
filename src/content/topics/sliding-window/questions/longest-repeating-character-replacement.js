@@ -39,6 +39,8 @@ Return the length of the **longest substring containing only one repeated letter
 
   functionName: 'characterReplacement',
   paramNames: ['s', 'k'],
+  paramTypes: ['string', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string} s
  * @param {number} k

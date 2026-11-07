@@ -35,6 +35,8 @@ Your solution should run in linear time and use only **constant extra space**.`,
 
   functionName: 'singleNumber',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

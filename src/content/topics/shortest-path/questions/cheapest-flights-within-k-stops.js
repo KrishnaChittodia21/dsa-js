@@ -42,6 +42,8 @@ Alternative: Dijkstra/BFS over states (city, flightsUsed).`,
 
   functionName: 'findCheapestPrice',
   paramNames: ['n', 'flights', 'src', 'dst', 'k'],
+  paramTypes: ['int', 'int[][]', 'int', 'int', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} flights

@@ -24,7 +24,7 @@ function main() {
 `;
 const GLOBALS = [...new Set(toolkit.flatMap((t) => t.exports || []))];
 
-export default function PlaygroundPage() {
+export default function PlaygroundPage({ embedded }) {
   const [code, setCode] = useState(() => {
     try {
       return localStorage.getItem(KEY) || DEFAULT;
@@ -54,7 +54,7 @@ export default function PlaygroundPage() {
 
   return (
     <div className="page wb-page pl-page">
-      <WorkbenchHeader title="Playground" lead="A scratch runner with the whole toolkit loaded. Experiment with JavaScript and the DSA classes — nothing here is graded." />
+      <WorkbenchHeader embedded={embedded} title="Playground" lead="A scratch runner with the whole toolkit loaded. Experiment with JavaScript and the DSA classes — nothing here is graded." />
       <section className="tile pl-shell rise" style={{ '--i': 1 }} aria-labelledby="pl-t">
         <div className="pl-bar">
           <div>

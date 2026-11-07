@@ -40,6 +40,8 @@ Return the **minimum number of boats** needed to carry everyone.`,
 
   functionName: 'numRescueBoats',
   paramNames: ['people', 'limit'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} people
  * @param {number} limit

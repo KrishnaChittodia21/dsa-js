@@ -70,6 +70,11 @@ The solution below uses the toolkit \`FenwickTree\` (a global in the editor); wr
 
   kind: 'design',
   className: 'NumArray',
+  methodTypes: {
+    constructor: { params: ['int[]'] },
+    sumRange: { params: ['int', 'int'], returns: 'int' },
+    update: { params: ['int', 'int'], returns: 'void' },
+  },
   starterCode: `class NumArray {
   /**
    * @param {number[]} nums

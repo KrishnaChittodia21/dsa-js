@@ -68,7 +68,7 @@ const PATTERNS = [
     if (s >= lastEnd) {   // compatible with everything kept so far
       kept++;
       lastEnd = e;
-    }                     // else: skip it (it ends later than lastEnd anyway)
+    }                     // else: skip it (it ends at or after lastEnd anyway)
   }
   return kept;
 }`,
@@ -560,6 +560,7 @@ That is O(n) — you cannot do better because the output itself may be O(n) long
             type: 'code',
             title: 'Merge template',
             code: `function mergeIntervals(intervals) {
+  // Same result as starting from [] with a \`last &&\` guard; seeding with sorted[0] just moves the empty check up front.
   if (intervals.length === 0) return [];
   const sorted = intervals.toSorted((a, b) => a[0] - b[0]);
   const out = [[sorted[0][0], sorted[0][1]]];
@@ -781,6 +782,7 @@ So some optimal answer contains \`g\`. Remove \`g\` and everything overlapping i
 
 Each step advances one pointer → at most \`n + m\` steps: **O(n + m)**. This is the same "discard what can't matter any more" idea you saw in Two Pointers.`,
           },
+          { type: 'visual', scenario: 'interval-intersection', caption: 'Overlap = [max of starts, min of ends] when lo ≤ hi; the interval that ends first is dropped.' },
           {
             type: 'code',
             title: 'Interval List Intersections',

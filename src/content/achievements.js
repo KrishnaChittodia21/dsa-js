@@ -31,6 +31,23 @@ const solvedIds = (p) => qStates(p).filter(([, s]) => s?.status === 'solved').ma
 const lessonsDone = (p) => Object.values(p.topics || {}).filter((t) => t?.lessonCompleted).length;
 const solvedIn = (p, list) => list.filter((q) => p.questions?.[q.id]?.status === 'solved').length;
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+/** local 'YYYY-MM-DD' of a timestamp (same keys as progress.activity) */
+const dayOf = (ms) => {
+  const d = new Date(ms);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+/** the longest run of consecutive calendar days among 'YYYY-MM-DD' keys */
+function longestRun(keys) {
+  const days = [...new Set(keys)].sort().map((k) => new Date(`${k}T00:00:00`).getTime());
+  let best = 0;
+  let run = 0;
+  days.forEach((t, i) => {
+    run = i > 0 && Math.round((t - days[i - 1]) / 86400000) === 1 ? run + 1 : 1;
+    best = Math.max(best, run);
+  });
+  return best;
+}
+const LANGS = ['js', 'java', 'cpp'];
 
 /** Precomputes the content-dependent lists every measure needs. */
 export function buildAchievementContext({ topics, stages, allQuestions, companies = [], companyQuestions = [], topicStatus, streak }) {
@@ -101,6 +118,17 @@ export const ACHIEVEMENTS = [
     measure: (p) => qStates(p).filter(([, s]) => s?.patternGuess?.correct).length,
     requirement: () => "Guess a question's pattern correctly on the first try",
     unit: 'correct guesses',
+  },
+  {
+    id: 'animated',
+    name: 'Lights, Camera, Pass',
+    description: 'Watched Animate my run play your own code to a passing answer.',
+    group: 'start',
+    art: 'play',
+    goal: 1,
+    measure: (p) => p.animate?.passed || 0,
+    requirement: () => 'Animate your own code on a test it passes',
+    unit: 'passing runs',
   },
 
   // ---- content ----
@@ -201,6 +229,21 @@ export const ACHIEVEMENTS = [
     requirement: (goal) => `Solve ${goal} questions without opening the solution`,
     unit: 'clean solves',
   },
+  {
+    id: 'polyglot',
+    name: 'Polyglot',
+    description: 'The same question solved in JavaScript, Java and C++.',
+    group: 'practice',
+    art: 'languages',
+    tiers: [
+      { tier: 'bronze', goal: 1 },
+      { tier: 'silver', goal: 10 },
+      { tier: 'gold', goal: 25 },
+    ],
+    measure: (p) => qStates(p).filter(([, s]) => LANGS.every((l) => s?.solvedLangs?.includes(l))).length,
+    requirement: (goal) => `Solve ${plural(goal, 'question')} in JavaScript, Java and C++`,
+    unit: 'questions',
+  },
 
   // ---- understanding ----
   {
@@ -233,6 +276,17 @@ export const ACHIEVEMENTS = [
     requirement: (goal) => `Name the pattern right first time on ${goal} questions`,
     unit: 'correct guesses',
   },
+  {
+    id: 'divergence-fixed',
+    name: 'Course Corrected',
+    description: 'Fixed a test after "Compare with the reference" showed where your run went off course.',
+    group: 'understanding',
+    art: 'gitCompare',
+    goal: 1,
+    measure: (p) => p.animate?.fixed || 0,
+    requirement: () => 'Compare a failing Animate run with the reference, then animate a passing run on that test',
+    unit: 'fixes',
+  },
 
   // ---- consistency ----
   {
@@ -252,6 +306,36 @@ export const ACHIEVEMENTS = [
       return Math.max(s.current, s.longest);
     },
     requirement: (goal) => `Study ${goal} days in a row`,
+    unit: 'days',
+  },
+  {
+    id: 'shorts-streak',
+    name: 'Daily Short',
+    description: 'Days in a row with a Short answered (your longest run).',
+    group: 'consistency',
+    art: 'clapperboard',
+    tiers: [
+      { tier: 'bronze', goal: 3 },
+      { tier: 'silver', goal: 7 },
+      { tier: 'gold', goal: 30 },
+    ],
+    measure: (p) => longestRun([...Object.keys(p.shortDays || {}), ...Object.values(p.shorts || {}).filter((s) => s?.at).map((s) => dayOf(s.at))]),
+    requirement: (goal) => `Answer a Short on ${goal} days in a row`,
+    unit: 'days',
+  },
+  {
+    id: 'step-streak',
+    name: 'Hands-on Streak',
+    description: 'Days in a row with a step-lesson "Your turn" task solved (your longest run).',
+    group: 'consistency',
+    art: 'listChecks',
+    tiers: [
+      { tier: 'bronze', goal: 3 },
+      { tier: 'silver', goal: 7 },
+      { tier: 'gold', goal: 30 },
+    ],
+    measure: (p) => longestRun(Object.keys(p.stepDays || {})),
+    requirement: (goal) => `Solve a step-lesson task on ${goal} days in a row`,
     unit: 'days',
   },
 
@@ -297,6 +381,21 @@ export const ACHIEVEMENTS = [
       return b ? `Solve all ${b.total} ${b.company.name} questions` : "Solve every question on one company's list";
     },
     unit: 'solved',
+  },
+  {
+    id: 'collector',
+    name: 'Collector',
+    description: 'Questions, sections, scenes and Shorts saved for later.',
+    group: 'fun',
+    art: 'bookmark',
+    tiers: [
+      { tier: 'bronze', goal: 5 },
+      { tier: 'silver', goal: 25 },
+      { tier: 'gold', goal: 100 },
+    ],
+    measure: (p) => Object.keys(p.saved || {}).length,
+    requirement: (goal) => `Save ${goal} items for later`,
+    unit: 'saved',
   },
 ];
 

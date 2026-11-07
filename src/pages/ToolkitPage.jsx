@@ -1,4 +1,4 @@
-import { Link, NavLink, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import Markdown from '../components/ui/Markdown.jsx';
 import CodeBlock from '../components/ui/CodeBlock.jsx';
 import Icon from '../components/ui/Icon.jsx';
@@ -7,21 +7,16 @@ import { useProgress } from '../state/ProgressContext.jsx';
 import { toolkit, toolkitById, questionById, topicById } from '../content/index.js';
 import NotFound from './NotFound.jsx';
 
-const WB_TABS = [
-  { to: '/cheatsheet', label: 'Cheat sheet', icon: 'file' },
-  { to: '/toolkit', label: 'Toolkit', icon: 'box' },
-  { to: '/js', label: 'JS reference', icon: 'book' },
-  { to: '/playground', label: 'Playground', icon: 'terminal' },
-];
-
-/** Shared "Workbench" header for the cheat sheet, toolkit, JS reference and playground screens. */
-export function WorkbenchHeader({ title = 'Workbench', lead, eyebrow, children }) {
+/** Shared header for the cheat sheet, toolkit, JS reference and playground screens. `embedded` (inside the
+ * Tools hub, which owns the page title and tabs) drops the big title and keeps only the children (page controls). */
+export function WorkbenchHeader({ title = 'Tools', lead, eyebrow, embedded, children }) {
+  if (embedded) return children ? <div className="wb-embed">{children}</div> : null;
   return (
     <header className="wb-head rise">
       <div className="wb-head-l">
         <span className="eyebrow">
           <i className="pip" />
-          {eyebrow || 'Workbench · cheat sheet · toolkit · JavaScript for DSA · playground'}
+          {eyebrow || 'Tools · cheat sheet · toolkit · JavaScript for DSA · playground'}
         </span>
         <h1 className="display display--m chrome wb-title">
           {title}
@@ -30,14 +25,6 @@ export function WorkbenchHeader({ title = 'Workbench', lead, eyebrow, children }
         {lead && <p className="lead">{lead}</p>}
         {children}
       </div>
-      <nav className="wb-tabs" aria-label="Workbench sections">
-        {WB_TABS.map((t) => (
-          <NavLink key={t.to} to={t.to} className="wb-tab" end={t.to !== '/toolkit'}>
-            <Icon name={t.icon} size={15} />
-            {t.label}
-          </NavLink>
-        ))}
-      </nav>
     </header>
   );
 }
@@ -58,7 +45,7 @@ const OPS = [
 ];
 const CAT_COLOR = { 'Stack / Queue': 'var(--plasma)', Heap: 'var(--volt)', 'Linked List': 'var(--uv)', Trees: 'var(--ice)', Graphs: '#8FB2FF', Advanced: '#D27BFF' };
 
-export function ToolkitIndex() {
+export function ToolkitIndex({ embedded }) {
   const { progress } = useProgress();
   const groups = {};
   for (const t of toolkit) (groups[t.category || 'Other'] ||= []).push(t);
@@ -66,7 +53,7 @@ export function ToolkitIndex() {
 
   return (
     <div className="page wb-page tk-page">
-      <WorkbenchHeader
+      <WorkbenchHeader embedded={embedded}
         title="Toolkit"
         lead="JavaScript has no built-in priority queue, deque, linked list or tree. These are the implementations you build and reuse — every class here is also global in the practice editor."
       />
@@ -194,12 +181,12 @@ export function ToolkitDetail() {
   const practice = (t.practiceQuestions || []).map((id) => questionById[id]).filter(Boolean);
   return (
     <div className="page wb-page tk-page">
-      <Link to="/toolkit" className="tile-link tk-back">
+      <Link data-guide="tk-back" to="/tools?tab=toolkit" className="tile-link tk-back">
         <Icon name="chevronLeft" size={14} /> JS DSA Toolkit
       </Link>
       <WorkbenchHeader title={t.name} eyebrow={`Toolkit · ${t.category || 'class'} · src/toolkit/${t.file}`} lead={t.summary} />
       <div className="tk-layout">
-        <div className="tk-main">
+        <div data-guide="tk-main" className="tk-main">
           <section className="tile rise" style={{ '--i': 1 }}>
             <div className="tile-head">
               <span className="eyebrow">
@@ -237,7 +224,7 @@ export function ToolkitDetail() {
             <CodeBlock code={t.usage} copy />
           </section>
         </div>
-        <aside className="tk-aside">
+        <aside data-guide="tk-aside" className="tk-aside">
           <section className="tile rise" style={{ '--i': 2 }}>
             <div className="tile-head">
               <span className="eyebrow">

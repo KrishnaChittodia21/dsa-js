@@ -37,6 +37,8 @@ You may turn water cells into land. Return the **smallest number of water cells*
 
   functionName: 'shortestBridge',
   paramNames: ['grid'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} grid
  * @return {number}

@@ -33,6 +33,8 @@ Return the **minimum number of bricks** the line must cross.`,
 
   functionName: 'leastBricks',
   paramNames: ['wall'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} wall
  * @return {number}

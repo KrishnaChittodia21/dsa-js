@@ -40,6 +40,8 @@ You must write an algorithm that runs in **linear time** and uses linear extra s
 
   functionName: 'maximumGap',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

@@ -34,6 +34,8 @@ Return \`true\` if the vertices can be split into two sets A and B such that eve
 
   functionName: 'isBipartite',
   paramNames: ['graph'],
+  paramTypes: ['int[][]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[][]} graph
  * @return {boolean}

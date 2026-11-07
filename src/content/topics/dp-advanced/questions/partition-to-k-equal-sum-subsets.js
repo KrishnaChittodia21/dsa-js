@@ -38,6 +38,8 @@ Why one number per mask suffices: buckets are filled in order, so all previous b
 
   functionName: 'canPartitionKSubsets',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

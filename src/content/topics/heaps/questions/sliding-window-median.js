@@ -44,6 +44,8 @@ Stale elements are never read because tops are always pruned before use.`,
 
   functionName: 'medianSlidingWindow',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'double[]',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k
@@ -66,6 +68,7 @@ function medianSlidingWindow(nums, k) {
     { scenario: 'All equal values', hint: 'Equal values on both heaps: decide the side of a removed value consistently with low.peek().', args: [[5, 5, 5, 5], 2], expected: [5, 5, 5] },
     { scenario: 'Negative and zero values', hint: 'Mixed signs in an even window.', args: [[-1, 5, -3, 8, 0], 2], expected: [2, 1, 2.5, 4] },
     { scenario: 'Many duplicates, even k', hint: 'Stale (lazily deleted) elements must never surface as a heap top; prune after moving elements between heaps.', args: [[4, 1, 7, 1, 8, 7, 8, 7, 7, 4], 4], expected: [2.5, 4, 7, 7.5, 7.5, 7, 7] },
+    { scenario: 'Stale top after rebalancing', hint: 'Moving a heap top across can expose a lazily deleted value on the heap it left: prune that heap after every move, or a removed 2 comes back as the median.', args: [[2, 2, 0, 0, 1, 4, 4], 3], expected: [2, 0, 0, 1, 4] },
     { scenario: 'Decreasing sequence', hint: 'Each new element is the new minimum; rebalancing keeps the halves equal.', args: [[9, 8, 7, 6, 5, 4, 3, 2, 1], 3], expected: [8, 7, 6, 5, 4, 3, 2] },
     { scenario: 'Large input, k = 1000', hint: 'n = 10^5, k = 1000: sorting every window is O(n·k log k) — far too slow. (Every window here is a shuffle of 0..999.)', argsGen: '() => { let s = 12345; const r = () => (s = (s * 1103515245 + 12345) % 2147483648); const P = 1000, p = Array.from({ length: P }, (_, i) => i); for (let i = P - 1; i > 0; i--) { const j = r() % (i + 1); [p[i], p[j]] = [p[j], p[i]]; } return [Array.from({ length: 100000 }, (_, i) => p[i % P]), P]; }', expected: Array(99001).fill(499.5), timeLimitMs: 1000 },
     { scenario: 'Large input, k = 50000', hint: 'n = 10^5 with a huge window: two heaps with lazy deletion stay O(n log n). Large values and negatives too.', argsGen: '() => { let s = 12345; const r = () => (s = (s * 1103515245 + 12345) % 2147483648); const P = 50000, p = Array.from({ length: P }, (_, i) => i * 40000 - 1000000000); for (let i = P - 1; i > 0; i--) { const j = r() % (i + 1); [p[i], p[j]] = [p[j], p[i]]; } return [Array.from({ length: 100000 }, (_, i) => p[i % P]), P]; }', expected: Array(50001).fill(-20000), timeLimitMs: 2000 },

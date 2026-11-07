@@ -29,6 +29,8 @@ export default {
 
   functionName: 'isAnagram',
   paramNames: ['s', 't'],
+  paramTypes: ['string', 'string'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {string} s
  * @param {string} t

@@ -377,7 +377,7 @@ for (let j = 0; j < n; j++) doB(j);
             type: 'visual',
             scenario: 'binary-search',
             input: { nums: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31], target: 27 },
-            caption: '16 elements, about 4 steps: each comparison throws away half of what is left. That is O(log n). (Binary search has its own topic later.)',
+            caption: '16 elements: at most about log₂ 16 + 1 = 5 comparisons (here 3) — each comparison throws away half of what is left. That is O(log n). (Binary search has its own topic later.)',
           },
           {
             type: 'checkpoint',
@@ -577,7 +577,7 @@ function sumTo(n) {           // sumTo(5) → sumTo(4) → … → sumTo(0)
  fib(1) fib(0)
 \`\`\`
 
-The tree has roughly 2ⁿ nodes (time O(2ⁿ)) but is only n levels tall (space O(n)).`,
+The tree has roughly 2ⁿ nodes (an upper bound; really about 1.618ⁿ) (time O(2ⁿ)) but is only n levels tall (space O(n)).`,
           },
           {
             type: 'checkpoint',

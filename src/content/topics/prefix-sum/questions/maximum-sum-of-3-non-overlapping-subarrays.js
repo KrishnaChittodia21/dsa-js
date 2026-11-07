@@ -40,6 +40,8 @@ The middle-block framing guarantees non-overlap: the left block ends before \`j\
 
   functionName: 'maxSumOfThreeSubarrays',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

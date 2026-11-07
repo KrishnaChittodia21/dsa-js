@@ -36,6 +36,8 @@ Return \`true\` if \`n\` is happy, otherwise \`false\`.`,
 
   functionName: 'isHappy',
   paramNames: ['n'],
+  paramTypes: ['int'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number} n
  * @return {boolean}

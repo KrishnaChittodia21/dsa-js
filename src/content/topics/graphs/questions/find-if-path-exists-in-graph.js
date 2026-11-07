@@ -34,6 +34,8 @@ Return \`true\` if there is a path from \`source\` to \`destination\`, otherwise
 
   functionName: 'validPath',
   paramNames: ['n', 'edges', 'source', 'destination'],
+  paramTypes: ['int', 'int[][]', 'int', 'int'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} edges

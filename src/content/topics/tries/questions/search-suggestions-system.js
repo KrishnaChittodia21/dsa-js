@@ -39,6 +39,8 @@ Return a list of lists: the suggestions after each typed character.`,
 
   functionName: 'suggestedProducts',
   paramNames: ['products', 'searchWord'],
+  paramTypes: ['string[]', 'string'],
+  returnType: 'string[][]',
   starterCode: `/**
  * @param {string[]} products
  * @param {string} searchWord

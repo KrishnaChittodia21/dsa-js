@@ -57,6 +57,10 @@ Up to 10^5 queries will be made.`,
 
   kind: 'design',
   className: 'RangeFreqQuery',
+  methodTypes: {
+    constructor: { params: ['int[]'] },
+    query: { params: ['int', 'int', 'int'], returns: 'int' },
+  },
   starterCode: `class RangeFreqQuery {
   /**
    * @param {number[]} arr

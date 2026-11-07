@@ -39,6 +39,8 @@ Transitions: \`hold' = max(hold, rest − p)\`, \`sold' = hold + p\`, \`rest' = 
 
   functionName: 'maxProfit',
   paramNames: ['prices'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} prices
  * @return {number}

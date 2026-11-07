@@ -40,6 +40,8 @@ So its area is **smaller** than the current one. Line \`l\` has nothing more to 
 
   functionName: 'maxArea',
   paramNames: ['height'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} height
  * @return {number}

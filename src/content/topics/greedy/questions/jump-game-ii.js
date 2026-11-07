@@ -36,6 +36,8 @@ Why is it optimal? It is exactly BFS, which finds the shortest path in unweighte
 
   functionName: 'jump',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

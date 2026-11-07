@@ -33,6 +33,8 @@ You may assume such an element always exists. Follow-up: can you do it in O(n) t
 
   functionName: 'majorityElement',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

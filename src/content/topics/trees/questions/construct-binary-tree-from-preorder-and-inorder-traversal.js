@@ -37,6 +37,8 @@ Each value is consumed once → O(n) time.`,
 
   functionName: 'buildTree',
   paramNames: ['preorder', 'inorder'],
+  paramTypes: ['int[]', 'int[]'],
+  returnType: 'TreeNode',
   starterCode: `/**
  * @param {number[]} preorder
  * @param {number[]} inorder

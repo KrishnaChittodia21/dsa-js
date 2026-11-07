@@ -54,6 +54,10 @@ export default {
 **Prefix sum:** the constructor builds \`prefix[i + 1] = prefix[i] + nums[i]\` in O(n). Every query subtracts two entries in O(1). The leading 0 makes \`sumRange(0, r) = prefix[r + 1] − prefix[0]\` work without an \`if\`.`,
 
   className: 'NumArray',
+  methodTypes: {
+    constructor: { params: ['int[]'] },
+    sumRange: { params: ['int', 'int'], returns: 'int' },
+  },
   starterCode: `class NumArray {
   /**
    * @param {number[]} nums

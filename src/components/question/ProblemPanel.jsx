@@ -8,6 +8,42 @@ import { useProgress } from '../../state/ProgressContext.jsx';
 import { patternById, companiesForQuestion, companyById } from '../../content/index.js';
 import EvidenceBadge from '../EvidenceBadge.jsx';
 import { bigoClass } from '../../visualizations/complexity.js';
+import { useEffect, useState } from 'react';
+import { loadReference, referenceLanguages } from '../../languages/references.js';
+import { useUiPrefs } from '../../lib/uiPrefs.js';
+
+const REF_LANG = { js: { label: 'JavaScript', prism: 'javascript' }, java: { label: 'Java', prism: 'clike' }, cpp: { label: 'C++', prism: 'cpp' } };
+
+/** the reference in JS, Java or C++ (starts on the editor's language when that reference exists) */
+function ReferenceCode({ question }) {
+  const pref = useUiPrefs().codeLang;
+  const langs = ['js', ...referenceLanguages(question.id)];
+  const [lang, setLang] = useState(langs.includes(pref) ? pref : 'js');
+  const [text, setText] = useState({}); // lang → source
+  useEffect(() => {
+    if (lang === 'js' || text[lang]) return undefined;
+    let live = true;
+    loadReference(question.id, lang).then((src) => live && setText((t) => ({ ...t, [lang]: src })));
+    return () => {
+      live = false;
+    };
+  }, [lang, question.id, text]);
+  const code = lang === 'js' ? question.solution.code : text[lang];
+  return (
+    <div className="qp-stack">
+      {langs.length > 1 && (
+        <div className="seg" role="group" aria-label="Reference language">
+          {langs.map((l) => (
+            <button key={l} type="button" aria-pressed={lang === l} onClick={() => setLang(l)}>
+              {REF_LANG[l].label}
+            </button>
+          ))}
+        </div>
+      )}
+      {code ? <CodeBlock code={code} language={REF_LANG[lang].prism} title={langs.length > 1 ? REF_LANG[lang].label : 'Reference solution'} /> : <p className="qp-faint">Loading…</p>}
+    </div>
+  );
+}
 
 export function DryRun({ dryRun }) {
   if (!dryRun) return null;
@@ -24,7 +60,7 @@ export const monogram = (name = '') => {
 export function SolutionDetails({ question }) {
   return (
     <div className="qp-sol">
-      {question.solution?.code && <CodeBlock code={question.solution.code} title="Reference solution" />}
+      {question.solution?.code && <ReferenceCode key={question.id} question={question} />}
       {question.solution?.explanation && <Markdown>{question.solution.explanation}</Markdown>}
       {question.dryRun && (
         <div>

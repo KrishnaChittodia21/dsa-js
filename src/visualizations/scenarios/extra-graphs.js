@@ -58,6 +58,7 @@ const MST_DEFAULT = { n: 6, edges: [[0, 1, 4], [0, 2, 3], [1, 2, 1], [1, 3, 2], 
 
 /* ------------------------------------------------------------------ Kruskal */
 export const kruskal = {
+  problem: { name: 'Minimum spanning tree (Kruskal)', statement: 'Connect every node of a weighted undirected graph using edges of the smallest possible total weight.', example: 'the default 6-node graph → total weight 13', exampleOutput: 13, questionId: 'classic-mst-kruskal' },
   title: "Kruskal's minimum spanning tree",
   description: 'Sort edges by weight; take each edge unless union-find says it would close a cycle. (n ≤ 8, ≤ 16 edges.)',
   defaultInput: MST_DEFAULT,
@@ -142,12 +143,14 @@ export const kruskal = {
     if (n === 0) snap('No nodes → the MST is empty with total weight 0.');
     else if (comps === 1) snap(`MST complete: ${taken} edges, total weight ${total}. Sorting dominates → O(E log E); each union-find call is almost O(1).`, { states: all });
     else snap(`The graph has ${comps} separate components, so no single spanning tree exists. We get a minimum spanning FOREST of ${taken} edge(s), total weight ${total}. O(E log E).`, { states: all });
+    frames.at(-1).result = total;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ Prim */
 export const prim = {
+  problem: { name: 'Minimum spanning tree (Prim)', statement: 'Connect every node of a weighted undirected graph using edges of the smallest possible total weight.', example: 'the default 6-node graph → total weight 13', exampleOutput: 13, questionId: 'classic-mst-prim' },
   title: "Prim's minimum spanning tree",
   description: 'Grow one tree from the start node, always adding the cheapest edge that leaves the tree (min-heap). (n ≤ 8, ≤ 16 edges.)',
   defaultInput: { ...MST_DEFAULT, start: 0 },
@@ -191,6 +194,7 @@ export const prim = {
     if (n === 0) {
       snap('Empty graph: there is no node to start from.');
       snap('Nothing to span → MST weight 0.');
+      frames.at(-1).result = 0;
       return frames;
     }
     const pushFrom = (u) => {
@@ -235,12 +239,14 @@ export const prim = {
     const note = 'Unlike Dijkstra (heap keyed by total path distance from the start), Prim keys the heap by the single edge weight: it only cares about the cheapest way to attach each node. O(E log E) with a heap.';
     if (count === n) snap(`Heap empty. All ${n} node(s) are in the tree: MST weight ${total}. ${note}`);
     else snap(`Heap empty, but ${n - count} node(s) were never reached — the graph is disconnected, so Prim only spans ${start}'s component (weight ${total}). ${note}`);
+    frames.at(-1).result = total;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ Bellman-Ford */
 export const bellmanFord = {
+  problem: { name: 'Shortest paths with negative edges (Bellman-Ford)', statement: 'Find the shortest distance from the start to every node of a directed graph whose edges may be negative, and detect a negative cycle.', example: 'start = 0 → distances [0, 2, 7, 4, -2]', exampleOutput: [0, 2, 7, 4, -2] },
   title: 'Bellman-Ford shortest paths',
   description: 'Relax every directed edge V − 1 times; one more round detects a negative cycle. Works with negative weights. (n ≤ 8, ≤ 16 edges.)',
   defaultInput: { n: 5, edges: [[0, 1, 6], [0, 2, 7], [1, 2, 8], [1, 3, 5], [1, 4, -4], [2, 3, -3], [2, 4, 9], [3, 1, -2], [4, 0, 2], [4, 3, 7]], start: 0 },
@@ -274,6 +280,7 @@ export const bellmanFord = {
     if (n === 0) {
       snap('Empty graph: no nodes, no distances.');
       snap('Nothing to relax. O(V·E) in general.');
+      frames.at(-1).result = [];
       return frames;
     }
     snap(`dist[${start}] = 0, everything else ∞. A shortest path uses at most V − 1 = ${n - 1} edges, so ${n - 1} rounds of relaxing every edge are enough.`, { states: { [start]: 'active' }, round: 0 });
@@ -312,6 +319,7 @@ export const bellmanFord = {
       if (bad >= 0) {
         const [u, v, w] = edges[bad];
         snap(`Extra round: edge ${u}→${v} (w=${w}) can STILL lower dist[${v}] (${dist[u]} + ${w} < ${dist[v]}). After V − 1 rounds that is only possible with a negative cycle reachable from ${start} — shortest paths are undefined (−∞). O(V·E).`, { edge: bad, states: { [u]: 'bad', [v]: 'bad' }, distHl: { [v]: 'bad' }, round: n, predict: q });
+        frames.at(-1).result = null; // negative cycle: no shortest paths
         return frames;
       }
       snap('Extra round: no edge can improve any distance → no negative cycle reachable.', { round: n, predict: q });
@@ -327,12 +335,14 @@ export const bellmanFord = {
       distHl: Object.fromEntries(dist.map((d, i) => [i, d === Infinity ? 'muted' : 'done'])),
       round: '✓',
     });
+    frames.at(-1).result = dist;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ 0-1 BFS */
 export const zeroOneBfs = {
+  problem: { name: 'Shortest paths with 0/1 weights', statement: 'Every edge costs 0 or 1. Find the shortest distance from the start to every node.', example: 'start = 0 → distances [0, 1, 0, 1, 1, 1]', exampleOutput: [0, 1, 0, 1, 1, 1], questionId: 'minimum-obstacle-removal-to-reach-corner' },
   title: '0-1 BFS with a deque',
   description: 'Shortest paths when every edge weighs 0 or 1: 0-edges go to the deque front, 1-edges to the back. Undirected; n ≤ 8, ≤ 16 edges.',
   defaultInput: { n: 6, edges: [[0, 1, 1], [0, 2, 0], [2, 3, 1], [1, 3, 0], [3, 4, 0], [1, 4, 1], [4, 5, 1], [2, 5, 1]], start: 0 },
@@ -376,6 +386,7 @@ export const zeroOneBfs = {
     if (n === 0) {
       snap('Empty graph: nothing to explore.');
       snap('No nodes → no distances.');
+      frames.at(-1).result = [];
       return frames;
     }
     dist[start] = 0;
@@ -417,12 +428,14 @@ export const zeroOneBfs = {
     }
     const unreached = dist.filter((d) => d === Infinity).length;
     snap(`Deque empty. Distances from ${start}: [${dist.map(fmt).join(', ')}]${unreached ? ` (${unreached} unreachable)` : ''}. Each node is finalised once → O(V + E), faster than Dijkstra's O(E log V).`);
+    frames.at(-1).result = dist;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ Floyd-Warshall */
 export const floydWarshall = {
+  problem: { name: 'All-pairs shortest paths (Floyd-Warshall)', statement: 'Find the shortest distance between every pair of nodes in a small directed weighted graph.', example: 'dist = [[0, 3, 5, 6], [5, 0, 2, 3], [3, 6, 0, 1], [2, 5, 7, 0]]; dist[0][3] = 6 via 0 → 1 → 2 → 3 (the direct edge costs 7)', exampleOutput: [[0, 3, 5, 6], [5, 0, 2, 3], [3, 6, 0, 1], [2, 5, 7, 0]], questionId: 'find-the-city-with-the-smallest-number-of-neighbors-at-a-threshold-distance' },
   title: 'Floyd-Warshall all-pairs shortest paths',
   description: 'For each intermediate node k, try improving every dist[i][j] with dist[i][k] + dist[k][j]. Directed; n ≤ 5, a sample of updates per k.',
   defaultInput: { n: 4, edges: [[0, 1, 3], [0, 3, 7], [1, 0, 8], [1, 2, 2], [2, 0, 5], [2, 3, 1], [3, 0, 2]] },
@@ -497,12 +510,14 @@ export const floydWarshall = {
       const st = d.map((r, i) => r.map((_, j) => (i === j && d[i][i] < 0 ? 'bad' : '')));
       snap(`dist[i][i] < 0 for node(s) ${negs.join(', ')}: a path from a node back to itself has negative length → a negative cycle, so those distances are not meaningful. O(n³).`, { states: st, k: '✓', nodeStates: Object.fromEntries(negs.map((i) => [i, 'bad'])) });
     } else snap(`Done: every cell is the shortest distance from i to j using any intermediate nodes (∞ = unreachable). Three nested loops → O(n³) time, O(n²) space.`, { states: d.map((r) => r.map((v) => (v === Infinity ? 'muted' : 'done'))), k: '✓' });
+    frames.at(-1).result = d;
     return frames;
   },
 };
 
 /* ------------------------------------------------------------------ Bipartite check */
 export const bipartite = {
+  problem: { name: 'Is Graph Bipartite?', statement: 'Decide whether the nodes can be split into two groups so that every edge joins the two groups.', example: 'the default 7-node graph → true (no odd cycle)', exampleOutput: true, questionId: 'is-graph-bipartite' },
   title: 'Bipartite check (BFS 2-colouring)',
   description: 'Colour nodes with two colours so every edge joins different colours; a same-colour edge means an odd cycle. Undirected; n ≤ 8, ≤ 16 edges.',
   defaultInput: { n: 7, edges: [[0, 1], [0, 3], [1, 2], [2, 5], [3, 4], [4, 5], [1, 4]] },
@@ -584,6 +599,7 @@ export const bipartite = {
               predict: ask(`Neighbour ${conflict.v} already has the same colour as ${u}. What does that mean?`, ['Recolour it and continue', 'Ignore this edge', 'The graph is not bipartite'], 2),
             },
           );
+          frames.at(-1).result = false;
           return frames;
         }
       }
@@ -591,6 +607,7 @@ export const bipartite = {
     const A = color.map((c, i) => (c === 0 ? i : null)).filter((x) => x !== null);
     const B = color.map((c, i) => (c === 1 ? i : null)).filter((x) => x !== null);
     snap(`Every edge joins A to B → the graph IS bipartite. A = {${A.join(', ')}}, B = {${B.join(', ')}}. Each node and edge is handled once → O(V + E).`);
+    frames.at(-1).result = true;
     return frames;
   },
 };

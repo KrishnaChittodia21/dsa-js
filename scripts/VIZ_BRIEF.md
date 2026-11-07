@@ -30,7 +30,7 @@ A frame is `{ note: string, panels: Panel[], predict?: Predict }`.
 | `stack` | `values[]` (bottom → top), `label?` |
 | `queue` | `values[]` (front → back), `label?` |
 | `vars` | `vars: { name: value }` |
-| `list` | `values[]`, `next[]` (index or null), `pointers?`, `highlights?` |
+| `list` | `values[]`, `next[]` (index or null), `pointers?`, `highlights?`, `doubly?` (draw links as ⇄) |
 | `nodes` | `nodes: [{id, label (string), x, y, state}]`, `edges: [{from, to, label?, state}]`, `directed`, `freeLayout?` (true for graphs laid out with layoutCircle), `label?` |
 | `grid` | `cells[][]`, `states?[][]` (state names below or `wall`/`water`/`island-0..3`), `label?` |
 | `table` | `cells[][]`, `states?[][]`, `rowLabels[]`, `colLabels[]`, `label?` |

@@ -31,6 +31,8 @@ Add **one** to the number and return the resulting array of digits.`,
 
   functionName: 'plusOne',
   paramNames: ['digits'],
+  paramTypes: ['int[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} digits
  * @return {number[]}

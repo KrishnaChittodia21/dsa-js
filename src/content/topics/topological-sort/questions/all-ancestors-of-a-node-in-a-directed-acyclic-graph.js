@@ -33,6 +33,8 @@ Node \`u\` is an **ancestor** of \`v\` if \`v\` can be reached from \`u\` by fol
 
   functionName: 'getAncestors',
   paramNames: ['n', 'edges'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} edges

@@ -44,6 +44,11 @@ For every key, \`set\` is called with **strictly increasing** timestamps.`,
 
   className: 'TimeMap',
   paramNames: [],
+  methodTypes: {
+    constructor: { params: [] },
+    set: { params: ['string', 'string', 'int'], returns: 'void' },
+    get: { params: ['string', 'int'], returns: 'string' },
+  },
   starterCode: `class TimeMap {
   constructor() {
     

@@ -35,6 +35,8 @@ Return \`true\` if there is at least one moment when both events are happening, 
 
   functionName: 'haveConflict',
   paramNames: ['event1', 'event2'],
+  paramTypes: ['string[]', 'string[]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {string[]} event1
  * @param {string[]} event2

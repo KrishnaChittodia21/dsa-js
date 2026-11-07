@@ -38,6 +38,8 @@ Both are optimal here since just reading the matrix costs O(n²). The DSU versio
 
   functionName: 'findCircleNum',
   paramNames: ['isConnected'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} isConnected
  * @return {number}

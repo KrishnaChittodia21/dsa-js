@@ -39,6 +39,8 @@ Return the **maximum number of courses** you can complete.`,
 
   functionName: 'scheduleCourse',
   paramNames: ['courses'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} courses
  * @return {number}

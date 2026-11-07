@@ -42,6 +42,8 @@ Why comparing with only the nearest fleet is enough: a fleet's arrival time is t
 
   functionName: 'carFleet',
   paramNames: ['target', 'position', 'speed'],
+  paramTypes: ['int', 'int[]', 'int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} target
  * @param {number[]} position

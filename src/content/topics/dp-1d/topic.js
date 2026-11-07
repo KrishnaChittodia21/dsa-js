@@ -172,7 +172,7 @@ export default {
   return reach.get(stones[stones.length - 1]).size > 0;
 }`,
       variations: [{ name: 'Memoized DFS', description: 'dfs(index, lastJump) with key `${index},${k}` in a Map/Set.' }],
-      mistakes: ['Allowing a jump of size 0', 'Not requiring the first jump to be exactly 1'],
+      mistakes: ['Allowing a jump of size 0', 'Not requiring the first jump to be exactly 1 (the template enforces it implicitly: the start gets last jump 0, so the candidates are −1, 0, 1 and step > 0 leaves only 1)'],
       evolution: {
         easy: '—',
         medium: 'Reachability with a small extra state.',
@@ -424,7 +424,7 @@ If you cannot say the state in one sentence, you are not ready to code.`,
           {
             type: 'reflect',
             prompt: 'Do you understand **why** the house-robber recursion is exponential even though it only has two branches per call?',
-            deeper: 'Every call spawns two more, and the depth is about n, so the tree has up to ~2ⁿ (more precisely ~1.6ⁿ) nodes. But the calls only ever ask about `rob(k)` for k in −1..n−1 — at most n + 1 distinct questions. The huge tree is the same few questions asked again and again. That mismatch (exponential calls, linear distinct states) is the signal that memoization will help.',
+            deeper: 'Every call spawns two more, and the depth is about n, so the tree has up to ~2ⁿ (more precisely ~1.6ⁿ) nodes. But the calls only ever ask about `rob(k)` for k in −2..n−1 — at most n + 2 distinct questions (both negative ones just return 0). The huge tree is the same few questions asked again and again. That mismatch (exponential calls, linear distinct states) is the signal that memoization will help.',
           },
         ],
       },
@@ -484,7 +484,9 @@ If you cannot say the state in one sentence, you are not ready to code.`,
             type: 'text',
             md: `Instead of asking "what do I need?" (top-down), compute **every** state from the smallest upward, in an order where each state's dependencies are already filled.
 
-\`dp[i]\` = best money from the **first i houses**: \`dp[0] = 0\`, \`dp[1] = nums[0]\`, \`dp[i] = max(dp[i − 1], dp[i − 2] + nums[i − 1])\`.`,
+\`dp[i]\` = best money from the **first i houses**: \`dp[0] = 0\`, \`dp[1] = nums[0]\`, \`dp[i] = max(dp[i − 1], dp[i − 2] + nums[i − 1])\`.
+
+(Index shift: the recursion's \`rob(i)\` covers houses \`0..i\`, while this \`dp[i]\` covers the first i houses \`0..i − 1\` — so \`dp[i] = rob(i − 1)\`, and house i − 1 is \`nums[i − 1]\`.)`,
           },
           {
             type: 'code',
@@ -654,6 +656,16 @@ If you swap the loops (numbers outside, amounts inside), each number is "introdu
 **Word break:** \`dp[i]\` = can the first i characters be segmented? \`dp[i] = true\` if for some j, \`dp[j]\` is true and \`s.slice(j, i)\` is in the dictionary Set. Word break II needs all sentences: a memoized DFS \`sentences(start)\` returns the list of sentences for the suffix from start; memoizing by start avoids re-exploring shared suffixes.`,
           },
           {
+            type: 'visual',
+            scenario: 'decode-ways',
+            caption: 'Each dp[i] adds the one-digit way (if the digit is not 0) and the two-digit way (if it is 10–26). Try 06, 30 or 100 to see the zero traps drive dp to 0.',
+          },
+          {
+            type: 'visual',
+            scenario: 'word-break',
+            caption: 'For each end i, only split points j with dp[j] = ✓ are tried; the first dictionary word s[j..i) sets dp[i]. Following the stored j back rebuilds one sentence.',
+          },
+          {
             type: 'checkpoint',
             id: 'dp-1d-cp-9',
             question: 'Decode ways for `s = "106"`. Which is correct?',
@@ -815,7 +827,7 @@ If you swap the loops (numbers outside, amounts inside), each number is "introdu
             md: `- Climbing stairs / house robber: n states × O(1) → **O(n)** time, **O(1)** space with two variables.
 - Coin change: amount states × k coins → **O(amount · k)**, O(amount) space.
 - Perfect squares: n × √n → **O(n√n)**.
-- Word break: n states × n split points × O(L) slicing/hashing → **O(n² · L)** (or O(n · maxWordLen · L)).
+- Word break: n states × n split points × O(L) slicing/hashing → **O(n² · L)** (or O(n · maxWordLen · L)), where L is the length of the slice / word being compared.
 - Word break II: output-sensitive — there can be exponentially many sentences.`,
           },
         ],

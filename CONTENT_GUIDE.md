@@ -295,8 +295,74 @@ Use `{ type: 'visual', scenario: '<id>', input: {…} }`. Input is optional (def
 | `kruskal` / `prim` | `{ n, edges: [u,v,w][] }` (+ `start` for prim) |
 | `bellman-ford` / `zero-one-bfs` / `floyd-warshall` | `{ n, edges, start }` / same / `{ n, edges }` |
 | `bipartite-check` | `{ n, edges }` |
+| `palindrome-expand` / `z-algorithm` | `{ s }` (≤ 16 chars) |
+| `boyer-moore` / `next-permutation` | `{ nums }` (≤ 14 / ≤ 12) |
+| `difference-array` | `{ n, updates: [l, r, v][] }` (n ≤ 12, ≤ 6 updates) |
+| `prefix-sum-2d` | `{ matrix, query: [r1, c1, r2, c2] }` (≤ 5×6) |
+| `read-write-pointers` | `{ nums, mode: 'remove duplicates (sorted)'\|'move zeroes' }` |
+| `dummy-head` | `{ values, val }` (remove all nodes equal to val) |
+| `expression-eval` | `{ expr }` (infix with + − × ÷ and parentheses, or space-separated RPN) |
+| `circular-buffer` | `{ capacity, ops: ['push x' \| 'pop' \| 'front' \| 'rear'] }` |
+| `grid-dp` | `{ grid, mode: 'min-sum'\|'count-paths' }` (≤ 5×6; count-paths: 1 = obstacle) |
+| `interval-dp-burst` | `{ nums }` (burst balloons, ≤ 6) |
+| `bitmask-tsp` | `{ dist }` (n×n matrix, n ≤ 5, null = no road) |
+| `stock-state-machine` | `{ prices }` (buy/sell with cooldown, ≤ 8 days) |
+| `hierholzer-itinerary` | `{ tickets: [from, to][], start }` |
+| `minimax-game` | `{ nums }` (take from either end, ≤ 4) |
+| `median-partition` | `{ a, b }` (two sorted arrays, ≤ 10 each; binary search the cut) |
+| `decode-ways` / `word-break` | `{ s }` (digits, ≤ 12) / `{ s, words }` (≤ 16 letters, ≤ 10 words) |
+| `tree-from-traversals` | `{ preorder, inorder }` (unique values, ≤ 12) |
+| `bst-build-balanced` | `{ nums }` (sorted array → balanced BST, ≤ 15) |
+| `functional-graph` | `{ f }` (node i → f[i], ≤ 10 nodes) |
+| `fast-power` | `{ x, n }` (x^n by halving; negative n allowed) |
+| `digit-dp` | `{ n }` (count the digit 1 in 0…N, N ≤ 9999) |
+| `spiral-matrix` | `{ matrix }` (spiral order, ≤ 6×6) |
+| `merge-sorted-inplace` | `{ nums1, nums2 }` (nums1 = its m real values; merged from the back, ≤ 7 each) |
+| `interval-intersection` | `{ A, B }` (two sorted, disjoint `[start, end][]` lists, ≤ 6 each) |
+| `jump-game` | `{ nums, mode: 'can reach the end (Jump Game I)'\|'fewest jumps (Jump Game II)' }` (≤ 14) |
+| `min-stack` | `{ ops: ['push x' \| 'pop' \| 'top' \| 'getMin'], mode: 'min stack'\|'queue from two stacks' }` |
+| `lru-cache` | `{ capacity, ops: ['put k v' \| 'get k'] }` (capacity ≤ 5, ≤ 16 ops) |
+| `gray-code` | `{ n, mode: 'i ^ (i >> 1)'\|'reflect and prefix' }` (n ≤ 4) |
+| `sparse-table` | `{ nums, l, r }` (range-min query, ≤ 10 numbers) |
 
 **Pattern animations.** Each pattern is linked to an animation in `src/visualizations/patternVisuals.js`
 (shown in the topic's Visualize tab, on the Patterns page, on question pages and in the Visualizer gallery).
 A pattern can override it with `visual: { scenario, input }`. New scenarios: see `scripts/VIZ_BRIEF.md`
 (frames, panels and `predict` questions) and run `node scripts/validate-visuals.mjs`.
+
+## 7. "Animate my run" scenes
+
+Every coding question can be replayed step by step in its **Animate** tab: the learner's own code is recorded
+(`src/runner/recorder.js`) and drawn by the generic renderers (`src/visualizations/runFrames.js`). A **scene file**
+adds the question's own story on top: `src/visualizations/scenes/<question-id>.js` (the file name is the id;
+`scenes/index.js` finds it automatically). Without one the run still animates, with generic notes.
+
+A scene is plain data plus pure functions (imports only from `./util.js`):
+
+```js
+export default {
+  id: 'daily-temperatures',
+  metaphor: 'A waiting line of cold days',             // 3–7 words, required
+  caption: 'Days wait on the stack until a warmer day arrives.', // required
+  narrate(ctx) { /* string for this step, or null for the generic note */ },
+  predict(ctx) { /* { question, options, answer, explain } asked before ctx.next, or null */ },
+  bugs: [{ label, find, replace, explain }],          // classic mistakes for "Break it"
+};
+```
+
+**Adding a scene for a new question:**
+
+1. Make sure the question passes `npm run validate` (its reference solution and tests are the input).
+2. Look at real recorded steps: `node scripts/dump-run.mjs <id> 1 80` (test 1, first 80 steps).
+3. Write the scene following **`design/scene-brief.md`**: the full format, what `ctx` holds, how steps are
+   recorded (ifs, returns, recursion, sampled long runs), and the rules (never assume the learner's variable
+   names beyond the parameters; ask predictions from `ctx.next`, never from the reference; every bug must fail a
+   test). The gold scenes are `sort-an-array.js`, `binary-search.js` and `find-if-path-exists-in-graph.js`.
+4. Check it: `node scripts/qa-scenes.mjs <id>` must print ✔ (reference passes, frames are well-formed, it narrates
+   and predicts, a bug fails a test, panels fit a phone), and `node scripts/dump-run.mjs <id> 1 80 --frames` should
+   read well. Also try a learner-style solution with other names:
+   `node scripts/dump-run.mjs <id> 1 80 --frames --code <file>`.
+5. `npm run check` runs the QA for every scene.
+
+If the generic renderers draw a structure badly (not a scene problem), the fix belongs in `runFrames.js` /
+`recorder.js`, with a test in `tests/recorder.test.js`.

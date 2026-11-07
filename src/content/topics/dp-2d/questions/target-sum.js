@@ -41,6 +41,8 @@ If \`total + target\` is odd, or \`|target| > total\`, return 0. Otherwise count
 
   functionName: 'findTargetSumWays',
   paramNames: ['nums', 'target'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} target

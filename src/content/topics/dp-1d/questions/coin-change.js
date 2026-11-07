@@ -35,6 +35,8 @@ It is also a BFS: amounts are nodes, coins are unit-weight edges, and the answer
 
   functionName: 'coinChange',
   paramNames: ['coins', 'amount'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} coins
  * @param {number} amount

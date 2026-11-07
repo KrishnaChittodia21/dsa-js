@@ -96,7 +96,7 @@ export function exportNameOf(question) {
   return question.kind === 'design' ? question.className : question.functionName;
 }
 
-export function compile(code, exportName, logSink) {
+export function compile(code, exportName, logSink, extra = {}) {
   const consoleProxy = {
     log: (...a) => logSink.push(a.map((x) => (typeof x === 'string' ? x : format(x))).join(' ')),
   };
@@ -106,8 +106,9 @@ export function compile(code, exportName, logSink) {
   // `class Trie`, `class MinHeap`… — those shadow the injected toolkit globals instead of clashing.
   const body = `"use strict";\nreturn (() => {\n${code}\n;return (typeof ${exportName} !== 'undefined') ? ${exportName} : undefined;\n})();`;
   // eslint-disable-next-line no-new-func
-  const factory = new Function('console', ...TOOLKIT_NAMES, body);
-  return factory(consoleProxy, ...TOOLKIT_NAMES.map((k) => toolkit[k]));
+  // `extra`: more names in scope, e.g. the recorder's __rec hook (src/runner/recorder.js)
+  const factory = new Function('console', ...TOOLKIT_NAMES, ...Object.keys(extra), body);
+  return factory(consoleProxy, ...TOOLKIT_NAMES.map((k) => toolkit[k]), ...Object.values(extra));
 }
 
 function compileHelper(src) {
@@ -147,7 +148,8 @@ export function resolveArgs(test) {
 }
 
 // ---------- executing a single test ----------
-function executeOne(target, question, test) {
+// onOp(i, name, args): called before each design-class operation (the recorder marks op boundaries with it)
+export function executeOne(target, question, test, onOp) {
   const args = deepClone(resolveArgs(test));
   const io = question.io || {};
 
@@ -162,6 +164,7 @@ function executeOne(target, question, test) {
     let instance = null;
     for (let i = 0; i < ops.length; i++) {
       const a = deepClone(opArgs[i] || []);
+      onOp?.(i, ops[i], a);
       if (i === 0) {
         instance = new target(...a.map((v, j) => convertIn((io.ctorParams || [])[j], v)));
         out.push(null);
@@ -181,7 +184,7 @@ function executeOne(target, question, test) {
   return convertOut(io.returns, ret);
 }
 
-function checkPass(question, test, output) {
+export function checkPass(question, test, output) {
   if (question.checker) {
     const checker = compileHelper(question.checker);
     return !!checker(output, deepClone(resolveArgs(test)), resolveExpected(test), helpers);

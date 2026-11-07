@@ -39,6 +39,8 @@ Because target ≤ 30 and candidates ≥ 1, the path is short and the \`break\` 
 
   functionName: 'combinationSum2',
   paramNames: ['candidates', 'target'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number[]} candidates
  * @param {number} target

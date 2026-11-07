@@ -31,6 +31,8 @@ The "top" is just past the last step (index \`n\`). Return the **minimum total c
 
   functionName: 'minCostClimbingStairs',
   paramNames: ['cost'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} cost
  * @return {number}

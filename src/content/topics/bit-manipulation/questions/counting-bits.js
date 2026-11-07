@@ -33,6 +33,8 @@ Aim for O(n) overall — not O(n · 32).`,
 
   functionName: 'countBits',
   paramNames: ['n'],
+  paramTypes: ['int'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number} n
  * @return {number[]}

@@ -51,6 +51,8 @@ Each word costs O(min(L, length of shortest root)).`,
 
   functionName: 'replaceWords',
   paramNames: ['dictionary', 'sentence'],
+  paramTypes: ['string[]', 'string'],
+  returnType: 'string',
   starterCode: `/**
  * @param {string[]} dictionary
  * @param {string} sentence

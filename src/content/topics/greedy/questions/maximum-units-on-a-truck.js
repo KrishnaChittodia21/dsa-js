@@ -33,6 +33,8 @@ Sort by \`unitsPerBox\` descending and fill until the truck is full. (With a cou
 
   functionName: 'maximumUnits',
   paramNames: ['boxTypes', 'truckSize'],
+  paramTypes: ['int[][]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} boxTypes
  * @param {number} truckSize

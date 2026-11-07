@@ -44,6 +44,8 @@ Why forcing works: pre-uniting edge i and then running Kruskal gives the cheapes
 
   functionName: 'findCriticalAndPseudoCriticalEdges',
   paramNames: ['n', 'edges'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} edges

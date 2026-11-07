@@ -31,6 +31,8 @@ You start in room 0 and may collect keys and enter any room you have a key for, 
 
   functionName: 'canVisitAllRooms',
   paramNames: ['rooms'],
+  paramTypes: ['int[][]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[][]} rooms
  * @return {boolean}

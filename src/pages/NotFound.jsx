@@ -7,7 +7,7 @@ export default function NotFound() {
   const { pathname } = useLocation();
   return (
     <div className="page nf-page">
-      <section className="tile tile--glow nf rise" aria-labelledby="nf-t">
+      <section data-guide="nf" className="tile tile--glow nf rise" aria-labelledby="nf-t">
         <div className="nf-art" aria-hidden="true">
           <div className="vox nf-v1" style={{ '--h': 2 }} />
           <div className="vox vox--uv nf-v2" style={{ '--h': 3 }} />

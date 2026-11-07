@@ -37,6 +37,8 @@ Your algorithm must run in O(n) time and use O(1) auxiliary space.`,
 
   functionName: 'firstMissingPositive',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

@@ -33,7 +33,6 @@ export default function JourneyMap({ stages, perRow = 4 }) {
             >
               <span className="lln-data">
                 <span className="eyebrow">
-                  <span>S{String(x.number).padStart(2, '0')}</span>
                   <span className={state === 'done' ? 't-plasma' : state === 'cur' ? 't-uv' : state === 'open' ? 't-ice' : ''}>{label}</span>
                 </span>
                 <span className="lln-title">{x.title}</span>

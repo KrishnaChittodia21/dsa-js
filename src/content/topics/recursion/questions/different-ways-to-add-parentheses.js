@@ -40,6 +40,8 @@ Return the list of results of all those groupings, in any order. Different group
 
   functionName: 'diffWaysToCompute',
   paramNames: ['expression'],
+  paramTypes: ['string'],
+  returnType: 'int[]',
   compare: 'unordered',
   starterCode: `/**
  * @param {string} expression

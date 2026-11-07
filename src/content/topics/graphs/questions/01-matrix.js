@@ -33,6 +33,8 @@ export default {
 
   functionName: 'updateMatrix',
   paramNames: ['mat'],
+  paramTypes: ['int[][]'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number[][]} mat
  * @return {number[][]}

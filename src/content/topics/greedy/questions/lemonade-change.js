@@ -39,6 +39,8 @@ Return \`true\` if you can give correct change to every customer, otherwise \`fa
 
   functionName: 'lemonadeChange',
   paramNames: ['bills'],
+  paramTypes: ['int[]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[]} bills
  * @return {boolean}

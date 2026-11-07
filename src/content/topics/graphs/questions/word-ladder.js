@@ -36,6 +36,8 @@ Return the **number of words** in the shortest such sequence (including both \`b
 
   functionName: 'ladderLength',
   paramNames: ['beginWord', 'endWord', 'wordList'],
+  paramTypes: ['string', 'string', 'string[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string} beginWord
  * @param {string} endWord

@@ -46,6 +46,8 @@ modPow(b, e) = h·h mod M          (e even), where h = modPow(b, ⌊e/2⌋)
 
   functionName: 'countGoodNumbers',
   paramNames: ['n'],
+  paramTypes: ['long'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @return {number}

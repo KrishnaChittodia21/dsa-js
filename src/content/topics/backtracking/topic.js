@@ -50,7 +50,7 @@ export default {
       mistakes: [
         'Pushing `path` itself instead of a copy — every stored subset ends up as the same (finally empty) array',
         'Forgetting `path.pop()` after the recursive call',
-        'Starting the loop at 0 instead of `start` → produces reorderings like [2,1] as well as [1,2]',
+        'Starting the loop at 0 instead of `start` → elements are picked again ([1,1], [1,1,1]…); subsets has no base case, so the recursion never stops',
       ],
       evolution: {
         easy: 'List / sum over all subsets of distinct values.',
@@ -149,9 +149,10 @@ export default {
   const path = [];
   function backtrack(start) {
     if (start === s.length) { result.push([...path]); return; }
+    // end is exclusive here; end = start..n−1 with slice(start, end + 1) visits the same pieces
     for (let end = start + 1; end <= s.length; end++) {
       const piece = s.slice(start, end);
-      if (!isValid(piece)) continue;   // prune invalid cuts
+      if (!isValid(piece)) continue;   // prune invalid cuts (isValid = your rule, e.g. is a palindrome)
       path.push(piece);
       backtrack(end);
       path.pop();
@@ -184,7 +185,7 @@ export default {
   const queenCol = [];                        // queenCol[row] = column
   const result = [];
   function place(row) {
-    if (row === n) { result.push(render(queenCol)); return; }
+    if (row === n) { result.push(render(queenCol)); return; }  // render: turn columns into board rows, e.g. "..Q."
     for (let c = 0; c < n; c++) {
       if (cols.has(c) || diag.has(row - c) || anti.has(row + c)) continue;
       cols.add(c); diag.add(row - c); anti.add(row + c); queenCol.push(c);
@@ -650,7 +651,7 @@ The tree has n choices at level 0, n − 1 at level 1, … → n! leaves.`,
             prompt: 'Do you understand why the permutations loop starts at `0` (with `used[]`) while the subsets loop starts at `start`?',
             deeper: `\`start\` encodes "only move forward in the array". That produces each *unordered* group exactly once — perfect for subsets and combinations, where [1,2] and [2,1] are the same answer.
 
-Permutations need **every** order, so an element with a smaller index must be allowed to come later: after choosing 3 first, we still need to try 1 and 2. So the loop scans all indices, and \`used[]\` prevents picking the same element twice *within one path*. Swap the two techniques and you get the wrong family: start-from-0 subsets produce reorderings (and even [1,1]); start-index permutations produce only [1,2,3].`,
+Permutations need **every** order, so an element with a smaller index must be allowed to come later: after choosing 3 first, we still need to try 1 and 2. So the loop scans all indices, and \`used[]\` prevents picking the same element twice *within one path*. Swap the two techniques and you get the wrong family: start-from-0 subsets keep re-picking the same element ([1,1], [1,1,1]…) and, with no base case, never stop; start-index permutations produce only [1,2,3].`,
           },
         ],
       },

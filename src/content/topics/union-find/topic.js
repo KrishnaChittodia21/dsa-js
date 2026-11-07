@@ -117,7 +117,7 @@ function union(a, b, k) {
         { name: 'Parity (xor)', description: 'weight ∈ {0,1}: same side / opposite side (bipartite-style constraints).' },
       ],
       mistakes: [
-        'Updating parent before multiplying the weight (you lose the old parent\'s weight)',
+        'Reading weight[parent[x]] after re-pointing x (save the old parent first, as the template does)',
         'Getting the union formula backwards — derive it: value(ra)/value(rb) = k · w[b] / w[a]',
       ],
       evolution: {
@@ -141,7 +141,8 @@ let groups = 0;
 for (const cell of additions) {
   if (alive[cell]) { out.push(groups); continue; }
   alive[cell] = true; groups++;
-  for (const nb of neighbours(cell)) if (alive[nb] && uf.union(cell, nb)) groups--;
+  for (const nb of neighbours(cell))   // neighbours(cell) = the 4 grid neighbours (up/down/left/right) inside the grid
+    if (alive[nb] && uf.union(cell, nb)) groups--;
   out.push(groups);
 }`,
       variations: [

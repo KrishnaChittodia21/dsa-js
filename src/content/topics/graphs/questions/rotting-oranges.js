@@ -35,6 +35,8 @@ Return the minimum number of minutes until no fresh orange remains. If some fres
 
   functionName: 'orangesRotting',
   paramNames: ['grid'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} grid
  * @return {number}

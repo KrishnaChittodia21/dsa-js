@@ -37,6 +37,8 @@ Because we test indices from left to right and return at the first match, we ret
 
   functionName: 'pivotIndex',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

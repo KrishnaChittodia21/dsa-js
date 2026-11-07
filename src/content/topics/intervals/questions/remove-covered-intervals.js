@@ -37,6 +37,8 @@ Without the tie-break, \`[1,2]\` could come before \`[1,4]\` and would not be re
 
   functionName: 'removeCoveredIntervals',
   paramNames: ['intervals'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} intervals
  * @return {number}

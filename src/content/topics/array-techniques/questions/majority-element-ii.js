@@ -35,6 +35,8 @@ Follow-up: O(n) time and O(1) extra space.`,
 
   functionName: 'majorityElement',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number[]}

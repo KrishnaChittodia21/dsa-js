@@ -36,6 +36,8 @@ export default {
 
   functionName: 'findRelativeRanks',
   paramNames: ['score'],
+  paramTypes: ['int[]'],
+  returnType: 'string[]',
   starterCode: `/**
  * @param {number[]} score
  * @return {string[]}

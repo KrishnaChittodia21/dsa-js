@@ -42,6 +42,10 @@ The strings may contain **any character** — including commas, digits, \`#\`, s
 
   functionName: 'Codec',
   paramNames: ['strs'],
+  methodTypes: {
+    encode: { params: ['string[]'], returns: 'string' },
+    decode: { params: ['string'], returns: 'string[]' },
+  },
   starterCode: `class Codec {
   /**
    * @param {string[]} strs

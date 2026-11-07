@@ -36,6 +36,8 @@ Return all safe nodes, sorted ascending.`,
 
   functionName: 'eventualSafeNodes',
   paramNames: ['graph'],
+  paramTypes: ['int[][]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[][]} graph
  * @return {number[]}

@@ -43,6 +43,8 @@ export default {
 
   functionName: 'findAllConcatenatedWordsInADict',
   paramNames: ['words'],
+  paramTypes: ['string[]'],
+  returnType: 'string[]',
   starterCode: `/**
  * @param {string[]} words
  * @return {string[]}

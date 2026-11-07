@@ -50,6 +50,8 @@ Because updates only ever raise values, tags never need to be pushed down — a 
 
   functionName: 'fallingSquares',
   paramNames: ['positions'],
+  paramTypes: ['int[][]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[][]} positions
  * @return {number[]}

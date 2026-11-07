@@ -35,6 +35,8 @@ The prerequisite graph has no cycles. For each query \`[u, v]\`, answer whether 
 
   functionName: 'checkIfPrerequisite',
   paramNames: ['numCourses', 'prerequisites', 'queries'],
+  paramTypes: ['int', 'int[][]', 'int[][]'],
+  returnType: 'boolean[]',
   starterCode: `/**
  * @param {number} numCourses
  * @param {number[][]} prerequisites

@@ -35,6 +35,8 @@ export default {
 
   functionName: 'maxSubArray',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

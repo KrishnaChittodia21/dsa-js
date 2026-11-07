@@ -44,6 +44,8 @@ Unary minus needs no special case: at the start (or right after "("), result is 
 
   functionName: 'calculate',
   paramNames: ['s'],
+  paramTypes: ['string'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string} s
  * @return {number}

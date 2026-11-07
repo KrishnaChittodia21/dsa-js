@@ -73,7 +73,7 @@ export default function QuestionsPage() {
 
   return (
     <div className="page page-wide ql">
-      <header className="ql-head rise">
+      <header data-guide="ql-head" className="ql-head rise">
         <div>
           <span className="eyebrow">Practice · all questions</span>
           <h1 className="h1">Problem list</h1>
@@ -83,8 +83,8 @@ export default function QuestionsPage() {
         </p>
       </header>
 
-      <section className="tile ql-tile rise" style={{ '--i': 1 }} aria-label="Questions">
-        <div className="ql-filters">
+      <section data-guide="ql-list" className="tile ql-tile rise" style={{ '--i': 1 }} aria-label="Questions">
+        <div data-guide="ql-filters" className="ql-filters">
           <label className="search-in">
             <Icon name="search" size={17} />
             <input className="input" placeholder="Search title, tag, pattern or LC #" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search questions" />

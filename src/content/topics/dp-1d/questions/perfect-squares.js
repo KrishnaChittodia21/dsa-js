@@ -31,6 +31,8 @@ export default {
 
   functionName: 'numSquares',
   paramNames: ['n'],
+  paramTypes: ['int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @return {number}

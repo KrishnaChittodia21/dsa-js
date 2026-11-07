@@ -42,6 +42,8 @@ The sort dominates → O(n log n).
 
   functionName: 'verticalTraversal',
   paramNames: ['root'],
+  paramTypes: ['TreeNode'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {TreeNode} root
  * @return {number[][]}

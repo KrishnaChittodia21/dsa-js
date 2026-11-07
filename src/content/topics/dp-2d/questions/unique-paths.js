@@ -36,6 +36,8 @@ Return the number of different paths it can take.`,
 
   functionName: 'uniquePaths',
   paramNames: ['m', 'n'],
+  paramTypes: ['int', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} m
  * @param {number} n

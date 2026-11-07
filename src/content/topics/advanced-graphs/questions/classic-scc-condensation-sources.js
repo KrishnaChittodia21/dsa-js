@@ -41,6 +41,8 @@ Return that **minimum number** of starting nodes.`,
 
   functionName: 'minStartNodes',
   paramNames: ['n', 'edges'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} edges

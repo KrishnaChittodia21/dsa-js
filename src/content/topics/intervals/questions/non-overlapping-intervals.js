@@ -40,6 +40,8 @@ Intervals that only touch, such as \`[1,2]\` and \`[2,3]\`, are **not** overlapp
 
   functionName: 'eraseOverlapIntervals',
   paramNames: ['intervals'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} intervals
  * @return {number}

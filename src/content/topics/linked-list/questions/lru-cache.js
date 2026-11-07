@@ -67,6 +67,11 @@ Both operations must run in **O(1)** average time.`,
 **JS shortcut:** a \`Map\` iterates in insertion order, so \`delete\` + \`set\` moves a key to the "newest" end and \`map.keys().next().value\` is the oldest. Mention it, but be ready to build the DLL version.`,
 
   className: 'LRUCache',
+  methodTypes: {
+    constructor: { params: ['int'] },
+    put: { params: ['int', 'int'], returns: 'void' },
+    get: { params: ['int'], returns: 'int' },
+  },
   starterCode: `class LRUCache {
   /**
    * @param {number} capacity

@@ -40,6 +40,8 @@ Every node is visited twice (once to count, once to reverse) → O(n).`,
 
   functionName: 'reverseKGroup',
   paramNames: ['head', 'k'],
+  paramTypes: ['ListNode', 'int'],
+  returnType: 'ListNode',
   io: { params: ['list', 'any'], returns: 'list' },
   starterCode: `/**
  * @param {ListNode} head

@@ -79,8 +79,6 @@
 .wt-sl i { font-style: normal; } .wt-sl b { color: var(--text); font-weight: 600; }
 .wt-sl-sp { flex: 1; }
 .wt-sl .kbd { height: 16px; min-width: 16px; font-size: 9px; }
-.wt-sl-k { display: inline-flex; align-items: center; gap: 5px; height: 18px; padding: 0 6px; border-radius: 6px; color: var(--uv-t); box-shadow: inset 0 0 0 1px rgba(123, 92, 255, 0.55), 0 0 0 3px rgba(123, 92, 255, 0.12); }
-.wt-sl-k svg { width: 10px; height: 10px; }
 .wt-dock { display: flex; align-items: center; gap: 3px; padding: 6px 7px; border-radius: 14px; background: var(--surface); box-shadow: var(--tile-shadow), inset 0 0 0 1px var(--line-2); max-width: 100%; }
 :root[data-theme='light'] .wt-dock { background: #fff; }
 .wt-dock i { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 8px; color: var(--text-2); font-style: normal; flex: none; }
@@ -251,3 +249,19 @@
   .wt-ping { opacity: 0.5; }
   .cmd-dialog { animation: none; }
 }
+
+/* ---------- page guide (M11): `?` on a page that has one — components/guide/PageGuide.jsx ---------- */
+.pg-card { position: relative; width: min(520px, 100%); padding: 20px 22px 16px; border-radius: 22px; background: var(--surface-2, #17141b); box-shadow: 0 30px 80px rgba(0, 0, 0, .45), inset 0 0 0 1px var(--line); color: var(--text); outline: none; }
+.pg-head { display: grid; gap: 4px; padding-right: 36px; margin-bottom: 12px; }
+.pg-head h2 { margin: 0; font-size: 20px; }
+.pg-x { position: absolute; top: 14px; right: 14px; }
+.pg-list { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; counter-reset: pg; }
+.pg-list li { display: grid; gap: 4px; padding-left: 26px; position: relative; counter-increment: pg; }
+.pg-list li::before { content: counter(pg); position: absolute; left: 0; top: 1px; font: 600 12px var(--f-mono); color: var(--ice); }
+.pg-list p { margin: 0; color: var(--text-2); font-size: 14px; line-height: 1.5; }
+.pg-list .btn { justify-self: start; margin-top: 2px; }
+.pg-foot { display: flex; justify-content: flex-end; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+/* "Show me": outline the control for a moment */
+.guide-flash { outline: 2px solid var(--ice); outline-offset: 4px; border-radius: 10px; animation: guide-pulse 1.6s cubic-bezier(0.23, 1, 0.32, 1) 1; }
+@keyframes guide-pulse { 0%, 100% { outline-color: transparent; } 15%, 60% { outline-color: var(--ice); } }
+@media (prefers-reduced-motion: reduce) { .guide-flash { animation: none; } }

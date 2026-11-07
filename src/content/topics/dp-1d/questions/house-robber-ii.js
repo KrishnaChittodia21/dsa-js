@@ -35,6 +35,8 @@ Every valid circular plan belongs to A or B, and every plan of A or B is valid o
 
   functionName: 'rob',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

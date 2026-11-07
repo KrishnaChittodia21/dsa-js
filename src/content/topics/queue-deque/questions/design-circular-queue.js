@@ -64,6 +64,15 @@ export default {
 Keeping a count avoids the classic ambiguity: with only head and tail, \`head === tail\` could mean empty or full.`,
 
   className: 'MyCircularQueue',
+  methodTypes: {
+    constructor: { params: ['int'] },
+    enQueue: { params: ['int'], returns: 'boolean' },
+    Rear: { params: [], returns: 'int' },
+    isFull: { params: [], returns: 'boolean' },
+    deQueue: { params: [], returns: 'boolean' },
+    Front: { params: [], returns: 'int' },
+    isEmpty: { params: [], returns: 'boolean' },
+  },
   starterCode: `class MyCircularQueue {
   /** @param {number} k */
   constructor(k) {

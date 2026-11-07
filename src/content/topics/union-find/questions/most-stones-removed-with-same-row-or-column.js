@@ -36,6 +36,8 @@ Return the maximum number of stones you can remove.`,
 
   functionName: 'removeStones',
   paramNames: ['stones'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} stones
  * @return {number}

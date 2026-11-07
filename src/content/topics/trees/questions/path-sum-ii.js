@@ -41,6 +41,8 @@ No early pruning on "sum too large": values can be negative, so a path that is o
 
   functionName: 'pathSum',
   paramNames: ['root', 'targetSum'],
+  paramTypes: ['TreeNode', 'int'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {TreeNode} root
  * @param {number} targetSum

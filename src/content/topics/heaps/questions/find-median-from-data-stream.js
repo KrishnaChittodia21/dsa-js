@@ -57,6 +57,11 @@ Answers within 10⁻⁵ of the true median are accepted.`,
 \`addNum\` is O(log n), \`findMedian\` O(1).`,
 
   className: 'MedianFinder',
+  methodTypes: {
+    constructor: { params: [] },
+    addNum: { params: ['int'], returns: 'void' },
+    findMedian: { params: [], returns: 'double' },
+  },
   starterCode: `class MedianFinder {
   constructor() {
     

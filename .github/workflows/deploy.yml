@@ -24,18 +24,20 @@ jobs:
       # the site lives at https://<user>.github.io/<repo>/ — vite.config.js reads this as `base`
       PAGES_BASE: /${{ github.event.repository.name }}/
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build
+      # tests + content validation + build (M12): a failing check stops the deploy. The Java / C++ reference check
+      # (scripts/check-refs.mjs) needs a JDK and runs locally.
+      - run: npm run check
       # BrowserRouter routes: GitHub Pages answers unknown paths (deep links, refreshes) with 404.html,
       # so make that the app itself and let the router take over
       - run: cp dist/index.html dist/404.html
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:
           path: dist
 
@@ -47,4 +49,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

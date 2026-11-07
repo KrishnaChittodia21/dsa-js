@@ -35,6 +35,8 @@ Follow-up: can you do it in a single pass?`,
 
   functionName: 'removeNthFromEnd',
   paramNames: ['head', 'n'],
+  paramTypes: ['ListNode', 'int'],
+  returnType: 'ListNode',
   io: { params: ['list', 'any'], returns: 'list' },
   starterCode: `/**
  * @param {ListNode} head

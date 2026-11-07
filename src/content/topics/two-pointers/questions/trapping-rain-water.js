@@ -41,6 +41,8 @@ Every bar is settled exactly once → O(n).`,
 
   functionName: 'trap',
   paramNames: ['height'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} height
  * @return {number}

@@ -41,6 +41,8 @@ Why "max with 0"? A subsequence may start anywhere; if every reachable previous 
 
   functionName: 'constrainedSubsetSum',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

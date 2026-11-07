@@ -42,6 +42,8 @@ Return the **maximum number** of employees that can be invited.`,
 
   functionName: 'maximumInvitations',
   paramNames: ['favorite'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} favorite
  * @return {number}

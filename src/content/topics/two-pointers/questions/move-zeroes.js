@@ -36,6 +36,8 @@ You must do this **in place** (modify \`nums\` directly, without making a copy o
 
   functionName: 'moveZeroes',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'void',
   starterCode: `/**
  * Do not return anything, modify nums in place instead.
  * @param {number[]} nums

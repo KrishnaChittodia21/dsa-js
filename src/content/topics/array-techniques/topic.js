@@ -601,7 +601,7 @@ Zero is handled automatically: both become 0 and the next element restarts.`,
 
 After the pass, scan once: any index j with \`nums[j] !== j + 1\` tells you that value \`j + 1\` is **missing**, and the value sitting there is a **duplicate** (or garbage).`,
           },
-          { type: 'visual', scenario: 'cyclic-sort', caption: "Each swap puts one value in its final slot, so there are at most n swaps." },
+          { type: 'visual', scenario: 'cyclic-sort', caption: "Each swap puts one value in its final slot for good, so there are at most n − 1 swaps." },
           {
             type: 'callout',
             variant: 'analogy',
@@ -614,7 +614,7 @@ After the pass, scan once: any index j with \`nums[j] !== j + 1\` tells you that
             title: 'Why is it O(n) even though i sometimes does not move?',
             md: `Count two kinds of steps over the whole run:
 - **Increments of i**: at most n.
-- **Swaps**: every swap puts one value into its home index, where it stays forever (a correctly placed value is never swapped again, because the check \`nums[h] !== nums[i]\` fails for it). There are only n homes, so there are **at most n swaps in total**.
+- **Swaps**: every swap puts one value into its home index, where it stays forever (a correctly placed value is never swapped again, because the check \`nums[h] !== nums[i]\` fails for it). There are only n homes, and once n − 1 are filled the last value has nowhere new to go, so there are **at most n − 1 swaps in total**.
 
 Total ≤ 2n steps → **O(n)**. This is the same amortized argument as the sliding window: bound the total, not the per-iteration cost.`,
           },
@@ -648,7 +648,7 @@ Total ≤ 2n steps → **O(n)**. This is the same amortized argument as the slid
             code: `function findDisappearedNumbers(nums) {
   let i = 0;
   while (i < nums.length) {
-    const h = nums[i] - 1;
+    const h = nums[i] - 1; // no range check: values are always 1..n here (the template’s check matters only when they can fall outside)
     if (nums[h] !== nums[i]) [nums[i], nums[h]] = [nums[h], nums[i]];
     else i++;
   }
@@ -718,6 +718,7 @@ The algorithm performs this pairing on the fly with one candidate and one counte
 - Same as candidate → \`count++\` (another supporter).
 - Different → \`count--\` (cancel one supporter against this voter).`,
           },
+          { type: 'visual', scenario: 'boyer-moore', caption: "Matching votes add up, different votes cancel in pairs — a strict majority can never be fully cancelled. Verify the survivor at the end." },
           {
             type: 'callout',
             variant: 'insight',
@@ -786,6 +787,7 @@ The algorithm performs this pairing on the fly with one candidate and one counte
 
 If no pivot exists (the whole array is descending, e.g. \`[3, 2, 1]\`), it is the last permutation: reverse everything to get the first one, \`[1, 2, 3]\`.`,
           },
+          { type: 'visual', scenario: 'next-permutation', caption: "Pivot from the right, swap with the smallest larger value in the suffix, then reverse the descending suffix." },
           {
             type: 'dryrun',
             title: 'nextPermutation([1, 3, 5, 4, 2])',
@@ -876,7 +878,7 @@ reverse(a, i + 1, n - 1);`,
 5. **Advancing i after a swap** in cyclic sort — the newly arrived value is never placed.
 6. **Index marking without \`Math.abs\`** — negative index, \`undefined\`, wrong answer.
 7. **Voting without verification** when a majority is not guaranteed.
-8. **Next permutation with \`>\` instead of \`>=\`** in the pivot scan — duplicates like \`[1, 5, 1]\` break.`,
+8. **Next permutation with \`>\` instead of \`>=\`** in the pivot scan — an equal pair like the 5s in \`[1, 5, 5]\` is taken as the pivot and the answer breaks.`,
           },
         ],
       },

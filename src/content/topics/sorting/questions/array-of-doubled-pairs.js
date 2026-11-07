@@ -41,6 +41,8 @@ This forced-choice argument is what makes the greedy correct.`,
 
   functionName: 'canReorderDoubled',
   paramNames: ['arr'],
+  paramTypes: ['int[]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[]} arr
  * @return {boolean}

@@ -33,6 +33,8 @@ Count the tuples \`(i, j, k, l)\` such that \`nums1[i] + nums2[j] + nums3[k] + n
 
   functionName: 'fourSumCount',
   paramNames: ['nums1', 'nums2', 'nums3', 'nums4'],
+  paramTypes: ['int[]', 'int[]', 'int[]', 'int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums1
  * @param {number[]} nums2

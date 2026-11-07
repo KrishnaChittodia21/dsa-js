@@ -38,6 +38,8 @@ So walk in-order with \`prev\`; at the **first** drop set \`first = prev\`; at *
 
   functionName: 'recoverTree',
   paramNames: ['root'],
+  paramTypes: ['TreeNode'],
+  returnType: 'void',
   starterCode: `/**
  * Do not return anything; modify root in place.
  * @param {TreeNode} root

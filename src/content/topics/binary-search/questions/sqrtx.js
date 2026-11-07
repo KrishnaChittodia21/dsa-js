@@ -34,6 +34,8 @@ You may not use any built-in exponent or square-root function (\`Math.sqrt\`, \`
 
   functionName: 'mySqrt',
   paramNames: ['x'],
+  paramTypes: ['int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} x
  * @return {number}

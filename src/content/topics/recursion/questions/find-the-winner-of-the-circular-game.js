@@ -36,6 +36,8 @@ Depth n ≤ 500 is safe. For bigger n use the loop in the alternative.`,
 
   functionName: 'findTheWinner',
   paramNames: ['n', 'k'],
+  paramTypes: ['int', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number} k

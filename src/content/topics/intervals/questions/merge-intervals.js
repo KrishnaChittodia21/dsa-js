@@ -39,6 +39,8 @@ Correctness: after sorting, if the next interval starts after the block's end, e
 
   functionName: 'merge',
   paramNames: ['intervals'],
+  paramTypes: ['int[][]'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number[][]} intervals
  * @return {number[][]}

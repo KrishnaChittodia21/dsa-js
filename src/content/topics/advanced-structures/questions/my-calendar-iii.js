@@ -42,6 +42,10 @@ Half-open intervals work automatically: an event ending at 20 and one starting a
 
   kind: 'design',
   className: 'MyCalendarThree',
+  methodTypes: {
+    constructor: { params: [] },
+    book: { params: ['int', 'int'], returns: 'int' },
+  },
   starterCode: `class MyCalendarThree {
   constructor() {
     

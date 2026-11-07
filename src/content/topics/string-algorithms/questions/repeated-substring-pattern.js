@@ -38,6 +38,8 @@ export default {
 
   functionName: 'repeatedSubstringPattern',
   paramNames: ['s'],
+  paramTypes: ['string'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {string} s
  * @return {boolean}

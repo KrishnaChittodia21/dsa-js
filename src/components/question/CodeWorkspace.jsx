@@ -1,11 +1,27 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import CodeEditor from '../editor/CodeEditor.jsx';
 import Icon from '../ui/Icon.jsx';
 import { useProgress } from '../../state/ProgressContext.jsx';
 import { runInWorker } from '../../runner/runInWorker.js';
 import { describeTest, format, resolveExpected } from '../../runner/core.js';
 import { bigoClass } from '../../visualizations/complexity.js';
+import { LANGUAGES, starterFor } from '../../languages/signature.js';
+import { saveUiPrefs, useUiPrefs } from '../../lib/uiPrefs.js';
 
+// JS runs in a worker (runInWorker); Java and C++ compile and run in the browser too (M7, runner/native)
+const LANG_FILE = { js: 'solution.js', java: 'Solution.java', cpp: 'solution.cpp' };
+const LANG_HINT = { js: 'MinHeap, Deque, UnionFind… are global', java: 'java.util: HashMap, ArrayDeque, PriorityQueue…', cpp: 'STL: vector, unordered_map, priority_queue…' };
+const FIRST_RUN = { java: 'The first Java run downloads the compiler (about 4 MB); after that it is cached.', cpp: 'The first C++ run downloads the compiler (about 23 MB); after that it is cached.' };
+const ANIMATE_NO_REF = 'This question has no reference run to animate: switch to JavaScript to watch your own code step by step.';
+
+/** run tests in the editor's language: JS in its worker, Java / C++ through the in-browser compilers */
+async function runIn(lang, args, onStatus) {
+  if (lang === 'js') return runInWorker(args);
+  const { runNative } = await import('../../runner/native/runNative.js');
+  return runNative({ ...args, lang, onStatus });
+}
+
+const AnimateRun = lazy(() => import('./AnimateRun.jsx'));
 const VISIBLE_TESTS = 3;
 const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
 const MOD = IS_MAC ? '⌘' : 'Ctrl';
@@ -82,9 +98,15 @@ function Targets({ question }) {
 export default function CodeWorkspace({ question }) {
   const { progress, dispatch } = useProgress();
   const qs = progress.questions[question.id] || {};
-  const [code, setCode] = useState(qs.code ?? question.starterCode ?? '');
+  const prefLang = useUiPrefs().codeLang;
+  // a language without a starter for this question (untyped) falls back to JS
+  const lang = prefLang !== 'js' && starterFor(prefLang, question) ? prefLang : 'js';
+  const starterOf = (l) => (l === 'js' ? question.starterCode ?? '' : starterFor(l, question) ?? '');
+  const draftOf = (q, l) => (l === 'js' ? q?.code : q?.codeByLang?.[l]) ?? starterOf(l);
+  const [code, setCode] = useState(() => draftOf(qs, lang));
   const [tab, setTab] = useState('tests');
   const [running, setRunning] = useState(false);
+  const [status, setStatus] = useState(''); // Java / C++: "Downloading the compiler…", "Compiling…"
   const [run, setRun] = useState(null); // { mode, res, tests, at }
   const [custom, setCustom] = useState('');
   const [customRun, setCustomRun] = useState(null);
@@ -94,7 +116,7 @@ export default function CodeWorkspace({ question }) {
   const tests = useMemo(() => (question.tests || []).map((t, i) => ({ ...t, hidden: i >= VISIBLE_TESTS })), [question]);
 
   useEffect(() => {
-    setCode(progress.questions[question.id]?.code ?? question.starterCode ?? '');
+    setCode(draftOf(progress.questions[question.id], lang));
     setRun(null);
     setCustomRun(null);
     const first = question.tests?.[0];
@@ -102,17 +124,31 @@ export default function CodeWorkspace({ question }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [question.id]);
 
+  // switching language shows that language's draft (or its starter); a pending save of the old one is flushed first
+  const switchLang = (l) => {
+    if (l === lang) return;
+    if (!saved) {
+      clearTimeout(saveTimer.current);
+      dispatch({ type: 'Q_SAVE_CODE', qid: question.id, code, lang });
+      setSaved(true);
+    }
+    saveUiPrefs({ codeLang: l });
+    setCode(draftOf(progress.questions[question.id], l));
+    setRun(null);
+    setCustomRun(null);
+  };
+
   const onChange = useCallback(
     (v) => {
       setCode(v);
       setSaved(false);
       clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(() => {
-        dispatch({ type: 'Q_SAVE_CODE', qid: question.id, code: v });
+        dispatch({ type: 'Q_SAVE_CODE', qid: question.id, code: v, lang });
         setSaved(true);
       }, 600);
     },
-    [dispatch, question.id],
+    [dispatch, question.id, lang],
   );
 
   const execute = useCallback(
@@ -121,15 +157,16 @@ export default function CodeWorkspace({ question }) {
       setRunning(true);
       setTab('tests');
       const subset = mode === 'submit' ? tests : tests.slice(0, VISIBLE_TESTS);
-      const res = await runInWorker({ code, question, tests: subset });
+      setStatus('');
+      const res = await runIn(lang, { code, question, tests: subset }, setStatus);
       setRun({ mode, res, tests: subset, at: new Date() });
       const passed = res.results.filter((r) => r.passed).length;
       const total = subset.length;
-      if (mode === 'submit') dispatch({ type: 'Q_SUBMIT', qid: question.id, passed, total, allPassed: !res.compileError && passed === total });
+      if (mode === 'submit') dispatch({ type: 'Q_SUBMIT', qid: question.id, passed, total, allPassed: !res.compileError && passed === total, lang });
       else dispatch({ type: 'Q_RUN', qid: question.id, passed, total });
       setRunning(false);
     },
-    [code, question, tests, running, dispatch],
+    [code, question, tests, running, dispatch, lang],
   );
 
   const runCustom = async () => {
@@ -148,8 +185,10 @@ export default function CodeWorkspace({ question }) {
       return;
     }
     setRunning(true);
+    setStatus('');
+    // the reference is always the JS one: its answer is the same in every language
     const [mine, ref] = await Promise.all([
-      runInWorker({ code, question, tests: [test], opts: { compareWith: false } }),
+      runIn(lang, { code, question, tests: [test], opts: { compareWith: false } }, setStatus),
       question.solution?.code ? runInWorker({ code: question.solution.code, question, tests: [test], opts: { compareWith: false } }) : Promise.resolve(null),
     ]);
     setCustomRun({ test, mine, ref });
@@ -158,8 +197,10 @@ export default function CodeWorkspace({ question }) {
 
   const reset = () => {
     if (!window.confirm('Reset the editor to the starter code? Your current code will be lost.')) return;
-    setCode(question.starterCode || '');
-    dispatch({ type: 'Q_SAVE_CODE', qid: question.id, code: question.starterCode || '' });
+    clearTimeout(saveTimer.current);
+    setCode(starterOf(lang));
+    dispatch({ type: 'Q_SAVE_CODE', qid: question.id, code: starterOf(lang), lang });
+    setSaved(true);
   };
 
   const summary = run && !run.res.compileError && run.res.results.length > 0 && {
@@ -178,21 +219,27 @@ export default function CodeWorkspace({ question }) {
   const at = run?.at ? run.at.toTimeString().slice(0, 5) : '';
 
   return (
-    <div className="qp-work">
+    <div className={`qp-work${tab === 'animate' ? ' qp-work--anim' : ''}`}>
       {/* ---------- editor (dark island) ---------- */}
       <section className="qp-ed" aria-label="Code editor">
         <div className="qp-ed-bar">
           <span className="qp-file">
             <i aria-hidden="true" />
-            solution.js
+            {LANG_FILE[lang]}
           </span>
-          <span className="tag qp-ed-lang">JavaScript</span>
-          <span className="qp-ed-hint">MinHeap, Deque, UnionFind… are global</span>
+          <select className="qp-ed-langpick" data-guide="lang" value={lang} onChange={(e) => switchLang(e.target.value)} aria-label="Language">
+            {LANGUAGES.filter((l) => l.id === 'js' || starterFor(l.id, question)).map((l) => (
+              <option key={l.id} value={l.id} aria-label={l.label}>
+                {l.short}
+              </option>
+            ))}
+          </select>
+          <span className="qp-ed-hint">{LANG_HINT[lang]}</span>
           <span className="qp-sp" />
           <button type="button" className="iconbtn qp-ed-reset" onClick={reset} title="Reset to starter code" aria-label="Reset to starter code">
             <Icon name="rotate" size={16} />
           </button>
-          <button type="button" className="btn btn--chrome btn--sm" onClick={() => execute('run')} disabled={running} title={`Run the visible tests (${MOD}+Enter)`}>
+          <button type="button" className="btn btn--chrome btn--sm" data-guide="run" onClick={() => execute('run')} disabled={running} title={`Run the visible tests (${MOD}+Enter)`}>
             <Icon name="play" size={14} /> Run
           </button>
           <button type="button" className="btn btn--plasma btn--sm" onClick={() => execute('submit')} disabled={running} title={`Run all tests (${MOD}+Shift+Enter)`}>
@@ -200,7 +247,7 @@ export default function CodeWorkspace({ question }) {
           </button>
         </div>
         <div className="qp-ed-body">
-          <CodeEditor value={code} onChange={onChange} onRun={() => execute('run')} onSubmit={() => execute('submit')} label={`${question.title} solution editor`} />
+          <CodeEditor language={lang} value={code} onChange={onChange} onRun={() => execute('run')} onSubmit={() => execute('submit')} label={`${question.title} solution editor`} />
         </div>
         <div className="qp-ed-foot">
           <span>{saved ? 'autosaved' : 'saving…'}</span>
@@ -224,11 +271,14 @@ export default function CodeWorkspace({ question }) {
           <button type="button" role="tab" aria-selected={tab === 'cases'} onClick={() => setTab('cases')}>
             Test cases
           </button>
-          <button type="button" role="tab" aria-selected={tab === 'custom'} onClick={() => setTab('custom')}>
+          <button type="button" role="tab" data-guide="custom" aria-selected={tab === 'custom'} onClick={() => setTab('custom')}>
             Custom input
           </button>
           <button type="button" role="tab" aria-selected={tab === 'complexity'} onClick={() => setTab('complexity')}>
             Complexity
+          </button>
+          <button type="button" role="tab" data-guide="animate" aria-selected={tab === 'animate'} onClick={() => setTab('animate')}>
+            <Icon name="play" size={14} /> Animate
           </button>
           <span className="qp-sp" />
           {run && (
@@ -240,7 +290,7 @@ export default function CodeWorkspace({ question }) {
         <div className="qp-con-body" aria-live="polite">
           {running && (
             <div className="qp-running">
-              <span className="qp-running-dot" aria-hidden="true" /> Running in a sandboxed worker…
+              <span className="qp-running-dot" aria-hidden="true" /> {status || 'Running in a sandboxed worker…'}
             </div>
           )}
           {!running && tab === 'tests' && (
@@ -249,6 +299,7 @@ export default function CodeWorkspace({ question }) {
                 <div className="qp-empty">
                   Press <b>Run</b> to test against the <span className="mono">{Math.min(VISIBLE_TESTS, tests.length)}</span> example cases, or <b>Submit</b> to run all{' '}
                   <span className="mono">{tests.length}</span> tests.
+                  {FIRST_RUN[lang] && <span className="qp-faint"> {FIRST_RUN[lang]}</span>}
                 </div>
               )}
               {run?.res.compileError && (
@@ -391,6 +442,12 @@ export default function CodeWorkspace({ question }) {
                 </div>
               )}
             </div>
+          )}
+          {!running && lang !== 'js' && !question.solution?.code && tab === 'animate' && <p className="qp-faint">{ANIMATE_NO_REF}</p>}
+          {!running && (lang === 'js' || question.solution?.code) && tab === 'animate' && (
+            <Suspense fallback={<div className="qp-faint">Loading…</div>}>
+              <AnimateRun key={lang} code={code} question={question} tests={tests.slice(0, VISIBLE_TESTS)} lang={lang} />
+            </Suspense>
           )}
           {!running && tab === 'complexity' && (
             <div className="qp-stack">

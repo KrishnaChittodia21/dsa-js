@@ -36,6 +36,8 @@ Return the total number of gifts **remaining** in all piles after \`k\` seconds.
 
   functionName: 'pickGifts',
   paramNames: ['gifts', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'long',
   starterCode: `/**
  * @param {number[]} gifts
  * @param {number} k

@@ -41,6 +41,8 @@ Tip: run the boolean Word Break DP first if you want to prune starts that cannot
 
   functionName: 'wordBreak',
   paramNames: ['s', 'wordDict'],
+  paramTypes: ['string', 'string[]'],
+  returnType: 'string[]',
   compare: 'unordered',
   starterCode: `/**
  * @param {string} s

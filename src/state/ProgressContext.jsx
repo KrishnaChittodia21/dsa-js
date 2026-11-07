@@ -1,14 +1,20 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef } from 'react';
-import { initialProgress, progressReducer, STORAGE_KEY } from './progressReducer.js';
+import { initialProgress, migrate, progressReducer, STORAGE_KEY } from './progressReducer.js';
 
 const ProgressContext = createContext(null);
 
 function load() {
+  let raw = null;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return initialProgress();
-    return { ...initialProgress(), ...JSON.parse(raw) };
+    raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? migrate(JSON.parse(raw)) : initialProgress();
   } catch {
+    // unreadable store: keep a copy (it could still be recovered by hand) and start fresh instead of crashing
+    try {
+      if (raw) localStorage.setItem(`${STORAGE_KEY}:corrupt`, raw);
+    } catch {
+      /* storage unavailable */
+    }
     return initialProgress();
   }
 }

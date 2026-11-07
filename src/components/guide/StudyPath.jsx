@@ -6,7 +6,7 @@ import { LOOP, TAB_META, stepProgress } from './studyLoop.js';
 
 /**
  * "Study path" stepper: the topic's tabs shown as the study loop
- * (Learn → Visualize → Practice → Review, plus Company Qs and Cheatsheet on the side), each with its own
+ * (Learn → Visualize → Review, plus Company Qs and Cheatsheet on the side), each with its own
  * mini progress. It IS the tab bar (same `?tab=` ids), so it keeps tablist semantics and arrow keys.
  * Kinetic Voxel `.spath/.ps` (uv = current step, plasma = done; light flows only on the conduit leaving the current step).
  */

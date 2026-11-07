@@ -36,6 +36,8 @@ Return the number of **distinct sequences of moves** that take you from the bott
 
   functionName: 'climbStairs',
   paramNames: ['n'],
+  paramTypes: ['int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @return {number}

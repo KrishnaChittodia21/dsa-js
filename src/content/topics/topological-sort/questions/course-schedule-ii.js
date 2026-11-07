@@ -34,6 +34,8 @@ Return **an** order in which you can take all courses. If several orders are val
 
   functionName: 'findOrder',
   paramNames: ['numCourses', 'prerequisites'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number} numCourses
  * @param {number[][]} prerequisites

@@ -38,6 +38,8 @@ Heap size ≤ min(k, n1) → O(k log k).`,
 
   functionName: 'kSmallestPairs',
   paramNames: ['nums1', 'nums2', 'k'],
+  paramTypes: ['int[]', 'int[]', 'int'],
+  returnType: 'int[][]',
   starterCode: `/**
  * @param {number[]} nums1
  * @param {number[]} nums2

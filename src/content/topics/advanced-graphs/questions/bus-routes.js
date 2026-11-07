@@ -42,6 +42,8 @@ Marking routes used means each route's stop list is scanned **once**, so total w
 
   functionName: 'numBusesToDestination',
   paramNames: ['routes', 'source', 'target'],
+  paramTypes: ['int[][]', 'int', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} routes
  * @param {number} source

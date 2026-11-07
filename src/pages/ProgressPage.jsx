@@ -1,12 +1,37 @@
-import { useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../components/ui/Icon.jsx';
+import VoxSort from '../components/charts/VoxSort.jsx';
+import { plural } from '../components/charts/core.js';
 import { useProgress } from '../state/ProgressContext.jsx';
 import { activityTotals, companyProgress, formatDuration, overallStats, pct, recommendations, streak, strongAreas, topicStats, topicStatus, weakAreas } from '../state/selectors.js';
 import { questionById, stages, topics } from '../content/index.js';
 import { todayKey } from '../state/progressReducer.js';
 import { activityWeeks, difficultySolved, stageProgress } from '../lib/dashMetrics.js';
+import { currentTopic, nextStep } from '../lib/nextStep.js';
 import BigOChip, { bigoKey, firstBigO, topicShort, useQuestionComplexities } from '../components/BigOChip.jsx';
+
+/*
+ * Progress: every measure of the learner's progress in one page (the old /track page was merged in: its
+ * mastery[ ] columns and achievements summary live here; /track redirects).
+ */
+
+// short labels for the mastery[ ] voxel columns (fallback: first word of the title)
+const SHORT = {
+  complexity: 'Big-O', arrays: 'Arrays', hashing: 'Hashing', 'two-pointers': 'Two Ptrs', 'sliding-window': 'Window', 'prefix-sum': 'Prefix',
+  'array-techniques': 'Kadane', stack: 'Stack', 'queue-deque': 'Queue', 'binary-search': 'Bin Search', 'linked-list': 'Lists', recursion: 'Recursion',
+  sorting: 'Sorting', intervals: 'Intervals', backtracking: 'Backtrack', trees: 'Trees', bst: 'BST', heaps: 'Heaps', tries: 'Tries', graphs: 'Graphs',
+  'topological-sort': 'Topo Sort', 'union-find': 'Union Find', 'shortest-path': 'Paths', mst: 'MST', 'advanced-graphs': 'Adv Graphs', greedy: 'Greedy',
+  'dp-1d': 'DP 1D', 'dp-2d': 'DP 2D', 'bit-manipulation': 'Bits', 'dp-advanced': 'DP Adv', 'advanced-structures': 'Seg Trees', 'string-algorithms': 'Strings',
+};
+const shortOf = (t) => SHORT[t.id] || t.title.split(/\s+/)[0];
+// phone-width column labels
+const MINI = { 'binary-search': 'BinS', 'two-pointers': '2-Ptr', hashing: 'Hash', recursion: 'Recur', backtracking: 'BackT', intervals: 'Intvl', 'topological-sort': 'Topo', 'union-find': 'UF', 'advanced-graphs': 'AdvG', 'advanced-structures': 'SegT', 'string-algorithms': 'Str', sorting: 'Sort', 'dp-advanced': 'DPx', 'dp-1d': 'DP1', 'dp-2d': 'DP2', 'array-techniques': 'Kadn', 'queue-deque': 'Queue', 'shortest-path': 'Path', 'sliding-window': 'Window', 'prefix-sum': 'Prefix' };
+const miniOf = (t) => MINI[t.id] || shortOf(t).slice(0, 6);
+const MAX_COLS = 9;
+
+// badge art + summary load as their own chunk (shared with the Achievements page)
+const AchievementsSummary = lazy(() => import('../components/achievements/AchievementsSummary.jsx'));
 
 const WEEKS = 17;
 const BIGO_ROWS = [
@@ -111,6 +136,8 @@ function Heat({ activity, now }) {
   );
 }
 
+const BACKUP_DAYS = 14;
+
 export default function ProgressPage() {
   const { progress, dispatch } = useProgress();
   const now = useMemo(() => new Date(), []);
@@ -125,6 +152,23 @@ export default function ProgressPage() {
   const diffs = difficultySolved(progress, topics);
   const fileRef = useRef(null);
   const [msg, setMsg] = useState(null);
+
+  // ---- mastery[ ] voxel columns: topics you've touched (most recent MAX_COLS), the current one highlighted ----
+  const heroTopic = nextStep(progress, topics).topic || currentTopic(progress, topics) || topics.find((t) => topicStatus(t, progress) === 'available') || topics[0];
+  const touched = topics
+    .map((t) => ({ t, status: topicStatus(t, progress), s: topicStats(t, progress) }))
+    .filter((x) => x.status === 'in-progress' || x.status === 'completed');
+  let picked = touched;
+  if (touched.length > MAX_COLS) {
+    const recent = [...touched].sort((x, y) => (progress.topics[y.t.id]?.lastActiveAt || 0) - (progress.topics[x.t.id]?.lastActiveAt || 0));
+    const keep = new Set([heroTopic.id, ...recent.map((x) => x.t.id)].slice(0, MAX_COLS));
+    picked = touched.filter((x) => keep.has(x.t.id));
+  }
+  const voxCols = useMemo(
+    () => picked.map(({ t, s }) => ({ id: t.id, title: t.title, label: shortOf(t), mini: miniOf(t), value: s.mastery, solved: s.solved, total: s.total, current: t.id === heroTopic.id, href: `/topic/${t.id}` })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(picked.map((x) => [x.t.id, x.s.mastery, x.s.solved])), heroTopic.id],
+  );
 
   const states = Object.entries(progress.questions).filter(([id]) => questionById[id]);
   const attempted = states.filter(([, s]) => s.status === 'attempted').length;
@@ -151,6 +195,7 @@ export default function ProgressPage() {
     link.download = `dsa-journey-progress-${todayKey()}.json`;
     link.click();
     URL.revokeObjectURL(url);
+    dispatch({ type: 'EXPORTED' });
     setMsg({ ok: true, text: 'Backup downloaded.' });
   };
   const importData = async (e) => {
@@ -167,12 +212,21 @@ export default function ProgressPage() {
     e.target.value = '';
   };
 
+  // the only copy of progress is this browser's storage, so nudge towards a backup once there is something to lose
+  const hasWork = Object.keys(progress.questions).length + Object.keys(progress.topics).length > 0;
+  const days = progress.exportedAt ? Math.floor((Date.now() - progress.exportedAt) / 86400000) : null;
+  const backupNote = !hasWork
+    ? null
+    : days === null
+      ? { warn: true, text: 'No backup yet. Clearing browser data would erase your progress: press Export to keep a copy.' }
+      : { warn: days >= BACKUP_DAYS, text: `Last backup ${days === 0 ? 'today' : days === 1 ? 'yesterday' : `${days} days ago`}.${days >= BACKUP_DAYS ? ' Time for a fresh one.' : ''}` };
+
   let lastDay = null;
   const curStage = stages.findIndex((s) => s.topics.some((t) => t.id === rec.current?.id));
 
   return (
-    <div className="page pg-page">
-      <section className="pg-head rise" aria-labelledby="pg-t">
+    <div className="page pg-page dash">
+      <section data-guide="pg-head" className="pg-head rise" aria-labelledby="pg-t">
         <div>
           <span className="eyebrow">
             <i className="pip" />
@@ -182,6 +236,7 @@ export default function ProgressPage() {
             Your progress
           </h1>
           <p className="pg-sub">Everything lives in your browser. Export a backup to move it between devices.</p>
+          {backupNote && <p className={`pg-backup ${backupNote.warn ? 'pg-backup--warn' : ''}`}>{backupNote.text}</p>}
         </div>
         <div className="pg-acts">
           <button type="button" className="btn btn--ghost btn--sm" onClick={exportData}>
@@ -211,7 +266,7 @@ export default function ProgressPage() {
         </div>
       )}
 
-      <div className="pg-stat4">
+      <div data-guide="pg-stats" className="pg-stat4">
         <div className="tile pg-stat rise" style={{ '--i': 1 }}>
           <span className="eyebrow">
             <i className="pip" />
@@ -278,8 +333,59 @@ export default function ProgressPage() {
         </div>
       </div>
 
+      {/* ================= MASTERY ARRAY (from the old Track page) ================= */}
+      <section data-guide="pg-mastery" className="tile tile--glow dash-hero dash-track-hero section rise" style={{ '--i': 5 }} aria-labelledby="pg-mastery-t">
+        <h2 id="pg-mastery-t" className="sr-only">
+          Mastery of the topics you have touched
+        </h2>
+        <div className="dash-stage">
+          <div className="dash-stage-head">
+            <span className="eyebrow">
+              mastery[ ] · {plural(picked.length, 'topic')} you’ve touched{touched.length > picked.length ? ` (${picked.length} most recent of ${touched.length})` : ''} · 1 cube = 10%
+            </span>
+            <div className="dash-legend" aria-hidden="true">
+              <span>
+                <i className="sw-hot" />
+                strong
+              </span>
+              <span>
+                <i className="sw-cur" />
+                current
+              </span>
+              <span>
+                <i className="sw-cold" />
+                needs reps
+              </span>
+            </div>
+          </div>
+          {voxCols.length >= 2 ? (
+            <VoxSort cols={voxCols} />
+          ) : (
+            <div className="dash-vs-empty">
+              <div className="dash-vs-slots" aria-hidden="true">
+                {Array.from({ length: MAX_COLS }, (_, i) => (
+                  <span key={i}>
+                    <i />[{i}]
+                  </span>
+                ))}
+              </div>
+              <p>
+                {voxCols.length === 1 ? (
+                  <>
+                    One topic so far: <b>{voxCols[0].title}</b> at <span className="mono">{voxCols[0].value}%</span> mastery. Start a second one and your topics line up
+                    here and sort themselves, weakest first.
+                  </>
+                ) : (
+                  <>mastery[ ] is empty. Start a lesson or solve a question and each topic you touch becomes a voxel column, sorted weakest first, so you always know what to revise.</>
+                )}
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+
       <div className="grid pg-grid">
-        <section className="tile c-8 rise" style={{ '--i': 5 }} aria-labelledby="pg-sky-t">
+        <section data-guide="pg-towers" className="tile c-8 rise" style={{ '--i': 5 }} aria-labelledby="pg-sky-t">
           <div className="tile-head">
             <div>
               <span className="eyebrow">
@@ -405,7 +511,7 @@ export default function ProgressPage() {
           )}
         </section>
 
-        <section className="tile c-7 rise" style={{ '--i': 8 }} aria-labelledby="pg-act-t">
+        <section data-guide="pg-activity" className="tile c-7 rise" style={{ '--i': 8 }} aria-labelledby="pg-act-t">
           <div className="tile-head">
             <span className="eyebrow" id="pg-act-t">
               <i className="pip pip--acid" />
@@ -445,7 +551,7 @@ export default function ProgressPage() {
           </div>
         </section>
 
-        <section className="tile c-6 rise" style={{ '--i': 9 }} aria-labelledby="pg-st-t">
+        <section data-guide="pg-stages" className="tile c-6 rise" style={{ '--i': 9 }} aria-labelledby="pg-st-t">
           <div className="tile-head">
             <div>
               <span className="eyebrow">
@@ -456,8 +562,8 @@ export default function ProgressPage() {
                 {stagesP.length} stages
               </h2>
             </div>
-            <Link className="tile-link" to="/path">
-              Path <Icon name="arrowRight" size={13} />
+            <Link className="tile-link" to="/contents">
+              Contents <Icon name="arrowRight" size={13} />
             </Link>
           </div>
           {stagesP.map((s, i) => {
@@ -466,7 +572,6 @@ export default function ProgressPage() {
             const lit = Math.round(s.mastery / 10);
             return (
               <div key={s.id} className={`pg-st-row${cur ? ' pg-st-row--cur' : ''}${locked ? ' pg-st-row--lock' : ''}`}>
-                <span className="pg-sc">S{String(s.number).padStart(2, '0')}</span>
                 <div>
                   <div className="pg-nm">
                     <span>{s.title}</span>
@@ -516,7 +621,7 @@ export default function ProgressPage() {
           </div>
         </section>
 
-        <section className="tile c-6 rise" style={{ '--i': 10 }} aria-labelledby="pg-log-t">
+        <section data-guide="pg-history" className="tile c-6 rise" style={{ '--i': 10 }} aria-labelledby="pg-log-t">
           <div className="tile-head">
             <div>
               <span className="eyebrow">
@@ -608,6 +713,12 @@ export default function ProgressPage() {
             </div>
           </section>
         )}
+      </div>
+
+      <div data-guide="pg-achievements" className="section rise" style={{ '--i': 13 }}>
+        <Suspense fallback={<div className="tile dash-ach dash-ach-placeholder" aria-hidden="true" />}>
+          <AchievementsSummary progress={progress} />
+        </Suspense>
       </div>
 
       <details className="details pg-table">

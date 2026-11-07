@@ -36,6 +36,8 @@ Worst case is still O(n) (everything in range), but for narrow ranges only the n
 
   functionName: 'rangeSumBST',
   paramNames: ['root', 'low', 'high'],
+  paramTypes: ['TreeNode', 'int', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {TreeNode} root
  * @param {number} low

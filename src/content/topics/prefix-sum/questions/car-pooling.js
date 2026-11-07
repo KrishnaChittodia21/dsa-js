@@ -39,6 +39,8 @@ When coordinates are huge (10^9), use the same idea with **sorted events** (a sw
 
   functionName: 'carPooling',
   paramNames: ['trips', 'capacity'],
+  paramTypes: ['int[][]', 'int'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[][]} trips
  * @param {number} capacity

@@ -45,6 +45,8 @@ Each email is processed once, so linking is O(total emails · α).`,
 
   functionName: 'accountsMerge',
   paramNames: ['accounts'],
+  paramTypes: ['string[][]'],
+  returnType: 'string[][]',
   starterCode: `/**
  * @param {string[][]} accounts
  * @return {string[][]}

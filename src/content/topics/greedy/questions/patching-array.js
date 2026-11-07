@@ -37,6 +37,8 @@ Each patch at least doubles \`miss\`, so there are at most ~31 patches for n < 2
 
   functionName: 'minPatches',
   paramNames: ['nums', 'n'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} n

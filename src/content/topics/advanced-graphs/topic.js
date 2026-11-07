@@ -50,7 +50,7 @@ export default {
         low[u] = Math.min(low[u], disc[v]);     // back edge
       }
     }
-    if (parentEdge === -1 && children >= 2) cut.add(u);          // root rule
+    if (parentEdge === -1 && children > 1) cut.add(u);           // root rule
   }
   for (let s = 0; s < n; s++) if (disc[s] === -1) dfs(s, -1);
   return { bridges, cut: [...cut].sort((a, b) => a - b) };
@@ -315,7 +315,7 @@ None of these needs new data structures — just an adjacency list, a few arrays
             md: `Every question in this topic has an obvious but slow answer:
 
 - **Bridges:** remove each edge, run a BFS, put it back → E × O(V + E). For 10^5 edges that is ~10^10 operations.
-- **SCCs:** for every pair (u, v), check u → v and v → u → V × O(V + E).
+- **SCCs:** one search from every vertex records what it reaches; u and v share an SCC when each reaches the other → V × O(V + E).
 - **Euler path:** backtrack over edge orders → exponential.
 
 The algorithms here do each job in **one or two DFS passes, O(V + E)**. They work because a DFS tree has a very rigid structure: in an undirected graph every non-tree edge connects a node to one of its **ancestors** (there are no "cross edges"). That single fact is what makes low-link values meaningful.`,
@@ -528,7 +528,7 @@ In the drawing: \`low[3] = 3 > disc[1] = 1\` → 1–3 is a bridge and 1 is a cu
             steps: [
               'Build an adjacency list storing `[neighbour, edgeId]` so parallel edges can be told apart.',
               'DFS(u, parentEdge): set `disc[u] = low[u] = time++`.',
-              'For each `[v, id]`: skip `id === parentEdge`. If v is unvisited → recurse, then `low[u] = min(low[u], low[v])` and apply the bridge / cut tests. If v is visited → it is an ancestor (back edge): `low[u] = min(low[u], disc[v])`.',
+              'For each `[v, id]`: skip `id === parentEdge`. If v is unvisited → recurse, then `low[u] = min(low[u], low[v])` and apply the bridge / cut tests. If v is visited → it is a back edge to an ancestor (or the same back edge seen again from the ancestor’s side, where `disc[v] > disc[u]` changes nothing): `low[u] = min(low[u], disc[v])`.',
               'Root rule: the DFS root is a cut vertex iff it has ≥ 2 tree children.',
               'Repeat from every unvisited node (the graph may be disconnected).',
             ],
@@ -869,7 +869,7 @@ So along every condensation edge X → Y, the max finish time goes down. The ove
             md: `Every time a walk passes **through** a node it uses one edge in and one edge out. So in a directed graph:
 
 - **Euler circuit** exists ⇔ every node has in-degree = out-degree (and all edges are in one connected piece).
-- **Euler path** exists ⇔ exactly one node has out − in = 1 (the **start**), exactly one has in − out = 1 (the **end**), all others are balanced — or everything is balanced (a circuit).
+- **Euler path** exists ⇔ exactly one node has out − in = 1 (the **start**), exactly one has in − out = 1 (the **end**), all others are balanced — or everything is balanced (a circuit); and, as for circuits, all edges are in one connected piece.
 
 Undirected version: 0 odd-degree nodes → circuit; exactly 2 → path between them.
 
@@ -885,6 +885,11 @@ while (stack.length) {
   else path.push(stack.pop());                   // stuck → u is fixed at the END
 }
 path.reverse();                                  // nodes were collected end-first`,
+          },
+          {
+            type: 'visual',
+            scenario: 'hierholzer-itinerary',
+            caption: 'JFK → ATL is tried first (smallest) and dead-ends at DEN. DEN and ATL are fixed at the END of the path, then the detour JFK → SFO → ORD → JFK is spliced in front of them.',
           },
           {
             type: 'checkpoint',
@@ -1034,6 +1039,11 @@ contains 00, 01, 11, 10 ✓   length 2^2 + 1 = 5 ✓
 \`\`\`
 
 **How to separate the cycles from the trees:** a tree leaf has in-degree 0. Remove it (decrease its target's in-degree), repeat — exactly Kahn's topological sort. Nodes never removed are on cycles. As a bonus, while peeling you can compute \`depth[v]\` = the longest chain of tree nodes ending at v.`,
+          },
+          {
+            type: 'visual',
+            scenario: 'functional-graph',
+            caption: 'The graph from the diagram: 5 and 6 are peeled first, then 4 and 3; node 0 keeps an arrow from 2, so 0 → 1 → 2 is never peeled. That leftover is the cycle, with a longest chain of 2 feeding into 0.',
           },
           {
             type: 'text',

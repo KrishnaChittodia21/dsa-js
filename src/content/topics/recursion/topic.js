@@ -4,7 +4,7 @@ export default {
 
   jsTools: [
     { api: 'function f(n) { … f(n - 1) … }', use: 'A function that calls itself; each call gets its own local variables (its own stack frame)', complexity: 'O(1) overhead per call, O(depth) stack memory' },
-    { api: 'RangeError: Maximum call stack size exceeded', use: 'What JS throws when recursion is too deep (≈ 7k–10k frames in V8, depends on frame size)', complexity: '—' },
+    { api: 'RangeError: Maximum call stack size exceeded', use: 'What JS throws when recursion is too deep (about 7,000–10,000 frames in V8, depends on frame size)', complexity: '—' },
     { api: 'BigInt (10n, a * b % MOD)', use: 'Exact modular multiplication when a · b can exceed 2^53', complexity: 'slower than Number, but exact' },
     { api: 'Number.MAX_SAFE_INTEGER', use: '2^53 − 1: the largest integer a Number can represent exactly', complexity: '—' },
     { api: 'Map (memo)', use: 'Cache results of repeated sub-calls (preview of Dynamic Programming)', complexity: 'O(1) average per lookup' },
@@ -169,7 +169,7 @@ function diff(nums, i, j) {
       summary: 'When the input nests (expressions inside parentheses, balanced blocks inside blocks), write one function that handles one level and calls itself for each nested part.',
       whyItExists: 'Nesting depth is unknown in advance, so fixed loops cannot follow it. The call stack naturally remembers "where I was" in the outer level while an inner level is processed — the same job an explicit stack does in the Stack topic.',
       whenToUse: [
-        'The grammar is recursive: expr = "!(expr)" | "&(expr,expr,…)" | "t" | "f"',
+        'The grammar is recursive: expr = "!(expr)" | "&(expr,expr,…)" | "|(expr,expr,…)" | "t" | "f"',
         'The string decomposes into balanced blocks, each of which has the same structure inside',
       ],
       clues: ['"parse", "evaluate the expression"', 'nested parentheses of arbitrary depth', '"special / balanced / valid" strings defined recursively', '"a b-string is 1 + b-string + 0"'],
@@ -340,7 +340,7 @@ Every recursive function has exactly these two ingredients:
 | Game / choice | the state after one move | predict the winner |
 | Nesting | the inside of a pair of brackets | parsing expressions |
 
-**Prefer a loop** when the recursion would be very deep (JavaScript engines allow only about 10,000 nested calls) or when the recursion is just "reduce by one" and a loop is equally clear.`,
+**Prefer a loop** when the recursion would be very deep (JavaScript engines allow only about 7,000–10,000 nested calls) or when the recursion is just "reduce by one" and a loop is equally clear.`,
           },
           {
             type: 'callout',
@@ -548,7 +548,12 @@ x^n = (x^(n/2))² · x      if n is odd   (n/2 rounded down)
 x^0 = 1                   base case
 \`\`\`
 
-Each call halves n, so there are only about log2(n) calls: **O(log n)**. For n = 2^31, that is 31 calls instead of 2 billion.`,
+Each call halves n, so there are only about log2(n) calls: **O(log n)**. For n = 2^31, that is 33 calls (2^31, 2^30, …, 1, then 0) instead of 2 billion.`,
+          },
+          {
+            type: 'visual',
+            scenario: 'fast-power',
+            caption: 'pow(10) → pow(5) → pow(2) → pow(1) → pow(0): the stack grows by one frame per halving. On the way back each call squares its half, and odd exponents multiply by x once more.',
           },
           {
             type: 'steps',
@@ -709,7 +714,7 @@ modPow(5n, 10n ** 15n);               // ~50 calls, exact result`,
               ['pow(1)', '1', 'no', 'pow(0) = 1', '1 · 1 · 2 = 2'],
               ['pow(0)', '0', '—', 'base case', '1'],
             ],
-            note: 'Read the "returns" column bottom-up: that is the unwinding phase. 5 calls instead of 10 multiplications; for n = 2^31 it would be 32 calls instead of 2 billion.',
+            note: 'Read the "returns" column bottom-up: that is the unwinding phase. 5 calls instead of 10 multiplications; for n = 2^31 it would be 33 calls instead of 2 billion.',
           },
           {
             type: 'reflect',
@@ -745,10 +750,10 @@ Merge sort is the most famous example (you will study it in detail in the next t
 \`\`\`text
 last op = '*' (first):  2  *  (3-4*5)      → left {2},     right {-17, -5}
 last op = '-':         (2*3) - (4*5)       → left {6},     right {20}
-last op = '*' (last):  (2*3-4) * 5         → left {-10, 2}, right {5}
+last op = '*' (last):  (2*3-4) * 5         → left {-2, 2},  right {5}
 \`\`\`
 
-Combine every left value with every right value: \`{-34, -10, -14, -50, 10}\`. The base case is a string with no operator — just a number.`,
+Combine every left value with every right value: \`[-34, -10, -14, -10, 10]\` (-10 appears twice: two different groupings give it). The base case is a string with no operator — just a number.`,
           },
           {
             type: 'code',
@@ -812,6 +817,11 @@ diff(i, i) = nums[i]
 \`\`\`
 
 Player 1 wins (ties count) iff \`diff(0, n−1) >= 0\`. This is **minimax** written compactly: maximising my difference *is* minimising the opponent's.`,
+          },
+          {
+            type: 'visual',
+            scenario: 'minimax-game',
+            caption: 'The same game as an explicit MAX / MIN tree: Player 1 levels keep the larger child, Player 2 levels the smaller. Taking the 1 first looks bad but wins by 222 — greedy (take 7) would lose.',
           },
           {
             type: 'reflect',

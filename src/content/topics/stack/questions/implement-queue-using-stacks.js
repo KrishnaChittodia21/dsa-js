@@ -44,6 +44,13 @@ All calls to pop/peek are valid. Follow-up: make every operation **amortized O(1
 **Why amortized O(1):** each element is pushed to inbox once, moved to outbox once, and popped once — at most 3 moves per element in its lifetime, so any sequence of n operations costs O(n) total.`,
 
   className: 'MyQueue',
+  methodTypes: {
+    constructor: { params: [] },
+    push: { params: ['int'], returns: 'void' },
+    peek: { params: [], returns: 'int' },
+    pop: { params: [], returns: 'int' },
+    empty: { params: [], returns: 'boolean' },
+  },
   starterCode: `class MyQueue {
   constructor() {
     

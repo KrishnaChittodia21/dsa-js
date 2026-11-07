@@ -32,6 +32,8 @@ This is the Same Tree recursion with crossed children. O(n) time. An iterative v
 
   functionName: 'isSymmetric',
   paramNames: ['root'],
+  paramTypes: ['TreeNode'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {TreeNode} root
  * @return {boolean}

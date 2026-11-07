@@ -42,6 +42,8 @@ Why can a Set hold values (not counts)? If the window ever contained a duplicate
 
   functionName: 'containsNearbyDuplicate',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

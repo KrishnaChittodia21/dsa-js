@@ -38,6 +38,8 @@ The sum can reach n(n+1)/2 ≈ 5·10^9 — still an exact JS number.
 
   functionName: 'sumScores',
   paramNames: ['s'],
+  paramTypes: ['string'],
+  returnType: 'long',
   starterCode: `/**
  * @param {string} s
  * @return {number}

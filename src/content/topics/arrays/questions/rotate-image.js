@@ -30,6 +30,8 @@ You must rotate it **in place** — modify the given matrix directly; do not all
 
   functionName: 'rotate',
   paramNames: ['matrix'],
+  paramTypes: ['int[][]'],
+  returnType: 'void',
   starterCode: `/**
  * Do not return anything, modify matrix in place.
  * @param {number[][]} matrix

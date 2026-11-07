@@ -40,6 +40,8 @@ Each call halves n, so there are ⌊log2 |n|⌋ + 1 ≤ 32 calls. The crucial de
 
   functionName: 'myPow',
   paramNames: ['x', 'n'],
+  paramTypes: ['double', 'int'],
+  returnType: 'double',
   compare: 'float',
   starterCode: `/**
  * @param {number} x

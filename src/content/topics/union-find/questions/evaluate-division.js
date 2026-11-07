@@ -43,6 +43,8 @@ The equations never contradict each other and no value is 0.`,
 
   functionName: 'calcEquation',
   paramNames: ['equations', 'values', 'queries'],
+  paramTypes: ['string[][]', 'double[]', 'string[][]'],
+  returnType: 'double[]',
   starterCode: `/**
  * @param {string[][]} equations
  * @param {number[]} values

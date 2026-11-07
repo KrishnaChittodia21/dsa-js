@@ -2,8 +2,18 @@ import { runTests } from './core.js';
 
 // Streams each test result as soon as it finishes, so if a later test hangs the page
 // still knows which tests passed and which scenario was running when time ran out.
-self.onmessage = (e) => {
+self.onmessage = async (e) => {
   const { id, code, question, tests, opts } = e.data;
+  if (e.data.type === 'record') {
+    // "Animate my run": the recorder (and its parser) load only when asked for
+    try {
+      const { recordRun } = await import('./recorder.js');
+      self.postMessage({ id, type: 'done', ...recordRun(code, question, e.data.test, { refCode: e.data.refCode }) });
+    } catch (err) {
+      self.postMessage({ id, type: 'done', compileError: String(err && err.message ? err.message : err), steps: [], logs: [] });
+    }
+    return;
+  }
   try {
     const res = runTests(code, question, tests, {
       ...opts,

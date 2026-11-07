@@ -99,7 +99,7 @@ function canBuild(target, source) {
         { name: 'Meet in the middle', description: '4Sum II: map all sums a + b, then look up −(c + d): O(n²) instead of O(n⁴).' },
         { name: 'Prefix-sum complement', description: 'Subarray sum equals k: look up prefix − k (Prefix Sum topic).' },
       ],
-      mistakes: ['Inserting before checking (an element pairs with itself when target = 2x)', 'Storing value → index for duplicates and overwriting the one you needed (check first, then store)'],
+      mistakes: ['Inserting before checking (an element pairs with itself when target = 2x)', 'Counting pairs with a value → index map: duplicates overwrite each other and pairs are lost — store value → count instead'],
       evolution: {
         easy: 'Two sum.',
         medium: '4Sum II (meet in the middle), pairs with difference k.',

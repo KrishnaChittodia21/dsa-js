@@ -37,6 +37,8 @@ Why does \`missing === 0\` with window size m imply an exact anagram? The window
 
   functionName: 'findAnagrams',
   paramNames: ['s', 'p'],
+  paramTypes: ['string', 'string'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {string} s
  * @param {string} p

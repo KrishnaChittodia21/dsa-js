@@ -42,6 +42,8 @@ Searching the shorter array guarantees \`0 ≤ j ≤ n\` and gives O(log min(m, 
 
   functionName: 'findMedianSortedArrays',
   paramNames: ['nums1', 'nums2'],
+  paramTypes: ['int[]', 'int[]'],
+  returnType: 'double',
   starterCode: `/**
  * @param {number[]} nums1
  * @param {number[]} nums2

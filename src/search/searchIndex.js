@@ -5,22 +5,27 @@ const norm = (s) => String(s || '').toLowerCase();
 
 /** Every page of the app (also the palette's "Pages" group). `words` are extra search terms. */
 export const PAGES = [
-  { to: '/', title: 'Dashboard', sub: 'Next step, roadmap, metrics, weak areas', words: 'home metrics charts' },
+  { to: '/', title: 'Dashboard', sub: 'Next step, today’s plan, Short of the day', words: 'home start today' },
+  { to: '/progress', title: 'Progress', sub: 'Mastery, streak, activity, companies, badges, backup', words: 'track progress stats metrics charts kpi streak weak areas heatmap export import' },
   { to: '/contents', title: 'Contents', sub: 'Everything in the course on one page', words: 'index toc all topics sections' },
-  { to: '/path', title: 'Learning Path', sub: 'Stages and topics with prerequisites', words: 'roadmap stages unlock' },
+  { to: '/plan', title: 'Plan your journey', sub: 'Daily minutes, a finish date for every stage, and a pacer', words: 'study plan pace schedule goal deadline roadmap stages learning path' },
   { to: '/patterns', title: 'Patterns', sub: 'Every pattern with clues and templates', words: 'algorithms templates' },
   { to: '/finder', title: 'Pattern Finder', sub: 'Which pattern fits this problem?', words: 'recognise keywords clues' },
   { to: '/visualize', title: 'Visualizer', sub: 'Step-through animations', words: 'animation visualisation' },
+  { to: '/shorts', title: 'Shorts', sub: 'Two-minute animated stories, one per pattern', words: 'videos stories daily review short' },
   { to: '/questions', title: 'Questions', sub: 'All practice questions with filters', words: 'problems practice' },
   { to: '/companies', title: 'Companies', sub: 'Sourced company questions', words: 'interview' },
-  { to: '/toolkit', title: 'JS DSA Toolkit', sub: 'Stack, Queue, Heap, Trie, Union-Find…', words: 'data structures classes' },
-  { to: '/js', title: 'JavaScript for DSA', sub: 'APIs, complexity table, gotchas', words: 'reference array map set' },
-  { to: '/playground', title: 'Playground', sub: 'Run JavaScript with the toolkit', words: 'console run code' },
-  { to: '/progress', title: 'Progress', sub: 'Stats, export / import, reset', words: 'backup export import' },
+  { to: '/tools', title: 'Tools', sub: 'Cheat sheet, JS DSA toolkit, JS reference and playground', words: 'tools reference workbench' },
+  { to: '/tools?tab=toolkit', title: 'JS DSA Toolkit', sub: 'Tools › Stack, Queue, Heap, Trie, Union-Find…', words: 'data structures classes' },
+  { to: '/tools?tab=js', title: 'JavaScript for DSA', sub: 'Tools › APIs, complexity table, gotchas', words: 'reference array map set' },
+  { to: '/tools?tab=playground', title: 'Playground', sub: 'Tools › Run JavaScript with the toolkit', words: 'console run code' },
   { to: '/achievements', title: 'Achievements', sub: 'Badges you have earned and what unlocks next', words: 'badges milestones rewards trophies medals' },
   { to: '/revision', title: 'Revision', sub: 'Weak areas and questions to retry', words: 'review mistakes retry' },
-  { to: '/cheatsheet', title: 'Cheat Sheet', sub: 'Every topic on one printable page', words: 'summary print' },
+  { to: '/saved', title: 'Saved', sub: 'Questions, lesson sections and scenes saved for later', words: 'bookmarks saved later favourites' },
+  { to: '/tools?tab=cheatsheet', title: 'Cheat Sheet', sub: 'Tools › Every topic on one printable page', words: 'summary print' },
   { to: '/settings', title: 'Settings', sub: 'Theme, accent colour, guide and tips', words: 'dark mode accent colour tour coach' },
+  { to: '/settings?tab=guide', title: 'Coach tips & welcome tour', sub: 'Settings › Guide', words: 'tips tour reset dismissed help' },
+  { to: '/settings?tab=keys', title: 'Keyboard shortcuts', sub: 'Settings › Keyboard', words: 'keys hotkeys shortcuts' },
 ];
 
 function build() {
@@ -56,7 +61,7 @@ function build() {
   }
   for (const s of jsSections) {
     for (const it of s.items || []) {
-      items.push({ group: 'JavaScript APIs', title: `${s.title}: ${it.name}`, sub: it.complexity, to: `/js#${s.id}-${it.name}`, primary: [it.name, it.signature], secondary: [s.title, it.dsaUse, it.description] });
+      items.push({ group: 'JavaScript APIs', title: `${s.title}: ${it.name}`, sub: it.complexity, to: `/tools?tab=js#${s.id}-${it.name}`, primary: [it.name, it.signature], secondary: [s.title, it.dsaUse, it.description] });
     }
   }
   for (const [word, pattern, topicIds] of KEYWORDS) {

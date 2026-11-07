@@ -33,6 +33,8 @@ export default {
 
   functionName: 'rightSideView',
   paramNames: ['root'],
+  paramTypes: ['TreeNode'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {TreeNode} root
  * @return {number[]}

@@ -36,6 +36,8 @@ An empty tree has depth 0.`,
 
   functionName: 'maxDepth',
   paramNames: ['root'],
+  paramTypes: ['TreeNode'],
+  returnType: 'int',
   starterCode: `/**
  * Definition for a binary tree node (available globally as TreeNode):
  * function TreeNode(val, left, right) { this.val = val; this.left = left ?? null; this.right = right ?? null; }

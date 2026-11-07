@@ -66,6 +66,12 @@ Each operation is O(log k) to locate plus O(k) worst case for \`splice\` (fast m
 
   kind: 'design',
   className: 'RangeModule',
+  methodTypes: {
+    constructor: { params: [] },
+    addRange: { params: ['int', 'int'], returns: 'void' },
+    removeRange: { params: ['int', 'int'], returns: 'void' },
+    queryRange: { params: ['int', 'int'], returns: 'boolean' },
+  },
   starterCode: `class RangeModule {
   constructor() {
     

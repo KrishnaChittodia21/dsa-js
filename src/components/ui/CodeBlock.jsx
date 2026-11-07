@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Highlight } from 'prism-react-renderer';
 import Icon from './Icon.jsx';
 
-// Prism theme from the Kinetic Voxel code palette (tokens.css § 3) — code blocks are dark in both themes.
+// Prism theme from the Kinetic Voxel code palette (tokens.css section 3) — code blocks are dark in both themes.
 const varTheme = {
   plain: { color: 'var(--code-text)', backgroundColor: 'transparent' },
   styles: [

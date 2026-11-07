@@ -35,6 +35,8 @@ Neither number has leading zeros, except the number 0 itself.`,
 
   functionName: 'addTwoNumbers',
   paramNames: ['l1', 'l2'],
+  paramTypes: ['ListNode', 'ListNode'],
+  returnType: 'ListNode',
   io: { params: ['list', 'list'], returns: 'list' },
   starterCode: `/**
  * @param {ListNode} l1

@@ -39,6 +39,8 @@ Merge \`nums2\` into \`nums1\` **in place** so that \`nums1\` becomes one sorted
 
   functionName: 'merge',
   paramNames: ['nums1', 'm', 'nums2', 'n'],
+  paramTypes: ['int[]', 'int', 'int[]', 'int'],
+  returnType: 'void',
   starterCode: `/**
  * Do not return anything, modify nums1 in place instead.
  * @param {number[]} nums1

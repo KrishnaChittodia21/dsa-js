@@ -38,6 +38,8 @@ A pass bought on day d covers d and the following days of its length (a 7-day pa
 
   functionName: 'mincostTickets',
   paramNames: ['days', 'costs'],
+  paramTypes: ['int[]', 'int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} days
  * @param {number[]} costs

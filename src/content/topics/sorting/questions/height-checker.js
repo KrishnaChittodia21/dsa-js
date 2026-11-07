@@ -35,6 +35,8 @@ Return how many positions \`i\` hold a different height from the height that *sh
 
   functionName: 'heightChecker',
   paramNames: ['heights'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} heights
  * @return {number}

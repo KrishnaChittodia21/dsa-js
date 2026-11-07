@@ -37,6 +37,8 @@ Return the sum of all scores left on the record. Every operation is guaranteed t
 
   functionName: 'calPoints',
   paramNames: ['ops'],
+  paramTypes: ['string[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string[]} ops
  * @return {number}

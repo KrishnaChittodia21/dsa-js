@@ -38,6 +38,8 @@ Return the **minimum number of time units** needed to finish all tasks.`,
 
   functionName: 'leastInterval',
   paramNames: ['tasks', 'n'],
+  paramTypes: ['char[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {character[]} tasks
  * @param {number} n

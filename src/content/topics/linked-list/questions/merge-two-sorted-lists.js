@@ -35,6 +35,8 @@ Combine them into **one sorted list** by splicing together the existing nodes (d
 
   functionName: 'mergeTwoLists',
   paramNames: ['list1', 'list2'],
+  paramTypes: ['ListNode', 'ListNode'],
+  returnType: 'ListNode',
   io: { params: ['list', 'list'], returns: 'list' },
   starterCode: `/**
  * @param {ListNode} list1

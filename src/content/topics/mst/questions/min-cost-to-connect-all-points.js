@@ -40,6 +40,8 @@ Each round is O(n) → O(n²) total, O(n) memory. Correct by the cut property: \
 
   functionName: 'minCostConnectPoints',
   paramNames: ['points'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} points
  * @return {number}

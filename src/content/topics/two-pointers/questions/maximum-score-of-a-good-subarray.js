@@ -38,6 +38,8 @@ Return the maximum score of a good subarray.`,
 
   functionName: 'maximumScore',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

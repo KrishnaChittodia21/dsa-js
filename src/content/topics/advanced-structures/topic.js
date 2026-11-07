@@ -78,7 +78,7 @@ export default {
       template: `function countSmallerBefore(nums) {
   const sorted = [...new Set(nums)].sort((a, b) => a - b);
   const rank = new Map(sorted.map((v, i) => [v, i + 1])); // 1-based ranks
-  const bit = new FenwickTree(sorted.length);            // toolkit: 0-based API
+  const bit = new FenwickTree(sorted.length);            // toolkit: 0-based API → index = r − 1
   const out = [];
   for (const x of nums) {
     const r = rank.get(x);
@@ -833,7 +833,7 @@ ranks  = [  3,  1,  4,  3,  2 ]    // same order relations, indices 1..4
             title: 'countSmaller — O(n log n)',
             code: `function countSmaller(nums) {
   const sorted = [...new Set(nums)].sort((a, b) => a - b);
-  const rank = new Map(sorted.map((v, i) => [v, i]));   // 0-based ranks
+  const rank = new Map(sorted.map((v, i) => [v, i]));   // 0-based ranks = BIT index directly (no shift)
   const bit = new FenwickTree(sorted.length);
   const res = new Array(nums.length);
   for (let i = nums.length - 1; i >= 0; i--) {
@@ -1126,6 +1126,7 @@ answer = min(st[2][1], st[2][2]) = min(1, 1) = 1
 
 The overlap (indices 2..4) is counted twice — harmless because **min is idempotent**: min(x, x) = x. For **sum** it would be wrong (overlap added twice), which is why sparse tables are used for min/max/gcd, not sums.`,
           },
+          { type: 'visual', scenario: 'sparse-table', caption: 'Each level is built from two halves of the level below; the query [1, 5] uses two overlapping blocks of length 4.' },
           {
             type: 'checkpoint',
             id: 'advanced-structures-cp-10',
@@ -1163,7 +1164,7 @@ The overlap (indices 2..4) is counted twice — harmless because **min is idempo
             type: 'text',
             md: `Some problems talk about positions up to **10^9** (calendars, falling squares, range modules) but perform only ~10^3–10^4 operations. Only the **endpoints that actually appear** matter — nothing changes between two consecutive endpoints. Three acceptable strategies:
 
-1. **Sorted boundary map (sweep).** My Calendar III: store \`+1\` at each start and \`−1\` at each end; after every booking, walk the sorted keys with a running sum — the max running sum is the answer. O(k) per booking after sorting, fine for ≤ 400 calls.
+1. **Sorted boundary map (sweep).** My Calendar III: store \`+1\` at each start and \`−1\` at each end; after every booking, walk the sorted keys with a running sum — the max running sum is the answer. O(k log k) per booking (the keys are re-sorted each time), fine for ≤ 400 calls.
 2. **Sorted list of disjoint intervals.** Range Module: keep \`[[l1, r1], [l2, r2], …]\` sorted and non-overlapping; binary-search where a new range lands, then merge (add), cut (remove) or check containment (query).
 3. **Coordinate compression + segment tree.** Falling Squares: collect every left and right edge, sort + dedupe, map to indices, and run a segment tree over those indices supporting "max on a range" and "raise a range to h".`,
           },
@@ -1217,7 +1218,7 @@ The overlap (indices 2..4) is counted twice — harmless because **min is idempo
 | Prefix sums | O(n) | O(n) | O(n) | O(1) (sum) | O(n) |
 | Fenwick tree | O(n log n), or O(n) | O(log n) | O(log n) with difference trick (point query) | O(log n) (invertible ops) | n + 1 |
 | Segment tree | O(n) | O(log n) | — | O(log n) (any associative op) | 2n / 4n |
-| Lazy segment tree | O(n) | O(log n) | O(log n) | O(log n) | 8n (sum + tag) |
+| Lazy segment tree | O(n) | O(log n) | O(log n) | O(log n) | 8n (two 4n arrays: sum + tag) |
 | Sparse table | O(n log n) | ✗ | ✗ | O(1) (idempotent ops) | n log n |
 | Index lists + binary search | O(n) | ✗ | ✗ | O(log n) (frequency of v) | O(n) |
 

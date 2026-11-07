@@ -33,6 +33,8 @@ Find the **contiguous subarray of length exactly \`k\`** that has the maximum av
 
   functionName: 'findMaxAverage',
   paramNames: ['nums', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'double',
   starterCode: `/**
  * @param {number[]} nums
  * @param {number} k

@@ -41,6 +41,8 @@ Because the entrance is marked before the loop and only *neighbours* are tested 
 
   functionName: 'nearestExit',
   paramNames: ['maze', 'entrance'],
+  paramTypes: ['char[][]', 'int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {character[][]} maze
  * @param {number[]} entrance

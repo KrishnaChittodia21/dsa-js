@@ -40,6 +40,8 @@ The DP is over the ≤ 102 positions, not over n (which can be 10^6).`,
 
   functionName: 'minCost',
   paramNames: ['n', 'cuts'],
+  paramTypes: ['int', 'int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number[]} cuts

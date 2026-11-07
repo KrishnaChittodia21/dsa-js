@@ -39,6 +39,8 @@ Each asteroid is pushed and popped at most once.`,
 
   functionName: 'asteroidCollision',
   paramNames: ['asteroids'],
+  paramTypes: ['int[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} asteroids
  * @return {number[]}

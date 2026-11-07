@@ -33,6 +33,8 @@ Your algorithm must run in **O(n)** time and must **not use division**. (Every p
 
   functionName: 'productExceptSelf',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number[]}

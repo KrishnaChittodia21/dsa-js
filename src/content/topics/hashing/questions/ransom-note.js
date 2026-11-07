@@ -31,6 +31,8 @@ Return \`true\` if the note can be constructed, otherwise \`false\`.`,
 
   functionName: 'canConstruct',
   paramNames: ['ransomNote', 'magazine'],
+  paramTypes: ['string', 'string'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {string} ransomNote
  * @param {string} magazine

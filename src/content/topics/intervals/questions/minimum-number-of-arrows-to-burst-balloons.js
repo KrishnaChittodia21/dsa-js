@@ -42,6 +42,8 @@ Return the **minimum number of arrows** needed to burst all balloons.`,
 
   functionName: 'findMinArrowShots',
   paramNames: ['points'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} points
  * @return {number}

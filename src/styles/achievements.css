@@ -73,7 +73,9 @@
 /* ---------- page: hero + voxel shelf ---------- */
 .ach-page .ach-hero { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 48px; padding: 38px 44px 40px; border-radius: var(--r-xl); align-items: center; }
 .ach-hero-chips { display: flex; flex-wrap: wrap; gap: 10px; }
-.ach-hero-title { margin: 22px 0 22px -4px; }
+/* title sized to its column, like .dash-hero-title: .chrome paints via background-clip:text, so glyphs past the h1 box vanish */
+.ach-hero-main { min-width: 0; container-type: inline-size; }
+.ach-hero-title { margin: 22px 0 22px -4px; font-size: clamp(40px, min(7.6vw, calc(100cqi / (6 * 0.8))), 116px); overflow-wrap: break-word; }
 .ach-hero-title .ach-dot { -webkit-text-fill-color: var(--plasma); color: var(--plasma); }
 .ach-counter { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; margin-top: 28px; }
 .ach-counter-n { font: 800 84px/0.9 var(--f-mono); letter-spacing: -0.06em; --chrome-band: 0.9em; font-variant-numeric: tabular-nums; }
@@ -152,7 +154,7 @@
 .ach-grid > li { min-width: 0; display: flex; }
 .ach-card { --pc: var(--plasma); position: relative; flex: 1; display: flex; flex-direction: column; border-radius: var(--r-lg); background: var(--tile-sheen), var(--tile-bg); box-shadow: var(--tile-shadow); min-width: 0; transition: transform 0.3s var(--ease-out); }
 .ach-card::before { content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: var(--chrome-edge); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
-.ach-card:hover { transform: translateY(-4px); }
+.ach-card:hover { transform: translateY(-3px); }
 .ach-card:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; border-radius: var(--r-lg); }
 .ach-case { position: relative; height: 150px; margin: 8px 8px 0; border-radius: 19px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: var(--sunken); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
 .ach-case::before { content: ''; position: absolute; top: 0; left: 50%; width: 140px; height: 100%; transform: translateX(-50%); clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%); background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent 90%); pointer-events: none; }

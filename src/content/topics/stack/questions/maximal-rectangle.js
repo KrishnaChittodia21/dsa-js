@@ -33,6 +33,8 @@ export default {
 
   functionName: 'maximalRectangle',
   paramNames: ['matrix'],
+  paramTypes: ['char[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {character[][]} matrix
  * @return {number}

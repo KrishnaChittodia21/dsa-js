@@ -226,7 +226,7 @@ items.sort((a, b) =>
       variations: [
         { name: 'Sort + greedy', description: 'Process from smallest (or by |x|) and commit to the forced choice (Array of Doubled Pairs).' },
         { name: 'Sort + scan from one end', description: 'Cars sorted by position, scanned from the target backwards (Car Fleet).' },
-        { name: 'Sort + index threshold', description: 'After sorting descending, the answer is the largest i with a[i] ≥ i + 1 (H-Index).' },
+        { name: 'Sort + index threshold', description: 'After sorting descending, the answer is i + 1 for the largest i with a[i] ≥ i + 1 (H-Index).' },
         { name: 'Sort + two pointers', description: 'Pair sums, 3Sum — you met these in Two Pointers.' },
       ],
       mistakes: [
@@ -684,7 +684,7 @@ partition →  [2, 3] 4 [9, 7]
 - **3-way partition** (< pivot, = pivot, > pivot) — with many duplicates, a 2-way partition keeps recursing on piles of equal values; 3-way removes them in one go.
 - Recurse on the **smaller** side first and loop on the larger to keep stack depth O(log n).
 
-**Quickselect:** to find the k-th smallest, partition once and look where the pivot landed. If it is at index k, done. Otherwise recurse into **only one** side. Average work n + n/2 + n/4 + … = 2n → **O(n) average** (still O(n²) worst case).`,
+**Quickselect:** to find the k-th smallest, partition once and look where the pivot landed. If it is at index k, done. Otherwise recurse into **only one** side. Average work n + n/2 + n/4 + … = 2n → **O(n) average** (still O(n²) worst case). Any partition works here — Lomuto or the 3-way one below; 3-way just copes better with many duplicates.`,
           },
           {
             type: 'checkpoint',
@@ -809,7 +809,7 @@ out   = [0, 1, 2, 3, 3]
 
 Left-to-right placement keeps equal keys in input order → stable.
 
-**Capping trick.** Sometimes only values up to n matter. For H-Index, a paper with 5000 citations counts the same as one with n citations (h can never exceed n). Clamp values to n and a counting array of size n + 1 suffices, even though citations can be 1000.`,
+**Capping trick.** Sometimes only values up to n matter. For H-Index, a paper with 5000 citations counts the same as one with n citations (h can never exceed n). Clamp values to n and a counting array of size n + 1 suffices, even though citations can be far larger than n.`,
           },
           {
             type: 'checkpoint',

@@ -33,6 +33,8 @@ Normalisation: \`g = gcd(|dx|, |dy|)\`, divide both; then if \`dx < 0\` (or \`dx
 
   functionName: 'maxPoints',
   paramNames: ['points'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} points
  * @return {number}

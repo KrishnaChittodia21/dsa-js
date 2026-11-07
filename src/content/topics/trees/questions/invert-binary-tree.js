@@ -35,6 +35,8 @@ Every node is visited once → O(n). BFS with a queue works equally well: pop a 
 
   functionName: 'invertTree',
   paramNames: ['root'],
+  paramTypes: ['TreeNode'],
+  returnType: 'TreeNode',
   starterCode: `/**
  * @param {TreeNode} root
  * @return {TreeNode}

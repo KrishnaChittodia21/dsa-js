@@ -33,6 +33,8 @@ Return how many seconds pass until person \`k\` (0-indexed, original position) h
 
   functionName: 'timeRequiredToBuy',
   paramNames: ['tickets', 'k'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} tickets
  * @param {number} k

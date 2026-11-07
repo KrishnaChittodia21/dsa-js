@@ -55,6 +55,12 @@ export default {
 - **getRandom():** uniform slot → each value is chosen with probability count / total.`,
 
   className: 'RandomizedCollection',
+  methodTypes: {
+    constructor: { params: [] },
+    insert: { params: ['int'], returns: 'boolean' },
+    getRandom: { params: [], returns: 'int' },
+    remove: { params: ['int'], returns: 'boolean' },
+  },
   starterCode: `class RandomizedCollection {
   constructor() {
     

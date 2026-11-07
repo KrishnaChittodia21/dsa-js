@@ -34,6 +34,8 @@ Several different trees can be valid answers; any of them is accepted.`,
 
   functionName: 'insertIntoBST',
   paramNames: ['root', 'val'],
+  paramTypes: ['TreeNode', 'int'],
+  returnType: 'TreeNode',
   starterCode: `/**
  * @param {TreeNode} root
  * @param {number} val

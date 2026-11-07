@@ -17,7 +17,7 @@ export default {
       id: 'dp-2d-grid',
       name: 'Grid DP',
       summary: 'dp[r][c] describes the best / number of ways to reach (or leave) cell (r, c); each cell is built from a few neighbouring cells that were computed earlier.',
-      whyItExists: 'Counting or optimising over all paths in a grid by brute force explores exponentially many paths (a 3×7 grid already has 28, a 16×16 grid has over 155 million). But every path that reaches (r, c) arrives from a neighbour, so the answer for (r, c) depends only on the answers of those neighbours. Each cell is computed once: O(rows·cols).',
+      whyItExists: 'Counting or optimising over all paths in a grid by brute force explores exponentially many paths (a 3×7 grid already has 28, a 16×16 grid has over 155 million paths, and the plain recursion makes even more calls). But every path that reaches (r, c) arrives from a neighbour, so the answer for (r, c) depends only on the answers of those neighbours. Each cell is computed once: O(rows·cols).',
       whenToUse: [
         'Moves are restricted to a fixed set of directions that never revisit a cell (right/down, down/diagonal) so the dependency graph has no cycles',
         'Count paths, minimum / maximum path cost, or "largest square/shape ending at this cell"',
@@ -260,7 +260,7 @@ That is all "2D DP" means: the **state** has two indices, so the memo is a **tab
             type: 'text',
             md: `The plain recursion for these problems branches at every step and revisits the same sub-problems **exponentially** often.
 
-Take "unique paths" in an \`m × n\` grid moving only right or down. \`paths(r, c) = paths(r+1, c) + paths(r, c+1)\`. The call tree has about 2^(m+n) nodes, but there are only \`m · n\` distinct \`(r, c)\` pairs. For a 16 × 16 grid: ~10^9 calls versus 256 cells.
+Take "unique paths" in an \`m × n\` grid moving only right or down. \`paths(r, c) = paths(r+1, c) + paths(r, c+1)\`. The call tree has about 2^(m+n) nodes, but there are only \`m · n\` distinct \`(r, c)\` pairs. For a 16 × 16 grid: ~10^9 recursive calls versus 256 cells. (That counts calls, including dead ends; the number of complete paths is smaller — over 155 million.)
 
 The same holds for two strings: every recursive call is some pair of prefixes \`(i, j)\` — at most \`(m+1)(n+1)\` of them.`,
           },
@@ -454,6 +454,12 @@ Twist the combine step and you get the whole family:
 - **Minimum path sum:** \`cost + min(top, left)\` instead of \`top + left\`.
 - **Triangle:** go **bottom-up** — each cell adds the smaller of its two children. The apex ends up holding the answer, and there are no "edge of the row" special cases.
 - **Maximal square:** \`dp[r][c]\` = side of the largest all-1 square whose **bottom-right corner** is (r, c) = \`1 + min(top, left, top-left)\`.`,
+          },
+          {
+            type: 'visual',
+            scenario: 'grid-dp',
+            input: { grid: [[0, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 0]], mode: 'count-paths' },
+            caption: 'Unique paths with one obstacle: each cell adds the cell above and the cell to the left; the blocked cell holds 0. Switch the mode to min-sum to see cost + min(top, left).',
           },
           {
             type: 'checkpoint',
@@ -960,7 +966,7 @@ So: **count subsets with sum P**. If \`total + target\` is odd or \`|target| > t
               ['(3, 20)', '[0, 15, 15, 20, 35]', 'c=4: max(15, dp[1] + 20 = 35); c=3: max(15, dp[0]+20)'],
               ['(4, 30)', '[0, 15, 15, 20, 35]', 'c=4: max(35, dp[0] + 30 = 30) → keep 35'],
             ],
-            note: 'Answer 35 = items 1 and 3 (weights 1 + 3). With a forward loop, the first row would become [0,15,30,45,60] — item 1 taken four times.',
+            note: 'Answer 35 = the items of weight 1 and 3 (15 + 20). With a forward loop, the first row would become [0,15,30,45,60] — item 1 taken four times.',
           },
         ],
       },
@@ -1099,7 +1105,7 @@ function permutations(nums, target) {         // combination sum IV (DP 1D)
 6. **Loop order in counting:** coins outer = combinations, amount outer = permutations.
 7. **Dungeon game forwards:** the constraint depends on the future; go backwards and clamp with \`max(1, …)\`.
 8. **Regex \`*\`:** treating it as its own token instead of a unit with the previous character, or forgetting the empty-string row (\`"" ~ "a*"\`).
-9. **Target sum edge cases:** odd \`total + target\`, or \`|target| > total\` → 0 ways (and a negative array index otherwise).`,
+9. **Target sum edge cases:** odd \`total + target\`, or \`|target| > total\` → 0 ways (without that guard, a target below −total gives a negative array index).`,
           },
           {
             type: 'checkpoint',

@@ -17,17 +17,18 @@ function Pointers({ list }) {
   return (
     <div className="viz-ptrs">
       {list.map((p) => (
-        <span key={p.label} className={`viz-pointer ptr-${p.color || 'a'}`}>
+        <span key={p.label} data-flip={p.label} className={`viz-pointer ptr-${p.color || 'a'}`}>
           {p.label}
         </span>
       ))}
-      <span className={`viz-beam ptr-${list[0].color || 'a'}`} aria-hidden="true" />
+      <span data-flip={`beam:${list[0].label}`} className={`viz-beam ptr-${list[0].color || 'a'}`} aria-hidden="true" />
     </div>
   );
 }
 
 export function ArrayPanel({ panel, bars: allowBars }) {
-  const { values, highlights = {}, range, pointers = [], label, showIndices = true } = panel;
+  // indexBase: a slice of a longer array (split to fit a phone) labels its cells with their real indexes
+  const { values, highlights = {}, range, pointers = [], label, showIndices = true, indexBase = 0 } = panel;
   const byIndex = {};
   for (const p of pointers) (byIndex[p.index] ||= []).push(p);
   const bars = allowBars ? barsFor(values) : null;
@@ -45,13 +46,13 @@ export function ArrayPanel({ panel, bars: allowBars }) {
               <Pointers list={byIndex[i]} />
               {bars ? (
                 <>
-                  <span className={`viz-bar-val${st ? ` viz-${st}` : ''}`}>{String(v)}</span>
+                  <span data-pop={i} className={`viz-bar-val${st ? ` viz-${st}` : ''}`}>{String(v)}</span>
                   <div className={`vox viz-vox${st ? ` viz-${st}` : ''}`} style={{ '--h': Math.max(v, 0.3) }} aria-label={String(v)} />
                 </>
               ) : (
-                <div className={cellClass(st)}>{String(v)}</div>
+                <div data-pop={i} className={cellClass(st)}>{String(v)}</div>
               )}
-              {showIndices && <div className="viz-index">{i}</div>}
+              {showIndices && <div className="viz-index">{i + indexBase}</div>}
             </div>
           );
         })}
@@ -109,7 +110,7 @@ export function VarsPanel({ panel }) {
           return (
             <span key={k} className={`viz-var${text.length > 7 ? ' viz-var--wide' : ''}`}>
               <span className="viz-var-k">{k}</span>
-              <span className="viz-var-v">{text}</span>
+              <span data-pop={k} className="viz-var-v">{text}</span>
             </span>
           );
         })}
@@ -119,11 +120,13 @@ export function VarsPanel({ panel }) {
 }
 
 export function ListPanel({ panel }) {
-  const { values, next, pointers = [], highlights = {} } = panel;
+  // doubly: forward links are drawn as ⇄ (each node also points back to its prev).
+  const { values, next, pointers = [], highlights = {}, doubly = false } = panel;
   const byIndex = {};
   for (const p of pointers) (byIndex[p.index] ||= []).push(p);
   return (
     <div className="viz-panel viz-panel--list">
+      {panel.label && <div className="viz-label">{panel.label}</div>}
       <div className="viz-list">
         {next[0] === null && values.length > 0 && <span className="viz-null">∅ ←</span>}
         {values.map((v, i) => {
@@ -131,13 +134,13 @@ export function ListPanel({ panel }) {
           if (i < values.length - 1) {
             const fwd = next[i] === i + 1;
             const back = next[i + 1] === i;
-            link = <span className={`viz-link${fwd || back ? '' : ' viz-link-none'}`}>{fwd ? '→' : back ? '←' : ' '}</span>;
+            link = <span className={`viz-link${fwd || back ? '' : ' viz-link-none'}`}>{fwd ? (doubly ? '⇄' : '→') : back ? '←' : ' '}</span>;
           }
           return (
             <div key={i} className="viz-list-item">
               <div className="viz-col">
                 <Pointers list={byIndex[i]} />
-                <div className={`${cellClass(highlights[i])} viz-node-box`}>{String(v)}</div>
+                <div data-pop={i} className={`${cellClass(highlights[i])} viz-node-box`}>{String(v)}</div>
               </div>
               {link}
             </div>
@@ -156,7 +159,9 @@ export function NodesPanel({ panel }) {
   const sx = free ? 70 : 52;
   const sy = free ? 70 : 64;
   const r = 18;
-  const pad = 30;
+  // Self-loops (from === to) are drawn as a small arc pointing away from the diagram's centre.
+  const hasLoop = panel.edges.some((e) => e.from === e.to);
+  const pad = hasLoop ? 62 : 30;
   const xs = panel.nodes.map((n) => n.x * sx);
   const ys = panel.nodes.map((n) => n.y * sy);
   const minX = Math.min(...xs);
@@ -180,6 +185,27 @@ export function NodesPanel({ panel }) {
           const a = pos[e.from];
           const b = pos[e.to];
           if (!a || !b) return null;
+          if (e.from === e.to) {
+            const cx = width / 2;
+            const cy = height / 2;
+            const ang = Math.hypot(a.x - cx, a.y - cy) < 1 ? -Math.PI / 2 : Math.atan2(a.y - cy, a.x - cx);
+            const at = (t, d) => [a.x + Math.cos(t) * d, a.y + Math.sin(t) * d];
+            const [x1, y1] = at(ang - 0.55, r);
+            const [x2, y2] = at(ang + 0.55, r + 3);
+            const [c1x, c1y] = at(ang - 0.95, r * 3.4);
+            const [c2x, c2y] = at(ang + 0.95, r * 3.4);
+            const [lx, ly] = at(ang, r * 2.9 + Math.abs(Math.cos(ang)) * 14);
+            return (
+              <g key={i}>
+                <path d={`M ${x1} ${y1} C ${c1x} ${c1y} ${c2x} ${c2y} ${x2} ${y2}`} fill="none" className={`viz-edge ${e.state ? `viz-edge-${e.state}` : ''}`} markerEnd={panel.directed ? `url(#${markerId})` : undefined} />
+                {e.label && (
+                  <text x={lx} y={ly + 4} className="viz-edge-label" textAnchor="middle">
+                    {e.label}
+                  </text>
+                )}
+              </g>
+            );
+          }
           const dx = b.x - a.x;
           const dy = b.y - a.y;
           const len = Math.hypot(dx, dy) || 1;
@@ -215,6 +241,11 @@ export function NodesPanel({ panel }) {
               <text x={p.x} y={p.y + 4.5} textAnchor="middle">
                 {n.label}
               </text>
+              {n.tag && (
+                <text x={p.x} y={p.y - r - 7} textAnchor="middle" className="viz-node-tag">
+                  {n.tag}
+                </text>
+              )}
             </g>
           );
         })}
@@ -230,7 +261,7 @@ export function GridPanel({ panel }) {
       <div className="viz-grid" style={{ gridTemplateColumns: `repeat(${panel.cells[0]?.length || 1}, var(--viz-gc, 38px))` }}>
         {panel.cells.flatMap((row, r) =>
           row.map((v, c) => (
-            <div key={`${r}-${c}`} className={`viz-grid-cell viz-${panel.states?.[r]?.[c] || 'none'}`}>
+            <div key={`${r}-${c}`} data-pop={`${r}-${c}`} className={`viz-grid-cell viz-${panel.states?.[r]?.[c] || 'none'}`}>
               {String(v)}
             </div>
           )),
@@ -258,7 +289,7 @@ export function TablePanel({ panel }) {
             <tr key={i}>
               <th>{panel.rowLabels[i]}</th>
               {row.map((v, j) => (
-                <td key={j} className={`viz-${panel.states?.[i]?.[j] || 'none'}`}>
+                <td key={j} data-pop={`${i}-${j}`} className={`viz-${panel.states?.[i]?.[j] || 'none'}`}>
                   {String(v)}
                 </td>
               ))}

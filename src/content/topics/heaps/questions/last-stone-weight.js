@@ -36,6 +36,8 @@ Repeat until at most one stone is left. Return its weight, or \`0\` if none are 
 
   functionName: 'lastStoneWeight',
   paramNames: ['stones'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} stones
  * @return {number}

@@ -42,6 +42,8 @@ Each step O(log M) with M = max value → O(n log M).`,
 
   functionName: 'createSortedArray',
   paramNames: ['instructions'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} instructions
  * @return {number}

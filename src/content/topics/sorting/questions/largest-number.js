@@ -40,6 +40,8 @@ The result may be huge, so return it as a **string** (without unnecessary leadin
 
   functionName: 'largestNumber',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'string',
   starterCode: `/**
  * @param {number[]} nums
  * @return {string}

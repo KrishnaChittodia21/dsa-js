@@ -41,6 +41,8 @@ log₂ n levels × O(n) merging per level = O(n log n) always. Recursion depth i
 
   functionName: 'sortArray',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int[]',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number[]}

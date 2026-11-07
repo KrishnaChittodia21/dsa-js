@@ -59,6 +59,12 @@ export default {
 - search: \`walk(word)\` exists **and** \`isEnd\`. startsWith: \`walk(prefix)\` exists.`,
 
   className: 'Trie',
+  methodTypes: {
+    constructor: { params: [] },
+    insert: { params: ['string'], returns: 'void' },
+    search: { params: ['string'], returns: 'boolean' },
+    startsWith: { params: ['string'], returns: 'boolean' },
+  },
   starterCode: `class Trie {
   constructor() {
     

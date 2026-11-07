@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { SCENARIOS } from './scenarios/index.js';
 import { Panel } from './panels.jsx';
+import { useFitZoom } from './useFitZoom.js';
 import { SCENARIO_COMPLEXITY, bigoClass } from './complexity.js';
 import Icon from '../components/ui/Icon.jsx';
+import { Link } from 'react-router-dom';
+import { questionById } from '../content/index.js';
 
 const PREDICT_KEY = 'dsa-journey:predict-mode';
 function loadPredictPref() {
@@ -21,6 +24,64 @@ function savePredictPref(on) {
 }
 
 const LETTERS = 'ABCD';
+const SNAP = 'cubic-bezier(0.23, 1, 0.32, 1)'; // stepping by hand: quick ease-out
+const GLIDE = 'cubic-bezier(0.45, 0, 0.25, 1)'; // playing: ease-in-out spread over most of the step, so motion reads as one flow
+const reducedMotion = () => !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+/** Motion length for a frame change: most of the step while playing, short when stepping by hand. */
+const motionFor = (playing, speed) => (playing ? { ms: Math.min(Math.round(speed * 0.8), 600), ease: GLIDE } : { ms: 240, ease: SNAP });
+
+/** What the player shows right now: pointer boxes ([data-flip]) and cell texts ([data-pop]), per panel index. */
+function snapshot(root) {
+  const m = new Map();
+  root.querySelectorAll('.viz-panel').forEach((panel, pi) => {
+    for (const el of panel.querySelectorAll('[data-flip]')) m.set(`${pi}f${el.dataset.flip}`, el.getBoundingClientRect());
+    for (const el of panel.querySelectorAll('[data-pop]')) m.set(`${pi}p${el.dataset.pop}`, el.textContent);
+  });
+  return m;
+}
+const stop = (el) => el.getAnimations().forEach((a) => a.id === 'viz' && a.cancel()); // ours only, never the CSS transitions
+
+/**
+ * Tween between frames: pointers ([data-flip], remounted in a new column) slide from where they were
+ * (FLIP via the `translate` property, so CSS transforms on the element still apply), new pointers fade
+ * in, and cells whose text changed ([data-pop]) pop. The "before" is read during render, while the DOM
+ * still shows the old frame, so a slide interrupted by a fast step continues from where it visibly is.
+ */
+function useFrameMotion(ref, frame, motion) {
+  const before = useRef(null);
+  const shown = useRef(null);
+  if (frame !== shown.current && ref.current) before.current = snapshot(ref.current);
+  useLayoutEffect(() => {
+    const root = ref.current;
+    const was = shown.current !== null ? before.current : null; // first paint: nothing to tween from
+    shown.current = frame;
+    if (!root || !was || reducedMotion() || !root.animate) return;
+    const { ms, ease } = motion;
+    const opts = { id: 'viz', duration: ms, easing: ease };
+    root.querySelectorAll('.viz-panel').forEach((panel, pi) => {
+      for (const el of panel.querySelectorAll('[data-flip]')) {
+        stop(el);
+        const old = was.get(`${pi}f${el.dataset.flip}`);
+        if (!old) {
+          el.animate([{ opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1 }], opts);
+          continue;
+        }
+        const r = el.getBoundingClientRect();
+        const z = el.currentCSSZoom || 1; // translate is applied inside the stage's fit-zoom: screen px ÷ zoom
+        const dx = (old.left - r.left) / z;
+        const dy = (old.top - r.top) / z;
+        if (Math.abs(dx) + Math.abs(dy) > 0.5) el.animate([{ translate: `${dx}px ${dy}px` }, { translate: '0 0' }], opts);
+      }
+      for (const el of panel.querySelectorAll('[data-pop]')) {
+        const old = was.get(`${pi}p${el.dataset.pop}`);
+        if (old === undefined || old === el.textContent) continue;
+        stop(el);
+        el.animate([{ scale: 1.14 }, { scale: 1 }], { ...opts, duration: Math.min(ms, 320), easing: SNAP });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ref, frame]);
+}
 // Sorting animations draw arrays as value-tall voxel columns (other arrays are single cubes).
 const BAR_SCENARIOS = new Set(['merge-sort', 'quick-sort', 'counting-sort', 'cyclic-sort', 'dutch-flag']);
 // Panels that read as "state" go to the side column (a variables grid, stacks as voxel towers).
@@ -36,6 +97,12 @@ const SPEEDS = [
 function PredictCard({ predict, answer, onChoose, onReveal }) {
   const answeredNow = answer !== null;
   const correct = answeredNow && answer === predict.answer;
+  const first = useRef(null);
+  useEffect(() => {
+    // the card disables Next: move a keyboard user to the options, unless they are working elsewhere on the page
+    const at = document.activeElement;
+    if (!at || at === document.body || first.current?.closest('figure')?.contains(at)) first.current?.focus({ preventScroll: true });
+  }, []);
   return (
     <div className={`viz-predict ${answeredNow ? (correct ? 'is-correct' : 'is-wrong') : ''}`} role="group" aria-label="Predict the next step">
       <div className="viz-predict-main">
@@ -51,7 +118,7 @@ function PredictCard({ predict, answer, onChoose, onReveal }) {
             if (answeredNow && i === predict.answer) state = 'correct';
             else if (answeredNow && i === answer) state = 'wrong';
             return (
-              <button key={i} type="button" className={`option option-compact ${state}`} disabled={answeredNow} onClick={() => onChoose(i)}>
+              <button key={i} ref={i === 0 ? first : undefined} type="button" className={`option option-compact ${state}`} disabled={answeredNow} onClick={() => onChoose(i)}>
                 <span className="option-letter">{LETTERS[i]}</span>
                 <span className="option-text">{o}</span>
               </button>
@@ -127,8 +194,9 @@ const parse = (field, text) => {
  * (state column + complexity readout beside the stage once the player is wide enough); `eyebrow`
  * replaces the default "step-through" label.
  */
-export default function Visualizer({ scenario, input, caption, compact = false, wide = false, eyebrow }) {
-  const def = SCENARIOS[scenario];
+/** A scene by id, or ready-made `frames` (with `title`): "Animate my run" plays a recorded run in the same player. */
+export default function Visualizer({ scenario, input, caption, compact = false, wide = false, eyebrow, frames: given, title, autoPlay = false, autoFocus = false, bars: barsProp }) {
+  const def = useMemo(() => (given ? { title, description: caption } : SCENARIOS[scenario]), [given, title, caption, scenario]);
   const initial = useMemo(() => ({ ...(def?.defaultInput || {}), ...(input || {}) }), [def, input]);
   const [data, setData] = useState(initial);
   const [draft, setDraft] = useState(null);
@@ -142,19 +210,29 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
   const [answered, setAnswered] = useState(() => new Set()); // frame indexes already predicted this run
   const [verdicts, setVerdicts] = useState({}); // frame index → answered correctly (scrubber ticks)
   const [score, setScore] = useState({ correct: 0, total: 0 });
-  const timer = useRef(null);
+  const fill = useRef(null);
+  const elapsed = useRef(0); // ms played into the current step (kept across pause, so resume continues)
+  const body = useRef(null);
+  const fig = useRef(null);
+  useEffect(() => {
+    // a new player replaced the button that was pressed: keep a keyboard user's place instead of dropping focus to the page
+    if (autoFocus && (!document.activeElement || document.activeElement === document.body)) fig.current?.focus({ preventScroll: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const frames = useMemo(() => {
+    if (given) return given;
     if (!def) return [];
     try {
       return def.generate(structuredClone(data));
     } catch (e) {
       return [{ note: `Could not run this input: ${e.message}`, panels: [] }];
     }
-  }, [def, data]);
+  }, [def, data, given]);
 
   const totalPredicts = useMemo(() => frames.filter((f) => f.predict).length, [frames]);
   const restart = () => {
+    elapsed.current = 0;
     setStep(0);
     setPlaying(false);
     setPending(null);
@@ -163,7 +241,12 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
     setVerdicts({});
     setScore({ correct: 0, total: 0 });
   };
-  useEffect(restart, [frames]);
+  useEffect(() => {
+    restart();
+    // a fresh recorded run plays by itself, unless the reader asked for reduced motion
+    if (autoPlay && frames.length > 1 && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) setPlaying(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [frames]);
 
   // Every forward move goes through here so predictions can interrupt it.
   const next = () => {
@@ -190,6 +273,7 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
     setScore((sc) => ({ correct: sc.correct + (correct ? 1 : 0), total: sc.total + 1 }));
   };
   const reveal = () => {
+    fig.current?.focus({ preventScroll: true }); // the card (and its focused button) goes away
     setAnswered((a) => new Set(a).add(pending));
     setStep(pending);
     setPending(null);
@@ -197,20 +281,53 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
   };
 
   useEffect(() => {
+    elapsed.current = 0;
+  }, [step, frames]);
+  // One rAF loop both times the steps and glides the progress fill through the current step
+  // (written straight to the DOM: no re-render per frame). Paused or stepped by hand, it sits still.
+  useEffect(() => {
+    const draw = () => fill.current?.style.setProperty('--f', reducedMotion() ? '0' : String(Math.min(elapsed.current / speed, 1)));
+    draw();
     if (!playing) return undefined;
-    timer.current = setTimeout(next, speed);
-    return () => clearTimeout(timer.current);
+    let before = performance.now();
+    let raf;
+    const tick = (now) => {
+      elapsed.current += now - before;
+      before = now;
+      if (elapsed.current >= speed) {
+        next();
+        return;
+      }
+      draw();
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing, step, speed]);
+  const motion = motionFor(playing, speed);
+  useFrameMotion(body, frames[step], motion);
 
+  const [stageRef, zoom] = useFitZoom(frames[step], undefined, frames); // before the early return: hooks run in the same order
+  // decided per run, not per frame, so the side column never appears or vanishes mid-run
+  const hasSide = useMemo(() => frames.some((f) => f.panels?.some((p) => SIDE_KINDS.has(p.kind))), [frames]);
   if (!def) return <div className="card muted small">Unknown visualization “{scenario}”.</div>;
   const frame = frames[Math.min(step, frames.length - 1)] || { note: '', panels: [] };
   const last = frames.length - 1;
-  const bars = BAR_SCENARIOS.has(scenario);
+  const bars = barsProp ?? BAR_SCENARIOS.has(scenario);
   const stagePanels = frame.panels.filter((p) => !SIDE_KINDS.has(p.kind));
   const sidePanels = frame.panels.filter((p) => SIDE_KINDS.has(p.kind));
+  const problem = def.problem;
+  const linked = problem?.questionId ? questionById[problem.questionId] : null;
+  const practice = linked && (
+    <Link className="viz-prob-q" to={`/topic/${linked.topicId}/q/${linked.id}`}>
+      Practice: {linked.title} <Icon name="chevronRight" size={13} />
+    </Link>
+  );
+  const brief = compact || !!caption; // embedded where the lesson already explains it: a one-line problem name
   const showCx = wide && !!SCENARIO_COMPLEXITY[scenario];
-  const pct = last > 0 ? (Math.min(step, last) / last) * 100 : 0;
+  const at = last > 0 ? Math.min(step, last) / last : 0; // fill = at + seg × (fraction of this step played)
+  const seg = last > 0 && step < last ? 1 / last : 0;
 
   const onKey = (e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
@@ -247,7 +364,11 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
   };
 
   return (
-    <figure className={`viz ${compact ? 'viz--compact' : ''} ${wide ? 'viz--wide' : ''}`} tabIndex={0} onKeyDown={onKey} aria-label={`Visualization: ${def.title}`}>
+    <figure
+      ref={fig}
+      className={`viz ${compact ? 'viz--compact' : ''} ${wide ? 'viz--wide' : ''}${playing ? ' is-playing' : ''}`}
+      style={{ '--viz-t': `${motion.ms}ms`, '--viz-ease': motion.ease }}
+      tabIndex={0} onKeyDown={onKey} aria-label={`Visualization: ${def.title}`}>
       <div className="viz-head">
         <div className="viz-head-txt">
           <span className="eyebrow">
@@ -255,6 +376,27 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
             {eyebrow || 'step-through'}
           </span>
           <div className="viz-title">{def.title}</div>
+          {problem && brief && (
+            <p className="viz-prob-line">
+              <span className="viz-k">Problem</span> {problem.name}
+              {practice}
+            </p>
+          )}
+          {problem && !brief && (
+            <div className="viz-prob">
+              <span className="viz-k">Problem</span>
+              <p className="viz-prob-st">
+                <b>{problem.name}.</b> {problem.statement}
+              </p>
+              {problem.example && (
+                <p className="viz-prob-ex">
+                  <span>Example</span> {problem.example}
+                </p>
+              )}
+              {practice}
+            </div>
+          )}
+          {problem && !brief && <span className="viz-k viz-k--see">What you’re seeing</span>}
           <p className="viz-desc">{caption || def.description}</p>
         </div>
         <div className="viz-head-act">
@@ -311,13 +453,13 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
         </div>
       )}
 
-      <div className={`viz-body${sidePanels.length || showCx ? ' viz-body--side' : ''}`}>
-        <div className="viz-stage">
+      <div ref={body} className={`viz-body${hasSide || showCx ? ' viz-body--side' : ''}`}>
+        <div className="viz-stage" ref={stageRef} style={zoom < 1 ? { zoom } : undefined}>
           {stagePanels.map((p, i) => (
             <Panel key={i} panel={p} bars={bars} />
           ))}
         </div>
-        {(sidePanels.length > 0 || showCx) && (
+        {(hasSide || showCx) && (
           <div className="viz-side">
             {sidePanels.map((p, i) => (
               <Panel key={i} panel={p} />
@@ -339,8 +481,17 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
       )}
       <div className="viz-controls">
         <div className="viz-ctrls">
-          <button type="button" className="iconbtn" onClick={restart} disabled={step === 0 && pending === null} aria-label="First step">
-            <Icon name="skipBack" size={16} />
+          <button
+            type="button"
+            className="iconbtn"
+            onClick={() => {
+              restart();
+              setPlaying(true);
+            }}
+            aria-label="Replay from the start"
+            title="Replay from the start"
+          >
+            <Icon name="rotate" size={16} />
           </button>
           <button type="button" className="iconbtn" onClick={() => { setPending(null); setStep((s) => Math.max(0, s - 1)); }} disabled={step === 0} aria-label="Previous step">
             <Icon name="chevronLeft" size={16} />
@@ -353,9 +504,9 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
               if (step >= last) restart();
               setPlaying((p) => !p);
             }}
-            aria-label={playing ? 'Pause' : step >= last ? 'Replay' : 'Play'}
+            aria-label={playing ? 'Pause' : 'Play'}
           >
-            <Icon name={playing ? 'pause' : step >= last ? 'rotate' : 'play'} size={16} />
+            <Icon name={playing ? 'pause' : 'play'} size={16} />
           </button>
           <button type="button" className="iconbtn" onClick={next} disabled={step >= last || pending !== null} aria-label="Next step">
             <Icon name="chevronRight" size={16} />
@@ -364,9 +515,9 @@ export default function Visualizer({ scenario, input, caption, compact = false, 
             <Icon name="skipForward" size={16} />
           </button>
         </div>
-        <div className="viz-track" style={{ '--p': `${pct}%` }}>
+        <div className="viz-track" style={{ '--p': at, '--seg': seg }}>
           <span className="viz-rail" aria-hidden="true" />
-          <span className="viz-fill" aria-hidden="true" />
+          <span ref={fill} className="viz-fill" aria-hidden="true" />
           {last > 0 &&
             frames.map((f, i) =>
               f.predict ? (

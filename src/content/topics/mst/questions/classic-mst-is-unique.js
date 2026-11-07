@@ -44,6 +44,8 @@ Why it works: after all lighter edges, the components are the same for EVERY MST
 
   functionName: 'isMstUnique',
   paramNames: ['n', 'edges'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} edges  [u, v, w]

@@ -42,6 +42,8 @@ Fill bottom-to-top, right-to-left (dependencies point down/right). Use one row w
 
   functionName: 'calculateMinimumHP',
   paramNames: ['dungeon'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} dungeon
  * @return {number}

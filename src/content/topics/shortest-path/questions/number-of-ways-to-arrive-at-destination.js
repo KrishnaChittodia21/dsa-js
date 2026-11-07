@@ -40,6 +40,8 @@ Return the **number of different routes** from intersection \`0\` to intersectio
 
   functionName: 'countPaths',
   paramNames: ['n', 'roads'],
+  paramTypes: ['int', 'int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number} n
  * @param {number[][]} roads

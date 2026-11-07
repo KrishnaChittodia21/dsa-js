@@ -40,6 +40,8 @@ Return the **minimum** \`k\` that lets her eat everything within \`h\` hours.`,
 
   functionName: 'minEatingSpeed',
   paramNames: ['piles', 'h'],
+  paramTypes: ['int[]', 'int'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} piles
  * @param {number} h

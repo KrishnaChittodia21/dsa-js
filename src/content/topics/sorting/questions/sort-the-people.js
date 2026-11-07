@@ -36,6 +36,8 @@ Never sort \`names\` with a comparator that looks up heights via \`names.indexOf
 
   functionName: 'sortPeople',
   paramNames: ['names', 'heights'],
+  paramTypes: ['string[]', 'int[]'],
+  returnType: 'string[]',
   starterCode: `/**
  * @param {string[]} names
  * @param {number[]} heights

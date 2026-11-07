@@ -1,5 +1,6 @@
-import { Link } from 'react-router-dom';
-import { ArrowRight, BarChart3, Check, Compass, Moon, RotateCcw, Sun } from 'lucide-react';
+import { useRef } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { ArrowRight, BarChart3, Check, Compass, Monitor, Moon, RotateCcw, Sun } from 'lucide-react';
 import { ACCENTS, useTheme } from '../state/ThemeContext.jsx';
 import { saveUiPrefs, useUiPrefs } from '../lib/uiPrefs.js';
 import { openGuide } from '../lib/appEvents.js';
@@ -11,6 +12,7 @@ const MOD = isMac ? '⌘' : 'Ctrl';
 const THEMES = [
   { id: 'dark', label: 'Graphite', sub: 'dark', Icon: Moon },
   { id: 'light', label: 'Porcelain', sub: 'light', Icon: Sun },
+  { id: 'system', label: 'System', sub: 'follows your device', Icon: Monitor },
 ];
 const ACCENT_NOTE = { plasma: 'default', volt: 'hot pink', uv: 'ultraviolet', ice: 'cool cyan' };
 
@@ -24,11 +26,34 @@ const SHORTCUTS = [
   [['Esc'], 'close a dialog'],
 ];
 
-/** Appearance (theme + accent), the guide (coach tips, replay the tour), shortcuts and a pointer to progress data. */
+const TABS = [
+  { id: 'appearance', label: 'Appearance' },
+  { id: 'guide', label: 'Guide' },
+  { id: 'keys', label: 'Keyboard' },
+  { id: 'data', label: 'Data' },
+];
+
+/** Tabbed settings (?tab=appearance|guide|keys|data): theme + accent, coach tips + tour, shortcuts, a pointer to progress data. */
 export default function SettingsPage() {
-  const { theme, setTheme, accent, setAccent } = useTheme();
+  const { pref, setTheme, accent, setAccent } = useTheme();
   const ui = useUiPrefs();
   const dismissed = Object.keys(ui.coachDismissed || {}).length;
+  const [params, setParams] = useSearchParams();
+  const tab = TABS.some((t) => t.id === params.get('tab')) ? params.get('tab') : TABS[0].id;
+  const tabRefs = useRef({});
+  const select = (id) => setParams({ tab: id }, { replace: true });
+
+  // Roving tabindex: arrows/Home/End move focus and select (automatic activation).
+  const onTabKey = (e) => {
+    const i = TABS.findIndex((t) => t.id === tab);
+    const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: TABS.length - 1 }[e.key];
+    if (next === undefined) return;
+    e.preventDefault();
+    const id = TABS[(next + TABS.length) % TABS.length].id;
+    select(id);
+    tabRefs.current[id]?.focus();
+  };
+  const panel = (id) => ({ id: `set-panel-${id}`, role: 'tabpanel', 'aria-labelledby': `set-tab-${id}`, hidden: tab !== id, tabIndex: 0 });
 
   return (
     <div className="page page-narrow set-page">
@@ -41,8 +66,27 @@ export default function SettingsPage() {
         <p className="lead">Saved in this browser. Your study progress lives on the Progress page.</p>
       </header>
 
+      <div data-guide="set-tabs" className="tabs set-tabs" role="tablist" aria-label="Settings sections" onKeyDown={onTabKey}>
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            ref={(el) => (tabRefs.current[t.id] = el)}
+            id={`set-tab-${t.id}`}
+            type="button"
+            role="tab"
+            className="tab"
+            aria-selected={tab === t.id}
+            aria-controls={`set-panel-${t.id}`}
+            tabIndex={tab === t.id ? 0 : -1}
+            onClick={() => select(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
       {/* ---------- appearance ---------- */}
-      <section className="tile set-panel rise" style={{ '--i': 1 }} aria-labelledby="set-appearance">
+      <section className="tile set-panel rise" style={{ '--i': 1 }} {...panel('appearance')}>
         <div className="set-panel-head">
           <span className="eyebrow" id="set-appearance">
             <i className="pip pip--uv" aria-hidden="true" />
@@ -53,11 +97,11 @@ export default function SettingsPage() {
         <div className="set-row">
           <div className="set-row-text">
             <b id="set-theme-label">Theme</b>
-            <span>Graphite is the dark stage; Porcelain the light one.</span>
+            <span>Graphite is the dark stage, Porcelain the light one; System follows your device.</span>
           </div>
           <div className="seg set-theme" role="group" aria-labelledby="set-theme-label">
             {THEMES.map(({ id, label, sub, Icon }) => (
-              <button key={id} type="button" aria-pressed={theme === id} onClick={() => setTheme(id)} aria-label={`${label} (${sub} theme)`}>
+              <button key={id} type="button" aria-pressed={pref === id} onClick={() => setTheme(id)} aria-label={`${label} (${sub} theme)`} title={`${label} — ${sub} theme`}>
                 <Icon aria-hidden="true" />
                 {label}
               </button>
@@ -91,7 +135,7 @@ export default function SettingsPage() {
       </section>
 
       {/* ---------- guide ---------- */}
-      <section className="tile set-panel rise" style={{ '--i': 2 }} aria-labelledby="set-guide">
+      <section className="tile set-panel rise" style={{ '--i': 1 }} {...panel('guide')}>
         <div className="set-panel-head">
           <span className="eyebrow" id="set-guide">
             <i className="pip pip--ice" aria-hidden="true" />
@@ -144,7 +188,7 @@ export default function SettingsPage() {
       </section>
 
       {/* ---------- shortcuts ---------- */}
-      <section className="tile set-panel rise" style={{ '--i': 3 }} aria-labelledby="set-keys">
+      <section className="tile set-panel rise" style={{ '--i': 1 }} {...panel('keys')}>
         <div className="set-panel-head">
           <span className="eyebrow" id="set-keys">
             <i className="pip pip--volt" aria-hidden="true" />
@@ -168,7 +212,7 @@ export default function SettingsPage() {
       </section>
 
       {/* ---------- progress ---------- */}
-      <section className="tile set-panel rise" style={{ '--i': 4 }} aria-labelledby="set-data">
+      <section className="tile set-panel rise" style={{ '--i': 1 }} {...panel('data')}>
         <div className="set-panel-head">
           <span className="eyebrow" id="set-data">
             <i className="pip pip--acid" aria-hidden="true" />

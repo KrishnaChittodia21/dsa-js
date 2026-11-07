@@ -40,6 +40,8 @@ Order: \`dp[i][j]\` reads row i+1, so iterate i from n−1 down; j from i+1 up. 
 
   functionName: 'longestPalindromeSubseq',
   paramNames: ['s'],
+  paramTypes: ['string'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string} s
  * @return {number}

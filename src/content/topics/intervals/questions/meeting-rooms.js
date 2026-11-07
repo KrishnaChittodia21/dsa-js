@@ -34,6 +34,8 @@ Return \`true\` if **one person** could attend **all** the meetings, i.e. no two
 
   functionName: 'canAttendMeetings',
   paramNames: ['intervals'],
+  paramTypes: ['int[][]'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {number[][]} intervals
  * @return {boolean}

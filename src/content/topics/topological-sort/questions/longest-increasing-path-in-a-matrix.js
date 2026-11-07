@@ -35,6 +35,8 @@ export default {
 
   functionName: 'longestIncreasingPath',
   paramNames: ['matrix'],
+  paramTypes: ['int[][]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[][]} matrix
  * @return {number}

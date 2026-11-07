@@ -41,6 +41,8 @@ Return the number of valid teams. A soldier may belong to several teams.`,
 
   functionName: 'numTeams',
   paramNames: ['rating'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} rating
  * @return {number}

@@ -42,6 +42,8 @@ This is the general "longest subarray with at most K distinct" template with K =
 
   functionName: 'totalFruit',
   paramNames: ['fruits'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} fruits
  * @return {number}

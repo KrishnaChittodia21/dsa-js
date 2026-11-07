@@ -33,7 +33,9 @@
 
 /* ---------- hero ---------- */
 .pt-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 40px; align-items: end; padding: 18px 6px 0; }
-.pt-hero .display { font-size: clamp(52px, 6.6vw, 96px); margin: 20px 0 0; }
+/* title sized to its column, like .dash-hero-title: .chrome paints via background-clip:text, so glyphs past the h1 box vanish */
+.pt-hero > div:first-child { min-width: 0; container-type: inline-size; }
+.pt-hero .display { font-size: clamp(40px, min(6.6vw, calc(100cqi / (8 * 0.8))), 96px); margin: 20px 0 0; overflow-wrap: break-word; }
 .pt-dot { -webkit-text-fill-color: var(--plasma); color: var(--plasma); }
 .pt-hero .lead { margin-top: 20px; max-width: 62ch; }
 .pt-hero .lead b { color: var(--text); font-weight: 600; }
@@ -57,7 +59,6 @@
 .pt-sk { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; margin-top: 18px; padding-top: 44px; min-width: max-content; }
 .pt-sk-g { display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
 .pt-sk-cols { display: flex; gap: 6px; align-items: flex-end; }
-.pt-sk-s { font: 600 10.5px/1 var(--f-mono); letter-spacing: 0.1em; color: var(--muted); text-align: center; padding-top: 8px; border-top: 1px solid var(--line-2); }
 .pt-sk-col { position: relative; display: flex; flex-direction: column; align-items: center; width: 30px; color: inherit; transition: transform 0.3s var(--ease-spring); }
 .pt-sk-col:hover { transform: translateY(-5px); text-decoration: none; }
 .pt-sk-stack { display: flex; flex-direction: column-reverse; gap: 3px; padding-right: 7px; }
@@ -83,7 +84,7 @@
 .pt-note { margin: -6px 0 14px; font-size: 12px; color: var(--muted); }
 
 /* ---------- cards ---------- */
-.pt-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); align-items: start; }
+.pt-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); } /* default stretch: a row's cards share one height */
 .pt-page [id] { scroll-margin-top: calc(var(--status-h) + 16px); }
 .pt-blk { margin-top: 22px; min-width: 0; }
 .pt-blk h5 { font: 500 10.5px/1 var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; display: flex; align-items: center; gap: 10px; }
@@ -143,6 +144,11 @@
 .pt-tp { font: 500 10.5px/1.3 var(--f-mono); color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; display: block; }
 .pt-card h4 { font: 700 17px/1.2 var(--f-ui); letter-spacing: -0.015em; margin: 0; }
 .pt-card-sum { font-size: 13px; color: var(--text-2); line-height: 1.5; margin: 0; }
+.pt-card:not(.pt-card--open) .pt-card-sum { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+/* pin meter + problem list + toggle to the bottom so they line up across a row; the list reserves its 3 rows */
+.pt-card > .pt-mrow { margin-top: auto; }
+.pt-card > .pt-mrow ~ .pt-more { margin-top: 0; }
+.pt-card:not(.pt-card--open) > .pt-exs { min-height: 105px; }
 .pt-mrow { display: flex; align-items: center; gap: 10px; font: 600 11.5px/1 var(--f-mono); color: var(--text); }
 .pt-mrow .vmeter { flex: 1; }
 .pt-mrow .vmeter i { height: 10px; }

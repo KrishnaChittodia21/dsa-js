@@ -40,6 +40,8 @@ Optional pruning: if the board does not contain enough of some letter of the wor
 
   functionName: 'exist',
   paramNames: ['board', 'word'],
+  paramTypes: ['char[][]', 'string'],
+  returnType: 'boolean',
   starterCode: `/**
  * @param {character[][]} board
  * @param {string} word

@@ -36,6 +36,8 @@ Return the absent number.`,
 
   functionName: 'missingNumber',
   paramNames: ['nums'],
+  paramTypes: ['int[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {number[]} nums
  * @return {number}

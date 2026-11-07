@@ -39,6 +39,8 @@ Given the grid as an array of \`n\` strings, return the number of regions.
 
   functionName: 'regionsBySlashes',
   paramNames: ['grid'],
+  paramTypes: ['string[]'],
+  returnType: 'int',
   starterCode: `/**
  * @param {string[]} grid
  * @return {number}

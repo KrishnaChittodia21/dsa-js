@@ -1,0 +1,18 @@
+<!doctype html>
+<!-- M7: the in-browser counterpart of check-refs.mjs. With the dev server running (npm run dev), open
+     /scripts/check-refs-browser.html — options: ?lang=java|cpp  ?ids=two-sum,lru-cache. Dev only (not in the build). -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Check references in the browser</title>
+    <style>
+      body { font: 13px/1.5 ui-monospace, monospace; margin: 16px; background: #111; color: #ddd; }
+      .bad { color: #ff7b72; } .ok { color: #7ee787; } #sum { font-weight: bold; margin-bottom: 8px; }
+    </style>
+  </head>
+  <body>
+    <div id="sum">starting…</div>
+    <pre id="log"></pre>
+    <script type="module" src="./check-refs-browser.js"></script>
+  </body>
+</html>

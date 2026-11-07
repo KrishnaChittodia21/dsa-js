@@ -9,6 +9,7 @@ import manifest from 'virtual:content-manifest';
 
 const topicLoaders = import.meta.glob('./topics/*/topic.js', { import: 'default' });
 const questionLoaders = import.meta.glob('./topics/*/questions/*.js', { import: 'default' });
+const stepLoaders = import.meta.glob('./topics/*/steps.js', { import: 'default' });
 // Optional data files (may not exist while content is being authored).
 const companyModule = Object.values(import.meta.glob('./companies.js', { eager: true }))[0] || {};
 const toolkitModule = Object.values(import.meta.glob('./toolkit.js', { eager: true }))[0] || {};
@@ -54,7 +55,11 @@ export const topics = TOPIC_ORDER.map((id, index) => {
 /** Full topic content (lesson blocks included). Resolves to null if the topic has no content. */
 export async function loadTopicContent(topicId) {
   const load = topicLoaders[`./topics/${topicId}/topic.js`];
-  return load ? load() : null;
+  if (!load) return null;
+  const [topic, steps] = await Promise.all([load(), stepLoaders[`./topics/${topicId}/steps.js`]?.()]);
+  if (!steps || !topic?.lesson) return topic;
+  // step lessons (M2) live beside the lesson; each section with steps gets `section.steps`
+  return { ...topic, lesson: { ...topic.lesson, sections: topic.lesson.sections.map((s) => (steps[s.id] ? { ...s, steps: steps[s.id] } : s)) } };
 }
 
 /** Full question (statement, tests, solution…) merged with its metadata. */

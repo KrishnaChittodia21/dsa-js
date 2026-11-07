@@ -117,6 +117,7 @@ export default {
     while (!dq.isEmpty() && nums[dq.back()] <= nums[i]) dq.popBack(); // dominated
     dq.pushBack(i);
     if (dq.front() <= i - k) dq.popFront();                          // left the window
+    // expire AFTER pushing: window is [i−k+1, i], so i itself is in it; the DP template expires BEFORE reading (front < i − k) because i looks back at [i−k, i−1]
     if (i >= k - 1) res.push(nums[dq.front()]);                       // front = max
   }
   return res;
@@ -414,6 +415,7 @@ index:  0   1   2   3
         ↑back wrapped  ↑front
 \`\`\``,
           },
+          { type: 'visual', scenario: 'circular-buffer', caption: "The back slot is (head + count) % cap — watch it wrap to index 0, and count tell FULL from EMPTY when head = tail." },
           {
             type: 'callout',
             variant: 'warning',
@@ -430,12 +432,12 @@ index:  0   1   2   3
               '2',
               '1',
             ],
-            answer: 2,
+            answer: 3,
             explanation: 'The rear is at (head + count − 1) % cap = (3 + 4 − 1) % 5 = 6 % 5 = 1. The elements occupy indices 3, 4, 0, 1.',
             misconceptions: {
               0: '7 is head + count, which is past the end of the array. You must wrap with % 5, and the rear is at head + count − 1.',
               1: 'head + count − 1 = 6 — but the array only has indices 0..4. Apply % 5.',
-              3: '(3 + 4) % 5 = 2 is the NEXT free slot (where the next enqueue would write), not the current rear.',
+              2: '(3 + 4) % 5 = 2 is the NEXT free slot (where the next enqueue would write), not the current rear.',
             },
           },
         ],
@@ -554,6 +556,7 @@ for (let i = 0; i < n; i++) {
             title: 'Variable window with two deques (max − min ≤ limit)',
             code: `let left = 0, best = 0;
 for (let right = 0; right < n; right++) {
+  // strict < / > keeps equal values (windowMax pops them with <=); both are correct — a duplicate only delays expiry, which a limit check does not mind
   while (!maxD.isEmpty() && nums[maxD.back()] < nums[right]) maxD.popBack();
   maxD.pushBack(right);
   while (!minD.isEmpty() && nums[minD.back()] > nums[right]) minD.popBack();

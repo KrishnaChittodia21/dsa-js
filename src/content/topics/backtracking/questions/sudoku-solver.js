@@ -47,6 +47,8 @@ The given puzzle is guaranteed to have exactly one solution. The function return
 
   functionName: 'solveSudoku',
   paramNames: ['board'],
+  paramTypes: ['char[][]'],
+  returnType: 'void',
   starterCode: `/**
  * @param {character[][]} board
  * @return {void} Do not return anything, modify board in-place instead.
