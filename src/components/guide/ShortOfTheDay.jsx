@@ -1,6 +1,6 @@
 // M9: the dashboard's "Short of the day" — a daily suggestion; every Short is open (src/lib/shortsOrder.js).
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Clapperboard } from 'lucide-react';
 import { useProgress } from '../../state/ProgressContext.jsx';
 import { loadShorts, shortOfTheDay } from '../../lib/shorts.js';

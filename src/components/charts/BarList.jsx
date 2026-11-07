@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { useTooltip } from './core.js';
 import ChartTooltip from './ChartTooltip.jsx';
 

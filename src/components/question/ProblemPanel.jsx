@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import Markdown from '../ui/Markdown.jsx';
 import CodeBlock from '../ui/CodeBlock.jsx';
 import DryRunTable from '../lesson/DryRunTable.jsx';

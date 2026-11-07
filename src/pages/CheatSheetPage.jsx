@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import CodeBlock from '../components/ui/CodeBlock.jsx';
 import Icon from '../components/ui/Icon.jsx';
 import { questionById, stages } from '../content/index.js';

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { ArrowRight } from 'lucide-react';
 import Badge, { Plinth, TIER_COLOR, TierLadder, TierPill } from '../components/achievements/Badge.jsx';
 import { useProgress } from '../state/ProgressContext.jsx';

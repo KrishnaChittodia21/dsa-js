@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { ArrowRight } from 'lucide-react';
 
 /** "Next up" footer at the end of a tab's content: one obvious way forward. */

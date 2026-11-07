@@ -3,7 +3,7 @@
 // question that blocks Next until answered (answering dispatches SHORT_DONE) and an end card with the next Short.
 // Frames are drawn with the Visualizer's own panels. #/shorts/<id>?queue=a,b,c plays a list back to back.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { ArrowLeft, BookOpen, Pause, Play, RotateCcw } from 'lucide-react';
 import { useProgress } from '../state/ProgressContext.jsx';
 import { topicById } from '../content/index.js';

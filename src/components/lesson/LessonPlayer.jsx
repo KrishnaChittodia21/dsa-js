@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import Block, { CALLOUT_TITLES } from './Block.jsx';
 import Icon from '../ui/Icon.jsx';
 import SaveButton from '../ui/SaveButton.jsx';

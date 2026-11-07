@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 import Markdown from '../components/ui/Markdown.jsx';
 import CodeBlock from '../components/ui/CodeBlock.jsx';
 import Icon from '../components/ui/Icon.jsx';

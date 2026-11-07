@@ -4,7 +4,7 @@ import { Panel } from './panels.jsx';
 import { useFitZoom } from './useFitZoom.js';
 import { SCENARIO_COMPLEXITY, bigoClass } from './complexity.js';
 import Icon from '../components/ui/Icon.jsx';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { questionById } from '../content/index.js';
 
 const PREDICT_KEY = 'dsa-journey:predict-mode';

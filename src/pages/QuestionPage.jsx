@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router';
 import ProblemPanel from '../components/question/ProblemPanel.jsx';
 import CodeWorkspace from '../components/question/CodeWorkspace.jsx';
 import QuizPanel from '../components/question/QuizPanel.jsx';

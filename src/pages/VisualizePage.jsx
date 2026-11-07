@@ -1,5 +1,5 @@
 import { lazy, Suspense, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router';
 import Icon from '../components/ui/Icon.jsx';
 import SaveButton from '../components/ui/SaveButton.jsx';
 import CoachTip from '../components/guide/CoachTip.jsx';

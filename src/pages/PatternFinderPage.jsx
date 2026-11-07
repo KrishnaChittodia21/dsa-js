@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router';
 import Icon from '../components/ui/Icon.jsx';
 import SheetSection from '../components/SheetSection.jsx';
 import BigOChip from '../components/BigOChip.jsx';

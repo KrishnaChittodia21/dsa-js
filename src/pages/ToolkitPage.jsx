@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router';
 import Markdown from '../components/ui/Markdown.jsx';
 import CodeBlock from '../components/ui/CodeBlock.jsx';
 import Icon from '../components/ui/Icon.jsx';

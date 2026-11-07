@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router';
 import { ArrowRight, ListTree, Search } from 'lucide-react';
 import { openPalette } from '../lib/appEvents.js';
 

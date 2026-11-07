@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Check, Clock3, PartyPopper, Trash2 } from 'lucide-react';
 import { useProgress } from '../state/ProgressContext.jsx';
 import { topicStats } from '../state/selectors.js';

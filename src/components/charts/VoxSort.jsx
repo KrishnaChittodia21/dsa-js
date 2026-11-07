@@ -1,5 +1,5 @@
 import { useId, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 /**
  * mastery[] as voxel columns that bubble-sort themselves weakest → strongest (Dashboard hero).
