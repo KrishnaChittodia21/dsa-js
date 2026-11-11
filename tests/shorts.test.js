@@ -2,7 +2,7 @@
 // Every real Short file is also checked by scripts/validate-content.mjs (npm run check).
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { orderShorts, shortOfTheDay, shortLength } from '../src/lib/shortsOrder.js';
+import { orderShorts, shortOfTheDay, shortLength, posterFrame, cropArray } from '../src/lib/shortsOrder.js';
 import { validateShort } from '../src/content/shortSchema.js';
 import { progressReducer, initialProgress } from '../src/state/progressReducer.js';
 
@@ -46,4 +46,25 @@ test('a Short shows its length at the reading speed (last frame of a step 1.6×,
   // (2 + 0.6) × 2 s + (1 + 0.6) × 2 s + 15 s = 23.4 s
   assert.equal(shortLength({ steps: [watch, turn] }, 2000), '0:23');
   assert.equal(shortLength({ steps: [watch, turn] }, 6000), '0:40');
+});
+
+test('the thumbnail draws the busiest frame of the mechanism step (the 2nd watch step)', () => {
+  const plain = { panels: [{ kind: 'array', values: [1, 2] }] };
+  const busy = { panels: [{ kind: 'array', values: [1, 2], highlights: { 0: 'active' }, pointers: [{ index: 1, label: 'i' }] }] };
+  const turn = { kind: 'turn', panels: [{ kind: 'stack', values: [3] }] };
+  const short = { steps: [{ kind: 'watch', frames: [busy] }, { kind: 'watch', frames: [plain, busy, plain] }, turn] };
+  assert.equal(posterFrame(short), short.steps[1].frames[1]);
+  assert.deepEqual(posterFrame({ steps: [turn] }).panels, turn.panels); // no watch step: the question's panels
+});
+
+test('a long array is cropped to the cells around its marks, keeping the real index labels', () => {
+  const p = { kind: 'array', values: [...Array(16).keys()], highlights: { 10: 'active', 12: 'done' }, pointers: [{ index: 11, label: 'i' }], range: [9, 12] };
+  const c = cropArray(p, 9);
+  assert.deepEqual(c.values, [7, 8, 9, 10, 11, 12, 13, 14, 15]); // centred on 11, clamped to the end
+  assert.equal(c.indexBase, 7);
+  assert.deepEqual(c.highlights, { 3: 'active', 5: 'done' });
+  assert.deepEqual(c.pointers, [{ index: 4, label: 'i' }]);
+  assert.equal(c.range, undefined);
+  const small = { kind: 'array', values: [1, 2] };
+  assert.equal(cropArray(small), small); // short arrays (and other panels) come back unchanged
 });

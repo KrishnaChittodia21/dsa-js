@@ -50,26 +50,31 @@
 .sh-day { padding: 2px 8px; border-radius: 99px; border: 1px solid var(--sp-line-2); background: color-mix(in srgb, var(--sp-bg) 80%, transparent); color: var(--sp-ink); font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; }
 .sh-new { padding: 1px 7px; border-radius: 99px; background: var(--volt); color: var(--on-accent); font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; }
 
-/* ---------- thumbnails: a mini text poster (components/guide/ShortThumb.jsx) ---------- */
+/* ---------- thumbnails: one frame of the Short's own animation on a mini stage (components/guide/ShortThumb.jsx) ----------
+   The real panels, zoomed to fit, on a dotted stage lit from below in the topic's tone; a thin tone line marks the
+   bottom edge like a progress track. The play disc only shows on hover / focus. */
 .sh-thumb {
-  position: relative; display: flex; flex-direction: column; justify-content: center; gap: 2px;
-  aspect-ratio: 16 / 10; margin-bottom: 4px; padding: 40px 16px 14px; overflow: hidden; color: var(--sp-ink);
+  position: relative; display: block; aspect-ratio: 4 / 3; margin-bottom: 4px; overflow: hidden; color: var(--sp-ink);
   background:
-    radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--tone) 32%, transparent), transparent 60%),
+    radial-gradient(90% 70% at 50% 115%, color-mix(in srgb, var(--tone) 30%, transparent), transparent 70%),
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--sp-ink) 13%, transparent) 1px, transparent 1.5px) 0 0 / 14px 14px,
     var(--sp-bg);
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--tone) 70%, transparent);
 }
-.sh-thumb-kicker { padding-right: 40px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--tone); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sh-thumb-main { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 0; }
-.sh-thumb-big { flex: 0 1 auto; min-width: 0; font: 800 17px/1.15 var(--f-display); letter-spacing: -0.01em; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.sh-thumb-art { position: absolute; inset: 34px 8px 26px; /* below the #n / Today badges, above the labels */ display: grid; place-items: center; overflow: hidden; transition: opacity 0.18s var(--sp-ease); }
+.sh-thumb-panels { display: flex; align-items: center; width: max-content; pointer-events: none; }
+.sh-thumb-panels .viz-panel { margin: 0; }
+.sh-thumb-kicker, .sh-thumb-len, .sh-thumb-seen { position: absolute; padding: 2px 7px; border-radius: 6px; background: color-mix(in srgb, var(--sp-bg) 80%, transparent); font-size: 10.5px; }
+.sh-thumb-kicker { left: 10px; bottom: 8px; max-width: calc(100% - 76px); color: var(--tone); letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sh-thumb-len { right: 10px; bottom: 8px; }
+.sh-thumb-seen { right: 10px; top: 10px; display: inline-flex; align-items: center; gap: 4px; color: var(--sp-green); font: 600 10.5px/1.4 var(--f-ui); }
 .sh-thumb-play {
-  position: absolute; right: 12px; top: 12px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
-  background: color-mix(in srgb, var(--sp-ink) 12%, transparent); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-  transition: transform 0.18s var(--sp-ease), background 0.18s, color 0.18s;
+  position: absolute; left: 50%; top: 50%; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%;
+  background: var(--tone); color: var(--on-accent); box-shadow: 0 6px 24px color-mix(in srgb, var(--tone) 45%, transparent);
+  opacity: 0; transform: translate(-50%, -50%) scale(0.92); transition: opacity 0.18s var(--sp-ease), transform 0.18s var(--sp-ease);
 }
-.sh-card:hover .sh-thumb-play { transform: scale(1.08); background: var(--tone); color: var(--on-accent); }
-.sh-thumb-len, .sh-thumb-seen { position: absolute; bottom: 10px; padding: 2px 7px; border-radius: 6px; background: color-mix(in srgb, var(--sp-bg) 78%, transparent); font-size: 11px; }
-.sh-thumb-len { right: 10px; }
-.sh-thumb-seen { left: 10px; display: inline-flex; align-items: center; gap: 4px; color: var(--sp-green); font: 600 11px/1.4 var(--f-ui); }
+.sh-card:hover .sh-thumb-play, .sh-card:focus-visible .sh-thumb-play { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.sh-card:hover .sh-thumb-art, .sh-card:focus-visible .sh-thumb-art { opacity: 0.55; }
 
 /* ---------- the player (pages/ShortPage.jsx): a 9:16 story frame ---------- */
 .sp-player {
@@ -180,7 +185,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .sp-player *, .sp-player *::before, .sp-player *::after { animation-duration: 0.01ms !important; animation-delay: 0s !important; }
-  .sh-thumb-play, .sh-card { transition: none; }
+  .sh-thumb-play, .sh-thumb-art, .sh-card { transition: none; }
 }
 
 /* ---------- the Short page ---------- */
