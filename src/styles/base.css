@@ -1072,7 +1072,9 @@ kbd, .kbd {
 .ps--done .ps-bar i { background: var(--plasma-fill); }
 .ps--done .ps-meta { color: var(--plasma-t); }
 .ps--cur .ps-ico { color: #fff; background: linear-gradient(180deg, #a996ff, #5b3fe0); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 3px 3px 0 -1px #2a1d70, 0 0 0 4px rgba(123, 92, 255, 0.16), 0 8px 22px -6px rgba(123, 92, 255, 0.8); }
-:root[data-theme='light'] .ps--cur .ps-ico { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 3px 3px 0 -1px #3a2a9e, 0 0 0 4px rgba(106, 76, 245, 0.14); }
+/* the light .ps-ico rule (background: #fff) outranks the state fills above, so light restates them */
+:root[data-theme='light'] .ps--done .ps-ico { background: var(--plasma-fill); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 3px 3px 0 -1px #8a1f4a; }
+:root[data-theme='light'] .ps--cur .ps-ico { background: linear-gradient(180deg, #a996ff, #5b3fe0); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 3px 3px 0 -1px #3a2a9e, 0 0 0 4px rgba(106, 76, 245, 0.14); }
 .ps--cur .ps-bar i { background: linear-gradient(90deg, #5b3fe0, #a996ff); box-shadow: 0 0 8px rgba(123, 92, 255, 0.6); }
 .ps--cur .ps-meta { color: var(--uv-t); }
 .ps--locked { opacity: 0.55; }
