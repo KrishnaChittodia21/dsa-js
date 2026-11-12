@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams, useSearchParams } from 'react-router';
 import LessonPlayer from '../components/lesson/LessonPlayer.jsx';
+import Notebook from '../components/notebook/Notebook.jsx';
 import Icon from '../components/ui/Icon.jsx';
 import Markdown from '../components/ui/Markdown.jsx';
 import CodeBlock from '../components/ui/CodeBlock.jsx';
@@ -119,7 +120,13 @@ function LearnTab({ topic, onFinish, initialSection, onSectionApplied }) {
   const { data, loading, error } = useTopicContent(topic.id);
   if (loading) return <div className="tile tp-loading loading-shimmer">Loading lesson…</div>;
   if (error) return <div className="callout callout-danger small">Could not load this lesson: {String(error.message || error)}</div>;
-  return <LessonPlayer topic={{ ...topic, lesson: data?.lesson || topic.lesson }} onFinish={onFinish} initialSection={initialSection} onSectionApplied={onSectionApplied} />;
+  const full = { ...topic, lesson: data?.lesson || topic.lesson };
+  return (
+    <>
+      <LessonPlayer topic={full} onFinish={onFinish} initialSection={initialSection} onSectionApplied={onSectionApplied} />
+      <Notebook topic={full} />
+    </>
+  );
 }
 
 /** Topic progress rows (lesson, checks, Easy/Medium/Hard) — mono meters. */
@@ -572,7 +579,7 @@ function ReviewTab({ topic: meta, progress, onRelearn }) {
 }
 
 const TIPS = {
-  learn: ['The lesson waits for you.', 'Steps can end with a checkpoint question; the lesson continues once you answer, and a wrong answer explains the misconception. Your place is saved.'],
+  learn: ['The lesson waits for you.', 'Steps can end with a checkpoint question; the lesson continues once you answer, and a wrong answer explains the misconception. Your place is saved. Select any words to highlight them or add a note to your Notebook.'],
   visualize: ['Step through it.', 'Focus an animation and use ← → to step; it pauses to ask what happens next. “Try your own input” tests edge cases.'],
   company: ['Every attribution has a source.', 'Check the evidence level: verified, community-reported or commonly associated.'],
   cheatsheet: ['One card per topic.', 'Skim it before interviews; the global Cheat Sheet prints every topic on one page.'],

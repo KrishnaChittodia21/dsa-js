@@ -29,6 +29,10 @@ const DEFAULT = {
   studyPlan: null,
   /** desktop: the floating dock folded into a small "Menu" pill */
   dockMinimized: false,
+  /** the Notebook panel on a lesson (components/notebook) is open */
+  notebookOpen: false,
+  /** the floating Notebook button folded into a small tab at the screen edge */
+  notebookFabHidden: false,
 };
 
 let cache = null;

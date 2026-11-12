@@ -27,6 +27,7 @@ import './styles/achievements.css';
 import './styles/revision.css';
 import './styles/companies.css';
 import './styles/shorts.css';
+import './styles/notebook.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
