@@ -192,7 +192,7 @@ export const bidirectionalBfs = {
     snap(`Find the fewest one-letter changes from "${s}" to "${t}". Frontier A = {${s}}, frontier B = {${t}}, one shared seen set.`);
     if (s === t) {
       snap(`begin === end, so the answer is 0 changes before any search. O(1).`);
-      frames.at(-1).result = 1; // ladder length in words, as LeetCode counts it
+      frames.at(-1).result = 1; // ladder length in words, as the problem counts it
       return frames;
     }
     let asks = 0;
@@ -239,11 +239,11 @@ export const bidirectionalBfs = {
         break;
       }
     }
-    const pathLen = answer > 0 ? `${answer} change(s), i.e. a ladder of ${answer + 1} words (LeetCode's word ladder counts words, so it returns ${answer + 1})` : '0: no ladder exists';
+    const pathLen = answer > 0 ? `${answer} change(s), i.e. a ladder of ${answer + 1} words (Word Ladder counts words, so it returns ${answer + 1})` : '0: no ladder exists';
     const fq = answer > 0 ? pick('The searches met. How many words are in the whole ladder?', answer + 1, [answer, answer + 2, answer - 1 > 0 ? answer - 1 : answer + 3], 2) : undefined;
     snap(`Result: ${pathLen}. ${answer > 0 ? 'Each side searched only about half the depth, which is where the speed-up comes from.' : 'One frontier ran empty first, so the search stopped early.'}`, { met: meet || [], steps: answer });
     attach(frames, fq);
-    frames.at(-1).result = answer > 0 ? answer + 1 : 0; // LeetCode: words in the ladder, 0 if none
+    frames.at(-1).result = answer > 0 ? answer + 1 : 0; // the problem returns words in the ladder, 0 if none
     return frames;
   },
 };
@@ -295,7 +295,7 @@ export const stateSpaceBfs = {
     };
     if (n === 0) {
       snap('No nodes: the queue never gets a state.');
-      snap('The template returns -1 here (the loop never runs). LeetCode guarantees n ≥ 1.');
+      snap('The template returns -1 here (the loop never runs). The problem guarantees n ≥ 1.');
       frames.at(-1).result = -1;
       return frames;
     }

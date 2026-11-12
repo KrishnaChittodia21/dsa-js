@@ -665,7 +665,7 @@ head
 
 **What the toolkit gives you.**
 
-* \`ListNode(val, next)\`: the exact node shape LeetCode uses (\`val\`, \`next\`). Practice problems hand you a \`head\` made of these.
+* \`ListNode(val, next)\`: the standard node shape used in interview problems (\`val\`, \`next\`). Practice problems hand you a \`head\` made of these.
 * \`arrayToList([1,2,3])\` builds a chain and returns its head; \`listToArray(head)\` turns it back into an array (it stops after 100,000 nodes so an accidental cycle cannot freeze the page). Great for testing.
 * \`LinkedList\`: a small class with \`head\`, \`tail\` and \`length\`. Keeping a **tail pointer** makes \`append\` O(1) instead of walking to the end. It also has \`prepend\`, \`removeFirst\`, \`find\`, \`reverse\` and \`toArray\`.
 
@@ -706,7 +706,7 @@ Each node is visited once: O(n) time, O(1) extra space.
       { name: 'arrayToList(arr) / listToArray(head)', description: 'Convert between arrays and raw `ListNode` chains.', time: 'O(n)' },
     ],
     space: 'O(n)',
-    usage: `// Raw ListNode chains, the way LeetCode hands them to you
+    usage: `// Raw ListNode chains, the way linked-list problems hand them to you
 function reverseList(head) {
   let prev = null, cur = head;
   while (cur) {
@@ -882,7 +882,7 @@ cache.list.toArray(); // ['three', 'one']`,
     file: 'BinaryTree.js',
     exports: ['TreeNode', 'arrayToTree', 'treeToArray', 'findNode', 'traversals'],
     category: 'Trees',
-    summary: 'Nodes with at most two children (left and right), plus helpers to build trees from LeetCode arrays and walk them in pre/in/post/level order.',
+    summary: 'Nodes with at most two children (left and right), plus helpers to build trees from level-order arrays and walk them in pre/in/post/level order.',
     explanation: `A **binary tree** is a family tree where every person has **at most two children**, called \`left\` and \`right\`. The top node is the **root**; nodes with no children are **leaves**.
 
 \`\`\`
@@ -899,9 +899,9 @@ A few plain definitions you will see everywhere:
 * **Subtree**: a node together with everything below it. Every subtree is itself a binary tree, which is why trees and **recursion** fit so well.
 * **Balanced**: the heights of the left and right subtrees differ by at most 1 everywhere, which keeps the height about log₂ n. A tree can also degenerate into a straight line of height n − 1.
 
-**TreeNode** is the exact LeetCode shape: \`{ val, left, right }\`, with \`null\` for a missing child.
+**TreeNode** is the standard shape used in tree problems: \`{ val, left, right }\`, with \`null\` for a missing child.
 
-**The LeetCode array format.** Problems describe trees as a *level-order* array with \`null\` for missing children: the tree above is \`[1, 2, 3, null, 4, 5, 6]\`. \`arrayToTree(arr)\` builds it using a queue: take the next parent from the queue, give it the next two array entries as children (skipping \`null\`s), enqueue the new children, repeat. Children of \`null\` are *not* listed, which is why the arrays stay short. \`treeToArray(root)\` does the reverse and trims trailing \`null\`s. Both are O(n).
+**The level-order array format.** Problems describe trees as a *level-order* array with \`null\` for missing children: the tree above is \`[1, 2, 3, null, 4, 5, 6]\`. \`arrayToTree(arr)\` builds it using a queue: take the next parent from the queue, give it the next two array entries as children (skipping \`null\`s), enqueue the new children, repeat. Children of \`null\` are *not* listed, which is why the arrays stay short. \`treeToArray(root)\` does the reverse and trims trailing \`null\`s. Both are O(n).
 
 **Traversals** (\`traversals\` object). Visiting every node once costs **O(n)** time; the difference is *when* you record a node:
 
@@ -934,7 +934,7 @@ levelOrder (BFS by level):      [[1], [2, 3], [4, 5, 6]]
     ],
     operations: [
       { name: 'new TreeNode(val, left?, right?)', description: 'Create a node.', time: 'O(1)' },
-      { name: 'arrayToTree(arr)', description: 'Build a tree from LeetCode level-order format.', time: 'O(n)' },
+      { name: 'arrayToTree(arr)', description: 'Build a tree from a level-order array.', time: 'O(n)' },
       { name: 'treeToArray(root)', description: 'Inverse of arrayToTree (trailing nulls removed).', time: 'O(n)' },
       { name: 'findNode(root, val)', description: 'First node with that value (DFS), or `null`.', time: 'O(n)' },
       { name: 'traversals.preorder / inorder / postorder(root)', description: 'Values in DFS order (recursive, O(h) stack).', time: 'O(n)' },
@@ -978,7 +978,7 @@ findNode(root, 20).left.val; // 7 (after the inversion)`,
     pitfalls: [
       'Recursive traversals on a very deep, skewed tree (~10^4+ levels) can hit "Maximum call stack size exceeded" — switch to an explicit stack.',
       'Forgetting the `null` base case (`if (!node) return …`) is the #1 tree bug.',
-      '`arrayToTree` expects LeetCode format: children of `null` are **not** listed. `[1, null, 2, 3]` means 3 is the left child of 2.',
+      '`arrayToTree` expects the level-order format: children of `null` are **not** listed. `[1, null, 2, 3]` means 3 is the left child of 2.',
       'Values of 0 are falsy: write `if (node === null)` or `if (!node)` on the **node**, never `if (!node.val)`.',
       'A plain binary tree has no ordering — do not binary-search it; that only works for a BST.',
       'Passing a shared array down recursive calls (paths) needs backtracking: push before recursing, pop after, and copy (`[...path]`) when saving an answer.',
@@ -1044,7 +1044,7 @@ The toolkit \`BST\` is a plain (unbalanced) BST: inserting already-sorted data m
 * **LCA in a BST**: walk from the root; if both targets are smaller go left, if both are larger go right, otherwise the current node is the answer. O(h).
 * **Sorted array → balanced BST**: take the middle element as the root, recurse on both halves.
 
-**Using the class vs raw nodes.** LeetCode BST problems hand you a \`TreeNode\` root, so you write the walks yourself. The \`BST\` class is for experimenting, or when you need a quick ordered set of numbers for small inputs. Its \`root\` is an ordinary \`TreeNode\`, so all the \`BinaryTree.js\` helpers (\`treeToArray\`, \`traversals\`) work on it.`,
+**Using the class vs raw nodes.** BST problems hand you a \`TreeNode\` root, so you write the walks yourself. The \`BST\` class is for experimenting, or when you need a quick ordered set of numbers for small inputs. Its \`root\` is an ordinary \`TreeNode\`, so all the \`BinaryTree.js\` helpers (\`treeToArray\`, \`traversals\`) work on it.`,
     buildSteps: [
       'Reuse `TreeNode` from BinaryTree.js. The class keeps `root = null` and `size = 0`; the constructor inserts any initial values.',
       '`insert(val)`: if empty, the new node is the root. Otherwise walk: stop on an equal value (ignore duplicates); choose `side = val < cur.val ? "left" : "right"`; if `cur[side]` is empty attach there, else move down.',

@@ -6,7 +6,7 @@ import Markdown from '../components/ui/Markdown.jsx';
 import CodeBlock from '../components/ui/CodeBlock.jsx';
 import EvidenceBadge from '../components/EvidenceBadge.jsx';
 import { BigO, JsToolsTable } from '../components/lesson/Block.jsx';
-import { Callout, EmptyState } from '../components/ui/primitives.jsx';
+import { Callout, EmptyState, KindTag } from '../components/ui/primitives.jsx';
 import StudyPath from '../components/guide/StudyPath.jsx';
 import CoachTip from '../components/guide/CoachTip.jsx';
 import NextUp from '../components/guide/NextUp.jsx';
@@ -155,14 +155,16 @@ export function QuestionList({ questions, progress, topicId, showTopic = false, 
         const st = progress.questions[q.id];
         const status = st?.status;
         const companies = [...new Set(companiesForQuestion(q.id).map((c) => c.company))];
-        const lc = q.source?.number ? `${q.source.platform === 'LeetCode' ? 'LC' : q.source.platform || ''} ${q.source.number}` : '';
-        const sub = [status === 'solved' ? 'solved' : status === 'attempted' ? `attempted${st.failedSubmissions ? ` · ${st.failedSubmissions} failed` : ''}` : 'to do', showTopic && topicById[q.topicId]?.title, q.kind === 'design' && 'design', q.kind === 'quiz' && 'quiz'].filter(Boolean).join(' · ');
+        const sub = [status === 'solved' ? 'solved' : status === 'attempted' ? `attempted${st.failedSubmissions ? ` · ${st.failedSubmissions} failed` : ''}` : 'to do', showTopic && topicById[q.topicId]?.title].filter(Boolean).join(' · ');
         return (
           <li key={q.id} className={`qlist-row ${q.id === nextId ? 'qlist-row--next' : ''}`}>
             <span className="qlist-n">{pad2(i + 1)}</span>
             <i className={`qlist-d qlist-d--${status === 'solved' ? 's' : status === 'attempted' ? 'a' : 't'}`} aria-hidden="true" />
             <span className="qlist-t">
-              <Link to={`/topic/${topicId || q.topicId}/q/${q.id}`}>{q.title}</Link>
+              <span className="qlist-tl">
+                <Link to={`/topic/${topicId || q.topicId}/q/${q.id}`}>{q.title}</Link>
+                <KindTag kind={q.kind} />
+              </span>
               <small className={status === 'attempted' ? 'qlist-att' : ''}>{sub}</small>
             </span>
             <span className="qlist-pt">
@@ -184,7 +186,6 @@ export function QuestionList({ questions, progress, topicId, showTopic = false, 
               )}
             </span>
             <DiffChip difficulty={q.difficulty} />
-            <span className="qlist-lc">{lc}</span>
           </li>
         );
       })}
@@ -333,7 +334,6 @@ export function CompanyEntryTable({ entries, showCompany = false }) {
             <th>Pattern</th>
             <th>Difficulty</th>
             <th>Evidence</th>
-            <th>Source</th>
           </tr>
         </thead>
         <tbody>
@@ -348,10 +348,6 @@ export function CompanyEntryTable({ entries, showCompany = false }) {
                 <td className="cet-q">
                   {e.question ? (
                     <Link to={`/topic/${e.question.topicId}/q/${e.question.id}`}>{e.title}</Link>
-                  ) : e.url ? (
-                    <a href={e.url} target="_blank" rel="noreferrer">
-                      {e.title} <Icon name="external" size={11} />
-                    </a>
                   ) : (
                     e.title
                   )}
@@ -363,17 +359,6 @@ export function CompanyEntryTable({ entries, showCompany = false }) {
                 </td>
                 <td>
                   <EvidenceBadge evidence={e.evidence} />
-                </td>
-                <td className="cet-src">
-                  {e.sourceList.map((s) =>
-                    s.url ? (
-                      <a key={s.key} href={s.url} target="_blank" rel="noreferrer" title={s.description}>
-                        {s.label} <Icon name="external" size={10} />
-                      </a>
-                    ) : (
-                      <span key={s.key}>{s.label}</span>
-                    ),
-                  )}
                 </td>
               </tr>
             );

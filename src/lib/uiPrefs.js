@@ -27,6 +27,8 @@ const DEFAULT = {
   shortSpeed: 'normal',
   /** Plan your journey (src/lib/pace.js): { dailyMinutes, daysPerWeek, goal, startedAt, baselineAt, baselineCovered, catchUp?, warningsOff? } or null */
   studyPlan: null,
+  /** desktop: the floating dock folded into a small "Menu" pill */
+  dockMinimized: false,
 };
 
 let cache = null;

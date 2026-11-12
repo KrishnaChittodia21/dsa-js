@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { KindTag } from '../components/ui/primitives.jsx';
 import { Link } from 'react-router';
 import Icon from '../components/ui/Icon.jsx';
 import { monogram } from '../components/question/ProblemPanel.jsx';
@@ -56,7 +57,7 @@ export default function QuestionsPage() {
     if (status === 'todo' && st !== 'todo') return false;
     if (status === 'attempted' && st !== 'attempted') return false;
     if (company !== 'all' && !byQuestion[x.id]?.has(company)) return false;
-    if (q && !`${x.title} ${(x.tags || []).join(' ')} ${patternById[x.pattern]?.name || ''} ${x.source?.number || ''}`.toLowerCase().includes(q.toLowerCase())) return false;
+    if (q && !`${x.title} ${(x.tags || []).join(' ')} ${patternById[x.pattern]?.name || ''}`.toLowerCase().includes(q.toLowerCase())) return false;
     return true;
   });
   const solvedShown = rows.filter((x) => stOf(x) === 'solved').length;
@@ -161,7 +162,7 @@ export default function QuestionsPage() {
               Tries
             </span>
           </div>
-          {rows.map((x) => {
+          {rows.map((x, i) => {
             const qs = progress.questions[x.id];
             const st = qs?.status || 'todo';
             const cos = [...(byQuestion[x.id] || [])];
@@ -171,14 +172,13 @@ export default function QuestionsPage() {
               <Link key={x.id} to={`/topic/${x.topicId}/q/${x.id}`} className="ql-r" role="row">
                 <span className={`ql-st ql-st--${st}`} role="cell" title={st === 'todo' ? 'Not started' : st} aria-label={st === 'todo' ? 'Not started' : st} />
                 <span className="ql-r-no" role="cell">
-                  {x.source?.number || '—'}
+                  {i + 1}
                 </span>
                 <span className="ql-r-ti" role="cell">
                   <b>{x.title}</b>
-                  {x.source?.premium && <span className="tag ql-prem">premium</span>}
+                  <KindTag kind={x.kind} />
                 </span>
                 <span className="ql-r-sub" aria-hidden="true">
-                  {x.source?.number ? `#${x.source.number} · ` : ''}
                   {pname || topicById[x.topicId]?.title}
                 </span>
                 <span className="ql-r-pt ql-hide-md" role="cell">

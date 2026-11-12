@@ -3,8 +3,8 @@ export default {
   summary: 'A binary tree is a set of nodes where each node points to at most two children. Almost every tree problem is solved by visiting nodes depth-first (recursion / stack) or level by level (queue), and deciding what information flows down and what flows back up.',
 
   jsTools: [
-    { api: 'TreeNode (toolkit)', use: '`new TreeNode(val, left, right)` — same shape as LeetCode', complexity: 'O(1) to create' },
-    { api: 'arrayToTree / treeToArray (toolkit)', use: 'Convert LeetCode level-order arrays like [3,9,20,null,null,15,7] to nodes and back', complexity: 'O(n)' },
+    { api: 'TreeNode (toolkit)', use: '`new TreeNode(val, left, right)` — the standard shape used in tree problems', complexity: 'O(1) to create' },
+    { api: 'arrayToTree / treeToArray (toolkit)', use: 'Convert level-order arrays like [3,9,20,null,null,15,7] to nodes and back', complexity: 'O(n)' },
     { api: 'Array as a stack (push / pop)', use: 'Iterative DFS traversals', complexity: 'O(1) amortized' },
     { api: 'Array + head index (queue)', use: 'BFS without the O(n) cost of shift()', complexity: 'O(1) per dequeue' },
     { api: 'Map', use: 'value → index in inorder (tree construction), column → nodes (vertical order)', complexity: 'O(1) average' },
@@ -256,7 +256,7 @@ function deserialize(data) {
   }
   return build();
 }`,
-      variations: [{ name: 'Level-order encoding', description: 'LeetCode format: BFS writing "null" for missing children, trailing nulls trimmed.' }, { name: 'Coordinates', description: 'Vertical order: DFS/BFS with (row, col), children at (row+1, col∓1); sort by (col, row, val).' }],
+      variations: [{ name: 'Level-order encoding', description: 'The usual problem format: BFS writing "null" for missing children, trailing nulls trimmed.' }, { name: 'Coordinates', description: 'Vertical order: DFS/BFS with (row, col), children at (row+1, col∓1); sort by (col, row, val).' }],
       mistakes: ['Omitting null markers — the shape cannot be recovered', 'Using `parseInt` on multi-character tokens without a separator', 'Keeping the tree in a variable instead of truly encoding it'],
       evolution: { easy: 'Encode a tree as a string (tree to string with parentheses).', medium: 'Find duplicate subtrees via serialization.', hard: 'Serialize/deserialize, vertical order traversal.' },
     },
@@ -290,7 +290,7 @@ class TreeNode {
 }
 \`\`\`
 
-The toolkit already provides \`TreeNode\`, plus \`arrayToTree([3,9,20,null,null,15,7])\` which builds the tree above from LeetCode's **level-order array** (read the tree row by row, left to right, writing \`null\` for a missing child).`,
+The toolkit already provides \`TreeNode\`, plus \`arrayToTree([3,9,20,null,null,15,7])\` which builds the tree above from a **level-order array** (read the tree row by row, left to right, writing \`null\` for a missing child).`,
           },
           {
             type: 'callout',
@@ -302,7 +302,7 @@ The toolkit already provides \`TreeNode\`, plus \`arrayToTree([3,9,20,null,null,
 - **Depth of a node** — number of edges from the **root down to it** (root has depth 0).
 - **Height of a node** — number of edges on the longest path from it **down to a leaf** (a leaf has height 0). The height of the tree = height of the root.
 - **Level** — all nodes with the same depth.
-- LeetCode's "maximum depth" counts **nodes** on the longest root-to-leaf path (so a single node has max depth 1). Always check which convention a problem uses.`,
+- In most problems, "maximum depth" counts **nodes** on the longest root-to-leaf path (so a single node has max depth 1). Always check which convention a problem uses.`,
           },
           {
             type: 'callout',
@@ -988,7 +988,7 @@ Checking \`!node.left && !node.right\` on a real node guarantees the path ends a
             type: 'jsTools',
             items: [
               { api: 'new TreeNode(val, left, right)', use: 'Create nodes (toolkit)', complexity: 'O(1)' },
-              { api: 'arrayToTree(arr) / treeToArray(root)', use: 'LeetCode level-order arrays ⇄ nodes (toolkit)', complexity: 'O(n)' },
+              { api: 'arrayToTree(arr) / treeToArray(root)', use: 'Level-order arrays ⇄ nodes (toolkit)', complexity: 'O(n)' },
               { api: 'findNode(root, val)', use: 'Get a node reference by value, e.g. for LCA tests (toolkit)', complexity: 'O(n)' },
               { api: 'traversals.preorder / inorder / postorder / levelOrder', use: 'Reference traversals for checking your own (toolkit)', complexity: 'O(n)' },
               { api: 'stack.push / stack.pop', use: 'Iterative DFS', complexity: 'O(1) amortized' },

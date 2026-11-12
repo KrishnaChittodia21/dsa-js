@@ -40,7 +40,7 @@ The tests call \`serialize\` on one \`Codec\` instance and \`deserialize\` on a 
 
 Because a tree with n nodes has n + 1 null children, the string has 2n + 1 tokens.
 
-**Level-order encoding** (like LeetCode's own format) works too: BFS writing "#" for null children, and deserialize with a queue attaching children two tokens at a time.
+**Level-order encoding** (the usual format for tree inputs) works too: BFS writing "#" for null children, and deserialize with a queue attaching children two tokens at a time.
 
 **Deep trees:** with 10⁴ nodes in a chain, recursion depth reaches 10⁴ — close to the JS limit. The BFS version (used as the reference solution) is fully iterative.`,
 

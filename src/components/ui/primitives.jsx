@@ -1,5 +1,22 @@
 import Icon from './Icon.jsx';
 
+// what answering looks like: write code (most), pick an answer (quiz), or build a class (design)
+const KINDS = {
+  quiz: { label: 'MCQ', icon: 'list', title: 'Multiple choice: pick the answer, no code' },
+  design: { label: 'Design', icon: 'box', title: 'Coding: design a class' },
+  code: { label: 'Code', icon: 'code', title: 'Coding: write a function' },
+};
+/** Code / MCQ / Design flag for question lists */
+export function KindTag({ kind }) {
+  const k = KINDS[kind] || KINDS.code;
+  return (
+    <span className={`tag kind-tag kind-tag--${KINDS[kind] ? kind : 'code'}`} title={k.title}>
+      <Icon name={k.icon} size={11} />
+      {k.label}
+    </span>
+  );
+}
+
 export function DifficultyBadge({ difficulty }) {
   if (!difficulty) return null;
   return <span className={`badge badge-${difficulty.toLowerCase()}`}>{difficulty}</span>;

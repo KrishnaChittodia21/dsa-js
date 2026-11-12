@@ -3,7 +3,7 @@ export default {
   summary: 'A chain of nodes where each node points to the next one. Problems are about rewiring those pointers safely: dummy heads, in-place reversal, fast & slow pointers, merging/splitting, and caches built from a hash map plus a doubly linked list.',
 
   jsTools: [
-    { api: 'ListNode (toolkit)', use: '`new ListNode(val, next)` — the same node shape LeetCode uses', complexity: 'O(1) to create' },
+    { api: 'ListNode (toolkit)', use: '`new ListNode(val, next)` — the standard node shape used in linked-list problems', complexity: 'O(1) to create' },
     { api: 'arrayToList / listToArray (toolkit)', use: 'Build a list from an array and read it back while debugging', complexity: 'O(n)' },
     { api: 'Map', use: 'Key → node lookup for LRU/LFU caches; keeps insertion order', complexity: 'get / set / delete: O(1) average' },
     { api: 'map.keys().next().value', use: 'Oldest key of a Map (insertion order) — the one-line LRU eviction trick', complexity: 'O(1)' },
@@ -248,7 +248,7 @@ head
 
 Unlike an array, the boxes are **not** stored next to each other in memory. The only way to reach box 3 is to start at the head and follow the arrows: 1 → 2 → 3.
 
-In JavaScript (and on LeetCode) a box is a \`ListNode\`:
+In JavaScript (and in interview problems) a box is a \`ListNode\`:
 
 \`\`\`js
 class ListNode {
@@ -950,7 +950,7 @@ function merge(a, b) {
 4. **Forgetting to cut** — after splitting, set \`mid.next = null\`; otherwise halves still overlap and recursion never ends.
 5. **Accidental cycles** — reusing nodes without setting the new tail's \`next = null\` (e.g. reorder list, odd-even list).
 6. **Comparing values instead of nodes** in cycle detection or intersection problems.
-7. **Off-by-one in position problems** — LeetCode positions are usually **1-indexed**; start \`prev\` at a dummy and step \`left − 1\` times.`,
+7. **Off-by-one in position problems** — problem positions are usually **1-indexed**; start \`prev\` at a dummy and step \`left − 1\` times.`,
           },
           {
             type: 'reflect',
@@ -997,7 +997,7 @@ function merge(a, b) {
           {
             type: 'jsTools',
             items: [
-              { api: 'new ListNode(val, next)', use: 'Create nodes (toolkit global, LeetCode shape)', complexity: 'O(1)' },
+              { api: 'new ListNode(val, next)', use: 'Create nodes (toolkit global, standard shape)', complexity: 'O(1)' },
               { api: 'arrayToList(arr) / listToArray(head)', use: 'Build and inspect lists while testing', complexity: 'O(n)' },
               { api: 'a === b', use: 'Node identity — the right comparison for cycles/intersections', complexity: 'O(1)' },
               { api: 'new Map()', use: 'key → node for caches; iteration order = insertion order', complexity: 'O(1) average' },

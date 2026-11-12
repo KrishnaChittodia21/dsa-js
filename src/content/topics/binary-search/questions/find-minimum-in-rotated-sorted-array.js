@@ -84,7 +84,7 @@ function findMin(nums) {
       ['4', '4', '—', '—', 'return nums[4] = 0'],
     ],
   },
-  complexity: { time: 'O(log n)', space: 'O(1)', explanation: 'Boundary search; duplicates would degrade it to O(n) (LeetCode 154).' },
+  complexity: { time: 'O(log n)', space: 'O(1)', explanation: 'Boundary search; duplicates would degrade it to O(n).' },
   alternative: {
     title: 'Scan for the drop',
     md: 'Return the first `nums[i]` with `nums[i] < nums[i − 1]`, or `nums[0]` if none. Simple but O(n).',

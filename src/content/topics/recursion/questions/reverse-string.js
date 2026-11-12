@@ -32,7 +32,7 @@ For this lesson, solve it **recursively**.`,
 
 Pass **indices**, not slices — a slice copies O(n) characters per call and breaks the in-place requirement.
 
-**JavaScript warning:** the recursion depth is n / 2. For n = 10^5 that is 50,000 frames, above the typical ~10k JS stack limit, so in production (and for LeetCode's maximum) the two-pointer loop in the alternative is the safe choice. This question is here to practise the recursive shape.`,
+**JavaScript warning:** the recursion depth is n / 2. For n = 10^5 that is 50,000 frames, above the typical ~10k JS stack limit, so in production (and at the maximum input size) the two-pointer loop in the alternative is the safe choice. This question is here to practise the recursive shape.`,
 
   functionName: 'reverseString',
   paramNames: ['s'],

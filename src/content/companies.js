@@ -9,7 +9,7 @@
 export const EVIDENCE_LEVELS = {
   verified: { label: 'Verified', description: 'Published by the company itself (official interview-prep material, engineering blog).' },
   community: { label: 'Community-reported', description: 'Reported by candidates in a specific, linkable interview-experience post.' },
-  associated: { label: 'Commonly associated', description: 'Listed for this company in community-compiled lists (e.g. derived from LeetCode company tags). Frequency and recency not guaranteed.' },
+  associated: { label: 'Commonly associated', description: 'Listed for this company in community-compiled lists. Frequency and recency not guaranteed.' },
 };
 
 export const COMPANIES = [
@@ -3776,7 +3776,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "google-tdg-volume-of-lakes"
     ],
-    "note": "Published by Google as \"volume of lakes\": total water held between bars of given heights, i.e. the same problem as LeetCode 42."
+    "note": "Published by Google as \"volume of lakes\": total water held between bars of given heights."
   },
   {
     "company": "google",
@@ -3785,7 +3785,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "google-tdg-compression-and-decompression"
     ],
-    "note": "Published by Google as \"compression and decompression\": expand strings of the form number[string], e.g. 2[3[a]b], i.e. the LeetCode 394 problem."
+    "note": "Published by Google as \"compression and decompression\": expand strings of the form number[string], e.g. 2[3[a]b]."
   },
   {
     "company": "google",
@@ -3794,7 +3794,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "google-tdg-find-longest-word"
     ],
-    "note": "Google's own statement; closely related to LeetCode 524 \"Longest Word in Dictionary through Deleting\". Difficulty is our estimate.",
+    "note": "Google's own statement. Difficulty is our estimate.",
     "title": "Find Longest Word (subsequence of S)",
     "difficulty": "Medium",
     "url": "https://web.archive.org/web/20221209223021/https://techdevguide.withgoogle.com/resources/former-interview-question-find-longest-word/",
@@ -3807,7 +3807,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "google-tdg-word-squares"
     ],
-    "note": "Google's own statement (check a word square, then find all word squares); related to LeetCode 425 \"Word Squares\". Difficulty is our estimate.",
+    "note": "Google's own statement (check a word square, then find all word squares). Difficulty is our estimate.",
     "title": "Word Squares",
     "difficulty": "Hard",
     "url": "https://web.archive.org/web/20221209223021/https://techdevguide.withgoogle.com/resources/former-interview-question-word-squares/",
@@ -3820,7 +3820,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "google-tdg-minesweeper"
     ],
-    "note": "Google's own statement (implement Minesweeper, including revealing empty regions); related to LeetCode 529 \"Minesweeper\". Difficulty is our estimate.",
+    "note": "Google's own statement (implement Minesweeper, including revealing empty regions). Difficulty is our estimate.",
     "title": "Implement Minesweeper",
     "difficulty": "Medium",
     "url": "https://web.archive.org/web/20230324001952/https://techdevguide.withgoogle.com/resources/former-interview-question-minesweeper/",
@@ -3833,7 +3833,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "google-tdg-flatten-iterators"
     ],
-    "note": "Google's own statement (given an iterator of iterators, implement an interleaving iterator); related to LeetCode 281 \"Zigzag Iterator\". Difficulty is our estimate.",
+    "note": "Google's own statement (given an iterator of iterators, implement an interleaving iterator). Difficulty is our estimate.",
     "title": "Flatten (Interleave) Iterators",
     "difficulty": "Medium",
     "url": "https://web.archive.org/web/20221108083129/https://techdevguide.withgoogle.com/resources/former-interview-question-flatten-iterators/",
@@ -3846,7 +3846,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-1789833"
     ],
-    "note": "SDE 1 new-grad final round; the post links LeetCode 146 directly."
+    "note": "SDE 1 new-grad final round."
   },
   {
     "company": "amazon",
@@ -3855,7 +3855,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-302349"
     ],
-    "note": "Phone screen: \"view most recently visited items\", which the candidate says turned into LeetCode 146."
+    "note": "Phone screen: \"view most recently visited items\"."
   },
   {
     "company": "meta",
@@ -3873,7 +3873,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-5949964"
     ],
-    "note": "Phone screen, second question; links LeetCode 408.",
+    "note": "Phone screen, second question.",
     "title": "Valid Word Abbreviation",
     "difficulty": "Easy",
     "url": "https://leetcode.com/problems/valid-word-abbreviation/",
@@ -3886,7 +3886,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-5893260"
     ],
-    "note": "Screening question: merge a target interval into a sorted list, which is the LeetCode 57 task (post title calls it \"Merge Intervals given a target\")."
+    "note": "Screening question: merge a target interval into a sorted list (post title calls it \"Merge Intervals given a target\")."
   },
   {
     "company": "meta",
@@ -3895,7 +3895,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-4266103"
     ],
-    "note": "E4 onsite coding round 1; links LeetCode 207."
+    "note": "E4 onsite coding round 1."
   },
   {
     "company": "meta",
@@ -3904,7 +3904,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-4266103"
     ],
-    "note": "E4 onsite coding round 2; links LeetCode 84."
+    "note": "E4 onsite coding round 2."
   },
   {
     "company": "meta",
@@ -3913,7 +3913,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-4266103"
     ],
-    "note": "E4 onsite coding round 2; links LeetCode 76."
+    "note": "E4 onsite coding round 2."
   },
   {
     "company": "meta",
@@ -3922,7 +3922,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-6379540"
     ],
-    "note": "Screening round: \"return the final directory after following the path\" with ./ and ~ cases, a variant of LeetCode 71.",
+    "note": "Screening round: \"return the final directory after following the path\" with ./ and ~ cases.",
     "title": "Simplify Path",
     "difficulty": "Medium",
     "url": "https://leetcode.com/problems/simplify-path/",
@@ -3935,7 +3935,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-5199331"
     ],
-    "note": "CoderPad round (Engineering Division); links LeetCode 42."
+    "note": "CoderPad round (Engineering Division)."
   },
   {
     "company": "goldman-sachs",
@@ -3944,7 +3944,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-5199331"
     ],
-    "note": "CoderPad round, first question; links LeetCode 1823."
+    "note": "CoderPad round, first question."
   },
   {
     "company": "goldman-sachs",
@@ -3962,7 +3962,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-413065"
     ],
-    "note": "Phone screen; candidate says \"similar to\" LeetCode 42."
+    "note": "Phone screen."
   },
   {
     "company": "goldman-sachs",
@@ -3971,7 +3971,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "glassdoor-gs-5462610"
     ],
-    "note": "First online coding interview, per the Glassdoor review."
+    "note": "First online coding interview."
   },
   {
     "company": "goldman-sachs",
@@ -3980,7 +3980,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "glassdoor-gs-5462610"
     ],
-    "note": "Second online coding interview (testing/debugging), per the Glassdoor review.",
+    "note": "Second online coding interview (testing/debugging).",
     "title": "String to Integer (atoi)",
     "difficulty": "Medium",
     "url": "https://leetcode.com/problems/string-to-integer-atoi/",
@@ -3993,7 +3993,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-1789554"
     ],
-    "note": "New-grad phone round; links LeetCode 680.",
+    "note": "New-grad phone round.",
     "title": "Valid Palindrome II",
     "difficulty": "Easy",
     "url": "https://leetcode.com/problems/valid-palindrome-ii/",
@@ -4006,7 +4006,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-1789554"
     ],
-    "note": "New-grad onsite round 1; links LeetCode 253."
+    "note": "New-grad onsite round 1."
   },
   {
     "company": "bloomberg",
@@ -4015,7 +4015,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-1789554"
     ],
-    "note": "New-grad onsite round 1; links LeetCode 1396.",
+    "note": "New-grad onsite round 1.",
     "title": "Design Underground System",
     "difficulty": "Medium",
     "url": "https://leetcode.com/problems/design-underground-system/",
@@ -4046,7 +4046,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-3281930"
     ],
-    "note": "Onsite algorithms round; candidate says the question was \"similar to\" LeetCode 210."
+    "note": "Onsite algorithms round."
   },
   {
     "company": "linkedin",
@@ -4073,7 +4073,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-1627771"
     ],
-    "note": "ICT3 onsite interview 2; links LeetCode 4."
+    "note": "ICT3 onsite interview 2."
   },
   {
     "company": "adobe",
@@ -4162,7 +4162,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-4937133"
     ],
-    "note": "SDE2 round 1: connect nodes to right neighbours in a complete tree (LeetCode 116 setup).",
+    "note": "SDE2 round 1: connect nodes to right neighbours in a complete tree.",
     "title": "Populating Next Right Pointers in Each Node",
     "difficulty": "Medium",
     "url": "https://leetcode.com/problems/populating-next-right-pointers-in-each-node/",
@@ -4175,7 +4175,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-124626"
     ],
-    "note": "Onsite round 1 (post from 2017); links LeetCode 137."
+    "note": "Onsite round 1 (post from 2017)."
   },
   {
     "company": "google",
@@ -4184,7 +4184,7 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-124626"
     ],
-    "note": "Onsite round 2 (post from 2017); links LeetCode 394."
+    "note": "Onsite round 2 (post from 2017)."
   },
   {
     "company": "google",
@@ -4206,6 +4206,6 @@ export const COMPANY_QUESTIONS = [
     "sources": [
       "lc-discuss-4987607"
     ],
-    "note": "L5 onsite; links LeetCode 2115."
+    "note": "L5 onsite."
   }
 ];

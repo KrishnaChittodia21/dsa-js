@@ -369,3 +369,89 @@
   .ql-r-no, .ql-r-pt, .ql-r-tp, .ql-r-co, .ql-r-tries { display: none; }
   .ql-fsel select { max-width: 200px; }
 }
+
+/* ---------- Where did I go wrong · Measure my growth · Ghost of past me (WhereWrong / MeasureGrowth / Attempts) ---------- */
+.qp-lines { margin: 0; padding: 8px 0; border-radius: var(--r-md); background: var(--code-bg); color: var(--code-text); font: 12.5px/1.7 var(--f-mono); overflow-x: auto; }
+.qp-ln { display: flex; padding: 0 12px; white-space: pre; }
+.qp-ln i { font-style: normal; width: 26px; flex: none; color: var(--code-gutter); user-select: none; }
+.qp-ln.is-hot { background: color-mix(in srgb, var(--bad) 18%, transparent); box-shadow: inset 3px 0 0 var(--bad); }
+.qp-val { padding: 1px 8px; border-radius: 7px; font: 600 12px var(--f-mono); box-shadow: inset 0 0 0 1px currentColor; }
+.qp-val--bad { color: var(--bad); }
+.qp-val--ok { color: var(--good); }
+
+/* the entry point: an action row inside the failing test */
+.qp-ww-go { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 14px; border: 0; border-radius: var(--r-md); cursor: pointer; text-align: left; color: var(--text); background: color-mix(in srgb, var(--uv) 10%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--uv) 32%, transparent); transition: box-shadow 0.15s ease, transform 0.12s var(--ease-out); }
+.qp-ww-go:active { transform: scale(0.99); }
+.qp-ww-go:focus-visible { outline: 2px solid var(--uv); outline-offset: 2px; }
+.qp-ww-ico { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; color: var(--uv-t); background: color-mix(in srgb, var(--uv) 16%, transparent); }
+.qp-ww-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.qp-ww-txt b { font: 600 13.5px var(--f-ui); }
+.qp-ww-txt span { font-size: 12.5px; color: var(--text-muted); }
+.qp-ww-arrow { flex: none; color: var(--uv-t); transition: transform 0.15s var(--ease-out); }
+@media (hover: hover) and (pointer: fine) {
+  .qp-ww-go:hover { box-shadow: inset 0 0 0 1px var(--uv); }
+  .qp-ww-go:hover .qp-ww-arrow { transform: translateX(2px); }
+}
+.qp-ww { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-radius: var(--r-md); font: 14px/1.55 var(--f-ui); background: color-mix(in srgb, var(--uv) 9%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--uv) 35%, transparent); }
+.qp-ww p { margin: 0; }
+.qp-ww--err { background: color-mix(in srgb, var(--bad) 8%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bad) 30%, transparent); }
+.qp-ww-log { margin: 0; font: 12px/1.9 var(--f-mono); color: var(--text-2); overflow-x: auto; }
+.qp-ww-log div { white-space: pre; animation: qp-rise 0.25s var(--ease-out) both; }
+.qp-ww-log .is-last { color: var(--text); font-weight: 600; }
+@keyframes qp-rise { from { opacity: 0; transform: translateY(4px); } }
+
+/* Measure my growth */
+.qp-mg { display: flex; flex-direction: column; gap: 10px; padding-top: 6px; border-top: 1px solid var(--line); }
+.qp-mg p { margin: 0; }
+.qp-mg-chart { width: 100%; height: auto; display: block; }
+.qp-mg-chart .ax { stroke: var(--line-2); }
+.qp-mg-chart text { fill: var(--text-faint); font: 10px var(--f-mono); }
+.qp-mg-legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--text-2); }
+.qp-mg-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.qp-mg-card { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-radius: var(--r-md); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); font-size: 14px; }
+.qp-mg-map { display: grid; gap: 4px; font: 11px var(--f-mono); }
+.qp-mg-map .h { color: var(--text-faint); text-align: center; }
+.qp-mg-map .rh { color: var(--text-faint); text-align: right; padding-right: 6px; align-self: center; }
+.qp-mg-map .c { min-height: 42px; border-radius: 8px; background: var(--sunken); box-shadow: inset 0 0 0 1px var(--line); display: flex; flex-wrap: wrap; gap: 4px; align-items: center; justify-content: center; padding: 4px; }
+.qp-mg-map .c.best { background: color-mix(in srgb, var(--good) 10%, var(--sunken)); }
+.qp-mg-mk { padding: 2px 8px; border-radius: 99px; font: 600 11px var(--f-ui); color: #fff; animation: qp-pop 0.35s var(--ease-out) both; }
+.qp-mg-mk.you { background: var(--plasma); }
+.qp-mg-mk.ref { background: var(--uv); animation-delay: 0.2s; }
+@keyframes qp-pop { from { opacity: 0; transform: scale(0.9) translateY(4px); } }
+
+/* Ghost of past me */
+.qp-con-n--plain { color: var(--text-faint); }
+.qp-gh-atts { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+.qp-gh-att { flex: 1 0 140px; text-align: left; border: 0; cursor: pointer; padding: 10px 12px; border-radius: var(--r-md); background: var(--surface-2); color: var(--text-2); box-shadow: inset 0 0 0 1px var(--line-2); font: 12.5px var(--f-ui); }
+.qp-gh-att b { display: block; font: 600 13px var(--f-ui); color: var(--text); }
+.qp-gh-att[aria-pressed='true'] { background: color-mix(in srgb, var(--uv) 10%, var(--surface)); box-shadow: inset 0 0 0 2px var(--uv); }
+.qp-gh-att.is-now { cursor: default; box-shadow: inset 0 0 0 2px var(--plasma); }
+.qp-gh-att:focus-visible { outline: 2px solid var(--uv); outline-offset: 2px; }
+.qp-gh-test { height: 32px; }
+.qp-gh-lanes { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+.qp-gh-lane { --viz-h: 170px; --viz-side-h: 96px; }
+.qp-gh-lane .viz-head { padding: 12px 16px 8px; display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.qp-gh-lane .viz-title { font-size: 15px; }
+.qp-gh-lane .viz-note { font-size: 12px; min-height: 52px; }
+.qp-gh-done { padding: 2px 8px; border-radius: 99px; font: 600 11px var(--f-ui); color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); opacity: 0; transition: opacity 0.25s ease; }
+.qp-gh-done.is-on { opacity: 1; }
+.qp-gh-verdict { padding: 12px 14px; border-radius: var(--r-md); font-size: 14px; background: color-mix(in srgb, var(--bad) 8%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bad) 30%, transparent); }
+.qp-gh-verdict.is-ok { background: color-mix(in srgb, var(--good) 8%, var(--surface)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--good) 30%, transparent); }
+.qp-gh-verdict p { margin: 0; }
+.qp-gh-verdict p + p { margin-top: 6px; }
+@media (prefers-reduced-motion: reduce) {
+  .qp-ww-log div, .qp-mg-mk { animation: none; }
+}
+/* Measure my growth fits the results panel: chart left, findings right (stacks when narrow) */
+.qp-mg-body { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 14px; align-items: start; }
+.qp-mg-body:empty { display: none; }
+.qp-mg-plot { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.qp-mg-chart { max-height: 300px; }
+.qp-mg-card { padding: 12px 14px; gap: 8px; font-size: 13.5px; }
+.qp-mg-map .c { min-height: 30px; padding: 3px; }
+.qp-mg-how { font-size: 12px; color: var(--text-muted); }
+.qp-mg-how summary { cursor: pointer; color: var(--text-2); }
+.qp-mg-map { font-size: 10.5px; }
+.qp-mg-map .c { min-height: 24px; }
+.qp-mg-map .h { white-space: nowrap; }
+.qp-mg-card .qp-lines { padding: 4px 0; }

@@ -677,10 +677,10 @@ const steps = {
     },
     {
       kind: 'turn',
-      title: 'Your turn: maximum depth, LeetCode style',
-      lines: ['**Height** counts edges down to a leaf.', 'LeetCode\'s "maximum depth" counts **nodes** on the longest root-to-leaf path.'],
+      title: 'Your turn: maximum depth, counted in nodes',
+      lines: ['**Height** counts edges down to a leaf.', 'In most problems, "maximum depth" counts **nodes** on the longest root-to-leaf path.'],
       panels: [draw(T1)],
-      task: { type: 'number', question: 'What is LeetCode\'s maximum depth of this tree?', options: [2, 3, 4, 5], answer: 3, hint: 'Count the nodes on 3 → 20 → 15, not the edges.' },
+      task: { type: 'number', question: 'What is the maximum depth of this tree, counted in nodes?', options: [2, 3, 4, 5], answer: 3, hint: 'Count the nodes on 3 → 20 → 15, not the edges.' },
       solved: '3 nodes, but only 2 edges. Always check which one a problem counts.',
       then: [{ say: 1, note: 'Longest root-to-leaf path: 3 → 20 → 15. Three nodes.', panels: [draw(T1, { st: states([0, 2, idOf(T1, 15)], 'active'), es: states([2, idOf(T1, 15)], 'active') })] }],
     },

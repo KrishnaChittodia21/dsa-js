@@ -8,6 +8,8 @@ import {
   CalendarClock,
   ChartNoAxesColumn,
   Building2,
+  ChevronDown,
+  ChevronUp,
   Code2,
   Bookmark,
   Clapperboard,
@@ -339,6 +341,11 @@ export default function AppShell() {
   // first visit: when the welcome tour closes, the dock's glow pulses twice so the menu is noticed
   const firstVisit = useRef(!getUiPrefs().tourSeen);
   const [dockHello, setDockHello] = useState(false);
+  const [dockMin, setDockMin] = useState(() => !!getUiPrefs().dockMinimized);
+  const setDockMinimized = (v) => {
+    setDockMin(v);
+    saveUiPrefs({ dockMinimized: v });
+  };
   const closeTour = useCallback(() => {
     setTourOpen(false);
     if (!firstVisit.current) return;
@@ -450,6 +457,12 @@ export default function AppShell() {
 
       {/* ---------- floating dock (desktop) ---------- */}
       <div className="dock-wrap">
+        {dockMin ? (
+          <button type="button" className="dock-pill" onClick={() => setDockMinimized(false)} aria-label="Show the menu" title="Show the menu">
+            <ChevronUp aria-hidden="true" />
+            Menu
+          </button>
+        ) : (
         <nav className={`dock${dockHello ? ' dock--hello' : ''}`} aria-label="Primary">
           {DOCK.map((d) => {
             const Icon = d.icon;
@@ -491,7 +504,14 @@ export default function AppShell() {
               {SEARCH_KEY}
             </span>
           </button>
+          <button type="button" className="dock-item dock-min" onClick={() => setDockMinimized(true)} aria-label="Minimise the menu">
+            <ChevronDown aria-hidden="true" />
+            <span className="dock-tip" aria-hidden="true">
+              Minimise
+            </span>
+          </button>
         </nav>
+        )}
       </div>
 
       {/* ---------- touch tab dock (≤900px) ---------- */}

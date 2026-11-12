@@ -27,6 +27,25 @@ export function recordInWorker({ code, question, test, refCode, timeoutMs = 1000
   });
 }
 
+/** A growth.js job in a fresh worker: `shrink` (Where did I go wrong) or `measure` (Measure my growth).
+ *  The question is reduced to its runnable fields plus what the size sweep needs. */
+export function jobInWorker(type, { question, ...payload }, timeoutMs = 15000) {
+  return new Promise((resolve) => {
+    const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+    const id = ++seq;
+    const end = (res) => {
+      clearTimeout(timer);
+      worker.terminate();
+      resolve(res);
+    };
+    const timer = setTimeout(() => end({ error: `Stopped after ${timeoutMs / 1000}s.` }), timeoutMs);
+    worker.onmessage = (e) => e.data.id === id && end(e.data);
+    worker.onerror = (e) => end({ error: e.message || 'Worker error' });
+    const q = { ...runnableQuestion(question), paramTypes: question.paramTypes, paramNames: question.paramNames, solution: question.solution && { code: question.solution.code }, growth: question.growth };
+    worker.postMessage({ id, type, question: q, ...payload });
+  });
+}
+
 export function runInWorker({ code, question, tests, opts, timeoutMs = 10000 }) {
   return new Promise((resolve) => {
     const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });

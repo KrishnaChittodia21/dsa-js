@@ -96,7 +96,6 @@ export default function QuestionPage() {
   const unlocked = solved || !!qs.solutionViewed;
   const hints = question.hints?.length || 0;
   const tags = meta.tags || question.tags || [];
-  const src = question.source || meta.source;
   const quiz = question.kind === 'quiz';
 
   return (
@@ -136,16 +135,6 @@ export default function QuestionPage() {
         <header className="qp-head rise" style={{ '--i': 1 }}>
           <div className="qp-head-main">
             <div className="qp-tags">
-              {src?.platform === 'LeetCode' &&
-                (src.url ? (
-                  <a className="tag qp-tag-link" href={src.url} target="_blank" rel="noreferrer">
-                    LeetCode {src.number ? `#${src.number}` : ''}
-                    {src.premium ? ' · premium' : ''} <Icon name="external" size={11} />
-                  </a>
-                ) : (
-                  <span className="tag">LeetCode {src.number ? `#${src.number}` : ''}</span>
-                ))}
-              {src?.platform === 'Classic' && <span className="tag">Classic problem</span>}
               {question.difficulty && (
                 <span className={`chip ${DIFF_CHIP[question.difficulty] || ''}`}>
                   <span className="diff-pips">

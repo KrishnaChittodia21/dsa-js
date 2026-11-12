@@ -283,7 +283,7 @@ The DP versions are O(n log n), O(n·k), O(n), O(n³), O(2^n·n²) (the TSP-styl
             misconceptions: {
               0: 'Order matters a lot — the coins depend on current neighbours, which change as balloons disappear.',
               2: 'Greedy choices fail here; e.g. [3,1,5,8] is not optimal with smallest-first.',
-              3: 'n goes up to 300 on LeetCode; the DP is O(n³), not exponential.',
+              3: 'n goes up to 300 in the usual constraints; the DP is O(n³), not exponential.',
             },
           },
         ],

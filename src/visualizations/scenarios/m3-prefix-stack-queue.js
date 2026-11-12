@@ -292,7 +292,7 @@ export const subarrayMinContribution = {
       });
     }
     frames.push({
-      note: `Sum of subarray minimums = ${total}. Strict on the left, ≤ on the right, so equal values are never counted twice. O(n) instead of O(n²). (The LeetCode version takes the answer mod 10^9 + 7.)`,
+      note: `Sum of subarray minimums = ${total}. Strict on the left, ≤ on the right, so equal values are never counted twice. O(n) instead of O(n²). (The usual version of this problem takes the answer mod 10^9 + 7.)`,
       panels: [view({}), stPanel(), vars({ total })],
     });
     if (n > 1) attach(frames, pick('Every element has been popped. What is the sum of all subarray minimums?', total, [a.reduce((s, x) => s + x, 0), total + Math.min(...a), total - 1], 0));
