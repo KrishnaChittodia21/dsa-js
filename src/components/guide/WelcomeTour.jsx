@@ -1,30 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import {
-  Activity,
-  ArrowDownToLine,
-  ArrowLeft,
-  ArrowRight,
-  Award,
-  Check,
-  Clapperboard,
-  Code2,
-  Compass,
-  Download,
-  House,
-  Keyboard,
-  LayoutGrid,
-  Layers,
-  ListTree,
-  RotateCcw,
-  Route,
-  Save,
-  Search,
-  SquareTerminal,
-  Target,
-  X,
-} from 'lucide-react';
+import { Activity, ArrowDownToLine, ArrowLeft, ArrowRight, Award, BookMarked, Check, Clapperboard, Code2, Compass, Download, House, Keyboard, Layers, LayoutGrid, ListTree, RotateCcw, Route, Save, Search, SquareTerminal, Target, X } from 'lucide-react';
 import { allQuestions, stages, topics } from '../../content/index.js';
 import { useProgress } from '../../state/ProgressContext.jsx';
 import { topicStatus } from '../../state/selectors.js';
@@ -400,6 +377,13 @@ export default function WelcomeTour({ onClose }) {
                       <span>
                         <b>Animate my run</b> (the Animate tab) replays your JavaScript step by step; in Java or C++ it plays the reference and checks
                         your answer.
+                      </span>
+                    </li>
+                    <li>
+                      <BookMarked aria-hidden="true" />
+                      <span>
+                        <b>Notebook</b>: select any words in a lesson to highlight them, write a note with marker text and emojis, or sketch a
+                        diagram. The Notebook button on a lesson opens them all.
                       </span>
                     </li>
                     <li>

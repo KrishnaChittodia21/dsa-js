@@ -250,7 +250,7 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
                 {current.title}
               </h2>
               <SaveButton saveKey={`sec:${topic.id}/${index}`} item={{ kind: 'section', topicId: topic.id, index, title: current.title }} />
-              <div className="ls-blocks">{renderBlocks(current, true)}</div>
+              <div className="ls-blocks" data-sec={current.id} data-si={index}>{renderBlocks(current, true)}</div>
               <nav className="ls-pager" aria-label="Lesson pager">
                 {index > 0 ? (
                   <button type="button" className="ls-pg" onClick={() => go(index - 1)}>
@@ -303,7 +303,7 @@ export default function LessonPlayer({ topic, onFinish, initialSection, onSectio
                     {s.title}
                   </h3>
                   <SaveButton saveKey={`sec:${topic.id}/${si}`} item={{ kind: 'section', topicId: topic.id, index: si, title: s.title }} />
-                  <div className="ls-blocks">{renderBlocks(s, false)}</div>
+                  <div className="ls-blocks" data-sec={s.id} data-si={si}>{renderBlocks(s, false)}</div>
                 </section>
               ))}
               {!tState.lessonCompleted && (

@@ -1,0 +1,468 @@
+/* =====================================================================
+   Notebook (components/notebook): highlights on lesson text, the selection toolbar, pins, the side panel,
+   the note composer and the sketch board. Class prefix ntb- (design/notes.html).
+   ===================================================================== */
+
+/* colour of a note/highlight: data-c on the element; doubled attribute so it beats the .ntb-card default */
+[data-c][data-c='amber'] { --hc: var(--plasma); }
+[data-c][data-c='cyan'] { --hc: var(--ice); }
+[data-c][data-c='rose'] { --hc: var(--volt); }
+[data-c][data-c='mag'] { --hc: var(--uv); }
+[data-c][data-c='blue'] { --hc: var(--info); }
+
+/* ---------- highlights (CSS Custom Highlight API: the lesson DOM is untouched) ---------- */
+::highlight(ntb-amber) { background-color: color-mix(in srgb, var(--plasma) 30%, transparent); }
+::highlight(ntb-cyan) { background-color: color-mix(in srgb, var(--ice) 28%, transparent); }
+::highlight(ntb-rose) { background-color: color-mix(in srgb, var(--volt) 28%, transparent); }
+::highlight(ntb-mag) { background-color: color-mix(in srgb, var(--uv) 28%, transparent); }
+::highlight(ntb-noted) { text-decoration: underline dashed 1.5px var(--muted); text-underline-offset: 4px; }
+::highlight(ntb-flash) { background-color: color-mix(in srgb, var(--ice) 50%, transparent); }
+
+.ntb-pin {
+  position: absolute;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 99px;
+  border: 1px solid color-mix(in srgb, var(--hc) 50%, transparent);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+.ntb-pin:hover { background: var(--surface-hover); color: var(--text); }
+
+/* ---------- selection toolbar ---------- */
+.ntb-seltb {
+  position: fixed;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 5px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--line-2);
+  box-shadow: var(--shadow-lg);
+  animation: ntb-rise 0.16s var(--ease-out);
+}
+.ntb-seltb button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  min-width: 34px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-2);
+  font: 600 13px var(--f-ui);
+  cursor: pointer;
+}
+.ntb-seltb button:hover { background: var(--surface-hover); color: var(--text); }
+.ntb-swatch { width: 16px; height: 16px; border-radius: 50%; background: var(--hc); box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.16); }
+.ntb-sep { width: 1px; height: 20px; margin: 0 3px; background: var(--line-2); flex: none; }
+.ntb-seltb [data-tip]:hover::before {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font: 500 11px var(--f-mono);
+  padding: 4px 8px;
+  border-radius: 7px;
+  background: var(--text);
+  color: var(--bg);
+  pointer-events: none;
+}
+@keyframes ntb-rise { from { opacity: 0; transform: translateY(5px); } }
+
+/* ---------- open button + panel ---------- */
+/* liquid glass, the same recipe as the menu bars (shell.css): a clear tint, a little blur, light on the top edge */
+.ntb-fab,
+.ntb-tab,
+.ntb-panel {
+  background: color-mix(in srgb, var(--surface) 58%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.35),
+    inset 0 -1px 0 rgb(255 255 255 / 0.06),
+    0 0 0 1px color-mix(in srgb, var(--text) 10%, transparent),
+    0 18px 44px -22px rgb(0 0 0 / 0.55);
+}
+.ntb-fab {
+  position: fixed;
+  z-index: 40;
+  right: 24px;
+  bottom: calc(var(--dock-space) + 4px);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 999px;
+  animation: ntb-rise 0.22s var(--ease-out);
+}
+.ntb-fab-open,
+.ntb-fab-hide {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+.ntb-fab-open { padding: 0 12px 0 14px; font: 700 13px var(--f-ui); }
+.ntb-fab-hide { width: 30px; height: 30px; justify-content: center; color: var(--muted); }
+.ntb-fab-open:hover,
+.ntb-fab-hide:hover { background: color-mix(in srgb, var(--text) 9%, transparent); color: var(--text); }
+.ntb-count { font: 500 11px var(--f-mono); padding: 1px 7px; border-radius: 99px; background: var(--plasma); color: var(--on-accent); }
+/* hidden: a slim glass tab on the right edge; tapping it brings the button back */
+.ntb-tab {
+  position: fixed;
+  z-index: 40;
+  right: 0;
+  bottom: calc(var(--dock-space) + 72px);
+  width: 34px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  padding-right: 2px;
+  border: 0;
+  border-radius: 14px 0 0 14px;
+  color: var(--plasma);
+  cursor: pointer;
+  animation: ntb-tab-in 0.22s var(--ease-out);
+}
+@keyframes ntb-tab-in { from { transform: translateX(100%); } }
+.ntb-handle { display: none; }
+.ntb-scrim { display: none; }
+
+.ntb-panel {
+  position: fixed;
+  z-index: 46; /* above the dock (45) */
+  top: calc(var(--status-h) + 12px);
+  right: 16px;
+  bottom: var(--dock-space);
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 22px;
+  animation: ntb-in 0.22s var(--ease-out);
+}
+/* glass inside too: cards and fields are tinted, not solid */
+.ntb-panel .ntb-card { background: color-mix(in srgb, var(--surface-2) 62%, transparent); }
+.ntb-panel .ntb-search,
+.ntb-panel .ntb-tabs,
+.ntb-panel .ntb-composer { background: color-mix(in srgb, var(--bg-2) 55%, transparent); }
+.ntb-panel .ntb-ed { background: color-mix(in srgb, var(--surface) 70%, transparent); }
+/* mouse / trackpad: clearer at rest, frosted again on hover or while typing in it (like the menu bars) */
+@media (hover: hover) and (pointer: fine) {
+  .ntb-panel,
+  .ntb-fab {
+    transition: background 0.25s ease, backdrop-filter 0.25s ease, -webkit-backdrop-filter 0.25s ease;
+  }
+  .ntb-panel:not(:hover, :focus-within),
+  .ntb-fab:not(:hover, :focus-within) {
+    background: color-mix(in srgb, var(--surface) 30%, transparent);
+    -webkit-backdrop-filter: blur(10px) saturate(180%) brightness(1.04);
+    backdrop-filter: blur(10px) saturate(180%) brightness(1.04);
+  }
+}
+@keyframes ntb-in { from { opacity: 0; transform: translateX(12px); } }
+/* wide screens: the page makes room so the panel sits beside the lesson, not over it */
+@media (min-width: 1360px) {
+  body:has(.ntb-panel) .main { padding-right: calc(380px + 40px); }
+}
+.ntb-head { padding: 16px 16px 10px; border-bottom: 1px solid var(--line-3); }
+.ntb-title { display: flex; align-items: center; gap: 10px; }
+.ntb-title h2 { margin: 0; font: 600 15px var(--f-display); }
+.ntb-title-ic { color: var(--plasma); }
+.ntb-sp { flex: 1; }
+.ntb-faint { font: 11px var(--f-mono); color: var(--faint); }
+.ntb-ib {
+  width: 32px;
+  height: 32px;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.ntb-ib:hover:not(:disabled) { background: var(--surface-hover); color: var(--text); }
+.ntb-ib:disabled { opacity: 0.4; cursor: default; }
+.ntb-tabs { display: flex; gap: 4px; margin: 12px 0 10px; padding: 3px; border-radius: 12px; background: var(--bg-2); border: 1px solid var(--line-3); }
+.ntb-tabs button { flex: 1; height: 30px; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font: 600 13px var(--f-ui); cursor: pointer; }
+.ntb-tabs button[aria-selected='true'] { background: var(--surface-2); color: var(--text); box-shadow: inset 0 1px 0 var(--line-2); }
+.ntb-search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 11px; border: 1px solid var(--line); background: var(--bg-2); color: var(--muted); }
+.ntb-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text); font: 13px var(--f-ui); }
+.ntb-search:focus-within { border-color: var(--line-2); }
+.ntb-chips { display: flex; gap: 6px; overflow-x: auto; padding: 10px 0 2px; scrollbar-width: none; }
+.ntb-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font: 600 12px var(--f-ui);
+  cursor: pointer;
+}
+.ntb-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--hc); }
+.ntb-chip .ntb-n { font-family: var(--f-mono); opacity: 0.6; }
+.ntb-chip[aria-pressed='true'] {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--hc, var(--muted)) 55%, transparent);
+  background: color-mix(in srgb, var(--hc, var(--muted)) 12%, transparent);
+}
+.ntb-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; }
+.ntb-foot { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--line-3); }
+.ntb-foot .btn { flex: 1; }
+.ntb-guest { flex: 1; overflow-y: auto; padding: 12px; }
+.ntb-guest .tp-panel { margin: 0; }
+.ntb-empty { margin: 24px 8px; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.ntb-group { display: flex; align-items: center; gap: 8px; margin: 8px 2px 0; font: 500 11px var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.ntb-group::after { content: ''; flex: 1; height: 1px; background: var(--line-3); }
+
+/* ---------- note card ---------- */
+.ntb-card {
+  --hc: var(--faint);
+  position: relative;
+  flex: none;
+  display: block;
+  padding: 12px 14px 10px 16px;
+  border-radius: 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-3);
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.ntb-card::before { content: ''; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 0 3px 3px 0; background: var(--hc); }
+.ntb-card:hover { border-color: var(--line-2); }
+.ntb-card.is-sel { border-color: color-mix(in srgb, var(--hc) 60%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--hc) 14%, transparent); }
+.ntb-card:focus-visible { outline: 2px solid var(--accent-solid); outline-offset: 2px; }
+.ntb-card-top { display: flex; align-items: center; gap: 8px; min-width: 0; font: 500 11px var(--f-mono); color: var(--muted); }
+.ntb-lbl { flex: none; color: var(--hc); letter-spacing: 0.04em; text-transform: uppercase; }
+.ntb-where { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ntb-card blockquote {
+  margin: 8px 0 0;
+  padding: 0;
+  border: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  font-style: italic;
+  color: var(--text-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ntb-card blockquote::before { content: '“'; margin-right: 2px; color: var(--hc); font: 600 18px/0 var(--f-display); vertical-align: -4px; }
+.ntb-lost { margin: 8px 0 0; font-size: 12px; color: var(--warn); }
+.ntb-body { margin-top: 8px; font-size: 14px; line-height: 1.6; color: var(--text); overflow-wrap: anywhere; }
+.ntb-body p, .ntb-ed p { margin: 0 0 6px; }
+.ntb-body ul, .ntb-ed ul { margin: 4px 0; padding-left: 18px; }
+.ntb-add { margin-top: 8px; padding: 0; border: 0; background: transparent; color: var(--muted); font: 600 13px var(--f-ui); cursor: pointer; }
+.ntb-add:hover { color: var(--text); }
+.ntb-card-foot { display: flex; align-items: center; gap: 6px; margin-top: 10px; min-height: 26px; }
+.ntb-rx { display: inline-flex; align-items: center; height: 24px; padding: 0 7px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; color: var(--muted); cursor: pointer; }
+.ntb-rx-add { opacity: 0.6; }
+.ntb-rx:hover { opacity: 1; border-color: var(--line-2); }
+.ntb-acts { display: flex; gap: 2px; opacity: 0; transition: opacity 0.15s; }
+.ntb-card:hover .ntb-acts,
+.ntb-card.is-sel .ntb-acts,
+.ntb-card:focus-within .ntb-acts { opacity: 1; }
+@media (hover: none) { .ntb-acts { opacity: 1; } }
+.ntb-acts .ntb-ib { width: 26px; height: 26px; }
+.ntb-go { font: 11px var(--f-mono); color: var(--faint); }
+
+/* what the composer makes: marker, checkbox, handwriting, code */
+.mk { color: inherit; padding: 0 0.12em; border-radius: 0.25em 0.45em 0.3em 0.4em; background: color-mix(in srgb, var(--hc, var(--plasma)) 34%, transparent); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.chk {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  vertical-align: -3px;
+  border-radius: 5px;
+  border: 1.5px solid var(--muted);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+}
+.chk.done { background: var(--success); border-color: var(--success); color: var(--on-accent); }
+.chk.done + span { text-decoration: line-through; color: var(--muted); }
+.hand { font-family: 'Bradley Hand', 'Segoe Print', 'Chalkboard SE', 'Comic Sans MS', cursive; font-size: 1.12em; color: var(--text); }
+.ntb-body code, .ntb-ed code { font: 500 0.86em var(--f-mono); padding: 1px 5px; border-radius: 5px; background: var(--bg-2); }
+
+/* sketch thumbnail */
+.ntb-thumb {
+  margin: 10px 0 0;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  background-color: var(--bg-2);
+  background-image: radial-gradient(circle at center, var(--dot) 1.1px, transparent 1.6px);
+  background-size: 16px 16px;
+}
+.ntb-thumb svg { display: block; width: 100%; height: 130px; }
+.ntb-thumb .ntb-sk-t { font-size: 32px; }
+.ntb-thumb .ntb-sk { stroke-width: 3.5; }
+
+/* ---------- composer ---------- */
+.ntb-composer {
+  --hc: var(--info);
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 12px 12px 0;
+  padding: 12px;
+  border-radius: 18px;
+  background: var(--bg-2);
+  border: 1px solid color-mix(in srgb, var(--hc) 50%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--hc) 9%, transparent);
+  animation: ntb-rise 0.2s var(--ease-out);
+}
+.ntb-cq { padding-left: 10px; border-left: 2px solid var(--hc); font-size: 13px; font-style: italic; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ntb-cbar { display: flex; align-items: center; flex-wrap: wrap; }
+.ntb-cbar .ntb-ib { width: 26px; height: 30px; }
+.ntb-cbar .ntb-mk-btn { width: 22px; }
+.ntb-cbar .ntb-sep { height: 18px; margin: 0 2px; }
+.ntb-mkdot { width: 14px; height: 14px; border-radius: 4px; background: color-mix(in srgb, var(--hc) 55%, transparent); border: 1px solid var(--hc); }
+.ntb-ed {
+  min-height: 92px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  outline: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.ntb-ed:focus { border-color: var(--line-2); }
+.ntb-ed:empty::before { content: attr(data-ph); color: var(--faint); pointer-events: none; }
+.ntb-csk { padding: 0; border: 0; background: transparent; cursor: pointer; text-align: left; }
+.ntb-csk .ntb-thumb { margin: 0; }
+.ntb-crow { display: flex; align-items: center; gap: 8px; }
+
+/* ---------- emoji picker ---------- */
+.ntb-emo {
+  position: fixed;
+  z-index: 80;
+  width: 248px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  padding: 10px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--line-2);
+  box-shadow: var(--shadow-lg);
+  animation: ntb-rise 0.16s var(--ease-out);
+}
+.ntb-emo button { height: 32px; border: 0; border-radius: 8px; background: transparent; font-size: 18px; cursor: pointer; transition: transform 0.12s var(--ease-out); }
+.ntb-emo button:hover, .ntb-emo button:focus-visible { background: var(--surface-hover); transform: scale(1.12); }
+
+/* ---------- sketch dialog ---------- */
+.ntb-dlg { width: min(980px, calc(100vw - 32px)); padding: 0; border: 1px solid var(--line-2); border-radius: 22px; background: var(--surface); color: var(--text); box-shadow: var(--shadow-lg); }
+.ntb-dlg::backdrop { background: var(--scrim); backdrop-filter: blur(4px); }
+.ntb-dlg[open] { animation: ntb-pop 0.2s var(--ease-out); }
+@keyframes ntb-pop { from { opacity: 0; transform: scale(0.97); } }
+.ntb-dlg-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line-3); }
+.ntb-dlg-head h3 { margin: 0; font: 600 15px var(--f-display); }
+.ntb-dlg-ic { color: var(--ice); }
+.ntb-dlg-body { display: grid; grid-template-columns: 56px minmax(0, 1fr); }
+.ntb-tools { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 8px; border-right: 1px solid var(--line-3); }
+.ntb-tool { position: relative; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 11px; border: 1px solid transparent; background: transparent; color: var(--muted); cursor: pointer; }
+.ntb-tool:hover { background: var(--surface-hover); color: var(--text); }
+.ntb-tool[aria-pressed='true'] { background: color-mix(in srgb, var(--ice) 14%, transparent); border-color: color-mix(in srgb, var(--ice) 45%, transparent); color: var(--text); }
+.ntb-tool-k { position: absolute; right: 3px; bottom: 1px; font: 500 8.5px var(--f-mono); color: var(--faint); }
+.ntb-tools-sep { width: 24px; height: 1px; margin: 6px 0; background: var(--line-2); }
+.ntb-ink { width: 20px; height: 20px; margin: 3px 0; padding: 0; border: 0; border-radius: 50%; background: var(--hc); cursor: pointer; }
+.ntb-ink[aria-pressed='true'] { outline: 2px solid var(--hc); outline-offset: 2px; }
+.ntb-stage {
+  position: relative;
+  margin: 14px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background-color: var(--bg-2);
+  background-image: radial-gradient(circle at center, var(--dot) 1.1px, transparent 1.6px);
+  background-size: 20px 20px;
+}
+.ntb-stage svg { display: block; width: 100%; height: auto; aspect-ratio: 720 / 440; touch-action: none; cursor: crosshair; }
+.ntb-stage.is-erase svg { cursor: cell; }
+.ntb-stage.is-erase [data-i]:hover { opacity: 0.35; }
+.ntb-sk { fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.ntb-sk-t { font: 600 21px 'Bradley Hand', 'Segoe Print', 'Chalkboard SE', 'Comic Sans MS', cursive; text-anchor: middle; dominant-baseline: middle; stroke: none; }
+.ntb-label-in {
+  position: absolute;
+  z-index: 2;
+  width: 180px;
+  transform: translate(-50%, -50%);
+  padding: 2px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--ice);
+  background: var(--surface);
+  color: var(--text);
+  outline: 0;
+  text-align: center;
+  font: 600 18px 'Bradley Hand', 'Segoe Print', 'Chalkboard SE', cursive;
+}
+.ntb-dlg-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 0 16px 16px; }
+
+/* ---------- phones: the panel is a bottom sheet ---------- */
+@media (max-width: 860px) {
+  .ntb-panel {
+    top: auto; left: 8px; right: 8px; bottom: calc(var(--dock-space) - 12px); width: auto; height: min(72vh, calc(100dvh - var(--dock-space) - var(--status-h) - 8px)); border-radius: 24px; animation-name: ntb-up; z-index: 57; /* floats above the touch dock, under the More sheet */
+    /* touch can't hover: keep it frosted enough to read over the lesson */
+    background: color-mix(in srgb, var(--surface) 68%, transparent);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+  }
+  .ntb-head { touch-action: none; }
+  /* the grab handle: tap it (or swipe the head down, or tap outside) to hide the sheet */
+  .ntb-handle { display: block; width: 64px; height: 18px; margin: -10px auto 4px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+  .ntb-handle::before { content: ''; display: block; width: 40px; height: 5px; margin: 0 auto; border-radius: 5px; background: color-mix(in srgb, var(--text) 30%, transparent); }
+  .ntb-scrim { display: block; position: fixed; inset: 0; z-index: 56; background: var(--scrim); animation: ntb-fade 0.2s ease; }
+  .ntb-fab { right: 16px; bottom: calc(var(--dock-space) + 4px); }
+  .ntb-dlg-body { grid-template-columns: minmax(0, 1fr); }
+  .ntb-tools { flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--line-3); }
+  .ntb-tools-sep { width: 1px; height: 24px; margin: 0 4px; }
+}
+@keyframes ntb-up { from { transform: translateY(24px); opacity: 0; } }
+@keyframes ntb-fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .ntb-seltb, .ntb-panel, .ntb-composer, .ntb-emo, .ntb-dlg[open], .ntb-fab, .ntb-tab, .ntb-scrim { animation: none; }
+}

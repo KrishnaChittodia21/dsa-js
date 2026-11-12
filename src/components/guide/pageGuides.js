@@ -97,12 +97,17 @@ export const PAGE_GUIDES = [
     title: 'A topic',
     match: (path) => /^\/topic\/[^/]+\/?$/.test(path),
     items: [
-      { target: 'tp-crumbs', file: D + 'TopicPage.jsx', title: 'Where you are', text: 'The stage this topic belongs to, with the previous and next topic.' },
-      { target: 'tp-hero', file: D + 'TopicPage.jsx', title: 'The topic', text: 'What it covers, how long the lesson takes and what it needs first.' },
+      { target: 'tp-hero', file: D + 'TopicPage.jsx', title: 'The topic', text: 'What it covers, how long the lesson takes and what it needs first. The trail above it shows its stage, with the previous and next topic.' },
       { target: 'tp-prog', file: D + 'TopicPage.jsx', title: 'Your progress here', text: 'Mastery and one cube per problem: solved, attempted or still to do.' },
       { target: 'tp-path', file: D + 'TopicPage.jsx', title: 'Study path', text: 'Learn → Visualize → Review: the tabs of this topic in the order to do them.' },
       { target: 'tp-panel', file: D + 'TopicPage.jsx', title: 'The open tab', text: 'The lesson, its animations, your review items, company questions or the cheatsheet, depending on the tab you picked.' },
       { target: 'tp-questions', file: D + 'TopicPage.jsx', title: 'Question bank', text: 'Every problem of this topic, filterable by pattern, always below the tabs.' },
+      {
+        target: 'notebook',
+        file: 'src/components/notebook/Notebook.jsx',
+        title: 'Notebook',
+        text: 'Select any words in the lesson to highlight them (Key idea, Remember, Confusing, My take; keys 1–4), write a note with marker text, checkboxes and emojis (N), or sketch a diagram. Every note from every lesson lives here: search, filter by colour or export them as Markdown. Saved in this browser. × folds the button into a small tab at the edge; on a phone, swipe the panel down to hide it.',
+      },
     ],
   },
   {
