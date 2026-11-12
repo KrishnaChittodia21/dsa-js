@@ -291,6 +291,8 @@ const mean = (xs) => xs.reduce((s, x) => s + x, 0) / xs.length;
 
 /** least squares y = a·f(n) + b for every class; the simplest class within 25% of the best error wins */
 export function fitClass(points, field) {
+  // nothing held at any size (e.g. no extra memory at all) is constant, not "unknown"
+  if (points.length >= 3 && points.every((p) => !p[field])) return { name: '1', slope: 0 };
   const pts = points.filter((p) => p[field] > 0);
   if (pts.length < 3) return null;
   const ys = pts.map((p) => p[field]);

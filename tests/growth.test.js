@@ -73,6 +73,7 @@ test('fitClass names the usual classes', () => {
   assert.equal(fitClass(pts((n) => 4 * Math.ceil(Math.log2(n)) + 3), 'calls').name, 'log n');
   assert.equal(fitClass(pts((n) => 3 * n * Math.log2(n)), 'calls').name, 'n log n');
   assert.equal(fitClass(pts(() => 7), 'calls').name, '1');
+  assert.equal(fitClass(pts(() => 0), 'calls').name, '1'); // no extra memory at any size is O(1), not "unknown"
 });
 
 test('inputs from paramTypes: sizes, edge lists vs grids, ints as the size when nothing else is', () => {

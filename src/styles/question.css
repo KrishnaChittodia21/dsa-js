@@ -405,7 +405,8 @@
 .qp-mg p { margin: 0; }
 .qp-mg-chart { width: 100%; height: auto; display: block; }
 .qp-mg-chart .ax { stroke: var(--line-2); }
-.qp-mg-chart text { fill: var(--text-faint); font: 10px var(--f-mono); }
+.qp-mg-chart text { fill: var(--text-muted); font: 500 12px var(--f-mono); }
+.qp-mg-chart .ax-t { font: 600 12px var(--f-ui); fill: var(--text-2); }
 .qp-mg-legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--text-2); }
 .qp-mg-legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
 .qp-mg-card { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-radius: var(--r-md); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); font-size: 14px; }
@@ -443,10 +444,21 @@
   .qp-ww-log div, .qp-mg-mk { animation: none; }
 }
 /* Measure my growth fits the results panel: chart left, findings right (stacks when narrow) */
-.qp-mg-body { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 14px; align-items: start; }
+.qp-mg-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+/* chart wider, findings narrower; on a narrow panel they stack */
+.qp-mg-body:has(> .qp-mg-card) { grid-template-columns: minmax(0, 1.35fr) minmax(250px, 1fr); }
+@media (max-width: 1100px) { .qp-mg-body:has(> .qp-mg-card) { grid-template-columns: minmax(0, 1fr); } }
 .qp-mg-body:empty { display: none; }
 .qp-mg-plot { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.qp-mg-chart { max-height: 300px; }
+/* the Measure block fills the Complexity tab; the chart takes whatever height is left */
+.qp-con-body > .qp-stack:has(> .qp-mg) { flex: 1 1 auto; min-height: 0; }
+.qp-mg { flex: 1 1 auto; min-height: 0; }
+.qp-mg-body { flex: 1 1 auto; min-height: 0; align-items: stretch; }
+.qp-mg-plot { min-height: 240px; }
+.qp-mg-canvas { position: relative; flex: 1 1 auto; min-height: 220px; overflow: hidden; }
+.qp-mg-canvas .qp-mg-chart { position: absolute; inset: 0; width: 100%; height: 100%; }
+.qp-mg-body:has(> .qp-mg-card) > .qp-mg-card { align-self: start; }
+@media (max-width: 1100px) { .qp-mg-canvas { flex: none; height: 280px; } }
 .qp-mg-card { padding: 12px 14px; gap: 8px; font-size: 13.5px; }
 .qp-mg-map .c { min-height: 30px; padding: 3px; }
 .qp-mg-how { font-size: 12px; color: var(--text-muted); }

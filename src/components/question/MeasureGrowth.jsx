@@ -1,22 +1,36 @@
 // "Measure my time and space": run your code and the reference on generated inputs of size 8 … 4,096, count steps and
 // peak extra memory (growth.js), fit a class to each, and show where you sit next to the reference.
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Icon from '../ui/Icon.jsx';
-import CodeLines from './CodeLines.jsx';
 import { jobInWorker } from '../../runner/runInWorker.js';
 import { CLASSES, fitClass, measurable } from '../../runner/growth.js';
 
 const RANK = Object.fromEntries(CLASSES.map(([n], i) => [n, i]));
 const fmt = (n) => Number(n).toLocaleString('en');
+const SUP = ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹'];
 const reduce = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
+/** the box's size in CSS pixels, kept up to date (the chart draws at that size, so text never scales) */
+function useBoxSize() {
+  const ref = useRef(null);
+  const [size, setSize] = useState({ w: 520, h: 260 });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(([e]) => setSize({ w: Math.max(260, Math.round(e.contentRect.width)), h: Math.max(200, Math.round(e.contentRect.height)) }));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return [ref, size];
+}
+
 function Chart({ mine, theirs, field, k }) {
-  const W = 640,
-    H = 270,
-    L = 56,
-    R = 16,
+  // drawn at the box's real size: fills the space the panel has, labels stay 12px
+  const [box, { w: W, h: H }] = useBoxSize();
+  const L = 50,
+    R = 14,
     T = 12,
-    B = 36;
+    B = 40;
   const all = [...mine.points, ...theirs.points].map((p) => p[field]).filter((v) => v > 0);
   const top = Math.max(1, Math.ceil(Math.log10(Math.max(...all, 10)) + 0.15));
   const lx = (n) => L + ((Math.log2(n) - 3) / 9) * (W - L - R);
@@ -26,36 +40,44 @@ function Chart({ mine, theirs, field, k }) {
     if (!p.length) return null;
     return (
       <g>
-        <polyline fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" points={p.map((x) => x.join(',')).join(' ')} />
+        <polyline fill="none" stroke={color} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" points={p.map((x) => x.join(',')).join(' ')} />
         {p.map(([x, y], i) => (
-          <circle key={i} cx={x} cy={y} r="3.5" fill={color} />
+          <circle key={i} cx={x} cy={y} r="4.5" fill={color} />
         ))}
       </g>
     );
   };
   return (
-    <svg className="qp-mg-chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={field === 'calls' ? 'Steps by input size, log scales' : 'Peak extra memory by input size, log scales'}>
-      <line className="ax" x1={L} y1={H - B} x2={W - R} y2={H - B} />
-      <line className="ax" x1={L} y1={T} x2={L} y2={H - B} />
-      {Array.from({ length: top + 1 }, (_, e) => (
-        <g key={e}>
-          <line className="ax" x1={L} x2={W - R} y1={ly(10 ** e)} y2={ly(10 ** e)} strokeDasharray="2 4" />
-          <text x={L - 8} y={ly(10 ** e) + 3} textAnchor="end">
-            {e ? `10^${e}` : '1'}
+    <div className="qp-mg-canvas" ref={box}>
+      <svg
+        className="qp-mg-chart"
+        width={W}
+        height={H}
+        viewBox={`0 0 ${W} ${H}`}
+        role="img"
+        aria-label={field === 'calls' ? 'Steps by input size, log scales' : 'Peak extra memory by input size, log scales'}>
+        <line className="ax" x1={L} y1={H - B} x2={W - R} y2={H - B} />
+        <line className="ax" x1={L} y1={T} x2={L} y2={H - B} />
+        {Array.from({ length: top + 1 }, (_, e) => (
+          <g key={e}>
+            <line className="ax" x1={L} x2={W - R} y1={ly(10 ** e)} y2={ly(10 ** e)} strokeDasharray="2 4" />
+            <text x={L - 8} y={ly(10 ** e) + 4} textAnchor="end">
+              {e ? `10${SUP[e]}` : '1'}
+            </text>
+          </g>
+        ))}
+        {[8, 64, 512, 4096].map((n) => (
+          <text key={n} x={lx(n)} y={H - B + 18} textAnchor={n === 4096 ? 'end' : 'middle'}>
+            {fmt(n)}
           </text>
-        </g>
-      ))}
-      {[8, 64, 512, 4096].map((n) => (
-        <text key={n} x={lx(n)} y={H - B + 16} textAnchor={n === 4096 ? 'end' : 'middle'}>
-          {fmt(n)}
+        ))}
+        <text className="ax-t" x={(W + L) / 2} y={H - 4} textAnchor="middle">
+          input size n
         </text>
-      ))}
-      <text x={(W + L) / 2} y={H - 4} textAnchor="middle">
-        n (input size)
-      </text>
-      {line(theirs.points, 'var(--uv)')}
-      {line(mine.points, 'var(--plasma)')}
-    </svg>
+        {line(theirs.points, 'var(--uv)')}
+        {line(mine.points, 'var(--plasma)')}
+      </svg>
+    </div>
   );
 }
 
@@ -81,8 +103,16 @@ function TradeMap({ you, theirs }) {
           <span className="rh">{r}</span>
           {cols.map((c) => (
             <span key={c} className={`c${RANK[c] <= 2 && RANK[r] === 0 ? ' best' : ''}`}>
-              {theirs[0] === c && theirs[1] === r && <span className="qp-mg-mk ref">reference</span>}
-              {you[0] === c && you[1] === r && <span className="qp-mg-mk you">yours</span>}
+              {theirs[0] === c && theirs[1] === r && (
+                <span className="qp-mg-mk ref" title="reference">
+                  ref
+                </span>
+              )}
+              {you[0] === c && you[1] === r && (
+                <span className="qp-mg-mk you" title="yours">
+                  you
+                </span>
+              )}
             </span>
           ))}
         </div>
@@ -145,6 +175,8 @@ export default function MeasureGrowth({ question, code }) {
       }
     : null;
   const ok = f && f.yt && f.ys && f.rt && f.rs;
+  // the untouched starter does no work: comparing it with the reference would only mislead
+  const untouched = m && !m.error && m.code.trim() === (question.starterCode ?? '').trim();
   const lastMine = done && m.mine.points[m.mine.points.length - 1];
   const lastRef = done && m.ref.points[m.ref.points.length - 1];
   const sameN = done && lastMine && m.ref.points.find((p) => p.n === lastMine.n);
@@ -195,8 +227,16 @@ export default function MeasureGrowth({ question, code }) {
             </div>
           </div>
         )}
-        {done && !ok && <p className="qp-faint">Too few sizes finished to name a class.</p>}
-        {ok && (
+        {done && (untouched || !ok) && (
+          <div className="qp-mg-card">
+            <p>
+              {untouched
+                ? 'This is still the starter code, so there is nothing to measure yet. Write your solution, then press Measure: the orange line will show how it grows next to the reference.'
+                : 'Too few sizes finished to name a class. Your run stopped early; see the note under the chart.'}
+            </p>
+          </div>
+        )}
+        {ok && !untouched && (
           <div className="qp-mg-card">
             {field === 'calls' ? (
               <p>
@@ -217,9 +257,6 @@ export default function MeasureGrowth({ question, code }) {
                 ); the reference <span className="qp-val qp-val--ok">O({f.rs.name})</span> (peak {fmt(lastRef.space)} at n = {fmt(lastRef.n)}).
               </p>
             )}
-            {field === 'calls' && hot.length > 0 && (
-              <CodeLines code={m.code} only={hot.map(([l]) => l)} marks={Object.fromEntries(hot.map(([l]) => [l, 'hot']))} />
-            )}
             <span className="lbl-mono">Where you sit</span>
             <TradeMap you={[f.yt.name, f.ys.name]} theirs={[f.rt.name, f.rs.name]} />
             <p>{tradeText([f.yt.name, f.ys.name], [f.rt.name, f.rs.name])}</p>
@@ -227,8 +264,8 @@ export default function MeasureGrowth({ question, code }) {
             <details className="qp-mg-how">
               <summary>How this is measured</summary>
               Both axes of the chart are logarithmic, so a straight line's slope is the power of n. The map puts time across and extra space up; bottom-left is best.
-              {m.mine.stoppedAt ? ` Your run stopped at n = ${fmt(m.mine.stoppedAt)}: ${m.mine.reason}.` : ''} Steps count your own statements; work inside built-ins (sort, includes…) is not counted. Space counts your variables and the collections you create, not the input. Inputs are generated,
-              so they may not hit a question's worst case.
+              {m.mine.stoppedAt ? ` Your run stopped at n = ${fmt(m.mine.stoppedAt)}: ${m.mine.reason}.` : ''} Steps count your own statements; work inside built-ins (sort, includes…) is not counted.
+              Space counts your variables and the collections you create, not the input. Inputs are generated, so they may not hit a question's worst case.
             </details>
           </div>
         )}
