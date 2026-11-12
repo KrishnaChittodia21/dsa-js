@@ -55,7 +55,6 @@ function Examples({ questions, progress, limit, showNumber = false }) {
           <span className="pt-ex-t">{q.title}</span>
           <span className={`pt-ex-d ${DIFF_CLS[q.difficulty]}`}>
             {DIFF_LETTER[q.difficulty]}
-            {showNumber && q.source?.number ? ` · LC ${q.source.number}` : ''}
           </span>
         </Link>
       ))}

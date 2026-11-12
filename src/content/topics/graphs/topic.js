@@ -510,7 +510,7 @@ Same graph, same visited set, same O(V + E) — only the container differs: **st
             type: 'callout',
             variant: 'analogy',
             title: 'Analogy',
-            md: 'DFS is how you read Wikipedia at 2am — click a link, then a link inside that, then another… BFS is how a rumour spreads: everyone who heard it today tells their friends tomorrow.',
+            md: 'DFS is how you read an online encyclopedia at 2am — click a link, then a link inside that, then another… BFS is how a rumour spreads: everyone who heard it today tells their friends tomorrow.',
           },
         ],
       },

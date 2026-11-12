@@ -13,7 +13,7 @@ function nodeOf(vars) {
   return k === undefined ? undefined : { name: k, tree: vars[k] };
 }
 
-/** a level-order list (LeetCode style) as nested { val, left, right } */
+/** a level-order list as nested { val, left, right } */
 function build(list) {
   if (!Array.isArray(list) || !list.length || list[0] === null) return null;
   const root = { val: list[0], left: null, right: null };

@@ -14,6 +14,16 @@ self.onmessage = async (e) => {
     }
     return;
   }
+  if (e.data.type === 'shrink' || e.data.type === 'measure') {
+    // "Where did I go wrong" / "Measure my growth" (growth.js): loaded only when asked for
+    try {
+      const growth = await import('./growth.js');
+      self.postMessage({ id, type: 'done', ...growth[e.data.type](e.data) });
+    } catch (err) {
+      self.postMessage({ id, type: 'done', error: String(err && err.message ? err.message : err) });
+    }
+    return;
+  }
   try {
     const res = runTests(code, question, tests, {
       ...opts,

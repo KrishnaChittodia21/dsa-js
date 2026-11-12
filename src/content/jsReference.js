@@ -641,7 +641,7 @@ s.length;           // → 3
 [...s].length;      // → 2
 s.codePointAt(1);   // → 128512
 s.charCodeAt(1);    // → 55357 (half of a surrogate pair)`,
-        dsaUse: 'Mostly a note: LeetCode inputs are usually ASCII, so `charCodeAt` is fine. Reach for code points only if the problem mentions Unicode.',
+        dsaUse: 'Mostly a note: problem inputs are usually ASCII, so `charCodeAt` is fine. Reach for code points only if the problem mentions Unicode.',
       },
       {
         name: 'repeat',
@@ -1368,7 +1368,7 @@ waysIter(1e6);             // works fine`,
   {
     id: 'structures-missing-in-js',
     title: 'Structures JavaScript Does Not Have',
-    intro: `C++ (STL) and Java (Collections) ship with priority queues, deques, ordered maps and linked lists. JavaScript's standard library only has \`Array\`, \`Map\`, \`Set\` (and typed arrays). LeetCode's JavaScript runtime happens to include the \`@datastructures-js/priority-queue\` and \`@datastructures-js/queue\` packages, but most other judges and live interviews do not, so you should be able to write what you need.
+    intro: `C++ (STL) and Java (Collections) ship with priority queues, deques, ordered maps and linked lists. JavaScript's standard library only has \`Array\`, \`Map\`, \`Set\` (and typed arrays). Some online judges happen to include extra queue packages, but most judges and live interviews do not, so you should be able to write what you need.
 
 The toolkit in this app provides ready-made versions (and the practice editor exposes them as globals). Here is what to use instead of each missing structure.`,
     items: [
@@ -1429,7 +1429,7 @@ sorted;                                 // → [1, 3, 4, 5, 7]`,
       {
         name: 'linked list',
         signature: 'C++ list · Java LinkedList → toolkit ListNode / LinkedList / DoublyLinkedList',
-        description: 'No built-in linked list. LeetCode passes `ListNode` objects; use Toolkit → **Singly Linked List** (`linked-list`) and **Doubly Linked List** (`doubly-linked-list`) for your own designs such as LRU caches.',
+        description: 'No built-in linked list. Linked-list problems pass `ListNode` objects; use Toolkit → **Singly Linked List** (`linked-list`) and **Doubly Linked List** (`doubly-linked-list`) for your own designs such as LRU caches.',
         complexity: 'O(1) insert/remove at a known node',
         example: `const head = arrayToList([1, 2, 3]);
 head.next.val;          // → 2

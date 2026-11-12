@@ -465,13 +465,12 @@ function NextProblem({ q, qs }) {
   const code = draft || full?.starterCode || '';
   const lines = code ? snippet(code) : [];
   const cos = [...new Set(companiesForQuestion(q.id).map((cq) => cq.company))].map((id) => companyById[id]).filter(Boolean);
-  const src = q.source?.platform === 'LeetCode' && q.source.number ? `LC ${q.source.number}` : q.source?.platform || '';
   const r = qs?.lastResult;
   return (
     <aside className="tile tile--raised dash-next" aria-label="Next problem">
       <div className="eyebrow">
         <span>Next problem</span>
-        <span>{src}</span>
+        <span>{topicById[q.topicId]?.title || ''}</span>
       </div>
       <h3>{q.title}</h3>
       <div className="chips">

@@ -1,0 +1,1040 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Next features — designs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Martian+Mono:wght@400;500;600&family=Archivo:wght@800;900&display=swap" />
+<style>
+/* Design mockups for design/next-features/*.md. Colours are the app's own tokens (src/styles/tokens.css).
+   Nothing here is wired into the app; every demo runs on hard-coded data, traced live in this page. */
+:root {
+  --bg: #f1eee9; --surface: #fbfaf7; --surface-3: #ece8e1; --sunken: #e7e2db;
+  --line: rgba(40, 28, 20, 0.09); --line-2: rgba(40, 28, 20, 0.16);
+  --text: #16131a; --text-2: #3f3a44; --text-3: #6f6875;
+  --uv-t: #5536d8; --uv-soft: rgba(85, 54, 216, 0.1);
+  --good: #08705a; --good-soft: rgba(8, 112, 90, 0.12);
+  --bad: #c21a48; --bad-soft: rgba(194, 26, 72, 0.09);
+  --warn: #9a5b00; --warn-soft: rgba(154, 91, 0, 0.1);
+  --plasma-fill: linear-gradient(135deg, #ffb07a 0%, #ff6b2c 38%, #ff2e88 100%);
+  --uv-fill: linear-gradient(180deg, #a996ff, #5b3fe0);
+  --good-fill: linear-gradient(180deg, #6ff0cf, #0d9c7c);
+  --cell: #fff; --cell-edge: #d9d2c8;
+  --f-display: 'Archivo', 'Arial Black', system-ui, sans-serif;
+  --f-ui: 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-mono: 'Martian Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 10px 30px -18px rgba(60,40,30,.45);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0b0a0c; --surface: #16141a; --surface-3: #25212c; --sunken: #0e0d11;
+    --line: rgba(255, 236, 222, 0.08); --line-2: rgba(255, 236, 222, 0.14);
+    --text: #f5f1ec; --text-2: #c3bbb4; --text-3: #8d857f;
+    --uv-t: #a996ff; --uv-soft: rgba(169, 150, 255, 0.13);
+    --good: #4fe3c1; --good-soft: rgba(79, 227, 193, 0.12);
+    --bad: #ff5577; --bad-soft: rgba(255, 85, 119, 0.11);
+    --warn: #ffb547; --warn-soft: rgba(255, 181, 71, 0.1);
+    --cell: #221f28; --cell-edge: #0a090c;
+    --shadow: 0 1px 0 rgba(255,255,255,.05) inset, 0 14px 34px -18px rgba(0,0,0,.9);
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #0b0a0c; --surface: #16141a; --surface-3: #25212c; --sunken: #0e0d11;
+  --line: rgba(255, 236, 222, 0.08); --line-2: rgba(255, 236, 222, 0.14);
+  --text: #f5f1ec; --text-2: #c3bbb4; --text-3: #8d857f;
+  --uv-t: #a996ff; --uv-soft: rgba(169, 150, 255, 0.13);
+  --good: #4fe3c1; --good-soft: rgba(79, 227, 193, 0.12);
+  --bad: #ff5577; --bad-soft: rgba(255, 85, 119, 0.11);
+  --warn: #ffb547; --warn-soft: rgba(255, 181, 71, 0.1);
+  --cell: #221f28; --cell-edge: #0a090c;
+  --shadow: 0 1px 0 rgba(255,255,255,.05) inset, 0 14px 34px -18px rgba(0,0,0,.9);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 70px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition-duration: 0s !important; animation: none !important; } }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.6 var(--f-ui); }
+a { color: var(--uv-t); }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+
+/* top bar */
+.top { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 14px; height: 56px; }
+.brand { font: 800 16px var(--f-display); letter-spacing: -0.01em; white-space: nowrap; }
+.brand span { background: var(--plasma-fill); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.toc { display: flex; gap: 4px; overflow-x: auto; flex: 1; scrollbar-width: none; }
+.toc a { padding: 6px 11px; border-radius: 999px; color: var(--text-2); text-decoration: none; font: 600 12.5px var(--f-ui); white-space: nowrap; }
+.toc a:hover { background: var(--surface-3); color: var(--text); }
+.theme-btn { flex: none; border: 1px solid var(--line-2); background: var(--surface); color: var(--text); border-radius: 999px; padding: 6px 12px; font: 600 12px var(--f-ui); cursor: pointer; }
+
+/* hero */
+.hero { padding: 48px 0 20px; }
+.kicker { font: 500 11.5px var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--uv-t); }
+h1 { font: 900 clamp(34px, 6vw, 60px)/0.98 var(--f-display); letter-spacing: -0.02em; margin: 10px 0 14px; }
+h1 i { font-style: normal; background: var(--plasma-fill); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lede { max-width: 720px; color: var(--text-2); font-size: 17px; margin: 0; }
+.note { margin-top: 16px; padding: 12px 14px; border-radius: 12px; background: var(--warn-soft); color: var(--text); font-size: 14px; max-width: 780px; }
+
+/* cards & tables */
+.card { background: var(--surface); border-radius: 18px; box-shadow: var(--shadow), 0 0 0 1px var(--line); padding: 20px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 14px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 500 11px var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+.scroll-x { overflow-x: auto; }
+.pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font: 600 11.5px var(--f-ui); background: var(--surface-3); color: var(--text-2); white-space: nowrap; }
+.pill.first { background: var(--plasma-fill); color: #fff; }
+.pill.keep { background: var(--good-soft); color: var(--good); }
+
+/* feature sections */
+section.feat { padding: 56px 0 8px; border-top: 1px solid var(--line); margin-top: 40px; }
+.feat-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 14px; }
+.feat-n { font: 900 46px/1 var(--f-display); color: transparent; -webkit-text-stroke: 1.5px var(--text-3); }
+h2 { font: 800 clamp(24px, 3.4vw, 34px)/1.1 var(--f-display); letter-spacing: -0.01em; margin: 0; }
+.feat-sub { color: var(--text-2); margin: 10px 0 18px; max-width: 760px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 10px; margin-bottom: 18px; }
+.fact { padding: 12px 14px; border-radius: 12px; background: var(--surface); box-shadow: 0 0 0 1px var(--line); font-size: 13.5px; color: var(--text-2); }
+.fact b { display: block; font: 500 10.5px var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 4px; }
+.fact.new b { color: var(--uv-t); }
+.label { font: 500 10.5px var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); margin: 22px 0 8px; }
+details.spec { margin-top: 14px; }
+details.spec summary { cursor: pointer; font-weight: 600; color: var(--text-2); }
+details.spec ul { color: var(--text-2); font-size: 14px; }
+
+/* mock app frame */
+.mock { border-radius: 18px; background: var(--surface); box-shadow: var(--shadow), 0 0 0 1px var(--line); overflow: hidden; }
+.mock-bar { display: flex; gap: 2px; padding: 6px 8px 0; background: var(--surface-3); border-bottom: 1px solid var(--line-2); overflow-x: auto; scrollbar-width: none; }
+.mock-tab { padding: 8px 12px; font: 600 12.5px var(--f-ui); color: var(--text-3); border-radius: 9px 9px 0 0; white-space: nowrap; }
+.mock-tab.on { background: var(--surface); color: var(--text); box-shadow: 0 -2px 0 var(--uv-t) inset; }
+.mock-tab.new::after { content: 'new'; margin-left: 6px; padding: 1px 6px; border-radius: 99px; background: var(--uv-soft); color: var(--uv-t); font-size: 10px; }
+.mock-body { padding: 18px; }
+.code { font: 12.5px/1.75 var(--f-mono); background: var(--sunken); border-radius: 12px; padding: 10px 0; overflow-x: auto; }
+.code .ln { display: flex; padding: 0 14px; white-space: pre; transition: background-color .2s ease; }
+.code .ln i { font-style: normal; width: 26px; flex: none; color: var(--text-3); user-select: none; }
+.code .ln.hot { background: var(--bad-soft); box-shadow: 3px 0 0 var(--bad) inset; }
+.code .ln.mark { background: var(--uv-soft); box-shadow: 3px 0 0 var(--uv-t) inset; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.in { flex: 1 1 200px; min-height: 38px; padding: 0 12px; border-radius: 10px; border: 0; background: var(--sunken); color: var(--text); font: 13px var(--f-mono); box-shadow: inset 0 0 0 1px var(--line-2); }
+.in:focus { outline: none; box-shadow: inset 0 0 0 1px var(--uv-t), 0 0 0 4px var(--uv-soft); }
+.btn { min-height: 38px; padding: 0 16px; border-radius: 999px; border: 0; cursor: pointer; font: 700 13px var(--f-ui); background: var(--surface-3); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); transition: transform .12s var(--ease-out); }
+.btn:active:not(:disabled) { transform: scale(0.97); }
+.btn.primary { background: var(--plasma-fill); color: #fff; box-shadow: 0 8px 18px -10px #ff2e88; }
+.btn.sm { min-height: 32px; padding: 0 12px; font-size: 12px; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn:focus-visible, .theme-btn:focus-visible, .seg button:focus-visible { outline: 2px solid var(--uv-t); outline-offset: 2px; }
+.verdict { margin-top: 12px; padding: 12px 14px; border-radius: 12px; font-size: 14px; display: none; }
+.verdict.show { display: block; }
+.verdict.ok { background: var(--good-soft); color: var(--good); }
+.verdict.no { background: var(--surface-3); color: var(--text-2); }
+.verdict.err { background: var(--warn-soft); color: var(--warn); }
+.hint { margin-top: 10px; font-size: 13.5px; color: var(--text-2); }
+.hint li { margin: 3px 0; }
+.faint { color: var(--text-3); font-size: 13px; }
+
+/* ---------- the array stage (cells + sliding pointers), like the app's scenes ---------- */
+.stage { background: var(--sunken); border-radius: 14px; padding: 12px 14px 14px; background-image: radial-gradient(circle at 1px 1px, var(--line-2) 1px, transparent 0); background-size: 14px 14px; }
+.viz { position: relative; padding-top: 44px; padding-bottom: 20px; margin: 0 auto; }
+.cells { display: flex; gap: 6px; }
+.cell { position: relative; width: 42px; height: 42px; flex: none; display: grid; place-items: center; border-radius: 9px; font: 600 14px var(--f-mono); color: var(--text); background: var(--cell);
+  box-shadow: inset 0 0 0 1px var(--line-2), 4px 4px 0 -1px var(--cell-edge), 4px 4px 0 0 var(--line-2);
+  transition: background-color .25s ease, color .25s ease, opacity .25s ease, transform .25s var(--ease-out); }
+.cell small { position: absolute; bottom: -19px; font: 500 9.5px var(--f-mono); color: var(--text-3); }
+.cell.visited { background: color-mix(in srgb, var(--uv-t) 16%, var(--cell)); }
+.cell.min { background: var(--good-fill); color: #062b22; }
+.cell.active { background: var(--uv-fill); color: #fff; transform: translateY(-3px); }
+.cell.found { background: var(--good-fill); color: #062b22; transform: translateY(-3px); }
+.cell.out { opacity: 0.28; }
+.cell.skipped { opacity: 0.5; outline: 2px dashed var(--bad); outline-offset: 2px; }
+.ptr { position: absolute; left: 0; top: 18px; width: 42px; text-align: center; font: 600 10.5px/1 var(--f-mono); color: var(--uv-t); opacity: 0; pointer-events: none;
+  transition: transform .38s var(--ease-in-out), opacity .2s ease; }
+.ptr::after { content: ''; display: block; width: 0; height: 0; margin: 3px auto 0; border: 5px solid transparent; border-top-color: currentColor; border-bottom: 0; }
+.ptr.p2 { color: #e0287a; }
+.ptr.p3 { color: var(--good); }
+.vars { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.var { padding: 3px 9px; border-radius: 8px; background: var(--surface); font: 500 11.5px var(--f-mono); box-shadow: inset 0 0 0 1px var(--line-2); transition: background-color .3s ease, box-shadow .3s ease; }
+.var.changed { background: var(--uv-soft); box-shadow: inset 0 0 0 1px var(--uv-t); }
+.var.ret { background: var(--surface-3); font-weight: 600; }
+.var.ret.bad { background: var(--bad-soft); color: var(--bad); box-shadow: inset 0 0 0 1px var(--bad); }
+.var.ret.good { background: var(--good-soft); color: var(--good); box-shadow: inset 0 0 0 1px var(--good); }
+.ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.ctl .say { font-size: 13px; color: var(--text-2); flex: 1 1 200px; min-height: 1.6em; }
+
+/* hack lanes */
+.lanes { display: grid; gap: 10px; margin-top: 14px; }
+.lane-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font: 600 13px var(--f-ui); }
+.tag { padding: 2px 8px; border-radius: 99px; font: 600 11px var(--f-ui); opacity: 0; transition: opacity .25s ease; }
+.tag.show { opacity: 1; }
+.tag.bad { background: var(--bad-soft); color: var(--bad); }
+.tag.good { background: var(--good-soft); color: var(--good); }
+
+/* divergence */
+.testrow { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--bad-soft); font-size: 13.5px; }
+.testrow .x { color: var(--bad); font-weight: 700; }
+.btn.diag { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; background: var(--surface-3); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); transition: transform .12s var(--ease-out), box-shadow .15s ease; }
+.btn.diag svg { width: 14px; height: 14px; stroke: var(--uv-t); }
+@media (hover: hover) and (pointer: fine) { .btn.diag:hover:not(:disabled) { box-shadow: inset 0 0 0 1px var(--uv-t); } }
+.shrink { font: 12.5px/1.9 var(--f-mono); color: var(--text-2); margin: 12px 0; white-space: pre; overflow-x: auto; }
+.shrink span { display: block; opacity: 0; transform: translateY(4px); transition: opacity .25s var(--ease-out), transform .25s var(--ease-out); }
+.shrink span.on { opacity: 1; transform: none; }
+.found { padding: 14px; border-radius: 12px; background: var(--uv-soft); }
+.found p { margin: 0 0 8px; }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px; margin-top: 14px; }
+.steps { font: 12px var(--f-mono); }
+.steps td, .steps th { padding: 6px 8px; }
+.steps tr.cur td { background: var(--uv-soft); }
+.steps tr.div td { background: var(--bad-soft); }
+.steps tr.future td { opacity: 0.35; }
+.pane-title { font: 600 13px var(--f-ui); margin-bottom: 6px; display: flex; justify-content: space-between; }
+
+/* chart */
+.chart { width: 100%; height: auto; display: block; }
+.chart .ax { stroke: var(--line-2); }
+.chart text { fill: var(--text-3); font: 10px var(--f-mono); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--text-2); margin-top: 6px; }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; }
+.result { margin-top: 12px; font-size: 15px; }
+.result b.bad { color: var(--bad); }
+.result b.good { color: var(--good); }
+
+/* rosetta */
+.seg { display: inline-flex; padding: 3px; border-radius: 999px; background: var(--surface-3); gap: 2px; }
+.seg button { border: 0; background: none; padding: 6px 12px; border-radius: 999px; font: 600 12.5px var(--f-ui); color: var(--text-2); cursor: pointer; }
+.seg button[aria-pressed='true'] { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.ros { width: 100%; border-collapse: separate; border-spacing: 0; font: 12px/1.6 var(--f-mono); }
+.ros th { font: 600 12px var(--f-ui); text-transform: none; letter-spacing: 0; color: var(--text); background: var(--surface-3); }
+.ros td { white-space: pre; border-bottom: 1px dashed var(--line); padding: 5px 10px; transition: background-color .2s ease, box-shadow .2s ease; }
+.ros tr:hover td { background: var(--surface-3); }
+.ros tr.cur td { background: var(--uv-soft); }
+.ros tr.cur td.first { box-shadow: inset 3px 0 0 var(--uv-t); }
+.ros td.boiler { color: var(--text-3); }
+.trapnote { display: block; white-space: normal; font: 11.5px/1.4 var(--f-ui); color: var(--warn); margin-top: 3px; padding: 4px 8px; border-radius: 8px; background: var(--warn-soft); transition: transform .25s var(--ease-out); }
+.ros tr.cur .trapnote { transform: translateX(4px); }
+.ros .hide { display: none; }
+
+/* radar */
+.dots { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; }
+.dot { width: 22px; height: 22px; border-radius: 7px; background: var(--surface-3); box-shadow: inset 0 0 0 1px var(--line-2); transition: background-color .2s ease, transform .2s var(--ease-out); display: grid; place-items: center; font: 600 10px var(--f-mono); color: transparent; }
+.dot.run { transform: scale(1.12); box-shadow: inset 0 0 0 2px var(--uv-t); }
+.dot.ok { background: var(--good-fill); color: #062b22; }
+.dot.no { background: linear-gradient(180deg, #ff8aa3, #d81b4f); color: #fff; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 999px; font: 600 12.5px var(--f-ui); color: var(--text-3); box-shadow: inset 0 0 0 1px var(--line-2); transition: background-color .25s ease, color .25s ease, box-shadow .25s ease; }
+.chip.ok { color: var(--good); background: var(--good-soft); box-shadow: none; }
+.chip.no { color: var(--bad); background: var(--bad-soft); box-shadow: none; }
+.chip.na { color: var(--text-3); box-shadow: none; border: 1px dashed var(--line-2); }
+.radar { width: 100%; max-width: 440px; height: auto; display: block; margin: 0 auto; }
+.radar .ring { fill: none; stroke: var(--line-2); }
+.radar .axis { stroke: var(--line-2); }
+.radar text { fill: var(--text-2); font: 600 11px var(--f-ui); }
+.radar text.weak { fill: var(--bad); }
+.radar .pct { fill: var(--text-3); font: 9px var(--f-mono); }
+
+/* predict */
+.predict { padding: 14px; border-radius: 14px; background: var(--uv-soft); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--uv-t) 30%, transparent); }
+.predict-k { font: 500 10.5px var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--uv-t); }
+.toggle { display: inline-flex; align-items: center; gap: 8px; font: 600 13px var(--f-ui); color: var(--text-2); cursor: pointer; }
+.toggle input { accent-color: #5b3fe0; width: 16px; height: 16px; }
+.streak { font: 12px var(--f-mono); color: var(--text-3); }
+.counter { display: inline-flex; align-items: baseline; gap: 8px; padding: 8px 14px; border-radius: 12px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-2); }
+.counter b { font: 800 26px/1 var(--f-display); font-variant-numeric: tabular-nums; display: inline-block; transition: transform .18s var(--ease-out); }
+.counter b.tick { transform: translateY(-3px); color: var(--uv-t); }
+.counter span { font: 12px var(--f-mono); color: var(--text-3); }
+
+/* growth: time-space map */
+.pill.now { background: var(--uv-soft); color: var(--uv-t); }
+.tsmap { display: grid; grid-template-columns: 54px repeat(5, minmax(0, 1fr)); gap: 4px; font: 11px var(--f-mono); }
+.tsmap .h { color: var(--text-3); text-align: center; padding: 2px 0; }
+.tsmap .rh { color: var(--text-3); align-self: center; text-align: right; padding-right: 6px; }
+.tsmap .c { min-height: 46px; border-radius: 8px; background: var(--sunken); box-shadow: inset 0 0 0 1px var(--line); display: flex; flex-wrap: wrap; gap: 4px; align-items: center; justify-content: center; padding: 4px; }
+.tsmap .c.best { background: var(--good-soft); }
+.mk { padding: 2px 8px; border-radius: 99px; font: 600 11px var(--f-ui); color: #fff; animation: mk .35s var(--ease-out) both; }
+.mk.you { background: #ff2e88; } .mk.ref { background: #7b5cff; animation-delay: .25s; }
+@keyframes mk { from { opacity: 0; transform: scale(.9) translateY(4px); } }
+footer { padding: 50px 0 70px; color: var(--text-3); font-size: 13px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">DSA Journey<span>.js</span></div>
+    <nav class="toc" aria-label="Features">
+      <a href="#overview">Overview</a>
+      <a href="#hack">02 Hack it</a>
+      <a href="#diverge">01 Where it went wrong</a>
+      <a href="#growth">03 Big-O: time + space</a>
+      <a href="#rosetta">04 Rosetta</a>
+      <a href="#radar">05 Edge radar</a>
+      <a href="#predict">06 Predict</a>
+      <a href="more.html">07–15 more →</a>
+    </nav>
+    <button class="theme-btn" id="theme" type="button">Theme: auto</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero" id="overview">
+    <div class="kicker">Design preview · no code changed · 2026-11-11</div>
+    <h1>Six features <i>nobody else</i> has.</h1>
+    <p class="lede">Each one builds on what only this app has: your code runs in the browser in three languages, and any run can be recorded step by step. Every demo below is animated from a real trace of the code shown, computed in this page; the specs are in the <code>.md</code> files next to it.</p>
+    <p class="note"><b>Correction to the first pitch:</b> Animate already has <i>Compare with the reference</i> (one variable), <i>Break it</i> (the app finds the bug) and a <i>Measure</i> meter. Features 01–03 build only what is missing.</p>
+  </div>
+
+  <div class="card scroll-x">
+    <table>
+      <thead><tr><th>Order</th><th>Feature</th><th>Already in the app</th><th>What is new</th><th>Effort</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill first">1st</span></td><td><a href="#hack"><b>02 Hack it</b></a></td><td>Break it: the app injects a bug and finds the input</td><td>You write the input that breaks a wrong solution, then watch both runs part ways</td><td>3 batches</td></tr>
+        <tr><td><span class="pill first">2nd</span></td><td><a href="#diverge"><b>01 Where it went wrong</b></a></td><td><code>firstDivergence</code> on one scene variable, inside Animate</td><td>From a failing test: shrink the input, diff every shared variable, name the line</td><td>4 batches</td></tr>
+        <tr><td><span class="pill first">3rd</span></td><td><a href="#growth"><b>03 Measure my Big-O</b></a></td><td>Measure meter: steps on existing tests vs target</td><td>Generated sizes, fitted class, hot line</td><td>3–4 batches</td></tr>
+        <tr><td><span class="pill">later</span></td><td><a href="#rosetta"><b>04 Rosetta view</b></a></td><td>JS / Java / C++ references for all 426</td><td>Aligned, and one animation lights the same line in all three</td><td>2 batches</td></tr>
+        <tr><td><span class="pill">later</span></td><td><a href="#radar"><b>05 Edge-case radar</b></a></td><td><code>scenario</code> / <code>hint</code> prose on tests</td><td>Tagged tests, a radar of the edge cases you miss</td><td>3 batches</td></tr>
+        <tr><td><span class="pill">optional</span></td><td><a href="#predict"><b>06 Predict, then run</b></a></td><td><code>PredictCard</code> on authored animations</td><td>Predictions on your own code, revealed by the animation</td><td>1–2 batches</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="label">Rules that keep existing features safe</div>
+  <div class="facts">
+    <div class="fact"><b>Additive only</b>New logic in new files. Existing files get only the listed mount points (one tab, button or import); new props default to today's behaviour.</div>
+    <div class="fact"><b>One switch</b>A <code>labs</code> preference (default on). Off = the app is exactly today's app.</div>
+    <div class="fact"><b>Progress stays compatible</b>New keys only (<code>hacks</code>, <code>growth</code>, <code>edgeMisses</code>, <code>predictions</code>). Old exports still import.</div>
+    <div class="fact"><b>Workers, lazy, no deps</b>Every extra run in a worker, only on a button press. Each feature is its own chunk. No new packages.</div>
+    <div class="fact"><b>Animations reuse the player</b>The array stages here stand for the app's existing <code>Panel</code> / run player, which already handles reduced motion and pause / step.</div>
+  </div>
+
+  <!-- ====================================================== 02 HACK IT -->
+  <section class="feat" id="hack">
+    <div class="feat-head"><span class="feat-n">02</span><h2>Hack it</h2><span class="pill first">build 1st</span></div>
+    <p class="feat-sub">The app shows a solution that passes the examples but is wrong. You write the input that breaks it, and both runs play side by side on <i>your</i> input until they part ways.</p>
+    <div class="facts">
+      <div class="fact"><b>Exists</b>Break it (<code>AnimateRun.jsx</code>) runs <code>mutants()</code> and shows the first that fails. The app finds bug and input.</div>
+      <div class="fact new"><b>New</b>A script keeps mutants that <strong>pass every example</strong> but fail some test (<code>hackable.json</code>). You find the input.</div>
+      <div class="fact"><b>Mount point</b>One "Hack it" tab in <code>CodeWorkspace.jsx</code> (JS, only when the question has a hack) + <code>HACK_DONE</code>.</div>
+    </div>
+
+    <div class="label">Mockup · press Try it on the example, then try [1, 5]</div>
+    <div class="mock">
+      <div class="mock-bar"><span class="mock-tab">Test results</span><span class="mock-tab">Test cases</span><span class="mock-tab">Custom input</span><span class="mock-tab">Complexity</span><span class="mock-tab">Animate</span><span class="mock-tab on new">Hack it</span></div>
+      <div class="mock-body">
+        <div class="row" style="justify-content:space-between"><b>Best Time to Buy and Sell Stock</b><span class="faint mono">wrong solution 1 of 1</span></div>
+        <p style="margin:6px 0 12px;color:var(--text-2)">This solution passes both examples. Find an input where it gives the wrong answer.</p>
+        <div class="code" id="hack-code"></div>
+        <div class="row" style="margin-top:12px">
+          <label for="hack-in" class="mono faint">prices =</label>
+          <input id="hack-in" class="in" value="[7, 1, 5, 3, 6, 4]" spellcheck="false" autocomplete="off" />
+          <button class="btn primary" id="hack-go" type="button">Try it</button>
+          <button class="btn" id="hack-hint" type="button">Hint</button>
+        </div>
+        <p class="faint" style="margin:6px 0 0">Constraints: 1 ≤ prices.length · 0 ≤ prices[i] ≤ 10⁴ · the stage draws up to 10 prices</p>
+        <div class="lanes">
+          <div class="stage">
+            <div class="lane-head"><span>Wrong solution</span><span class="tag bad" id="hw-tag"></span></div>
+            <div class="scroll-x"><div id="hw-viz"></div></div>
+            <div class="vars" id="hw-vars"></div>
+          </div>
+          <div class="stage">
+            <div class="lane-head"><span>Reference</span><span class="tag good" id="hr-tag"></span></div>
+            <div class="scroll-x"><div id="hr-viz"></div></div>
+            <div class="vars" id="hr-vars"></div>
+          </div>
+        </div>
+        <div class="ctl">
+          <button class="btn sm" id="h-play" type="button">▶ Play</button>
+          <button class="btn sm" id="h-step" type="button">Step →</button>
+          <button class="btn sm" id="h-again" type="button">↺ Restart</button>
+          <span class="say" id="h-say" aria-live="polite"></span>
+        </div>
+        <div class="verdict" id="hack-v" role="status" aria-live="polite"></div>
+        <ol class="hint" id="hack-hints"></ol>
+      </div>
+    </div>
+    <details class="spec"><summary>States, hints and validity</summary>
+      <ul>
+        <li><b>Broken</b>: outputs differ (the question's own <code>compareResult</code> mode). Cells the wrong run never looked at get a red dashed outline.</li>
+        <li><b>Survived</b>: same output; a nudge, never the answer.</li>
+        <li><b>Invalid</b>: wrong type for <code>paramTypes</code>, outside an optional <code>validInput</code> predicate, or the reference itself fails.</li>
+        <li>Hints, one at a time: the bug's label → its line → the breaking test's scenario → the breaking input.</li>
+        <li>Spec: <code>02-hack-it.md</code>.</li>
+      </ul>
+    </details>
+  </section>
+
+  <!-- ====================================================== 01 DIVERGENCE (approved, unchanged) -->
+  <section class="feat" id="diverge">
+    <div class="feat-head"><span class="feat-n">01</span><h2>Where did I go wrong?</h2><span class="pill first">build 2nd</span><span class="pill keep">design approved</span></div>
+    <p class="feat-sub">From a failing test: shrink the input to the smallest one that still fails, record your run and the reference, and stop at the first step where your state differs. LeetCode shows input / expected / output; nobody shows <i>where</i>.</p>
+    <div class="facts">
+      <div class="fact"><b>Exists</b><code>firstDivergence()</code>: one variable chosen by the scene, only inside Animate, only after you press Compare.</div>
+      <div class="fact new"><b>New</b>Every shared variable, any question, the line, and an input shrinker (delta debugging, ≤ 60 runs / 4 s).</div>
+      <div class="fact"><b>Mount point</b>A button under each failing JS test; optional <code>start</code> prop on <code>AnimateRun</code> for "Watch from here".</div>
+    </div>
+
+    <div class="label">Mockup · press the button, then step through</div>
+    <div class="mock">
+      <div class="mock-bar"><span class="mock-tab on">Test results</span><span class="mock-tab">Test cases</span><span class="mock-tab">Custom input</span><span class="mock-tab">Complexity</span><span class="mock-tab">Animate</span></div>
+      <div class="mock-body">
+        <div class="testrow"><span class="x">✗ Test 1 · Example 1</span><span class="mono">prices = [7, 1, 5, 3, 6, 4]</span><span class="mono">expected 5 · got 7</span><button class="btn sm diag" id="dv-go" type="button"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>Find where it went wrong</button></div>
+        <div class="shrink" id="dv-shrink" aria-live="polite"></div>
+        <div id="dv-found" hidden>
+          <div class="found">
+            <p class="mono">Smallest failing input: <b>prices = [7]</b> · yours 7 · correct 0</p>
+            <p><b>Step 1 · line 2:</b> your <code>minPrice</code> starts at <b style="color:var(--bad)">0</b>; in the correct run it starts at <b style="color:var(--good)">Infinity</b>.</p>
+            <div class="code" id="dv-code"></div>
+          </div>
+          <div class="row" style="margin-top:12px">
+            <button class="btn" id="dv-prev" type="button">← Step</button>
+            <button class="btn" id="dv-next" type="button">Step →</button>
+            <span class="faint mono" id="dv-at"></span>
+          </div>
+          <div class="pair">
+            <div><div class="pane-title"><span>Your run</span><span class="faint mono">4 steps</span></div><div class="scroll-x"><table class="steps" id="dv-mine"></table></div></div>
+            <div><div class="pane-title"><span>Reference run</span><span class="faint mono">4 steps</span></div><div class="scroll-x"><table class="steps" id="dv-ref"></table></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <details class="spec"><summary>Honesty rules</summary>
+      <ul>
+        <li>Same approach? If under half of your variable names exist in the reference, or step counts differ more than 10×, it says "your approach is different" instead of claiming a bug step.</li>
+        <li>In-place questions compare the argument snapshots too.</li>
+        <li>Java / C++ wait for M8b (tracing your own Java/C++ code); the shrinker alone could ship for them earlier.</li>
+        <li>Spec: <code>01-where-it-went-wrong.md</code>.</li>
+      </ul>
+    </details>
+  </section>
+
+  <!-- ====================================================== 03 GROWTH (approved, unchanged) -->
+  <section class="feat" id="growth">
+    <div class="feat-head"><span class="feat-n">03</span><h2>Measure my Big-O: time and space</h2><span class="pill first">build 3rd</span><span class="pill keep">design approved</span><span class="pill now">+ space merged from 12</span></div>
+    <p class="feat-sub">Run your passing code on sizes 8 … 4,096, count steps (not milliseconds), fit the usual classes and draw your curve next to the reference's. The same sweep also counts the extra memory your code holds, so you see both classes and the trade between them. "Beats 73%" is wall-clock noise; this tells you the class.</p>
+    <div class="facts">
+      <div class="fact"><b>Exists</b>Measure meter: <code>run.calls</code> on the existing (mostly tiny) tests vs <code>bigO(target)</code>, as a ratio table.</div>
+      <div class="fact new"><b>New</b>Count-only runs (no snapshots, cap 5·10⁶), seeded generators from <code>paramTypes</code>, a least-squares fit, the hot line. <b style="display:inline;font:inherit;letter-spacing:0;text-transform:none;color:var(--uv-t)">Space:</b> the same run tracks peak extra slots (your variables + sizes of arrays / Maps / Sets you create).</div>
+      <div class="fact"><b>Mount point</b>A lazy section at the bottom of the Complexity tab; one new <code>count</code> message in the worker.</div>
+    </div>
+
+    <div class="label">Mockup · your code: two nested loops</div>
+    <div class="mock">
+      <div class="mock-bar"><span class="mock-tab">Test results</span><span class="mock-tab">Test cases</span><span class="mock-tab">Custom input</span><span class="mock-tab on">Complexity</span><span class="mock-tab">Animate</span></div>
+      <div class="mock-body">
+        <p class="faint" style="margin-top:0">(The tab's existing content stays above.)</p>
+        <div class="row" style="justify-content:space-between"><b>Measure my growth</b><button class="btn primary" id="gr-go" type="button">Measure</button></div>
+        <div class="row" style="justify-content:space-between;margin:6px 0 4px">
+          <p class="faint" style="margin:0" id="gr-sub">sizes 8 … 4,096 · seeded random inputs · step counts</p>
+          <div class="seg" role="group" aria-label="What to chart"><button type="button" id="gr-t" aria-pressed="true">Time · steps</button><button type="button" id="gr-s" aria-pressed="false">Space · extra slots</button></div>
+        </div>
+        <svg class="chart" id="gr-svg" viewBox="0 0 640 280" role="img" aria-label="Step count by input size, log scales"></svg>
+        <div class="legend"><span><i class="sw" style="background:#ff2e88"></i>yours</span><span><i class="sw" style="background:#7b5cff"></i>reference</span><span class="faint">log–log axes: a straight line's slope is the power of n</span></div>
+        <div class="result" id="gr-res" aria-live="polite"></div>
+        <div class="code" id="gr-code" style="margin-top:10px" hidden></div>
+        <div id="gr-map" hidden>
+          <div class="label">Where you sit · time across, extra space up (bottom-left is best)</div>
+          <div class="tsmap" id="gr-grid"></div>
+          <p class="result" id="gr-trade"></p>
+        </div>
+      </div>
+    </div>
+    <details class="spec"><summary>Fit and generators</summary>
+      <ul>
+        <li>Candidates 1, log n, n, n log n, n², n³, 2ⁿ; fit on the larger half of the sizes; "between n and n log n" when two are within 0.02. The log–log slope is shown too.</li>
+        <li>Default generators per <code>paramTypes</code>; an optional <code>growth.gen</code> per question for sorted / structured inputs; <code>worst: true</code> for worst-case.</li>
+        <li>Space: peak of (live local variables + lengths / sizes of arrays, Maps, Sets and objects your code allocated) per run; the input itself and memory inside built-ins (e.g. <code>sort</code>) are not counted, and the chart says so. Fitted on the same candidates.</li>
+        <li>Spec: <code>03-measure-my-big-o.md</code>.</li>
+      </ul>
+    </details>
+  </section>
+
+  <!-- ====================================================== 04 ROSETTA -->
+  <section class="feat" id="rosetta">
+    <div class="feat-head"><span class="feat-n">04</span><h2>Rosetta view</h2><span class="pill">later</span></div>
+    <p class="feat-sub">The JS, Java and C++ references side by side, lines aligned automatically. Press Play: one run drives all three, so the same line lights up in every language while lo, mid and hi move over the array.</p>
+    <div class="facts">
+      <div class="fact"><b>Exists</b><code>solution.code</code> + <code>loadReference(id, lang)</code> for Java / C++; all 852 pass. The JS run is already recordable.</div>
+      <div class="fact new"><b>New</b>Line alignment by token similarity (a diff-like DP), boilerplate dimmed, ~20 trap rules; the JS run's line maps to the aligned row.</div>
+      <div class="fact"><b>Mount point</b>One "Compare languages" tab in <code>SolutionDetails.jsx</code>.</div>
+    </div>
+
+    <div class="label">Mockup · binary search for 13 · press Play</div>
+    <div class="mock">
+      <div class="mock-bar"><span class="mock-tab">Explanation</span><span class="mock-tab">Code</span><span class="mock-tab on new">Compare languages</span></div>
+      <div class="mock-body">
+        <div class="stage"><div class="scroll-x"><div id="ros-viz"></div></div></div>
+        <div class="ctl">
+          <button class="btn sm" id="r-play" type="button">▶ Play</button>
+          <button class="btn sm" id="r-step" type="button">Step →</button>
+          <button class="btn sm" id="r-again" type="button">↺ Restart</button>
+          <span class="say" id="r-say" aria-live="polite"></span>
+        </div>
+        <div class="row" style="justify-content:space-between;margin:14px 0 10px">
+          <span class="faint">Turn a language off (at least two stay):</span>
+          <div class="seg" role="group" aria-label="Languages shown" id="ros-seg">
+            <button type="button" data-l="js" aria-pressed="true">JavaScript</button>
+            <button type="button" data-l="java" aria-pressed="true">Java</button>
+            <button type="button" data-l="cpp" aria-pressed="true">C++</button>
+          </div>
+        </div>
+        <div class="scroll-x"><table class="ros" id="ros"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================== 05 RADAR -->
+  <section class="feat" id="radar">
+    <div class="feat-head"><span class="feat-n">05</span><h2>Edge-case radar</h2><span class="pill">later</span></div>
+    <p class="feat-sub">Every test gets categories (empty, single, duplicates, negatives, large n …), tagged by a script from the arguments' shape and the test's own words. Submit lights them up test by test; over time the radar shows which edge cases <i>you</i> forget.</p>
+    <div class="facts">
+      <div class="fact"><b>Exists</b>Each test's <code>scenario</code> and <code>hint</code> prose; <code>argsGen</code> / <code>timeLimitMs</code> on big tests.</div>
+      <div class="fact new"><b>New</b><code>testTags.json</code> (generated), <code>EDGE_RESULT</code> counts per tag, a Progress page radar.</div>
+      <div class="fact"><b>Stored</b>Counts only: <code>edgeMisses[tag] = { failed, seen }</code>. No code, no inputs.</div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <div class="label">Mockup · press Submit</div>
+        <div class="mock"><div class="mock-bar"><span class="mock-tab on">Test results</span><span class="mock-tab">Test cases</span></div>
+          <div class="mock-body">
+            <div class="row" style="justify-content:space-between"><b id="rd-sum">13 tests</b><button class="btn primary sm" id="rd-go" type="button">Submit</button></div>
+            <div class="dots" id="rd-dots" aria-hidden="true"></div>
+            <div class="chips" id="rd-chips"></div>
+            <p class="faint mono" id="rd-fail" style="margin:12px 0 0;min-height:1.5em"></p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="label">Mockup · Progress page · your edge cases</div>
+        <div class="mock"><div class="mock-body">
+          <svg class="radar" id="rd-svg" viewBox="0 0 440 340" role="img" aria-label="Pass rate per edge-case category: yours vs the course average"></svg>
+          <div class="legend" style="justify-content:center"><span><i class="sw" style="background:#ff2e88"></i>you (86 submits)</span><span><i class="sw" style="background:#7b5cff"></i>average over the course</span></div>
+          <p class="faint" style="text-align:center;margin:6px 0 0" id="rd-note">Press Submit to draw it.</p>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================== 06 PREDICT -->
+  <section class="feat" id="predict">
+    <div class="feat-head"><span class="feat-n">06</span><h2>Predict, then run</h2><span class="pill">optional</span></div>
+    <p class="feat-sub">An opt-in toggle next to Run. Before the run you guess one thing about your own code; the run then plays and counts it in front of you.</p>
+    <div class="facts">
+      <div class="fact"><b>Exists</b><code>PredictCard</code> on authored pattern animations (not touched).</div>
+      <div class="fact new"><b>New</b>Questions picked from your code: a final value, a line's hit count, or pass/fail.</div>
+      <div class="fact"><b>Cost</b>One extra recorded run, only with the toggle on. Run itself is unchanged.</div>
+    </div>
+    <div class="label">Mockup · guess, then Run</div>
+    <div class="mock">
+      <div class="mock-body">
+        <div class="grid2" style="align-items:start">
+          <div class="code" id="pr-code"></div>
+          <div>
+            <div class="row" style="justify-content:space-between;margin-bottom:10px">
+              <label class="toggle"><input type="checkbox" id="pr-on" checked /> Predict first</label>
+              <span class="streak" id="pr-streak">streak 0</span>
+            </div>
+            <div class="predict" id="pr-box">
+              <div class="predict-k">Predict</div>
+              <p style="margin:4px 0 10px">On <span class="mono">prices = [7, 1, 5, 3, 6, 4]</span>, how many times does <b>line 4</b> run?</p>
+              <div class="row"><input class="in" id="pr-in" inputmode="numeric" placeholder="your guess" aria-label="Your guess" style="flex:0 1 150px" /><button class="btn primary" id="pr-go" type="button">Run</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="stage" style="margin-top:14px">
+          <div class="row" style="justify-content:space-between"><span class="counter"><b id="pr-n">0</b><span>times line 4 ran</span></span><div class="vars" id="pr-vars"></div></div>
+          <div class="scroll-x"><div id="pr-viz"></div></div>
+        </div>
+        <div class="verdict" id="pr-v" role="status" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>Design preview for <code>design/next-features/</code>. Mockups only: the demos trace hard-coded examples in this page and change nothing in the app.</footer>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const show = (v) => (v === Infinity ? '∞' : v);
+function codeBlock(el, lines, marks = {}) {
+  el.innerHTML = lines.map((l, k) => `<div class="ln ${marks[k + 1] || ''}"><i>${k + 1}</i>${esc(l)}</div>`).join('');
+}
+
+// theme: auto → dark → light
+(() => {
+  const btn = $('theme');
+  const order = ['auto', 'dark', 'light'];
+  let i = 0;
+  btn.addEventListener('click', () => {
+    i = (i + 1) % 3;
+    if (order[i] === 'auto') delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = order[i];
+    btn.textContent = 'Theme: ' + order[i];
+  });
+})();
+
+// ---------- shared: an array stage with sliding pointers (stands for the app's Panel / run player) ----------
+const CW = 48; // cell 42 + gap 6
+function arrayViz(el, values, ptrs = []) {
+  el.innerHTML = `<div class="viz" style="width:${values.length * CW - 6}px">` +
+    ptrs.map((p, k) => `<span class="ptr p${k + 1}" data-p="${p}">${p}</span>`).join('') +
+    '<div class="cells">' + values.map((v, i) => `<span class="cell">${esc(v)}<small>${i}</small></span>`).join('') + '</div></div>';
+  const cells = [...el.querySelectorAll('.cell')];
+  const marks = {};
+  el.querySelectorAll('.ptr').forEach((x) => (marks[x.dataset.p] = x));
+  return {
+    set({ cls = {}, at = {}, level = {} } = {}) {
+      cells.forEach((c, i) => (c.className = 'cell' + (cls[i] ? ' ' + cls[i] : '')));
+      for (const p in marks) {
+        const i = at[p];
+        const x = marks[p];
+        if (i == null || i < 0 || i >= cells.length) { x.style.opacity = '0'; continue; }
+        x.style.opacity = '1';
+        x.style.transform = `translate(${i * CW}px, ${-(level[p] || 0) * 15}px)`;
+      }
+    },
+  };
+}
+// play / step / restart over frames 0..n()-1
+function player(n, render, ids, ms = 700) {
+  let k = 0, timer = null;
+  const [play, step, again] = ids.map($);
+  const stop = () => { clearInterval(timer); timer = null; play.textContent = '▶ Play'; };
+  const go = (to) => {
+    k = Math.max(0, Math.min(n() - 1, to));
+    render(k);
+    step.disabled = k >= n() - 1;
+    if (k >= n() - 1) stop();
+  };
+  play.addEventListener('click', () => {
+    if (timer) return stop();
+    if (k >= n() - 1) go(0);
+    play.textContent = '❚❚ Pause';
+    timer = setInterval(() => go(k + 1), ms);
+  });
+  step.addEventListener('click', () => { stop(); go(k + 1); });
+  again.addEventListener('click', () => { stop(); go(0); });
+  return { go, stop, start() { stop(); go(0); play.click(); } };
+}
+// variable chips; a value that just changed is highlighted
+function chips(el, list, prev) {
+  el.innerHTML = list.map(([k, v, extra = '']) => `<span class="var ${extra} ${prev && prev[k] !== undefined && prev[k] !== v ? 'changed' : ''}">${k}${v === undefined ? '' : ' = ' + show(v)}</span>`).join('');
+  return Object.fromEntries(list.map(([k, v]) => [k, v]));
+}
+
+// ---------- 02 Hack it: really runs, both runs animated ----------
+const WRONG = [
+  'function maxProfit(prices) {',
+  '  let min = prices[0], best = 0;',
+  '  for (let i = 1; i < prices.length - 1; i++) {',
+  '    best = Math.max(best, prices[i] - min);',
+  '    min = Math.min(min, prices[i]);',
+  '  }',
+  '  return best;',
+  '}',
+];
+codeBlock($('hack-code'), WRONG);
+// one frame per loop iteration; `vis` = cells the run has read
+function trace(p, wrong) {
+  const F = [];
+  const vis = [];
+  let best = 0, min, minIdx;
+  if (wrong) { min = p[0]; minIdx = 0; vis.push(0); } else { min = Infinity; minIdx = -1; }
+  F.push({ i: null, min, best, minIdx, vis: [...vis] });
+  const from = wrong ? 1 : 0, to = wrong ? p.length - 1 : p.length;
+  for (let i = from; i < to; i++) {
+    best = Math.max(best, p[i] - min);
+    if (p[i] < min) { min = p[i]; minIdx = i; }
+    vis.push(i);
+    F.push({ i, min, best, minIdx, vis: [...vis] });
+  }
+  F.push({ i: null, min, best, minIdx, vis: [...vis], done: true });
+  return F;
+}
+const H = { n: 0, W: [], R: [], vw: null, vr: null, pw: null, pr: null, verdict: null };
+function hackSetup(p) {
+  const shown = p.slice(0, 10);
+  H.n = shown.length;
+  H.W = trace(shown, true);
+  H.R = trace(shown, false);
+  H.vw = arrayViz($('hw-viz'), shown, ['i']);
+  H.vr = arrayViz($('hr-viz'), shown, ['i']);
+  H.pw = H.pr = null;
+  H.verdict = null;
+}
+function laneRender(viz, varsEl, F, k, wrong, prevKey) {
+  const f = F[Math.min(k, F.length - 1)];
+  const cls = {};
+  f.vis.forEach((i) => (cls[i] = 'visited'));
+  if (f.minIdx >= 0) cls[f.minIdx] = 'min';
+  if (f.i != null) cls[f.i] = 'active';
+  if (f.done && wrong) for (let i = 0; i < H.n; i++) if (!f.vis.includes(i)) cls[i] = 'skipped';
+  viz.set({ cls, at: { i: f.i } });
+  const same = H.W[H.W.length - 1].best === H.R[H.R.length - 1].best;
+  const list = [['min', f.min], ['best', f.best]];
+  if (f.done) list.push([`return ${f.best}`, undefined, 'ret ' + (same || !wrong ? 'good' : 'bad')]);
+  H[prevKey] = chips(varsEl, list, H[prevKey]);
+  return f;
+}
+const hackFrames = () => Math.max(H.W.length, H.R.length);
+const hackPlayer = player(hackFrames, (k) => {
+  const fw = laneRender(H.vw, $('hw-viz').parentElement.nextElementSibling, H.W, k, true, 'pw');
+  const fr = laneRender(H.vr, $('hr-viz').parentElement.nextElementSibling, H.R, k, false, 'pr');
+  const tw = $('hw-tag'), tr = $('hr-tag');
+  tw.textContent = H.W.length < H.R.length ? 'stopped early' : 'done';
+  tw.classList.toggle('show', !!fw.done);
+  tr.textContent = 'done';
+  tr.classList.toggle('show', !!fr.done);
+  $('h-say').textContent = k === 0 ? 'Start: the wrong one reads prices[0] as min; the reference starts at ∞.'
+    : fr.done && fw.done ? 'Both finished.'
+    : fw.done ? `The wrong loop has ended; the reference is still reading day ${fr.i}.`
+    : `Both at day ${fr.i ?? '–'}.`;
+  if (k === hackFrames() - 1 && H.verdict) H.verdict();
+}, ['h-play', 'h-step', 'h-again'], 750);
+
+function wrongFn(p) { let min = p[0], best = 0; for (let i = 1; i < p.length - 1; i++) { best = Math.max(best, p[i] - min); min = Math.min(min, p[i]); } return best; }
+function refFn(p) { let min = Infinity, best = 0; for (const x of p) { best = Math.max(best, x - min); min = Math.min(min, x); } return best; }
+const HINTS = [
+  'The bug: <b>Loop stops one step early</b>.',
+  'It is on <b>line 3</b>. Which day does the loop never look at?',
+  'The test that catches it: <b>Two days rising</b>.',
+  'A breaking input: <code>[1, 2]</code>.',
+];
+let hintN = 0;
+$('hack-hint').addEventListener('click', (e) => {
+  if (hintN >= HINTS.length) return;
+  $('hack-hints').insertAdjacentHTML('beforeend', `<li>${HINTS[hintN++]}</li>`);
+  if (hintN === 2) codeBlock($('hack-code'), WRONG, { 3: 'mark' });
+  if (hintN >= HINTS.length) e.currentTarget.disabled = true;
+});
+$('hack-go').addEventListener('click', () => {
+  const v = $('hack-v');
+  const say = (cls, html) => { v.className = 'verdict show ' + cls; v.innerHTML = html; };
+  v.className = 'verdict';
+  let p;
+  try { p = JSON.parse($('hack-in').value); } catch { return say('err', '<b>Invalid input:</b> write a JSON array, e.g. <code>[3, 1, 4]</code>.'); }
+  if (!Array.isArray(p) || !p.every((x) => Number.isInteger(x))) return say('err', '<b>Invalid input:</b> <code>prices</code> is an <code>int[]</code>.');
+  if (p.length < 1 || p.some((x) => x < 0 || x > 1e4)) return say('err', '<b>Outside the constraints:</b> at least one price, each between 0 and 10⁴. The reference only promises answers for valid inputs.');
+  const w = wrongFn(p), r = refFn(p);
+  hackSetup(p);
+  codeBlock($('hack-code'), WRONG, hintN >= 2 ? { 3: 'mark' } : {});
+  H.verdict = () => {
+    if (w !== r) {
+      say('ok', `<b>✓ Broken!</b> The wrong solution says <b>${w}</b>, the correct answer is <b>${r}</b>. The dashed cells are the days it never looked at.<br><span style="color:var(--text-2)">Progress records <code>HACK_DONE</code>.</span>`);
+      codeBlock($('hack-code'), WRONG, { 3: 'hot' });
+    } else say('no', `<b>Survived.</b> Both say <b>${r}</b>. Watch which cells the wrong run skips, then make the best sell day one of them.`);
+  };
+  hackPlayer.start();
+});
+hackSetup([7, 1, 5, 3, 6, 4]);
+hackPlayer.go(0);
+
+// ---------- 01 Divergence (approved, unchanged) ----------
+codeBlock($('dv-code'), ['function maxProfit(prices) {', '  let minPrice = 0, best = 0;', '  for (const p of prices) {', '    best = Math.max(best, p - minPrice);', '    minPrice = Math.min(minPrice, p);', '  }', '  return best;', '}'], { 2: 'hot' });
+const MINE = [
+  { line: 2, v: 'minPrice = 0, best = 0', div: true },
+  { line: 4, v: 'p = 7, best = 7' },
+  { line: 5, v: 'minPrice = 0' },
+  { line: 7, v: 'return 7' },
+];
+const REF = [
+  { line: 2, v: 'minPrice = Infinity, best = 0', div: true },
+  { line: 4, v: 'p = 7, best = 0' },
+  { line: 5, v: 'minPrice = 7' },
+  { line: 7, v: 'return 0' },
+];
+let dvAt = 0;
+function drawSteps() {
+  const row = (s, k) => `<tr class="${k === dvAt ? (s.div ? 'div' : 'cur') : k > dvAt ? 'future' : ''}"><td>${k + 1}</td><td>line ${s.line}</td><td>${s.v}</td></tr>`;
+  const head = '<tr><th>#</th><th>line</th><th>state</th></tr>';
+  $('dv-mine').innerHTML = head + MINE.map(row).join('');
+  $('dv-ref').innerHTML = head + REF.map(row).join('');
+  $('dv-at').textContent = `step ${dvAt + 1} of 4${dvAt === 0 ? ' · first difference' : ''}`;
+  $('dv-prev').disabled = dvAt === 0;
+  $('dv-next').disabled = dvAt === 3;
+}
+$('dv-prev').addEventListener('click', () => { dvAt--; drawSteps(); });
+$('dv-next').addEventListener('click', () => { dvAt++; drawSteps(); });
+$('dv-go').addEventListener('click', (e) => {
+  e.currentTarget.disabled = true;
+  const box = $('dv-shrink');
+  const lines = [
+    'shrinking  [7, 1, 5, 3, 6, 4]  still fails (yours 7, correct 5)',
+    '           [7, 1, 5]           still fails (yours 7, correct 4)',
+    '           [7, 1]              still fails (yours 7, correct 0)',
+    '           [7]                 still fails (yours 7, correct 0) · smallest',
+    'recording both runs on [7] · comparing 2 shared variables (minPrice, best)',
+  ];
+  const gap = reduceMotion() ? 0 : 260;
+  box.innerHTML = lines.map((l) => `<span>${esc(l)}</span>`).join('');
+  [...box.children].forEach((s, k) => setTimeout(() => s.classList.add('on'), gap * k));
+  setTimeout(() => { $('dv-found').hidden = false; drawSteps(); }, gap * lines.length + (gap ? 150 : 0));
+});
+
+// ---------- 03 Growth: time and space from one sweep ----------
+const SIZES = [8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
+const METRIC = {
+  time: { yours: SIZES.map((n) => (n * (n - 1)) / 2 + n), ref: SIZES.map((n) => 2 * n + 2), top: 7.2, ticks: [1, 3, 5, 7], sub: 'sizes 8 … 4,096 · seeded random inputs · step counts', aria: 'Step count by input size, log scales' },
+  // peak extra slots: yours holds best, i, j; the reference holds min, best
+  space: { yours: SIZES.map(() => 3), ref: SIZES.map(() => 2), top: 4, ticks: [0, 1, 2, 3, 4], sub: 'same sweep · peak extra slots (your variables + collections you create; not the input)', aria: 'Peak extra memory by input size, log scales' },
+};
+let grMetric = 'time', grK = 0;
+function drawGrowth(k = grK) {
+  grK = k;
+  const m = METRIC[grMetric], svg = $('gr-svg');
+  const W = 640, Ht = 280, L = 52, R = 14, T = 14, B = 34;
+  const lx = (n) => L + ((Math.log2(n) - 3) / 9) * (W - L - R);
+  const ly = (c) => Ht - B - (Math.log10(c) / m.top) * (Ht - T - B);
+  let g = `<line class="ax" x1="${L}" y1="${Ht - B}" x2="${W - R}" y2="${Ht - B}"/><line class="ax" x1="${L}" y1="${T}" x2="${L}" y2="${Ht - B}"/>`;
+  for (const n of [8, 64, 512, 4096]) g += `<text x="${lx(n)}" y="${Ht - B + 18}" text-anchor="middle">${n.toLocaleString('en')}</text>`;
+  for (const e of m.ticks) g += `<text x="${L - 8}" y="${ly(10 ** e) + 3}" text-anchor="end">${e ? '10^' + e : '1'}</text><line class="ax" x1="${L}" x2="${W - R}" y1="${ly(10 ** e)}" y2="${ly(10 ** e)}" stroke-dasharray="2 4"/>`;
+  g += `<text x="${(W + L) / 2}" y="${Ht - 4}" text-anchor="middle">n (input size)</text>`;
+  const path = (arr, col) => {
+    const pts = arr.slice(0, k).map((c, i) => [lx(SIZES[i]), ly(c)]);
+    if (!pts.length) return '';
+    return `<polyline fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round" points="${pts.map((q) => q.join(',')).join(' ')}"/>` + pts.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.5" fill="${col}"/>`).join('');
+  };
+  svg.innerHTML = g + path(m.ref, '#7b5cff') + path(m.yours, '#ff2e88');
+  svg.setAttribute('aria-label', m.aria);
+  $('gr-sub').textContent = m.sub;
+}
+const GR_TEXT = {
+  time: 'Time: yours grows like <b class="bad">n²</b> (slope 1.98, fit 0.99). The reference grows like <b class="good">n</b> (slope 1.01). Lines 4–5 run <b>99%</b> of all steps:',
+  space: 'Space: yours holds <b class="good">O(1)</b> extra (3 slots at every size); the reference also holds <b class="good">O(1)</b> (2 slots). <span class="faint">The input array and memory inside built-ins are not counted.</span>',
+};
+let grDone = false;
+for (const [id, key] of [['gr-t', 'time'], ['gr-s', 'space']]) $(id).addEventListener('click', () => {
+  grMetric = key; $('gr-t').setAttribute('aria-pressed', key === 'time'); $('gr-s').setAttribute('aria-pressed', key === 'space');
+  drawGrowth();
+  if (grDone) { $('gr-res').innerHTML = GR_TEXT[key]; $('gr-code').hidden = key !== 'time'; }
+});
+function drawMap() {
+  const COLS = ['1', 'log n', 'n', 'n log n', 'n²'], ROWS = ['n', 'log n', '1'];
+  const at = { you: ['n²', '1'], ref: ['n', '1'] };
+  let h = '<span></span>' + COLS.map((c) => `<span class="h">${c}</span>`).join('');
+  for (const r of ROWS) {
+    h += `<span class="rh">${r}</span>`;
+    for (const c of COLS) {
+      const ci = COLS.indexOf(c), ri = ROWS.indexOf(r);
+      const mk = (at.ref[0] === c && at.ref[1] === r ? '<span class="mk ref">reference</span>' : '') + (at.you[0] === c && at.you[1] === r ? '<span class="mk you">yours</span>' : '');
+      h += `<span class="c ${ci <= 2 && ri === 2 ? 'best' : ''}">${mk}</span>`;
+    }
+  }
+  $('gr-grid').innerHTML = h;
+  $('gr-map').hidden = false;
+  $('gr-trade').innerHTML = 'Same space, more time: your nested loops are <b class="bad">slower and save no memory</b>, so this is not a trade, just a cost. A real trade looks like a hash map: O(n) time for O(n) space.';
+}
+drawGrowth(0);
+$('gr-go').addEventListener('click', (e) => {
+  e.currentTarget.disabled = true;
+  const res = $('gr-res');
+  let n = 0;
+  const step = () => {
+    n++;
+    drawGrowth(n);
+    res.textContent = `measuring n = ${SIZES[n - 1].toLocaleString('en')}… (time and space in one run)`;
+    if (n < SIZES.length) setTimeout(step, reduceMotion() ? 0 : 180);
+    else {
+      grDone = true;
+      res.innerHTML = GR_TEXT[grMetric];
+      const c = $('gr-code');
+      c.hidden = grMetric !== 'time';
+      codeBlock(c, ['function maxProfit(prices) {', '  let best = 0;', '  for (let i = 0; i < prices.length; i++)', '    for (let j = i + 1; j < prices.length; j++)', '      best = Math.max(best, prices[j] - prices[i]);', '  return best;', '}'], { 4: 'hot', 5: 'hot' });
+      drawMap();
+    }
+  };
+  step();
+});
+
+// ---------- 04 Rosetta: one run lights the same row in three languages ----------
+const ROWS = [
+  { js: 'function search(nums, target) {', java: 'class Solution {\n  public int search(int[] nums, int target) {', cpp: 'class Solution {\npublic:\n  int search(vector<int>& nums, int target) {', boiler: true },
+  { js: '  let lo = 0, hi = nums.length - 1;', java: '    int lo = 0, hi = nums.length - 1;', cpp: '    int lo = 0, hi = nums.size() - 1;' },
+  { js: '  while (lo <= hi) {', java: '    while (lo <= hi) {', cpp: '    while (lo <= hi) {' },
+  { js: '    const mid = (lo + hi) >> 1;', java: '      int mid = lo + (hi - lo) / 2;', cpp: '      int mid = (lo + hi) / 2;', trap: { cpp: '(lo + hi) can overflow int for large indexes: use lo + (hi - lo) / 2.' } },
+  { js: '    if (nums[mid] === target) return mid;', java: '      if (nums[mid] == target) return mid;', cpp: '      if (nums[mid] == target) return mid;' },
+  { js: '    if (nums[mid] < target) lo = mid + 1;', java: '      if (nums[mid] < target) lo = mid + 1;', cpp: '      if (nums[mid] < target) lo = mid + 1;' },
+  { js: '    else hi = mid - 1;', java: '      else hi = mid - 1;', cpp: '      else hi = mid - 1;' },
+  { js: '  }', java: '    }', cpp: '    }', boiler: true },
+  { js: '  return -1;', java: '    return -1;', cpp: '    return -1;' },
+  { js: '}', java: '  }\n}', cpp: '  }\n};', boiler: true },
+];
+const BS = [1, 3, 5, 7, 9, 11, 13, 15], TARGET = 13;
+const RF = (() => {
+  const F = [];
+  let lo = 0, hi = BS.length - 1, mid = null;
+  F.push({ row: 1, lo, hi, mid, say: `lo = 0, hi = ${hi}: the whole array is in play.` });
+  for (;;) {
+    F.push({ row: 2, lo, hi, mid: null, say: lo <= hi ? `lo ${lo} ≤ hi ${hi}: keep searching.` : 'lo > hi: not found.' });
+    if (lo > hi) { F.push({ row: 8, lo, hi, mid: null, say: 'return -1' }); break; }
+    mid = (lo + hi) >> 1;
+    F.push({ row: 3, lo, hi, mid, say: `mid = ${mid}. In C++ this sum can overflow; see the note.` });
+    if (BS[mid] === TARGET) { F.push({ row: 4, lo, hi, mid, found: true, say: `nums[${mid}] = ${TARGET}: found. Return ${mid}.` }); break; }
+    F.push({ row: 4, lo, hi, mid, say: `nums[${mid}] = ${BS[mid]} ≠ ${TARGET}.` });
+    if (BS[mid] < TARGET) { lo = mid + 1; F.push({ row: 5, lo, hi, mid, say: `${BS[mid]} < ${TARGET}: drop the left half, lo = ${lo}.` }); }
+    else { hi = mid - 1; F.push({ row: 6, lo, hi, mid, say: `${BS[mid]} > ${TARGET}: drop the right half, hi = ${hi}.` }); }
+  }
+  return F;
+})();
+const shownLang = { js: true, java: true, cpp: true };
+let rosRow = -1;
+function drawRos() {
+  const langs = ['js', 'java', 'cpp'];
+  const name = { js: 'JavaScript', java: 'Java', cpp: 'C++' };
+  const firstShown = langs.find((l) => shownLang[l]);
+  let h = '<tr>' + langs.map((l) => `<th class="${shownLang[l] ? '' : 'hide'}">${name[l]}</th>`).join('') + '</tr>';
+  ROWS.forEach((r, i) => {
+    h += `<tr class="${i === rosRow ? 'cur' : ''}">` + langs.map((l) => {
+      const t = r.trap?.[l];
+      return `<td class="${shownLang[l] ? '' : 'hide'} ${l === firstShown ? 'first' : ''} ${r.boiler ? 'boiler' : ''}">${esc(r[l])}${t ? `<span class="trapnote">⚠ ${esc(t)}</span>` : ''}</td>`;
+    }).join('') + '</tr>';
+  });
+  $('ros').innerHTML = h;
+}
+document.querySelectorAll('#ros-seg button').forEach((b) => b.addEventListener('click', () => {
+  const l = b.dataset.l;
+  if (shownLang[l] && Object.values(shownLang).filter(Boolean).length <= 2) return; // keep at least two
+  shownLang[l] = !shownLang[l];
+  b.setAttribute('aria-pressed', String(shownLang[l]));
+  drawRos();
+}));
+const rosViz = arrayViz($('ros-viz'), BS, ['lo', 'mid', 'hi']);
+const rosPlayer = player(() => RF.length, (k) => {
+  const f = RF[k];
+  const cls = {};
+  BS.forEach((_, i) => { if (i < f.lo || i > f.hi) cls[i] = 'out'; });
+  if (f.mid != null) cls[f.mid] = f.found ? 'found' : 'active';
+  rosViz.set({ cls, at: { lo: f.lo, mid: f.mid, hi: f.hi }, level: { mid: 1, hi: f.lo === f.hi ? 2 : 0 } });
+  rosRow = f.row;
+  drawRos();
+  $('r-say').textContent = `${k + 1}/${RF.length} · ${f.say}`;
+}, ['r-play', 'r-step', 'r-again'], 900);
+rosPlayer.go(0);
+
+// ---------- 05 Edge radar ----------
+const TESTS = [['single', 1], ['two items', 1], ['two items', 1], ['all equal', 1], ['zero', 1], ['duplicates', 0], ['single', 1], ['two items', 1], ['duplicates', 1], ['zero', 1], ['all equal', 1], ['large n', 0], ['large n', 1]];
+const CHIPS = ['single', 'two items', 'all equal', 'duplicates', 'zero', 'large n', 'negatives'];
+function drawChips(state) {
+  $('rd-chips').innerHTML = CHIPS.map((c) => {
+    const s = state[c];
+    const cls = c === 'negatives' && state.done ? 'na' : s === 'no' ? 'no' : s === 'ok' ? 'ok' : '';
+    const mark = cls === 'ok' ? '✓ ' : cls === 'no' ? '✗ ' : cls === 'na' ? '– ' : '';
+    return `<span class="chip ${cls}">${mark}${c}${cls === 'na' ? ' · not tested' : ''}</span>`;
+  }).join('');
+}
+$('rd-dots').innerHTML = TESTS.map(() => '<span class="dot"></span>').join('');
+drawChips({});
+const CATS = ['empty', 'single', 'two items', 'duplicates', 'negatives', 'sorted', 'all equal', 'large n'];
+const YOU = [0.9, 1, 0.95, 0.57, 0.92, 0.88, 0.96, 0.79];
+const AVG = [0.86, 0.95, 0.9, 0.83, 0.8, 0.9, 0.93, 0.84];
+function radar(t) {
+  const cx = 220, cy = 168, R = 118;
+  const pt = (i, v) => { const a = -Math.PI / 2 + (i * 2 * Math.PI) / CATS.length; return [cx + R * v * Math.cos(a), cy + R * v * Math.sin(a)]; };
+  const poly = (vals, s) => vals.map((v, i) => pt(i, v * s).join(',')).join(' ');
+  let g = '';
+  for (const r of [0.25, 0.5, 0.75, 1]) g += `<polygon class="ring" points="${poly(CATS.map(() => r), 1)}"/>`;
+  CATS.forEach((c, i) => {
+    const [x, y] = pt(i, 1);
+    const [lx, ly] = pt(i, 1.2);
+    g += `<line class="axis" x1="${cx}" y1="${cy}" x2="${x}" y2="${y}"/>`;
+    const weak = YOU[i] < AVG[i] - 0.1 && t >= 1;
+    g += `<text x="${lx}" y="${ly + 4}" text-anchor="${Math.abs(lx - cx) < 4 ? 'middle' : lx < cx ? 'end' : 'start'}" class="${weak ? 'weak' : ''}">${c}${weak ? ' ⚠' : ''}</text>`;
+  });
+  g += `<text class="pct" x="${cx + 3}" y="${cy - R * 0.5 + 3}">50%</text><text class="pct" x="${cx + 3}" y="${cy - R + 3}">100%</text>`;
+  if (t > 0) {
+    g += `<polygon points="${poly(AVG, t)}" fill="rgba(123,92,255,.10)" stroke="#7b5cff" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+    g += `<polygon points="${poly(YOU, t)}" fill="rgba(255,46,136,.16)" stroke="#ff2e88" stroke-width="2.2" stroke-linejoin="round"/>`;
+    YOU.forEach((v, i) => { const [x, y] = pt(i, v * t); g += `<circle cx="${x}" cy="${y}" r="3.2" fill="#ff2e88"/>`; });
+  }
+  $('rd-svg').innerHTML = g;
+}
+radar(0);
+function growRadar() {
+  if (reduceMotion()) { radar(1); return; }
+  const t0 = performance.now(), dur = 900;
+  const tick = (now) => {
+    const x = Math.min(1, (now - t0) / dur);
+    radar(1 - Math.pow(1 - x, 3)); // ease-out
+    if (x < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+$('rd-go').addEventListener('click', (e) => {
+  e.currentTarget.disabled = true;
+  const dots = [...$('rd-dots').children];
+  const state = {};
+  let k = 0, passed = 0;
+  const gap = reduceMotion() ? 0 : 170;
+  const next = () => {
+    if (k > 0) dots[k - 1].classList.remove('run');
+    if (k === TESTS.length) {
+      state.done = true;
+      drawChips(state);
+      $('rd-sum').innerHTML = `<span style="color:var(--bad)">${passed} / ${TESTS.length} passed</span> · edge cases`;
+      $('rd-fail').textContent = 'duplicates: [2, 2, 1] expected 1, got 2  ·  large n: time limit (n = 10⁵)';
+      $('rd-note').innerHTML = 'Weak spot: <b style="color:var(--bad)">duplicates</b>, 26 points under the course average. 7 questions practise it.';
+      growRadar();
+      return;
+    }
+    const [tag, ok] = TESTS[k];
+    dots[k].classList.add('run', ok ? 'ok' : 'no');
+    dots[k].textContent = ok ? '✓' : '✗';
+    if (ok) passed++;
+    state[tag] = state[tag] === 'no' || !ok ? 'no' : 'ok';
+    drawChips(state);
+    k++;
+    setTimeout(next, gap);
+  };
+  next();
+});
+
+// ---------- 06 Predict: the run counts line 4 in front of you ----------
+const PCODE = ['function maxProfit(prices) {', '  let min = Infinity, best = 0;', '  for (const p of prices) {', '    best = Math.max(best, p - min);', '    min = Math.min(min, p);', '  }', '  return best;', '}'];
+codeBlock($('pr-code'), PCODE, { 4: 'mark' });
+const PP = [7, 1, 5, 3, 6, 4];
+const PF = trace(PP, false);
+const pViz = arrayViz($('pr-viz'), PP, ['p']);
+let pPrev = null;
+function predictFrame(k) {
+  const f = PF[k];
+  const cls = {};
+  f.vis.forEach((i) => (cls[i] = 'visited'));
+  if (f.minIdx >= 0) cls[f.minIdx] = 'min';
+  if (f.i != null) cls[f.i] = 'active';
+  pViz.set({ cls, at: { p: f.i } });
+  const n = $('pr-n');
+  n.textContent = String(f.vis.length);
+  n.classList.toggle('tick', f.i != null);
+  codeBlock($('pr-code'), PCODE, f.i != null ? { 4: 'hot' } : f.done ? { 7: 'mark' } : { 4: 'mark' });
+  pPrev = chips($('pr-vars'), [['min', f.min], ['best', f.best]], pPrev);
+}
+predictFrame(0);
+let streak = 0, pTimer = null;
+$('pr-on').addEventListener('change', (e) => { $('pr-box').hidden = !e.target.checked; });
+$('pr-go').addEventListener('click', () => {
+  const raw = $('pr-in').value.trim();
+  const g = Number(raw);
+  const v = $('pr-v');
+  if (raw === '' || !Number.isFinite(g)) { v.className = 'verdict show err'; v.textContent = 'Type a number first.'; return; }
+  v.className = 'verdict';
+  clearTimeout(pTimer);
+  pPrev = null;
+  let k = 0;
+  const gap = reduceMotion() ? 0 : 650;
+  const step = () => {
+    predictFrame(k);
+    if (k < PF.length - 1) { k++; pTimer = setTimeout(step, gap); return; }
+    if (g === 6) { streak++; v.className = 'verdict show ok'; v.innerHTML = '<b>✓ Right:</b> line 4 ran 6 times, once per price. Then the tests run as usual.'; }
+    else { streak = 0; v.className = 'verdict show no'; v.innerHTML = `<b>You said ${esc(g)}, it was 6.</b> The loop body runs once for every price, including the first (min is ∞ there, so p − min is −∞ and best stays 0).`; }
+    $('pr-streak').textContent = 'streak ' + streak;
+  };
+  step();
+});
+</script>
+</body>
+</html>

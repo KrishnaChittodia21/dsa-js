@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
+import { KindTag } from '../components/ui/primitives.jsx';
 import { Link, useParams } from 'react-router';
 import Icon from '../components/ui/Icon.jsx';
 import EvidenceBadge from '../components/EvidenceBadge.jsx';
 import BigOChip, { firstBigO, useQuestionComplexities } from '../components/BigOChip.jsx';
 import { useProgress } from '../state/ProgressContext.jsx';
-import { companyById, companies, companyQuestions, companySources, EVIDENCE_LEVELS, topicById, topics } from '../content/index.js';
+import { companyById, companies, companyQuestions, EVIDENCE_LEVELS, topicById, topics } from '../content/index.js';
 import NotFound from './NotFound.jsx';
 import { sortCompanies } from '../lib/companySort.js';
 
@@ -102,30 +103,6 @@ function CompanyCard({ s, selected, index }) {
   );
 }
 
-function SourcesList() {
-  const entries = Object.entries(companySources);
-  if (!entries.length) return null;
-  return (
-    <details className="details cmp-sources">
-      <summary>All sources ({entries.length})</summary>
-      <ul>
-        {entries.map(([k, s]) => (
-          <li key={k}>
-            <a href={s.url} target="_blank" rel="noreferrer">
-              {s.label} <Icon name="external" size={11} />
-            </a>{' '}
-            <span className="cmp-src-meta mono">
-              {EVIDENCE_LEVELS[s.evidence]?.label || s.evidence}
-              {s.accessed ? ` · accessed ${s.accessed}` : ''}
-            </span>
-            {s.description && <p>{s.description}</p>}
-          </li>
-        ))}
-      </ul>
-    </details>
-  );
-}
-
 function Detail({ s }) {
   const { progress } = useProgress();
   const [evidence, setEvidence] = useState('all');
@@ -138,7 +115,6 @@ function Detail({ s }) {
   const topicIds = [...new Set(entries.map((e) => e.topicId))].filter(Boolean);
   const nextUp = s.inCourse.find((e) => progress.questions[e.questionId]?.status !== 'solved');
   const visible = all ? shown : shown.slice(0, 15);
-  const srcKeys = [...new Set(entries.flatMap((e) => e.sources || []))];
   const ready = s.inCourse.map((e) => progress.questions[e.questionId]?.status);
   const orderedReady = [...ready.filter((x) => x === 'solved'), ...ready.filter((x) => x === 'attempted'), ...ready.filter((x) => x !== 'solved' && x !== 'attempted')];
 
@@ -180,7 +156,7 @@ function Detail({ s }) {
               <span className="chip chip--todo">{s.inCourse.length - s.solved - s.attempted} to do</span>
             </div>
             {entries.length > s.inCourse.length && (
-              <p className="cmp-side-note mono">{entries.length - s.inCourse.length} entries link out (not in the course yet)</p>
+              <p className="cmp-side-note mono">{entries.length - s.inCourse.length} entries are not in the course yet</p>
             )}
             <h3>Difficulty mix</h3>
             <div className="cmp-diffs">
@@ -217,8 +193,7 @@ function Detail({ s }) {
                   Practise {company.name} <Icon name="arrowRight" size={18} />
                 </Link>
                 <p className="cmp-side-note mono">
-                  starts with your next unsolved: {nextUp.question.source?.number ? `LC ${nextUp.question.source.number} · ` : ''}
-                  {nextUp.title}
+                  starts with your next unsolved: {nextUp.title}
                 </p>
               </>
             ) : (
@@ -263,43 +238,26 @@ function Detail({ s }) {
           <ul className="cmp-qlist">
             {visible.map((e, i) => {
               const st = progress.questions[e.questionId]?.status;
-              const num = e.question?.source?.number;
               const time = cx[e.questionId]?.time;
               const isNext = nextUp && e === nextUp;
               return (
                 <li key={`${e.questionId}-${i}`} className={`cmp-qr${st === 'solved' ? ' cmp-qr--solved' : ''}${isNext ? ' cmp-qr--next' : ''}`}>
                   <StatusMark status={st} />
-                  <span className="cmp-qr-n mono">{num || '—'}</span>
+                  <span className="cmp-qr-n mono">{i + 1}</span>
                   <div className="cmp-qr-t">
                     {e.question ? (
-                      <Link to={`/topic/${e.question.topicId}/q/${e.question.id}`}>
-                        <b>{e.title}</b>
-                      </Link>
-                    ) : e.url ? (
-                      <a href={e.url} target="_blank" rel="noreferrer">
-                        <b>
-                          {e.title} <Icon name="external" size={11} />
-                        </b>
-                      </a>
+                      <>
+                        <Link to={`/topic/${e.question.topicId}/q/${e.question.id}`}>
+                          <b>{e.title}</b>
+                        </Link>{' '}
+                        <KindTag kind={e.question.kind} />
+                      </>
                     ) : (
                       <b>{e.title}</b>
                     )}
                     <small>
                       {isNext && <em>next up · </em>}
                       {topicById[e.topicId]?.title || 'outside the course'}
-                      {' · '}
-                      {e.sourceList.map((src, k) => (
-                        <span key={src.key}>
-                          {k > 0 && ', '}
-                          {src.url ? (
-                            <a href={src.url} target="_blank" rel="noreferrer" title={src.description}>
-                              {src.label}
-                            </a>
-                          ) : (
-                            src.label
-                          )}
-                        </span>
-                      ))}
                     </small>
                     {e.note && <small className="cmp-note">{e.note}</small>}
                   </div>
@@ -335,15 +293,6 @@ function Detail({ s }) {
           </div>
         </div>
       </div>
-      <div className="cmp-srcs mono">
-        <span>
-          <b>Sources:</b> {srcKeys.length} cited for {company.name} · {srcKeys.slice(0, 3).map((k) => companySources[k]?.label || k).join(' · ')}
-          {srcKeys.length > 3 ? ' …' : ''}
-        </span>
-        <a className="t-ice" href="#cmp-sources-all">
-          All {Object.keys(companySources).length} sources →
-        </a>
-      </div>
     </section>
   );
 }
@@ -357,7 +306,6 @@ function CompaniesView({ selectedId }) {
   const ev = { verified: 0, community: 0, associated: 0 };
   for (const e of companyQuestions) ev[e.evidence] = (ev[e.evidence] || 0) + 1;
   const solvedAcross = new Set(companyQuestions.filter((e) => e.question && progress.questions[e.questionId]?.status === 'solved').map((e) => e.questionId)).size;
-  const accessed = [...new Set(Object.values(companySources).map((s) => s.accessed).filter(Boolean))].sort().pop();
 
   useEffect(() => {
     if (!selectedId) return undefined;
@@ -394,10 +342,6 @@ function CompaniesView({ selectedId }) {
               <span className="eyebrow">sourced entries</span>
             </div>
             <div>
-              <span className="num chrome">{Object.keys(companySources).length}</span>
-              <span className="eyebrow">sources</span>
-            </div>
-            <div>
               <span className="num plasma-text">{solvedAcross}</span>
               <span className="eyebrow">solved across lists</span>
             </div>
@@ -415,7 +359,7 @@ function CompaniesView({ selectedId }) {
               <span className="cmp-ct">{ev[l] || 0}</span>
             </div>
           ))}
-          {accessed && <p className="cmp-evx-note">sources accessed {accessed} · associated lists capped at 30 per company</p>}
+          <p className="cmp-evx-note">associated lists capped at 30 per company</p>
         </aside>
       </section>
 
@@ -453,9 +397,6 @@ function CompaniesView({ selectedId }) {
 
       {selected && <Detail s={selected} />}
 
-      <div id="cmp-sources-all">
-        <SourcesList />
-      </div>
     </div>
   );
 }

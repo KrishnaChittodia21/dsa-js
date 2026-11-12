@@ -695,7 +695,7 @@ modPow(5n, 10n ** 15n);               // ~50 calls, exact result`,
 - Avoid \`slice\`/\`substring\` in each call — every copy is O(n) and turns O(n) recursion into O(n²). Pass indices.
 - Default parameters (\`function f(n, memo = new Map())\`) are evaluated per call only when the argument is missing — pass the memo explicitly in recursive calls.
 - \`>>\`, \`|\`, \`&\` convert to **32-bit signed integers**. \`(2 ** 31) >> 1\` is \`-1073741824\`. Use \`Math.floor(n / 2)\` for big n.
-- You can raise Node's stack with \`node --stack-size=…\`, but you cannot in a browser or on LeetCode — design for the default.`,
+- You can raise Node's stack with \`node --stack-size=…\`, but you cannot in a browser or an online judge — design for the default.`,
           },
         ],
       },

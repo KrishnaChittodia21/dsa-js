@@ -217,6 +217,6 @@ Both operations must run in **O(1)** average time.`,
     'Forgetting to reset `minFreq = 1` after inserting a new key.',
     'Evicting when updating an existing key (only new keys can overflow).',
     'Breaking ties by insertion time instead of most recent use.',
-    'Not handling capacity 0 (LeetCode allows it in some versions).',
+    'Not handling capacity 0 (some versions of this problem allow it).',
   ],
 };

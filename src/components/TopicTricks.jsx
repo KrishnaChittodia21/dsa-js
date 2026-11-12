@@ -111,20 +111,6 @@ export default function TopicTricks({ topicId }) {
               </div>
             </div>
           )}
-          {tricks.sources?.length > 0 && (
-            <details className="details" style={{ marginTop: '1rem' }}>
-              <summary className="small">Sources consulted ({tricks.sources.length})</summary>
-              <ul className="small">
-                {tricks.sources.map((s) => (
-                  <li key={s.url}>
-                    <a href={s.url} target="_blank" rel="noreferrer">
-                      {s.label} <Icon name="external" size={10} />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </details>
-          )}
         </section>
       )}
     </div>

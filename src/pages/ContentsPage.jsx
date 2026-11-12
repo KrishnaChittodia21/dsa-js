@@ -360,7 +360,6 @@ function TopicEntry({ view, q, current, open, onToggle }) {
             {questions.length === 0 && <p className="cx-none">{t.questions.length ? 'Every problem solved.' : 'Questions are on their way.'}</p>}
             {questions.map((x) => {
               const st = progress.questions[x.id]?.status;
-              const lc = x.source?.number ? `${x.source.platform === 'LeetCode' ? 'LC' : x.source.platform || ''} ${x.source.number}` : '';
               // one tag per company (a company can have several entries for the same question)
               const cos = [...new Map(companiesForQuestion(x.id).map((c) => [c.company, c])).values()];
               return (
@@ -383,7 +382,6 @@ function TopicEntry({ view, q, current, open, onToggle }) {
                   <span className={`cx-df ${DIFF_CLS[x.difficulty]}`} title={x.difficulty}>
                     {DIFF_LETTER[x.difficulty]}
                   </span>
-                  <span className="cx-lc">{lc}</span>
                 </Link>
               );
             })}

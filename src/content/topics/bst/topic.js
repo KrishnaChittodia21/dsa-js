@@ -238,7 +238,7 @@ That one rule gives a BST two superpowers:
             type: 'callout',
             variant: 'definition',
             title: 'Formal terms',
-            md: `- **BST invariant** — for every node \`x\`: every value in \`x.left\`'s subtree is \`< x.val\`, and every value in \`x.right\`'s subtree is \`> x.val\`. (LeetCode BSTs usually have no duplicates; if they do, the problem says which side they go.)
+            md: `- **BST invariant** — for every node \`x\`: every value in \`x.left\`'s subtree is \`< x.val\`, and every value in \`x.right\`'s subtree is \`> x.val\`. (BSTs in problems usually have no duplicates; if they do, the problem says which side they go.)
 - **Subtree** — a node together with *all* of its descendants.
 - **Height (h)** — the number of edges on the longest root-to-leaf path. Almost every BST operation costs **O(h)**.
 - **Balanced** — height is O(log n). **Degenerate / skewed** — height is O(n) (the tree is basically a linked list).
@@ -916,10 +916,10 @@ A node roots a BST exactly when both children are BSTs **and** \`left.max < node
           {
             type: 'jsTools',
             items: [
-              { api: 'new TreeNode(val, left, right)', use: 'Build nodes (toolkit global, LeetCode shape)', complexity: 'O(1)' },
+              { api: 'new TreeNode(val, left, right)', use: 'Build nodes (toolkit global, standard shape)', complexity: 'O(1)' },
               { api: 'new BST(values)', use: 'Toolkit reference BST: insert, has, delete, min, max, inorder', complexity: 'O(h) per op' },
               { api: 'traversals.inorder(root)', use: 'Sorted dump for debugging a BST', complexity: 'O(n)' },
-              { api: 'arrayToTree / treeToArray', use: 'Convert LeetCode level-order arrays ⇄ trees when testing locally', complexity: 'O(n)' },
+              { api: 'arrayToTree / treeToArray', use: 'Convert level-order arrays ⇄ trees when testing locally', complexity: 'O(n)' },
               { api: 'stack.push / stack.pop', use: 'Iterative in-order, BST iterator', complexity: 'O(1) amortized' },
               { api: '-Infinity / Infinity', use: 'Open bounds for validate and bottom-up sentinels', complexity: 'O(1)' },
               { api: '(lo + hi) >> 1', use: 'Middle index when building a balanced BST', complexity: 'O(1)' },

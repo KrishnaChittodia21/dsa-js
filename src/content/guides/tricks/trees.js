@@ -5,7 +5,7 @@ export default {
     '"count downward paths with sum k" (path may start below the root)',
     '"is subtree of / identical / symmetric" → recurse on two trees at once',
     '"maximum width" including the null gaps between nodes',
-    'input given as a level-order array with nulls (LeetCode format)',
+    'input given as a level-order array with nulls',
   ],
   tricks: [
     {

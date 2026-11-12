@@ -7,6 +7,7 @@ import { describeTest, format, resolveExpected } from '../../runner/core.js';
 import { bigoClass } from '../../visualizations/complexity.js';
 import { LANGUAGES, starterFor } from '../../languages/signature.js';
 import { saveUiPrefs, useUiPrefs } from '../../lib/uiPrefs.js';
+import { addAttempt, loadAttempts } from '../../lib/attempts.js';
 
 // JS runs in a worker (runInWorker); Java and C++ compile and run in the browser too (M7, runner/native)
 const LANG_FILE = { js: 'solution.js', java: 'Solution.java', cpp: 'solution.cpp' };
@@ -22,6 +23,10 @@ async function runIn(lang, args, onStatus) {
 }
 
 const AnimateRun = lazy(() => import('./AnimateRun.jsx'));
+// Where did I go wrong · Measure my growth · Ghost of past me (JavaScript only): loaded when first shown
+const WhereWrong = lazy(() => import('./WhereWrong.jsx'));
+const MeasureGrowth = lazy(() => import('./MeasureGrowth.jsx'));
+const Attempts = lazy(() => import('./Attempts.jsx'));
 const VISIBLE_TESTS = 3;
 const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
 const MOD = IS_MAC ? '⌘' : 'Ctrl';
@@ -30,7 +35,7 @@ const expectedText = (question, test) =>
   test.expectedAnyOf ? test.expectedAnyOf.map((e) => format(e)).join('  or  ') : question.checker ? 'any valid answer (checked by rules)' : format(resolveExpected(test));
 
 /** One test line: pass/fail/ran, runtime; opens to the input · expected · output diff. */
-function ResultCard({ r, test, question, defaultOpen }) {
+function ResultCard({ r, test, question, defaultOpen, children }) {
   const [open, setOpen] = useState(defaultOpen);
   const status = r.skipped ? 'skip' : r.passed === null ? 'ran' : r.passed ? 'pass' : 'fail';
   const cls = status === 'pass' ? 'test--pass' : status === 'fail' ? 'test--fail' : 'test--run';
@@ -74,6 +79,7 @@ function ResultCard({ r, test, question, defaultOpen }) {
               </span>
             </div>
           )}
+          {children}
         </div>
       )}
     </div>
@@ -111,6 +117,8 @@ export default function CodeWorkspace({ question }) {
   const [custom, setCustom] = useState('');
   const [customRun, setCustomRun] = useState(null);
   const [saved, setSaved] = useState(true);
+  const [attempts, setAttempts] = useState(() => loadAttempts(question.id));
+  const [cxShown, setCxShown] = useState(false);
   const saveTimer = useRef(null);
 
   const tests = useMemo(() => (question.tests || []).map((t, i) => ({ ...t, hidden: i >= VISIBLE_TESTS })), [question]);
@@ -119,6 +127,8 @@ export default function CodeWorkspace({ question }) {
     setCode(draftOf(progress.questions[question.id], lang));
     setRun(null);
     setCustomRun(null);
+    setAttempts(loadAttempts(question.id));
+    setCxShown(false);
     const first = question.tests?.[0];
     setCustom(first && (first.args || first.ops) ? JSON.stringify(question.kind === 'design' ? { ops: first.ops, args: first.args } : first.args) : '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -133,6 +143,7 @@ export default function CodeWorkspace({ question }) {
       setSaved(true);
     }
     saveUiPrefs({ codeLang: l });
+    if (l !== 'js' && tab === 'attempts') setTab('tests'); // attempts are JavaScript only
     setCode(draftOf(progress.questions[question.id], l));
     setRun(null);
     setCustomRun(null);
@@ -159,10 +170,12 @@ export default function CodeWorkspace({ question }) {
       const subset = mode === 'submit' ? tests : tests.slice(0, VISIBLE_TESTS);
       setStatus('');
       const res = await runIn(lang, { code, question, tests: subset }, setStatus);
-      setRun({ mode, res, tests: subset, at: new Date() });
+      setRun({ mode, res, tests: subset, at: new Date(), code });
       const passed = res.results.filter((r) => r.passed).length;
       const total = subset.length;
       if (mode === 'submit') dispatch({ type: 'Q_SUBMIT', qid: question.id, passed, total, allPassed: !res.compileError && passed === total, lang });
+      // Ghost of past me: every JS submit that ran is kept (last 5) to race later
+      if (mode === 'submit' && lang === 'js' && !res.compileError) setAttempts(addAttempt(question.id, { code, at: new Date().toISOString(), passed, total }));
       else dispatch({ type: 'Q_RUN', qid: question.id, passed, total });
       setRunning(false);
     },
@@ -216,10 +229,13 @@ export default function CodeWorkspace({ question }) {
   const solved = qs.status === 'solved';
   const firstFail = run?.res.results.find((r) => !r.passed && !r.skipped);
   const tone = accepted ? 'ok' : allPass ? 'uv' : 'bad';
+  // Where did I go wrong: JS, a reference to compare with, a function question, a test with plain arguments
+  const canDiagnose = lang === 'js' && !!question.solution?.code && question.kind !== 'design';
+  const diagnosable = (r) => canDiagnose && r === firstFail && !r.timedOut && Array.isArray(run.tests[r.index].args) && !run.tests[r.index].argsGen;
   const at = run?.at ? run.at.toTimeString().slice(0, 5) : '';
 
   return (
-    <div className={`qp-work${tab === 'animate' ? ' qp-work--anim' : ''}`}>
+    <div className={`qp-work${tab === 'animate' || tab === 'complexity' || tab === 'attempts' ? ' qp-work--anim' : ''}`}>
       {/* ---------- editor (dark island) ---------- */}
       <section className="qp-ed" aria-label="Code editor">
         <div className="qp-ed-bar">
@@ -277,6 +293,12 @@ export default function CodeWorkspace({ question }) {
           <button type="button" role="tab" aria-selected={tab === 'complexity'} onClick={() => setTab('complexity')}>
             Complexity
           </button>
+          {lang === 'js' && (
+            <button type="button" role="tab" aria-selected={tab === 'attempts'} onClick={() => setTab('attempts')}>
+              <Icon name="rotate" size={14} /> Your attempts
+              {attempts.length > 0 && <span className="qp-con-n qp-con-n--plain">{attempts.length}</span>}
+            </button>
+          )}
           <button type="button" role="tab" data-guide="animate" aria-selected={tab === 'animate'} onClick={() => setTab('animate')}>
             <Icon name="play" size={14} /> Animate
           </button>
@@ -372,7 +394,13 @@ export default function CodeWorkspace({ question }) {
               {run && run.res.results.length > 0 && (
                 <div className="tests qp-tests">
                   {run.res.results.map((r) => (
-                    <ResultCard key={`${run.mode}-${r.index}-${run.at?.getTime()}`} r={r} test={run.tests[r.index]} question={question} defaultOpen={firstFail === r} />
+                    <ResultCard key={`${run.mode}-${r.index}-${run.at?.getTime()}`} r={r} test={run.tests[r.index]} question={question} defaultOpen={firstFail === r}>
+                      {diagnosable(r) && (
+                        <Suspense fallback={null}>
+                          <WhereWrong key={`${run.at?.getTime()}`} question={question} code={run.code} test={run.tests[r.index]} />
+                        </Suspense>
+                      )}
+                    </ResultCard>
                   ))}
                 </div>
               )}
@@ -449,9 +477,19 @@ export default function CodeWorkspace({ question }) {
               <AnimateRun key={lang} code={code} question={question} tests={tests.slice(0, VISIBLE_TESTS)} lang={lang} />
             </Suspense>
           )}
+          {!running && tab === 'attempts' && lang === 'js' && (
+            <Suspense fallback={<div className="qp-faint">Loading…</div>}>
+              <Attempts key={question.id} question={question} code={code} attempts={attempts} tests={tests} />
+            </Suspense>
+          )}
           {!running && tab === 'complexity' && (
             <div className="qp-stack">
-              {solved || qs.solutionViewed ? <Targets question={question} /> : <ComplexityGuess question={question} />}
+              {solved || qs.solutionViewed || cxShown ? <Targets question={question} /> : <ComplexityGuess question={question} onShow={() => setCxShown(true)} />}
+              {lang === 'js' && (solved || qs.solutionViewed || cxShown) && (
+                <Suspense fallback={<div className="qp-faint">Loading…</div>}>
+                  <MeasureGrowth key={question.id} question={question} code={code} />
+                </Suspense>
+              )}
               {summary && (
                 <p className="qp-faint">
                   Last run: <span className="mono">{summary.ms.toFixed(2)} ms</span> across <span className="mono">{summary.total}</span> tests (small inputs — timing is a sanity check, not a complexity proof).
@@ -465,7 +503,7 @@ export default function CodeWorkspace({ question }) {
   );
 }
 
-function ComplexityGuess({ question }) {
+function ComplexityGuess({ question, onShow }) {
   const [shown, setShown] = useState(false);
   if (shown) return <Targets question={question} />;
   return (
@@ -474,7 +512,13 @@ function ComplexityGuess({ question }) {
         Before looking: what time and space complexity is your solution? Check the constraints — they tell you the target (e.g. n ≤ 10⁵ usually means O(n) or O(n log n)).
       </p>
       <div>
-        <button type="button" className="btn btn--ghost btn--sm" onClick={() => setShown(true)}>
+        <button
+          type="button"
+          className="btn btn--ghost btn--sm"
+          onClick={() => {
+            setShown(true);
+            onShow?.();
+          }}>
           Show target complexity
         </button>
       </div>

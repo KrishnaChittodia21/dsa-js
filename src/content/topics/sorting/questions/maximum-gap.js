@@ -9,7 +9,7 @@ export default {
 
   statement: `Given an integer array \`nums\`, return the **largest difference between two neighbours in the sorted version** of the array. If the array has fewer than two elements, return \`0\`.
 
-You must write an algorithm that runs in **linear time** and uses linear extra space. (Rated Medium on LeetCode; it is here as a Hard because of the pigeonhole argument.)`,
+You must write an algorithm that runs in **linear time** and uses linear extra space. (It is here as a Hard because of the pigeonhole argument.)`,
   examples: [
     { input: 'nums = [3,6,9,1]', output: '3', explanation: 'Sorted: [1,3,6,9]; the gaps are 2, 3, 3.' },
     { input: 'nums = [10]', output: '0' },

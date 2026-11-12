@@ -11,7 +11,7 @@ export default {
 
 \`nums[0] < nums[1] > nums[2] < nums[3] > nums[4] …\`
 
-(strict inequalities, alternating). The input is guaranteed to admit such an arrangement. Any valid arrangement is accepted. Return nothing — modify \`nums\`. (Rated Medium on LeetCode; the O(n)-time, O(1)-space follow-up makes it a Hard.)`,
+(strict inequalities, alternating). The input is guaranteed to admit such an arrangement. Any valid arrangement is accepted. Return nothing — modify \`nums\`. (The O(n)-time, O(1)-space follow-up makes it a Hard.)`,
   examples: [
     { input: 'nums = [1,5,1,1,6,4]', output: '[1,6,1,5,1,4]', explanation: '[1,4,1,5,1,6] is also accepted.' },
     { input: 'nums = [1,3,2,2,3,1]', output: '[2,3,1,3,1,2]' },

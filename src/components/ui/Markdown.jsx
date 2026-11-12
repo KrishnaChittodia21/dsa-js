@@ -20,12 +20,9 @@ const components = {
     return <>{children}</>;
   },
   a({ node, href, children }) {
-    const external = href && /^https?:/.test(href);
-    return (
-      <a href={href} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>
-        {children}
-      </a>
-    );
+    // no links out of the app: a link to another website shows as its text only
+    if (href && /^(https?:)?\/\//.test(href)) return <>{children}</>;
+    return <a href={href}>{children}</a>;
   },
 };
 

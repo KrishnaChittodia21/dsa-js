@@ -143,7 +143,7 @@ export const PAGE_GUIDES = [
     match: (path) => path.startsWith('/questions'),
     items: [
       { target: 'ql-head', file: D + 'QuestionsPage.jsx', title: 'Every problem', text: 'All problems from all topics in one list.' },
-      { target: 'ql-filters', file: D + 'QuestionsPage.jsx', title: 'Filter', text: 'Search by title, tag, pattern or LeetCode number, and narrow by difficulty, topic or status.' },
+      { target: 'ql-filters', file: D + 'QuestionsPage.jsx', title: 'Filter', text: 'Search by title, tag or pattern, and narrow by difficulty, topic or status.' },
       { target: 'ql-list', file: D + 'QuestionsPage.jsx', title: 'Open one', text: 'Click a problem to solve it; solving from its topic keeps the progression in order.' },
     ],
   },
@@ -162,7 +162,7 @@ export const PAGE_GUIDES = [
     title: 'Companies',
     match: (path) => path.startsWith('/companies'),
     items: [
-      { target: 'cmp-hero', file: D + 'CompaniesPage.jsx', title: 'Interview targets', text: 'Questions grouped by the companies that ask them, each with a cited source.' },
+      { target: 'cmp-hero', file: D + 'CompaniesPage.jsx', title: 'Interview targets', text: 'Questions grouped by the companies that ask them, with how strong the evidence is.' },
       { target: 'cmp-evidence', file: D + 'CompaniesPage.jsx', title: 'Evidence levels', text: 'How sure the source is that a company asks a question.' },
       { target: 'cmp-all', file: D + 'CompaniesPage.jsx', title: 'Pick a company', text: 'Each card shows your solved count; open one for its question list.' },
     ],
